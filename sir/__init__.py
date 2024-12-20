@@ -8,5 +8,5 @@ def sirmodel(u,parms,t):
     rfrac = 1.0 - math.exp(-parms["gamma"]*parms["dt"])
     infection = np.random.binomial(S,ifrac)
     recovery = np.random.binomial(I,rfrac)
-    return [S-infection,I+infection-recovery,R+recovery,Y+infection]
+    return [S-infection,I+infection-recovery,R+recovery,Y+infection ]
 

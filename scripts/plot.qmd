@@ -1,0 +1,24 @@
+---
+title: "Plots"
+format: html
+---
+
+---
+title: "Plots"
+format: html
+---
+
+```{python}
+import pandas as pd
+import altair as alt
+
+df = pd.read_csv("results.csv")
+print(df)
+chart = alt.Chart(df).mark_line().encode(
+    x='t:Q',
+    y='Y:Q',
+    color='replicate:N'
+)
+
+chart.display()
+```

@@ -33,7 +33,7 @@ if __name__=="__main__":
     results_all = griddler.run_squash(griddler.replicated(simulate), parameter_sets)
     print(results_all.columns)
     cols_to_select = [
-        "t", "S", "I", "R", "replicate"
+        "t", "S", "Y", "R", "replicate"
     ]
     results = (
         results_all
