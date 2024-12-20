@@ -13,6 +13,7 @@ griddler = {git = "https://github.com/CDCgov/pygriddler.git"}
 polars = "^1.17.1"
 altair = "^5.5.0"
 matplotlib = "^3.10.0"
+pytest = "^8.3.4"
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.29.5"
