@@ -7,3 +7,5 @@ baseline_parameters:
   dt: 0.1
   tf: 200
   tl: 2001
+  n_replicates: 10
+  seed: 10

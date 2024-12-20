@@ -1,8 +1,9 @@
 import numpy as np
-import sirenv
-import pandas as pd
+import polars as pl
+import polars.selectors as cs
 import griddler
-import griddle.griddle
+import griddler.griddle
+from sir import sirmodel
 
 def simulate(parms):
 
@@ -14,13 +15,33 @@ def simulate(parms):
     u = [parms["N"] - parms["I0"], parms["I0"],0,0]
     S[0],I[0],R[0],Y[0] = u
     for j in range(1,parms["tl"]):
-        u = sirenv.sir(u,parms,t[j])
+        u = sirmodel(u,parms,t[j])
         S[j],I[j],R[j],Y[j] = u
-    return {'t':t,'S':S,'I':I,'R':R,'Y':Y}
+
+    df = pl.DataFrame({
+        't': t,
+        'S': S,
+        'I': I,
+        'R': R,
+        'Y': Y
+    })
+
+    return df
 
 if __name__=="__main__":
     parameter_sets = griddler.griddle.read("scripts/config.yaml")
+    results_all = griddler.run_squash(griddler.replicated(simulate), parameter_sets)
+    print(results_all.columns)
+    cols_to_select = [
+        "t", "S", "I", "R", "replicate"
+    ]
+    results = (
+        results_all
+        .select(cs.by_name(cols_to_select))
+    )
 
-    results_all = griddler.run_squash(simulate, parameter_sets)
+    with pl.Config(tbl_rows=-1):
+        print(results)
 
-    results_all.write_csv(f"scripts/results.csv")
+    # save results
+    results.write_csv(f"scripts/results.csv")

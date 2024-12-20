@@ -10,6 +10,7 @@ python = "^3.10"
 pandas = "^2.2.3"
 numpy = "^2.2.0"
 griddler = {git = "https://github.com/CDCgov/pygriddler.git"}
+polars = "^1.17.1"
 
 [build-system]
 requires = ["poetry-core"]
