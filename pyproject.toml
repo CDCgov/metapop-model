@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "sir"
+version = "0.1.0"
+description = ""
+authors = ["Paige Miller <yub1@cdc.gov>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pandas = "^2.2.3"
+numpy = "^2.2.0"
+griddler = {git = "https://github.com/CDCgov/pygriddler.git"}
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
