@@ -1,11 +1,13 @@
 baseline_parameters:
-  beta: 0.25
-  gamma: 0.143
-  iota: 0.0
-  N: 200
-  I0: 1
-  dt: 1.0
-  tf: 200
-  tl: 200
+  n_groups: 2    # residents + HCW
+  beta: [[0.25, 0.25], [0.25, 0.25]]
+  sigma: 0.25    # 1/latent_duration
+  gamma: 0.143   # 1/infectious_duration
+  iota: 0.0      # spontaneous infection rate
+  N: [78, 22]    # population sizes
+  I0: [1, 1]     # initially infected
+  dt: 1.0        # model units (one day)
+  tf: 200        # total time modeled
+  tl: 200        # times the model is evaluated
   n_replicates: 10
   seed: 1

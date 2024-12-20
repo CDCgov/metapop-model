@@ -3,45 +3,50 @@ import polars as pl
 import polars.selectors as cs
 import griddler
 import griddler.griddle
-from sir import sirmodel
+from sir import SEIRModel
 
 def simulate(parms):
+    t = np.linspace(0, parms["tf"], parms["tl"])
+    groups = parms["n_groups"]
+    S = np.zeros((parms["tl"], groups))
+    E = np.zeros((parms["tl"], groups))
+    I = np.zeros((parms["tl"], groups))
+    R = np.zeros((parms["tl"], groups))
+    Y = np.zeros((parms["tl"], groups))
+    u = [[parms["N"][group] - parms["I0"][group],
+          0,
+          parms["I0"][group],
+          0,
+          0
+         ] for group in range(groups)]
+    for group in range(groups):
+        S[0, group], E[0, group], I[0, group], R[0, group], Y[0, group] = u[group]
 
-    t = np.linspace(0,parms["tf"], parms["tl"])
-    S = np.zeros(parms["tl"])
-    I = np.zeros(parms["tl"])
-    R = np.zeros(parms["tl"])
-    Y = np.zeros(parms["tl"])
-    u = [parms["N"] - parms["I0"], parms["I0"],0,0]
-    S[0],I[0],R[0],Y[0] = u
-    for j in range(1,parms["tl"]):
-        u = sirmodel(u,parms,t[j])
-        S[j],I[j],R[j],Y[j] = u
+    model = SEIRModel(parms)
+
+    for j in range(1, parms["tl"]):
+        u = model.seirmodel(u, t[j])
+        for group in range(groups):
+            S[j, group], E[j, group], I[j, group], R[j, group], Y[j, group] = u[group]
 
     df = pl.DataFrame({
-        't': t,
-        'S': S,
-        'I': I,
-        'R': R,
-        'Y': Y
+        't': np.repeat(t, groups),
+        'group': np.tile(np.arange(groups), parms["tl"]),
+        'S': S.flatten(),
+        'E': E.flatten(),
+        'I': I.flatten(),
+        'R': R.flatten(),
+        'Y': Y.flatten()
     })
 
     return df
 
-if __name__=="__main__":
+if __name__ == "__main__":
     parameter_sets = griddler.griddle.read("scripts/config.yaml")
     results_all = griddler.run_squash(griddler.replicated(simulate), parameter_sets)
+    print(results_all)
     print(results_all.columns)
-    cols_to_select = [
-        "t", "S", "Y", "R", "replicate"
-    ]
-    results = (
-        results_all
-        .select(cs.by_name(cols_to_select))
-    )
-
-    with pl.Config(tbl_rows=-1):
+    results = results_all.select(cs.by_name(["t", "group", "Y", "replicate"]))
+    with pl.Config(tbl_rows = -1):
         print(results)
-
-    # save results
     results.write_csv(f"scripts/results.csv")

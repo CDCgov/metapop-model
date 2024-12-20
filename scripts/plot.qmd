@@ -13,12 +13,42 @@ import pandas as pd
 import altair as alt
 
 df = pd.read_csv("results.csv")
-print(df)
-chart = alt.Chart(df).mark_line().encode(
+
+df['new_infections'] = df.groupby(['t', 'replicate'])['Y'].transform('sum')
+df_total = df.drop_duplicates(subset=['t', 'replicate'])
+
+print(df_total)
+chart = alt.Chart(df_total).mark_line().encode(
     x='t:Q',
-    y='Y:Q',
+    y='new_infections:Q',
     color='replicate:N'
 )
 
 chart.display()
+```
+
+
+```{python}
+df = pd.read_csv("results.csv")
+df_filtered = df[df['replicate'] == 3]
+
+chart = alt.Chart(df_filtered).mark_line().encode(
+    x='t:Q',
+    y='Y:Q',
+    color='group:N'
+)
+
+chart.display()
+
+
+```
+
+
+```{python}
+
+df = pd.read_csv("results.csv")
+df_filtered = df[df['group'] == 1].sort_values(by='Y', ascending = True)
+df_filtered
+
+
 ```
