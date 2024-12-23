@@ -1,54 +1,81 @@
 ---
-title: "Plots"
+title: "Two group plots"
 format: html
 ---
 
----
-title: "Plots"
-format: html
----
+Simple modeling results for 2 group model with the following parameters:
+
+  n_groups: 2    # residents + HCW
+  beta: [[0.1, 0.05], [0.05, 0.3]]
+  sigma: 0.25    # 1/latent_duration
+  gamma: 0.143   # 1/infectious_duration
+  iota: 0.0      # spontaneous infection rate
+  N: [78, 22]    # population sizes
+  I0: [1, 1]     # initially infected
+  dt: 1.0        # model units (one day)
+  tf: 200        # total time modeled
+  tl: 200        # times the model is evaluated
+  n_replicates: 10
+  seed: 1
+
+In this model, the force of infection from group 2 > for group 1. So we would expect a higher attack rate among group 2 than group 1 on average. Note that group 1 is larger than group 2, so we would still likely expect more infections total in group 1.
 
 ```{python}
 import pandas as pd
 import altair as alt
 
-df = pd.read_csv("results.csv")
-
+# overall cumulative plot
+df = pd.read_csv("results_two_group.csv")
 df['new_infections'] = df.groupby(['t', 'replicate'])['Y'].transform('sum')
 df_total = df.drop_duplicates(subset=['t', 'replicate'])
 
 print(df_total)
 chart = alt.Chart(df_total).mark_line().encode(
     x='t:Q',
-    y='new_infections:Q',
+    y=alt.Y('new_infections:Q', title='Cumulative infections'),
     color='replicate:N'
 )
 
 chart.display()
 ```
 
-
 ```{python}
-df = pd.read_csv("results.csv")
-df_filtered = df[df['replicate'] == 3]
+# overall incidence plot weekly
+df = pd.read_csv("results_two_group.csv")
+df['incidence'] = df.groupby(['replicate', 'group'])['Y'].diff().fillna(0)
+df['week'] = (df['t'] // 7).astype(int)
+df_weekly = df.groupby(['week', 'replicate'])['incidence'].sum().reset_index()
 
-chart = alt.Chart(df_filtered).mark_line().encode(
-    x='t:Q',
-    y='Y:Q',
-    color='group:N'
+chart = alt.Chart(df_weekly).mark_line().encode(
+    x='week:Q',
+    y='incidence:Q',
+    color='replicate:N'
+).properties(
 )
 
 chart.display()
-
 
 ```
 
 
 ```{python}
 
-df = pd.read_csv("results.csv")
-df_filtered = df[df['group'] == 1].sort_values(by='Y', ascending = True)
-df_filtered
+df = pd.read_csv("results_two_group.csv")
+df_final_ar = df[df['t'] == df['t'].max()]
+
+# group 0 has 78 people and group 1 has 22
+df_final_ar.loc[df_final_ar['group'] == 0, 'Y'] /= 78
+df_final_ar.loc[df_final_ar['group'] == 1, 'Y'] /= 22
+
+chart = alt.Chart(df_final_ar).mark_boxplot().encode(
+    x='group:N',
+    y=alt.Y('Y:Q', title='Attack Rate')
+).properties(
+    width = 300,
+    height = 300
+)
+
+chart.display()
 
 
 ```
