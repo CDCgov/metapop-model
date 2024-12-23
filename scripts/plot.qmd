@@ -79,3 +79,30 @@ chart.display()
 
 
 ```
+
+# how to some basic inference with this model
+
+Let's say we have some outbreak that looks like replicate 5 below:
+
+```{python}
+
+# Make some Fake data
+fake_outbreak = df[df['replicate'] == 5]
+fake_outbreak = fake_outbreak.groupby(['t', 'group'])['Y'].sum().reset_index()
+fake_outbreak['day'] = (fake_outbreak['t'] // 1).astype(int)
+fake_outbreak = fake_outbreak.groupby(['day'])['Y'].sum().reset_index()
+
+# Create the plot using Altair
+chart = alt.Chart(fake_outbreak).mark_line().encode(
+    x=alt.X('day:Q', title='Day'),
+    y=alt.Y('Y:Q', title='Cumulative Infections')
+).properties(
+    title='Fake dataset',
+    width=600,
+    height=400
+)
+
+chart.display()
+
+fake_outbreak.to_csv("../data/fake_outbreak.csv", index=False)
+```
