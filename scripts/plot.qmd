@@ -2,6 +2,13 @@
 title: "Two group plots"
 format: html
 ---
+```{python}
+import pandas as pd
+import polars as pl
+import altair as alt
+import numpy as np
+
+```
 
 Simple modeling results for 2 group model with the following parameters:
 
@@ -20,12 +27,11 @@ Simple modeling results for 2 group model with the following parameters:
 
 In this model, the force of infection from group 2 > for group 1. So we would expect a higher attack rate among group 2 than group 1 on average. Note that group 1 is larger than group 2, so we would still likely expect more infections total in group 1.
 
-```{python}
-import pandas as pd
-import altair as alt
 
+
+```{python}
 # overall cumulative plot
-df = pd.read_csv("results_two_group.csv")
+df = pd.read_csv("../output/results_two_group.csv")
 df['new_infections'] = df.groupby(['t', 'replicate'])['Y'].transform('sum')
 df_total = df.drop_duplicates(subset=['t', 'replicate'])
 
@@ -34,14 +40,13 @@ chart = alt.Chart(df_total).mark_line().encode(
     x='t:Q',
     y=alt.Y('new_infections:Q', title='Cumulative infections'),
     color='replicate:N'
-)
+).display()
 
-chart.display()
 ```
 
 ```{python}
 # overall incidence plot weekly
-df = pd.read_csv("results_two_group.csv")
+df = pd.read_csv("../output/results_two_group.csv")
 df['incidence'] = df.groupby(['replicate', 'group'])['Y'].diff().fillna(0)
 df['week'] = (df['t'] // 7).astype(int)
 df_weekly = df.groupby(['week', 'replicate'])['incidence'].sum().reset_index()
@@ -51,16 +56,15 @@ chart = alt.Chart(df_weekly).mark_line().encode(
     y='incidence:Q',
     color='replicate:N'
 ).properties(
-)
+).display()
 
-chart.display()
 
 ```
 
 
 ```{python}
 
-df = pd.read_csv("results_two_group.csv")
+df = pd.read_csv("../output/results_two_group.csv")
 df_final_ar = df[df['t'] == df['t'].max()]
 
 # group 0 has 78 people and group 1 has 22
@@ -73,9 +77,123 @@ chart = alt.Chart(df_final_ar).mark_boxplot().encode(
 ).properties(
     width = 300,
     height = 300
+).display()
+
+
+```
+
+# how to some basic inference with this model
+
+Let's say we have some outbreak that looks like replicate 5 below:
+
+```{python}
+
+# Make some Fake data
+fake_outbreak = df[df['replicate'] == 5]
+fake_outbreak = fake_outbreak.groupby(['t', 'group'])['Y'].sum().reset_index()
+fake_outbreak['day'] = (fake_outbreak['t'] // 1).astype(int)
+fake_outbreak = fake_outbreak.groupby(['day'])['Y'].sum().reset_index()
+
+# Create the plot using Altair
+chart = alt.Chart(fake_outbreak).mark_line().encode(
+    x=alt.X('day:Q', title='Day'),
+    y=alt.Y('Y:Q', title='Cumulative Infections')
+).properties(
+    title='Fake dataset',
+    width=600,
+    height=400
+).display()
+
+
+fake_outbreak.to_csv("../data/fake_outbreak.csv", index=False)
+```
+
+Let's say we want to calibrate group 2 to group 2 value in the beta matrix. The "true value", or the value used to simulate the fake data, was 0.3. Let's see if we can find any evidence for beta around that and we'll start with a uniform from 0.01 to 1.
+
+```{python}
+ngm = np.array([[0.05, 0.05], [0.05, 0.3]])  / 0.143
+e = np.linalg.eig(ngm)
+i = np.argmax(np.abs(e.eigenvalues))
+R0 = e.eigenvalues[i]
+vector = abs(e.eigenvectors[:, i]) / sum(abs(e.eigenvectors[:, i]))
+
+print(round(R0, 3))
+print(vector)
+```
+
+For context, the R0 is 2.17 and the relative distribution of infectious should be around 20% group 1 and 80% group 2 with the "true" parameters. If that beta_{2_2} is reduced from 0.3 or increased from 0.3, then we'd expect lower or higher R0s that hopefully are different enough from the underlying parameters that we could detect it with basic stats.
+
+```{python}
+
+# Read the CSV files using Pandas
+abc_summary = pd.read_csv("../output/abc_summary.csv")
+results = pd.read_csv("../output/results_100_beta.csv")
+
+# Merge the DataFrames by replicate
+merged_df = pd.merge(results, abc_summary[['replicate', 'score']], on='replicate', how='left')
+
+# Replace score values with 1 if not empty, else 0
+merged_df['score'] = merged_df['score'].notna().astype(int)
+
+abc_results = merged_df.drop_duplicates(subset=['replicate'])
+
+chart = alt.Chart(abc_results).mark_bar(opacity=0.5
+    ).encode(
+        x=alt.X('beta_2_value:Q', bin=alt.Bin(step=0.075), title='Beta_2_2'),
+        y=alt.Y('count()', title='Frequency'),
+        color=alt.Color('score:N', scale=alt.Scale(domain=[0, 1],
+                        range=['red', 'blue']),
+                        legend=alt.Legend(title="Score"))
+    ).properties(
+        width=400,
+        height=400
+    ).display()
+
+```
+
+In this very quick example, the posterior samples are slightly larger than the true value of 0.3.
+
+```{python}
+
+fake_data = pd.read_csv("../data/fake_outbreak.csv").rename(columns={"Y": "new_infections"})
+
+# Merge the DataFrames by replicate
+merged_df = pd.merge(results, abc_summary[['replicate', 'score']], on='replicate', how='left')
+
+# Replace score values with 1 if not empty, else 0
+merged_df['score'] = merged_df['score'].notna().astype(int)
+
+# Summarize new infections by day and replicate
+merged_df['day'] = np.floor(merged_df['t']).astype(int)
+merged_df['new_infections'] = merged_df.groupby(['day', 'replicate'])['Y'].transform('sum')
+merged_df = merged_df[['day', 'new_infections', 'replicate', 'score']]
+merged_df = merged_df[merged_df['day'] < 104]
+print(merged_df)
+
+
+alt.data_transformers.disable_max_rows()
+
+# Create a line plot of t vs new_infections for the replicates
+line_chart = alt.Chart(merged_df).mark_line().encode(
+    x='day:Q',
+    y=alt.Y('new_infections:Q', title='Cumulative Infections'),
+    color='score:N',
+    detail = 'replicate:N'
+)
+
+# Create a scatter plot of t vs new_infections for the fake data
+scatter_chart = alt.Chart(fake_data).mark_point(color='black').encode(
+    x='day:Q',
+    y='new_infections:Q'
+)
+
+
+# Overlay the scatter plot on the line plot
+chart = alt.layer(line_chart, scatter_chart).properties(
+    title='Cumulative Infections Over Time with Fake Data Points',
+    width=600,
+    height=400
 )
 
 chart.display()
-
-
 ```
