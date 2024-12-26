@@ -55,4 +55,4 @@ if __name__ == "__main__":
     results = results_all.select(cs.by_name(["t", "group", "Y", "replicate", "beta_2_value"]))
     # with pl.Config(tbl_rows = -1):
     #     print(results)
-    results.write_csv(f"output/results_100_beta.csv")
+    results.write_csv("output/results_100_beta.csv")

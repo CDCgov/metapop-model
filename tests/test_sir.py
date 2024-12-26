@@ -1,8 +1,5 @@
 import numpy as np
 from sir import SEIRModel
-from numpy.testing import assert_array_equal
-from numpy.testing import assert_allclose
-import pytest
 import yaml
 
 
@@ -44,4 +41,3 @@ def test_simulate():
     # Check that beta is a square n_groups x n_groups array
     beta = np.array(parms["beta"])
     assert beta.shape == (n_groups, n_groups), f"beta should be a {n_groups}x{n_groups} array"
-
