@@ -6,6 +6,12 @@ import griddler.griddle
 from sir import SEIRModel
 
 def simulate(parms):
+
+    beta_2_value = None
+    if "beta_2_low" in parms and "beta_2_high" in parms:
+        beta_2_value = np.random.uniform(parms["beta_2_low"], parms["beta_2_high"])
+        parms["beta"][1][1] = beta_2_value
+
     t = np.linspace(0, parms["tf"], parms["tl"])
     groups = parms["n_groups"]
     S = np.zeros((parms["tl"], groups))
@@ -36,7 +42,8 @@ def simulate(parms):
         'E': E.flatten(),
         'I': I.flatten(),
         'R': R.flatten(),
-        'Y': Y.flatten()
+        'Y': Y.flatten(),
+        'beta_2_value': [beta_2_value] * (parms["tl"] * groups)
     })
 
     return df
@@ -44,9 +51,8 @@ def simulate(parms):
 if __name__ == "__main__":
     parameter_sets = griddler.griddle.read("scripts/config.yaml")
     results_all = griddler.run_squash(griddler.replicated(simulate), parameter_sets)
-    print(results_all)
     print(results_all.columns)
-    results = results_all.select(cs.by_name(["t", "group", "Y", "replicate"]))
-    with pl.Config(tbl_rows = -1):
-        print(results)
-    results.write_csv(f"scripts/results.csv")
+    results = results_all.select(cs.by_name(["t", "group", "Y", "replicate", "beta_2_value"]))
+    # with pl.Config(tbl_rows = -1):
+    #     print(results)
+    results.write_csv(f"output/results_100_beta.csv")

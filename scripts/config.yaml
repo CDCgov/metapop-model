@@ -9,5 +9,7 @@ baseline_parameters:
   dt: 1.0        # model units (one day)
   tf: 200        # total time modeled
   tl: 200        # times the model is evaluated
-  n_replicates: 10
-  seed: 1
+  n_replicates: 100
+  seed: 123
+  beta_2_low: 0.1
+  beta_2_high: 0.5
