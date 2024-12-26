@@ -12,13 +12,13 @@
 
 * Enable poetry with `poetry install`
 * Run the example with `python scripts/simulate.py`, this will produce output in output folder
-* Run basic calibration in `run_abc.py`, note that `make_plots.qmd` creates and saves a fake dataset to use in `run_abc.csv`, also the calibration is for a value of beta matrix, can easily change code to calibrate another parameter
+* Run basic calibration in `run_abc.py`, note that `make_plots.qmd` created and saved a fake dataset to use in `run_abc.csv` (included in repo to make it easier to get started here), also the calibration is for a value of beta matrix (with a uniform prior from 0.1, 0.5), can easily change code to calibrate another parameter
 * Make plots and visualizations with `make_plots.qmd`
 
 ## Running with flexible number of compartments
 
 * Instead of two groups (e.g., age classes), you can easily change the number of groups by changing the config file (`scripts/config.yaml`)
-* For example, if we wanted 6 groups, you could specify   `n_groups: 6`  and then change `N: [100, 200, 300, 400, 500, 600]` (i.e., a list of 6 population sizes), same for `I0`, and then the beta_matrix would have to be a matrix 6x6. In the future, it would be good to have funcitonality to read beta matrix from a csv.
+* For example, if we wanted 6 groups, you could specify   `n_groups: 6`  and then change `N: [100, 200, 300, 400, 500, 600]` (i.e., a list of 6 population sizes), same for `I0: [1, 0, 0, 0, 0, 0]`, and then the beta_matrix would have to be a matrix 6x6. In the future, it would be good to have funcitonality to read beta matrix from a csv.
 
 ## Project Admin
 
