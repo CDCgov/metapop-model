@@ -12,7 +12,7 @@ def simulate(parms):
         beta_2_value = np.random.uniform(parms["beta_2_low"], parms["beta_2_high"])
         parms["beta"][1][1] = beta_2_value
 
-    steps = steps / parms["dt"]
+    steps = parms["tl"] / parms["dt"]
     t = np.linspace(1, parms["tf"], steps)
     groups = parms["n_groups"]
     S = np.zeros((steps, groups))
