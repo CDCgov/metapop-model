@@ -12,16 +12,17 @@ def simulate(parms):
         beta_2_value = np.random.uniform(parms["beta_2_low"], parms["beta_2_high"])
         parms["beta"][1][1] = beta_2_value
 
-    t = np.linspace(0, parms["tf"], parms["tl"])
+    steps = steps / parms["dt"]
+    t = np.linspace(1, parms["tf"], steps)
     groups = parms["n_groups"]
-    S = np.zeros((parms["tl"], groups))
-    V = np.zeros((parms["tl"], groups))
-    E1 = np.zeros((parms["tl"], groups))
-    E2 = np.zeros((parms["tl"], groups))
-    I1 = np.zeros((parms["tl"], groups))
-    I2 = np.zeros((parms["tl"], groups))
-    R = np.zeros((parms["tl"], groups))
-    Y = np.zeros((parms["tl"], groups))
+    S = np.zeros((steps, groups))
+    V = np.zeros((steps, groups))
+    E1 = np.zeros((steps, groups))
+    E2 = np.zeros((steps, groups))
+    I1 = np.zeros((steps, groups))
+    I2 = np.zeros((steps, groups))
+    R = np.zeros((steps, groups))
+    Y = np.zeros((steps, groups))
     u = [[parms["N"][group] - parms["I0"][group],
           0,
           0,
@@ -36,14 +37,14 @@ def simulate(parms):
 
     model = SEIRModel(parms)
 
-    for j in range(1, parms["tl"]):
+    for j in range(1, steps):
         u = model.seirmodel(u, t[j])
         for group in range(groups):
             S[j, group], V[j, group], E1[j, group], E2[j, group], I1[j, group], I2[j, group], R[j, group], Y[j, group] = u[group]
 
     df = pl.DataFrame({
         't': np.repeat(t, groups),
-        'group': np.tile(np.arange(groups), parms["tl"]),
+        'group': np.tile(np.arange(groups), steps),
         'S': S.flatten(),
         'V': V.flatten(),
         'E1': E1.flatten(),
@@ -52,7 +53,7 @@ def simulate(parms):
         'I2': I2.flatten(),
         'R': R.flatten(),
         'Y': Y.flatten(),
-        'beta_2_value': [beta_2_value] * (parms["tl"] * groups)
+        'beta_2_value': [beta_2_value] * (steps * groups)
     })
 
     return df
