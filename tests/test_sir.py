@@ -1,5 +1,5 @@
 import numpy as np
-from sir import SEIRModel
+from sir.__init__original import SEIRModel
 import yaml
 
 

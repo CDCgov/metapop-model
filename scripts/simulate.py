@@ -3,7 +3,7 @@ import polars as pl
 import polars.selectors as cs
 import griddler
 import griddler.griddle
-from sir import SEIRModel
+from sir.__init__original import SEIRModel
 
 def simulate(parms):
 

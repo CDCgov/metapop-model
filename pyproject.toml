@@ -2,7 +2,7 @@
 name = "sir"
 version = "0.1.0"
 description = ""
-authors = ["Paige Miller <yub1@cdc.gov>"]
+authors = ["Paige Miller <yub1@cdc.gov>", "Theresa Sheets <utg8@cdc.gov>", "Dina Mistry <uqx8@cdc.gov>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]

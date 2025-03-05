@@ -3,7 +3,7 @@ import polars as pl
 import polars.selectors as cs
 import griddler
 import griddler.griddle
-from sir import SEIRModel
+from sir.__init__measles import SEIRModel
 
 def simulate(parms):
 
@@ -24,7 +24,10 @@ def simulate(parms):
     Y = np.zeros((parms["tl"], groups))
     u = [[parms["N"][group] - parms["I0"][group],
           0,
+          0,
+          0,
           parms["I0"][group],
+          0,
           0,
           0
          ] for group in range(groups)]
@@ -55,10 +58,12 @@ def simulate(parms):
     return df
 
 if __name__ == "__main__":
-    parameter_sets = griddler.griddle.read("scripts/config.yaml")
+    parameter_sets = griddler.griddle.read("scripts/config_measles.yaml")
     results_all = griddler.run_squash(griddler.replicated(simulate), parameter_sets)
     print(results_all.columns)
     results = results_all.select(cs.by_name(["t", "group", "Y", "replicate", "beta_2_value"]))
     # with pl.Config(tbl_rows = -1):
     #     print(results)
-    results.write_csv("output/results_100_beta.csv")
+    results_tot = results_all.select(cs.by_name(['t', 'group', 'S', 'V', 'E1', 'E2', 'I1', 'I2', 'R', 'Y', 'beta_2_value']))
+    results_tot.write_csv("output/results_all_100_beta.csv")
+    
