@@ -23,8 +23,8 @@ def simulate(parms):
     I2 = np.zeros((steps, groups))
     R = np.zeros((steps, groups))
     Y = np.zeros((steps, groups))
-    u = [[parms["N"][group] - parms["I0"][group],
-          0,
+    u = [[int(parms["N"][group] * (1 - parms["vaccination_rate"][group])) - parms["I0"][group],
+          int(parms["N"][group] * (parms["vaccination_rate"][group])), # at some point we will need to ensure that these are integer values
           0,
           0,
           parms["I0"][group],

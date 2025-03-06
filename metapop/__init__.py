@@ -25,10 +25,16 @@ class SEIRModel:
             old_exposed.append(np.random.binomial(E1, e2frac))
         return [new_exposed, old_exposed]
 
-    #def vaccinated(self, u):
-        #new_vaccinated = []
-        #if intervention vaccinate at rate
-    #    return new_vaccinated
+    def vaccinate(self, u):
+        new_vaccinated = []
+        if (self.parms["vaccination_campaign"]):
+            #do something
+            for group in range(self.groups):
+                new_vaccinated.append(10000) #filler
+        else:
+            for group in range(self.groups):
+                new_vaccinated.append(0)
+        return new_vaccinated
 
     def infectious(self, u):
         new_infectious = []
@@ -51,7 +57,7 @@ class SEIRModel:
 
     def seirmodel(self, u, t): # add v group, possibly vaccinated group with vaccine failure going back eventually, might need more complexity for ongoing vaccine campaign
         new_u = []
-        #new_vaccinated = self.vaccinated(u)
+        new_vaccinated = self.vaccinate(u)
         new_exposed = self.exposed(u)[0]
         old_exposed = self.exposed(u)[1] #
         new_infectious = self.infectious(u)[0]#
@@ -60,7 +66,7 @@ class SEIRModel:
         for group in range(self.groups):
             S, V, E1, E2, I1, I2, R, Y = u[group]
             new_S = S - new_exposed[group] # - new_vaccinated[group]
-            new_V = 0 #V + new_vaccinated[group]
+            new_V = V + new_vaccinated[group]
             new_E1 = E1 + new_exposed[group] - old_exposed[group] # - new_vaccinated[group]? #handle these by percentage?
             new_E2 = E2 + old_exposed[group] - new_infectious[group] # - new_vaccinated[group]?
             new_I1 = I1 + new_infectious[group] - old_infectious[group]
