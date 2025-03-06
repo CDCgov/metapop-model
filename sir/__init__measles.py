@@ -10,7 +10,7 @@ class SEIRModel:
         new_exposed = []
         old_exposed = []
         # Extract the number of infected individuals for each group,
-        # eventually want to split contact and infectiousness, 
+        # eventually want to split contact and infectiousness,
         # right now they are specified by beta, just not by I1/2
         I1_g = np.array([u[group][4] for group in range(self.groups)])
         I2_g = np.array([u[group][5] for group in range(self.groups)])
@@ -24,7 +24,7 @@ class SEIRModel:
             e2frac = 1.0 - math.exp(-self.parms["sigma1"] * self.parms["dt"])
             old_exposed.append(np.random.binomial(E1, e2frac))
         return [new_exposed, old_exposed]
-    
+
     #def vaccinated(self, u):
         #new_vaccinated = []
         #if intervention vaccinate at rate
@@ -54,7 +54,7 @@ class SEIRModel:
         #new_vaccinated = self.vaccinated(u)
         new_exposed = self.exposed(u)[0]
         old_exposed = self.exposed(u)[1] #
-        new_infectious = self.infectious(u)[0]# 
+        new_infectious = self.infectious(u)[0]#
         old_infectious = self.infectious(u)[1]
         new_recoveries = self.recovery(u)#
         for group in range(self.groups):

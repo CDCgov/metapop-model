@@ -13,7 +13,7 @@ def simulate(parms):
         parms["beta"][1][1] = beta_2_value
 
     steps = parms["tl"] / parms["dt"]
-    t = np.linspace(1, parms["tf"], steps)
+    t = np.linspace(1, parms["tf"], int(steps))
     groups = parms["n_groups"]
     S = np.zeros((steps, groups))
     V = np.zeros((steps, groups))
@@ -67,4 +67,3 @@ if __name__ == "__main__":
     #     print(results)
     results_tot = results_all.select(cs.by_name(['t', 'group', 'S', 'V', 'E1', 'E2', 'I1', 'I2', 'R', 'Y', 'beta_2_value']))
     results_tot.write_csv("output/results_all_100_beta.csv")
-    
