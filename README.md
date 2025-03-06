@@ -1,16 +1,16 @@
-# Sandbox for a stochastic SEIR model in pyhton
+# Sandbox for a stochastic SEIR model in python
 
 ⚠️ This is a work in progress
 
 ## Model features
 
-* Stochastic SEIR model
+* Stochastic SEIRV model
 * Flexible numbers of groups (e.g., age classes) that is changeable using the config
 * Basic example of how to do a calibration
 
 ## Getting started
 
-* Enable poetry with `poetry install`
+* Enable poetry with `poetry install` and then start a poetry environment with `poetry shell`
 * Run the example with `python scripts/simulate.py`, this will produce output in output folder
 * Run basic calibration in `run_abc.py`, note that `make_plots.qmd` created and saved a fake dataset to use in `run_abc.csv` (included in repo to make it easier to get started here), also the calibration is for a value of beta matrix (with a uniform prior from 0.1, 0.5), can easily change code to calibrate another parameter
 * Make plots and visualizations with `make_plots.qmd`
@@ -23,6 +23,8 @@
 ## Project Admin
 
 Paige Miller (CDC/IOD/ORR/CFA)
+Theresa Sheets (CDC/IOD/ORR/CFA)
+Dina Mistry (CDC/IOD/ORR/CFA)
 
 ## General Disclaimer
 This repository was created for use by CDC programs to collaborate on public health related projects in support of the [CDC mission](https://www.cdc.gov/about/organization/mission.htm).  GitHub is not hosted by the CDC, but is a third party website used by CDC and its partners to share information and collaborate on software. CDC use of GitHub does not imply an endorsement of any one particular service, product, or enterprise.

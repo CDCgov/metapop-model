@@ -10,12 +10,12 @@ def summarize_daily(df):
     df = df.rename({"beta_2_value": "proposal"})
     return df
 
-def compare_replicate(fake_data_daily, replicate_data):
+def compare_replicate(data_daily, replicate_data):
     # make sure days are both integers
-    fake_data_daily = fake_data_daily.with_columns(pl.col('day').cast(pl.Int64))
+    data_daily = data_daily.with_columns(pl.col('day').cast(pl.Int64))
     replicate_data = replicate_data.with_columns(pl.col('day').cast(pl.Int64))
 
-    merged_data = fake_data_daily.join(replicate_data, on='day', how='inner')
+    merged_data = data_daily.join(replicate_data, on='day', how='inner')
     merged_data = merged_data.with_columns((merged_data['Y'] - merged_data['Y_right']).alias('difference'))
     score = merged_data['difference'].sum()
     proposal = replicate_data.select(pl.col('proposal')).unique().item()
