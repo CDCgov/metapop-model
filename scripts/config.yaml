@@ -1,10 +1,10 @@
 baseline_parameters:
   n_groups: 2    # mennonite + non
   beta: [[0.05, 0.05], [0.05, 0.3]] # split beta into contact + transmission
-  beta_upper: [[0.05, 0.05], [0.05, 0.3]]
-  beta_lower: [[0.05, 0.05], [0.05, 0.3]]
-  vaccination_rate: [0.50, 0.98]
-  vaccination_campaign: FALSE
+  initial_vaccine_coverage: [0.50, 0.98]
+  vaccine_uptake: FALSE
+  vaccine_uptake_days: [0]
+  vaccine_updake_doses: [0]
   sigma1: 0.25    # 1/latent_duration*2
   sigma2: 0.25    # 1/latent_duration*2
   gamma1: 0.4   # 1/infectious_duration

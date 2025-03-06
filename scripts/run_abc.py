@@ -23,7 +23,7 @@ def compare_replicate(data_daily, replicate_data):
 
 def main():
     results = pl.read_csv("output/results_100_beta.csv")
-    fake_data = pl.read_csv("data/2025-02-28_TX_Epi_Report.csv")
+    fake_data = pl.read_csv("data/fake_outbreak.csv")
 
     # Initialize a list to store the summary results
     summary_results = []

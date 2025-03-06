@@ -27,7 +27,7 @@ class SEIRModel:
 
     def vaccinate(self, u):
         new_vaccinated = []
-        if (self.parms["vaccination_campaign"]):
+        if (self.parms["vaccine_uptake"]):
             #do something
             for group in range(self.groups):
                 new_vaccinated.append(10000) #filler
