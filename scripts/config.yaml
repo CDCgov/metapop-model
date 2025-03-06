@@ -1,7 +1,7 @@
 baseline_parameters:
   n_groups: 2    # mennonite + non
   beta: [[0.05, 0.05], [0.05, 0.3]] # split beta into contact + transmission
-  initial_vaccine_coverage: [0.50, 0.98]
+  initial_vaccine_coverage: [0.0, 0.0]
   vaccine_uptake: FALSE
   vaccine_uptake_days: [0]
   vaccine_updake_doses: [0]
