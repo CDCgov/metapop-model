@@ -1,5 +1,5 @@
 import numpy as np
-from sir.__init__original import SEIRModel
+from metapop.__init__original import SEIRModel
 import yaml
 
 
