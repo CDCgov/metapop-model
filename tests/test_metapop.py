@@ -1,5 +1,5 @@
 import numpy as np
-from metapop.__init__original import SEIRModel
+from metapop import SEIRModel
 import yaml
 
 
@@ -41,3 +41,8 @@ def test_simulate():
     # Check that beta is a square n_groups x n_groups array
     beta = np.array(parms["beta"])
     assert beta.shape == (n_groups, n_groups), f"beta should be a {n_groups}x{n_groups} array"
+
+
+# should write a test for initial vaccination coverage
+
+# should write a test that no one changes in intiail vaccination coverage
