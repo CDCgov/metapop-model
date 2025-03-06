@@ -10,7 +10,7 @@
 
 ## Getting started
 
-* Enable poetry with `poetry install`
+* Enable poetry with `poetry install` and then start a poetry environment with `poetry shell`
 * Run the example with `python scripts/simulate.py`, this will produce output in output folder
 * Run basic calibration in `run_abc.py`, note that `make_plots.qmd` created and saved a fake dataset to use in `run_abc.csv` (included in repo to make it easier to get started here), also the calibration is for a value of beta matrix (with a uniform prior from 0.1, 0.5), can easily change code to calibrate another parameter
 * Make plots and visualizations with `make_plots.qmd`

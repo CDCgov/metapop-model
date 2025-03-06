@@ -61,9 +61,7 @@ def simulate(parms):
 if __name__ == "__main__":
     parameter_sets = griddler.griddle.read("scripts/config.yaml")
     results_all = griddler.run_squash(griddler.replicated(simulate), parameter_sets)
-    print(results_all.columns)
-    results = results_all.select(cs.by_name(["t", "group", "Y", "replicate", "beta_2_value"]))
+    results = results_all.select(cs.by_name(['t', 'group', 'S', 'V', 'E1', 'E2', 'I1', 'I2', 'R', 'Y', 'beta_2_value']))
     # with pl.Config(tbl_rows = -1):
     #     print(results)
-    results_tot = results_all.select(cs.by_name(['t', 'group', 'S', 'V', 'E1', 'E2', 'I1', 'I2', 'R', 'Y', 'beta_2_value']))
-    results_tot.write_csv("output/results_all_100_beta.csv")
+    results.write_csv("output/results_all_100_beta.csv")
