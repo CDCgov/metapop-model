@@ -6,8 +6,8 @@ baseline_parameters:
   vaccine_updake_doses: [0]
   sigma1: 0.25    # 1/latent_duration*2
   sigma2: 0.25    # 1/latent_duration*2
-  gamma1: 0.4   # 1/infectious_duration
-  gamma2: 0.4   # 1/infectious_duration
+  gamma1: 0.4   # 1/infectious_duration*2
+  gamma2: 0.4   # 1/infectious_duration*2
   iota: 0.0      # spontaneous infection rate
   N: [4400, 17600]    # population sizes
   I0: [1, 1]     # initially infected
