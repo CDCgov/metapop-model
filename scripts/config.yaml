@@ -1,7 +1,6 @@
 baseline_parameters:
   n_groups: 2    # mennonite + non
-  beta: [[0.05, 0.05], [0.05, 0.3]] # split beta into contact + transmission
-  initial_vaccine_coverage: [0.0, 0.0]
+  beta: [[0.5, 0.5], [0.5, 0.75]] # split beta into contact + transmission
   vaccine_uptake: FALSE
   vaccine_uptake_days: [0]
   vaccine_updake_doses: [0]
@@ -13,9 +12,20 @@ baseline_parameters:
   N: [4400, 17600]    # population sizes
   I0: [1, 1]     # initially infected
   dt: 1.0        # model units (one day)
-  tf: 200        # total time modeled
-  tl: 200        # times the model is evaluated
-  n_replicates: 100
+  tf: 365        # total time modeled
+  tl: 365        # times the model is evaluated
+  n_replicates: 1000
   seed: 123
   beta_2_low: 0.1 #for demonstrating how to calibrate the 4h beta value, here are ranges for samples replace with beta_lower
   beta_2_high: 0.5
+
+grid_parameters:
+  initial_coverage_scenario: ['low', 'medium', 'high']
+
+nested_parameters:
+  - initial_coverage_scenario: 'low'
+    initial_vaccine_coverage: [0.90, 0.25]
+  - initial_coverage_scenario: 'medium'
+    initial_vaccine_coverage: [0.90, 0.5]
+  - initial_coverage_scenario: 'high'
+    initial_vaccine_coverage: [0.90, 0.75]
