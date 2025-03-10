@@ -27,6 +27,7 @@ class SEIRModel:
 
     def vaccinate(self, u):
         new_vaccinated = []
+
         if (self.parms["vaccine_uptake"]):
             #do something
             for group in range(self.groups):

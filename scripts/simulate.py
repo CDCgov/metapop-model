@@ -12,6 +12,7 @@ def simulate(parms):
 
     steps = int(parms["tl"] / parms["dt"]) # kludge
     t = np.linspace(1, parms["tf"], steps)
+
     groups = parms["n_groups"]
     S = np.zeros((steps, groups))
     V = np.zeros((steps, groups))
@@ -62,4 +63,4 @@ if __name__ == "__main__":
     results = results_all.select(cs.by_name(['initial_coverage_scenario', 't', 'group', 'S', 'V', 'E1', 'E2', 'I1', 'I2', 'R', 'Y', 'beta_2_value', 'replicate']))
     # with pl.Config(tbl_rows = -1):
     #     print(results)
-    results.write_csv("output/results.csv")
+    results.write_csv("output/results_test.csv")

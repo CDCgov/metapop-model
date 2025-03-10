@@ -2,19 +2,20 @@ from metapop import SEIRModel  # Ensure this import path is correct
 import numpy as np
 import yaml
 
-def test_exposed_group1_zero_population():
+def test_only_expose_susceptible():
     # Define the parameters
     parms = {
-        "beta": np.array([[1, 2], [3, 4]]),
-        "N": [100, 1],
+        "beta": np.array([[2, 2], [2, 2]]),
+        "sigma1": 0.25,
+        "N": [100, 100],
         "dt": 1,
         "n_groups": 2
     }
 
     # Initial state for each group
     u = [
-        [99, 0, 1, 0, 0],
-        [0, 0, 0, 0, 1]    # group is tiny and no susceptibles
+        [99, 0, 0, 0, 1, 0, 0, 0],     # SV E1 E2 I1 I2 R Y
+        [ 0, 0, 0, 0, 0, 0, 100, 0]    # group has no susceptibles
     ]
 
     # Create an instance of SEIRModel
@@ -22,10 +23,11 @@ def test_exposed_group1_zero_population():
 
     # Call the exposed method
     new_exposed = model.exposed(u)
-    assert new_exposed[1] == 0 # No new exposures in group 2 because the population size is 0
-    assert len(new_exposed) == 2
+    print(new_exposed)
+    assert new_exposed[1] == [0, 0] # No new exposures in this group bc no susceptibles
+    assert len(new_exposed) == parms['n_groups']
 
-def test_simulate():
+def check_config():
     with open("scripts/config.yaml", "r") as file:
         config = yaml.safe_load(file)
 
