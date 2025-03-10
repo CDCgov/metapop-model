@@ -4,13 +4,11 @@ import polars.selectors as cs
 import griddler
 import griddler.griddle
 from metapop import SEIRModel
+from metapop.helper import set_beta_parameter
 
 def simulate(parms):
 
-    beta_2_value = None
-    if "beta_2_low" in parms and "beta_2_high" in parms:
-        beta_2_value = np.random.uniform(parms["beta_2_low"], parms["beta_2_high"])
-        parms["beta"][1][1] = beta_2_value
+    parms = set_beta_parameter(parms)
 
     steps = int(parms["tl"] / parms["dt"]) # kludge
     t = np.linspace(1, parms["tf"], steps)
@@ -53,7 +51,7 @@ def simulate(parms):
         'I2': I2.flatten(),
         'R': R.flatten(),
         'Y': Y.flatten(),
-        'beta_2_value': [beta_2_value] * (steps * groups)
+        'beta_2_value': parms["beta"][1][1] * (steps * groups)
     })
 
     return df
