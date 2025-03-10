@@ -19,9 +19,9 @@ class SEIRModel:
             S, V, E1,  E2, I1, I2, R, Y = u[target_group]
             # rows are to, columns are from
             foi = np.dot(self.parms["beta"][target_group] , I_g / np.array(self.parms["N"]))
-            e1frac = 1.0 - np.exp(-foi * self.parms["dt"])
+            e1frac = 1.0 - np.exp(-foi)
             new_exposed.append(np.random.binomial(S, e1frac))
-            e2frac = 1.0 - math.exp(-self.parms["sigma1"] * self.parms["dt"])
+            e2frac = 1.0 - math.exp(-self.parms["sigma1"])
             old_exposed.append(np.random.binomial(E1, e2frac))
         return [new_exposed, old_exposed]
 
@@ -42,9 +42,9 @@ class SEIRModel:
         old_infectious = []
         for group in range(self.groups):
             S, V, E1, E2, I1, I2, R, Y = u[group]
-            i1frac = 1.0 - math.exp(-self.parms["sigma2"] * self.parms["dt"])
+            i1frac = 1.0 - math.exp(-self.parms["sigma2"])
             new_infectious.append(np.random.binomial(E2, i1frac))
-            i2frac = 1.0 - math.exp(-self.parms["gamma1"] * self.parms["dt"])
+            i2frac = 1.0 - math.exp(-self.parms["gamma1"])
             old_infectious.append(np.random.binomial(I1, i2frac))
         return [new_infectious, old_infectious]
 
@@ -52,7 +52,7 @@ class SEIRModel:
         new_recoveries = []
         for group in range(self.groups):
             S, V,  E1, E2, I1, I2, R, Y = u[group]
-            rfrac = 1.0 - math.exp(-self.parms["gamma2"] * self.parms["dt"])
+            rfrac = 1.0 - math.exp(-self.parms["gamma2"])
             new_recoveries.append(np.random.binomial(I2, rfrac))
         return new_recoveries
 

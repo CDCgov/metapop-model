@@ -11,9 +11,7 @@ baseline_parameters:
   iota: 0.0      # spontaneous infection rate
   N: [4400, 17600]    # population sizes
   I0: [1, 1]     # initially infected
-  dt: 1.0        # model units (one day)
   tf: 365        # total time modeled
-  tl: 365        # times the model is evaluated
   n_replicates: 1000
   seed: 123
   beta_2_low: 0.1 #for demonstrating how to calibrate the 4h beta value, here are ranges for samples replace with beta_lower

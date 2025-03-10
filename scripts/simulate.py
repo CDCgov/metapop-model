@@ -5,41 +5,22 @@ import griddler
 import griddler.griddle
 from metapop import SEIRModel
 from metapop.helper import set_beta_parameter
+from metapop.helper import initialize_population
+from metapop.helper import run_model
 
 def simulate(parms):
 
     parms = set_beta_parameter(parms)
 
-    steps = int(parms["tl"] / parms["dt"]) # kludge
-    t = np.linspace(1, parms["tf"], steps)
-
+    steps = parms["tf"]
+    t = np.linspace(1, steps, steps)
     groups = parms["n_groups"]
-    S = np.zeros((steps, groups))
-    V = np.zeros((steps, groups))
-    E1 = np.zeros((steps, groups))
-    E2 = np.zeros((steps, groups))
-    I1 = np.zeros((steps, groups))
-    I2 = np.zeros((steps, groups))
-    R = np.zeros((steps, groups))
-    Y = np.zeros((steps, groups))
-    u = [[int(parms["N"][group] * (1 - parms["initial_vaccine_coverage"][group])) - parms["I0"][group],
-          int(parms["N"][group] * (parms["initial_vaccine_coverage"][group])), # at some point we will need to ensure that these are integer values
-          0,
-          0,
-          parms["I0"][group],
-          0,
-          0,
-          0
-         ] for group in range(groups)]
-    for group in range(groups):
-        S[0, group], V[0, group], E1[0, group], E2[0, group], I1[0, group], I2[0, group], R[0, group], Y[0, group] = u[group]
+
+    S, V, E1, E2, I1, I2, R, Y, u = initialize_population(steps, groups, parms)
 
     model = SEIRModel(parms)
 
-    for j in range(1, steps):
-        u = model.seirmodel(u, t[j])
-        for group in range(groups):
-            S[j, group], V[j, group], E1[j, group], E2[j, group], I1[j, group], I2[j, group], R[j, group], Y[j, group] = u[group]
+    S, V, E1, E2, I1, I2, R, Y, u = run_model(model, u, t, steps, groups, S, V, E1, E2, I1, I2, R, Y)
 
     df = pl.DataFrame({
         't': np.repeat(t, groups),
@@ -61,6 +42,4 @@ if __name__ == "__main__":
     parameter_sets = griddler.griddle.read("scripts/config.yaml")
     results_all = griddler.run_squash(griddler.replicated(simulate), parameter_sets)
     results = results_all.select(cs.by_name(['initial_coverage_scenario', 't', 'group', 'S', 'V', 'E1', 'E2', 'I1', 'I2', 'R', 'Y', 'beta_2_value', 'replicate']))
-    # with pl.Config(tbl_rows = -1):
-    #     print(results)
-    results.write_csv("output/results_test.csv")
+    results.write_csv("output/results.csv")
