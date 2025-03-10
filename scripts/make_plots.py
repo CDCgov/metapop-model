@@ -1,35 +1,50 @@
 import matplotlib.pyplot as plt
+import seaborn as sns
 import polars as pl
+import numpy as np
 
-
-results = pl.read_csv("output/results_all_100_beta.csv")
+results = pl.read_csv("output/results.csv")
 data = pl.read_csv("data/2025-02-28_TX_Epi_Report.csv")
 
-unique_replicates = results['replicate'].unique()
-unique_Y = results["Y"].unique()
+#### Visualization of one simulation
+# Filter the data for replicate == 0 and initial_coverage_scenario == "low"
+replicate_0_results = results.filter((pl.col("replicate") == 0) & (pl.col("initial_coverage_scenario") == "low"))
 
-def plot_replicate(results, replicate):
-    plt.style.use("ggplot")
-    replicate_res = results.filter(pl.col("replicate") == replicate)
-    replicate_res = replicate_res.filter(pl.col("group") == 1)
-    fig = plt.figure(facecolor='w')
-    infection_curve = fig.add_subplot(111, facecolor = '#dddddd', axisbelow = True)
-    infection_curve.plot("t", "S", 'b', data = replicate_res, alpha = 0.5, lw = 2, label = 'Susceptible')
-    infection_curve.plot("t", "E1", 'r', data = replicate_res, alpha = 0.5, lw = 2, label = 'Exposed')
-    infection_curve.plot("t", "I1", 'r', data = replicate_res, alpha = 0.5, lw = 2, label = 'Infected')
-    infection_curve.plot("t", "R", 'g', data = replicate_res, alpha = 0.5, lw = 2, label = 'Recovered')
-    infection_curve.set_xlabel('Time /days')
-    infection_curve.set_ylabel('Number')
-    legend = plt.legend(title = "Population", loc = 5, bbox_to_anchor = (1.25, 0.5))
-    legend.get_frame().set_linewidth(0)
-    legend.get_frame().set_facecolor("white")
-    plt.savefig('output/infection_curve.png')
+# Plot the line plot for each group
+plt.figure()
 
+for group in [0, 1]:
+    group_data = replicate_0_results.filter(pl.col("group") == group)
+    sum_I1_I2 = group_data["I1"] + group_data["I2"]
+    plt.plot(group_data["t"], sum_I1_I2, label=f'Group {group}')
 
-final_res = results.filter(pl.col("t") == 200)
-#plt.figure()
-plt.hist("Y", data = final_res.filter(pl.col("group") == 1), stacked = True, color = 'blue')
-plt.hist("Y", data = final_res.filter(pl.col("group") == 0), stacked = True, color = 'green')# this is not stacked as far as I can tell, depending on the order they change
-plt.savefig('output/final_size.png')
+plt.xlabel('Time (Days)')
+plt.ylabel('Infected Population')
+plt.legend()
+plt.savefig('output/infection_curve.png')
+plt.close()
 
-plot_replicate(results, 0)
+#### Faceted Histogram
+# Filter the data for t=200
+filtered_results = results.filter(pl.col("t") == 200)
+
+# Convert to pandas DataFrame for seaborn compatibility
+filtered_results_df = filtered_results.to_pandas()
+
+# Calculate the bin edges for consistent bin width
+min_value = filtered_results_df["Y"].min()
+max_value = filtered_results_df["Y"].max()
+bins = np.linspace(min_value, max_value, 21)  # 20 bins
+
+# Create the faceted histogram with the same bin width for all histograms
+g = sns.FacetGrid(filtered_results_df, row="initial_coverage_scenario", sharex=True, sharey=True, height=4, aspect=2)
+g.map_dataframe(sns.histplot, x="Y", hue="group", multiple="stack", bins=bins, palette=['blue', 'orange'])
+
+# Set the x-axis to log scale
+g.set(xscale="log")
+
+g.set_axis_labels('Final size (log scale)', 'Number of simulations')
+g.add_legend(title='Group')
+
+plt.savefig('output/final_size_log_scale.png')
+plt.close()
