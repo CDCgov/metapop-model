@@ -40,8 +40,8 @@ def initialize_population(steps, groups, parms):
     Y  = np.zeros((steps, groups))
 
     # initial states
-    u = [[int(parms["N"][group] * (1 - parms["initial_vaccine_coverage"][group])) - parms["I0"][group],
-          int(parms["N"][group] * (parms["initial_vaccine_coverage"][group])), # at some point we will need to ensure that these are integer values
+    u = [[int(parms["pop_sizes"][group] * (1 - parms["initial_vaccine_coverage"][group])) - parms["I0"][group],
+          int(parms["pop_sizes"][group] * (parms["initial_vaccine_coverage"][group])), # at some point we will need to ensure that these are integer values
           0,
           0,
           parms["I0"][group],
@@ -56,8 +56,47 @@ def initialize_population(steps, groups, parms):
 
     return S, V, E1, E2, I1, I2, R, Y, u
 
+def get_infected(u, I_indices, groups):
+    """
+    Calculate the number of infected individuals for each group. If there is only one infected compartment, n_i_compartments=1, then return I for each group
 
-# run model
+    Args:
+        u (list): The state of the system.
+        I_indices (list): The indices of the I compartments.
+        groups (int): The number of groups.
+
+    Returns:
+        np.array: An array of the number of infected individuals for each group.
+    """
+    return np.array([sum(u[group][i] for i in I_indices) for group in range(groups)])
+
+def calculate_foi(beta, I_g, pop_sizes, target_group):
+    """
+    Calculate the force of infection (FOI) for a target group.
+
+    Args:
+        beta (np.array): The transmission rate matrix.
+        I_g (np.array): The number of infected individuals in each group.
+        pop_sizes (np.array): The population sizes of each group.
+        target_group (int): The target group index.
+
+    Returns:
+        float: The force of infection for the target group.
+    """
+    return np.dot(beta[target_group], I_g / np.array(pop_sizes))
+
+def rate_to_frac(rate):
+    """
+    Calculate the fraction of transitions based on the rate
+
+    Args:
+        rate (float): The rate
+
+    Returns:
+        float: The fraction that will transition.
+    """
+    return 1.0 - np.exp(-rate)
+
 def run_model(model, u, t, steps, groups, S, V, E1, E2, I1, I2, R, Y):
     """
     Update the population arrays based on the SEIR model.

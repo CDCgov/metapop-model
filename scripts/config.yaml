@@ -1,21 +1,21 @@
 baseline_parameters:
   n_groups: 2    # mennonite + non
   beta: [[0.5, 0.5], [0.5, 0.75]] # split beta into contact + transmission
+  beta_2_low: 0.1 # optional, lower range to sample beta[g,g] from, where is n_groups
+  beta_2_high: 0.5 # optional, upper range to sample beta[g,g] from, where is n_groups
+  n_e_compartments: 2    # number of chained E compartments
+  sigma: 0.25    # 2 * 1/latent_duration
+  n_i_compartments: 2    # number of chained I compartments
+  gamma: 0.4   # 2 * 1/infectious_duration
+  iota: 0.0      # spontaneous infection rate
+  pop_sizes: [4400, 17600]    # population sizes
+  I0: [1, 1]     # initially infected
   vaccine_uptake: FALSE
   vaccine_uptake_days: [0]
   vaccine_updake_doses: [0]
-  sigma1: 0.25    # 1/latent_duration*2
-  sigma2: 0.25    # 1/latent_duration*2
-  gamma1: 0.4   # 1/infectious_duration*2
-  gamma2: 0.4   # 1/infectious_duration*2
-  iota: 0.0      # spontaneous infection rate
-  N: [4400, 17600]    # population sizes
-  I0: [1, 1]     # initially infected
   tf: 365        # total time modeled
   n_replicates: 1000
   seed: 123
-  beta_2_low: 0.1 #for demonstrating how to calibrate the 4h beta value, here are ranges for samples replace with beta_lower
-  beta_2_high: 0.5
 
 grid_parameters:
   initial_coverage_scenario: ['low', 'medium', 'high']
