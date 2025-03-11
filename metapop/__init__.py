@@ -5,12 +5,10 @@ class SEIRModel:
     def __init__(self, parms):
         self.parms = parms
         self.groups = parms["n_groups"]
-        self.e_chain = parms["n_e_compartments"]
-        self.E_indices = np.arange(self.e_chain,
-                                   2 + self.e_chain)
-
-        self.I_indices = np.arange(2 + self.e_chain,
-                                   2 + self.e_chain + parms["n_i_compartments"])
+        self.E_indices = np.arange(2, # S V are first and E starts at 2
+                                   2 + parms["n_e_compartments"])
+        self.I_indices = np.arange(max(self.E_indices), # I starts after E indices
+                                   max(self.E_indices) + parms["n_i_compartments"])
     def exposed(self, u):
         new_exposed = []
         old_exposed = []
