@@ -1,28 +1,35 @@
 import numpy as np
-import math
+from metapop.helper import* # noqa: F405
 
 class SEIRModel:
     def __init__(self, parms):
         self.parms = parms
         self.groups = parms["n_groups"]
+        self.e_chain = parms["n_e_compartments"]
+        self.E_indices = np.arange(self.e_chain,
+                                   2 + self.e_chain)
 
+        self.I_indices = np.arange(2 + self.e_chain,
+                                   2 + self.e_chain + parms["n_i_compartments"])
     def exposed(self, u):
         new_exposed = []
         old_exposed = []
-        # Extract the number of infected individuals for each group,
-        # eventually want to split contact and infectiousness,
-        # right now they are specified by beta, just not by I1/2
-        I1_g = np.array([u[group][4] for group in range(self.groups)])
-        I2_g = np.array([u[group][5] for group in range(self.groups)])
-        I_g = I1_g + I2_g
+
+        # Extract the number of infected individuals for each group
+        I_g = get_infected(u, self.I_indices, self.groups)
+
         for target_group in range(self.groups):
-            S, V, E1,  E2, I1, I2, R, Y = u[target_group]
-            # rows are to, columns are from
-            foi = np.dot(self.parms["beta"][target_group] , I_g / np.array(self.parms["N"]))
-            e1frac = 1.0 - np.exp(-foi)
-            new_exposed.append(np.random.binomial(S, e1frac))
-            e2frac = 1.0 - math.exp(-self.parms["sigma1"])
-            old_exposed.append(np.random.binomial(E1, e2frac))
+            S, V, E1, E2, I1, I2, R, Y = u[target_group]
+
+            # Get new Infections, for beta: rows are to, columns are from
+            foi =  calculate_foi(self.parms["beta"], I_g, self.parms["pop_sizes"], target_group)
+            new_e_frac = rate_to_frac(foi)
+            new_exposed.append(np.random.binomial(S, new_e_frac))
+
+            # Get within E chain movement (E1 -> E2)
+            e1_to_e2_frac = rate_to_frac(self.parms["sigma"])
+            old_exposed.append(np.random.binomial(E1, e1_to_e2_frac))
+
         return [new_exposed, old_exposed]
 
     def vaccinate(self, u):
@@ -42,28 +49,26 @@ class SEIRModel:
         old_infectious = []
         for group in range(self.groups):
             S, V, E1, E2, I1, I2, R, Y = u[group]
-            i1frac = 1.0 - math.exp(-self.parms["sigma2"])
-            new_infectious.append(np.random.binomial(E2, i1frac))
-            i2frac = 1.0 - math.exp(-self.parms["gamma1"])
-            old_infectious.append(np.random.binomial(I1, i2frac))
+            new_i_frac = rate_to_frac(self.parms["sigma"])
+            new_infectious.append(np.random.binomial(E2, new_i_frac))
+            i1_to_i2_frac = rate_to_frac(self.parms["gamma"])
+            old_infectious.append(np.random.binomial(I1, i1_to_i2_frac))
         return [new_infectious, old_infectious]
 
     def recovery(self, u):
         new_recoveries = []
         for group in range(self.groups):
             S, V,  E1, E2, I1, I2, R, Y = u[group]
-            rfrac = 1.0 - math.exp(-self.parms["gamma2"])
-            new_recoveries.append(np.random.binomial(I2, rfrac))
+            new_r_frac = rate_to_frac(self.parms["gamma"])
+            new_recoveries.append(np.random.binomial(I2, new_r_frac))
         return new_recoveries
 
     def seirmodel(self, u, t): # add v group, possibly vaccinated group with vaccine failure going back eventually, might need more complexity for ongoing vaccine campaign
         new_u = []
         new_vaccinated = self.vaccinate(u)
-        new_exposed = self.exposed(u)[0]
-        old_exposed = self.exposed(u)[1] #
-        new_infectious = self.infectious(u)[0]#
-        old_infectious = self.infectious(u)[1]
-        new_recoveries = self.recovery(u)#
+        new_exposed, old_exposed = self.exposed(u)
+        new_infectious, old_infectious = self.infectious(u)
+        new_recoveries = self.recovery(u)
         for group in range(self.groups):
             S, V, E1, E2, I1, I2, R, Y = u[group]
             new_S = S - new_exposed[group] # - new_vaccinated[group]
