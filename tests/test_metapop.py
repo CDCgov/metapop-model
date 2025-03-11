@@ -1,32 +1,34 @@
+from metapop import SEIRModel  # Ensure this import path is correct
 import numpy as np
-from metapop import SEIRModel
 import yaml
 
-
-def test_exposed_group1_zero_population():
+def test_only_expose_susceptible():
     # Define the parameters
     parms = {
-        "beta": np.array([[1, 2], [3, 4]]),
-        "N": [100, 1],
-        "dt": 1,
+        "beta": np.array([[2, 2], [2, 2]]),
+        "sigma": 0.75,
+        "n_e_compartments": 2,
+        "n_i_compartments": 2,
+        "pop_sizes": [100, 100],
         "n_groups": 2
     }
 
     # Initial state for each group
     u = [
-        [99, 0, 1, 0, 0],
-        [0, 0, 0, 0, 1]    # group is tiny and no susceptibles
+        [99, 0, 0, 0, 1, 0, 0, 0],     # S V E1 E2 I1 I2 R Y
+        [ 0, 0, 0, 0, 0, 0, 100, 0]    # group has no susceptibles
     ]
 
     # Create an instance of SEIRModel
     model = SEIRModel(parms)
 
     # Call the exposed method
-    new_exposed = model.exposed(u)
-    assert new_exposed[1] == 0 # No new exposures in group 2 because the population size is 0
-    assert len(new_exposed) == 2
+    new_exposed, old_exposed = model.exposed(u)
+    assert new_exposed[1] == 0 # No new exposures in this group bc no susceptibles
+    assert len(new_exposed) == parms['n_groups']
+    assert len(old_exposed) == parms['n_groups']
 
-def test_simulate():
+def check_config():
     with open("scripts/config.yaml", "r") as file:
         config = yaml.safe_load(file)
 
@@ -35,14 +37,9 @@ def test_simulate():
     n_groups = parms["n_groups"]
 
     # Check that N and I0 are of length equal to n_groups
-    assert len(parms["N"]) == n_groups, f"N should be of length {n_groups}"
+    assert len(parms["pop_sizes"]) == n_groups, f"N should be of length {n_groups}"
     assert len(parms["I0"]) == n_groups, f"I0 should be of length {n_groups}"
 
     # Check that beta is a square n_groups x n_groups array
     beta = np.array(parms["beta"])
     assert beta.shape == (n_groups, n_groups), f"beta should be a {n_groups}x{n_groups} array"
-
-
-# should write a test for initial vaccination coverage
-
-# should write a test that no one changes in intiail vaccination coverage
