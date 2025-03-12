@@ -12,8 +12,11 @@ def test_set_beta_parameter():
     parms = {
         "beta_2_low": 0.1,
         "beta_2_high": 0.5,
-        "beta": [[0, 0], [0, 0]]
+        "beta": [[0, 0], [0, 0]],
+        "n_groups": 2
     }
+
+    index = parms["n_groups"] - 1 # python indexing
 
     beta_original_shape = np.shape(parms["beta"])
 
@@ -24,7 +27,7 @@ def test_set_beta_parameter():
     assert beta_original_shape == np.shape(parms["beta"])
 
     # Check if the beta_2_value is within the expected range
-    assert 0.1 <= parms["beta"][1][1] <= 0.5
+    assert 0.1 <= parms["beta"][index][index] <= 0.5
 
 def test_pop_initialization():
     parms = {
@@ -122,7 +125,7 @@ def test_run_model():
         config = yaml.safe_load(file)
 
     parms = config["baseline_parameters"]
-    parms["initial_vaccine_coverage"] = [0.9, 0.5] # add here, griddler handles in nested params
+    parms["initial_vaccine_coverage"] = [0.9, 0.5, 0.5] # add here, griddler handles in nested params
     parms["vaccine_uptake"] = False # setting here in case default config changes
 
     # Define the time array and steps

@@ -10,11 +10,12 @@ def set_beta_parameter(parms):
     Returns:
         dict: Parameters with optionally randomly generated beta_2_value.
     """
+    n_groups = parms["n_groups"]
+    index = n_groups - 1 # python indexing
     if "beta_2_low" in parms and "beta_2_high" in parms:
         beta_2_value = np.random.uniform(parms["beta_2_low"], parms["beta_2_high"])
-        parms["beta"][1][1] = beta_2_value
+        parms["beta"][index][index] = beta_2_value
     return parms
-
 
 # initialize populations
 def initialize_population(steps, groups, parms):

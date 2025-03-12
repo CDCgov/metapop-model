@@ -42,4 +42,4 @@ if __name__ == "__main__":
     parameter_sets = griddler.griddle.read("scripts/config.yaml")
     results_all = griddler.run_squash(griddler.replicated(simulate), parameter_sets)
     results = results_all.select(cs.by_name(['initial_coverage_scenario', 't', 'group', 'S', 'V', 'E1', 'E2', 'I1', 'I2', 'R', 'Y', 'beta_2_value', 'replicate']))
-    results.write_csv("output/results.csv")
+    results.write_csv("output/results_test.csv")

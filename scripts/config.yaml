@@ -1,20 +1,20 @@
 baseline_parameters:
-  n_groups: 2    # mennonite + non
-  beta: [[0.5, 0.5], [0.5, 0.75]] # split beta into contact + transmission
+  n_groups: 3    # general, subpop1, subpop2
+  beta: [[0.5, 0.1, 0.1], [0.1, 0.5, 0.1], [0.1, 0.1, 0.5]] # split beta into contact + transmission
   beta_2_low: 0.1 # optional, lower range to sample beta[g,g] from, where is n_groups
-  beta_2_high: 0.5 # optional, upper range to sample beta[g,g] from, where is n_groups
-  n_e_compartments: 2    # number of chained E compartments
+  beta_2_high: 0.1 # optional, upper range to sample beta[g,g] from, where is n_groups
+  n_e_compartments: 3    # number of chained E compartments
   sigma: 0.25    # 2 * 1/latent_duration
   n_i_compartments: 2    # number of chained I compartments
   gamma: 0.4   # 2 * 1/infectious_duration
   iota: 0.0      # spontaneous infection rate
-  pop_sizes: [4400, 17600]    # population sizes
-  I0: [1, 1]     # initially infected
+  pop_sizes: [17600, 4400, 4400]    # population sizes
+  I0: [0, 1, 0]     # initially infected
   vaccine_uptake: FALSE
   vaccine_uptake_days: [0]
   vaccine_updake_doses: [0]
   tf: 365        # total time modeled
-  n_replicates: 1000
+  n_replicates: 2
   seed: 123
 
 grid_parameters:
@@ -22,8 +22,8 @@ grid_parameters:
 
 nested_parameters:
   - initial_coverage_scenario: 'low'
-    initial_vaccine_coverage: [0.90, 0.25]
+    initial_vaccine_coverage: [0.9, 0.25, 0.25]
   - initial_coverage_scenario: 'medium'
-    initial_vaccine_coverage: [0.90, 0.5]
+    initial_vaccine_coverage: [0.9, 0.5, 0.5]
   - initial_coverage_scenario: 'high'
-    initial_vaccine_coverage: [0.90, 0.75]
+    initial_vaccine_coverage: [0.9, 0.75, 0.75]
