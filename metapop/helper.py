@@ -1,21 +1,45 @@
 import numpy as np
+import numpy.linalg as la
 
 def set_beta_parameter(parms):
     """
-    If beta ranges are supplied in the parameters, reset the beta parameter.
+    Define matrix
 
     Args:
-        parms (dict): Dictionary containing the parameters, optionally including "beta_2_low" and "beta_2_high".
+        parms (dict):
 
     Returns:
-        dict: Parameters with optionally randomly generated beta_2_value.
+        dict:
     """
-    n_groups = parms["n_groups"]
-    index = n_groups - 1 # python indexing
-    if "beta_2_low" in parms and "beta_2_high" in parms:
-        beta_2_value = np.random.uniform(parms["beta_2_low"], parms["beta_2_high"])
-        parms["beta"][index][index] = beta_2_value
+    b_within = parms["beta_within"]
+    b_general = parms["beta_general"]
+    b_sub = parms["beta_small"]
+
+    b = np.array([[b_within, b_general, b_general],
+                     [b_general, b_within, b_sub],
+                     [b_general, b_sub, b_within]])
+    beta_scaled = b * parms["beta_factor"]
+
+    parms["beta"] = beta_scaled
+
     return parms
+
+def get_r0(parms):
+    beta = np.array(parms["beta"])
+    gamma = parms["gamma"] / parms["n_i_compartments"]
+    pop_sizes = parms["pop_sizes"]
+
+    # Calculate the R0 matrix with row-wise multi
+    X = (beta / gamma) * pop_sizes / sum(pop_sizes)
+
+    # Calculate the eigenvalues of the R0 matrix
+    eigen_all = la.eig(X)
+    spectral_radius = np.max(np.abs(eigen_all[0]))
+
+    return spectral_radius
+
+
+
 
 # initialize populations
 def initialize_population(steps, groups, parms):

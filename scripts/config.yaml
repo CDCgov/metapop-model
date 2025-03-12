@@ -1,24 +1,27 @@
 baseline_parameters:
   n_groups: 3    # general, subpop1, subpop2
-  beta: [[0.5, 0.1, 0.1], [0.1, 0.5, 0.1], [0.1, 0.1, 0.5]] # split beta into contact + transmission
-  beta_2_low: 0.1 # optional, lower range to sample beta[g,g] from, where is n_groups
-  beta_2_high: 0.1 # optional, upper range to sample beta[g,g] from, where is n_groups
+  beta_within: 0.5  # within group
+  beta_general: 0.1 # general to sub
+  beta_small: 0.025   # sub1 to sub2
+  beta_factor: 1.0
+  desired_r0: 12.0
   n_e_compartments: 3    # number of chained E compartments
   sigma: 0.25    # 2 * 1/latent_duration
   n_i_compartments: 2    # number of chained I compartments
   gamma: 0.4   # 2 * 1/infectious_duration
   iota: 0.0      # spontaneous infection rate
-  pop_sizes: [17600, 4400, 4400]    # population sizes
-  I0: [0, 1, 0]     # initially infected
+  pop_sizes: [40000, 5000, 5000]    # population sizes
+  I0: [0, 5, 0]     # initially infected
   vaccine_uptake: FALSE
   vaccine_uptake_days: [0]
   vaccine_updake_doses: [0]
   tf: 365        # total time modeled
-  n_replicates: 2
+  n_replicates: 1000
   seed: 123
 
 grid_parameters:
-  initial_coverage_scenario: ['low', 'medium', 'high']
+  initial_coverage_scenario: ['low', 'medium', 'high', 'optimistic']
+  connectivity_scenario: [1.0, 1.5, 2.0]
 
 nested_parameters:
   - initial_coverage_scenario: 'low'
@@ -27,3 +30,5 @@ nested_parameters:
     initial_vaccine_coverage: [0.9, 0.5, 0.5]
   - initial_coverage_scenario: 'high'
     initial_vaccine_coverage: [0.9, 0.75, 0.75]
+  - initial_coverage_scenario: 'optimistic'
+    initial_vaccine_coverage: [0.9, 0.9, 0.9]
