@@ -9,7 +9,8 @@ plot_cols = c("#156082",  "#78206e", "#3b7d23")
 filtered_results <- results |>
     filter(replicate == 15,
            initial_coverage_scenario == "optimistic",
-           connectivity_scenario == 1)
+           connectivity_scenario == 1,
+           beta_small == 0.001)
 
 total_results <- filtered_results |>
     group_by(t) |>
@@ -62,9 +63,9 @@ outbreak_size <- 300
 res_table <- results |>
     filter(t == 365, Y >= 30) |>
     group_by(group, initial_coverage_scenario,
-             connectivity_scenario) |>
+             connectivity_scenario, beta_small) |>
     count() |>
     mutate(n = round(n/1000, 2)) |>
     pivot_wider(names_from = group, values_from = n) |>
-    select(initial_coverage_scenario, connectivity_scenario, Sub1 = `1`, Sub2 =`2`, General = `0`)
+    select(initial_coverage_scenario, connectivity_scenario, Sub1 = `1`, Sub2 =`2`, General = `0`, beta_small)
 write_csv(res_table, "output/res_table.csv")
