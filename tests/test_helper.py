@@ -43,15 +43,17 @@ def test_construct_beta():
         "pop_sizes": np.array([100, 200, 300]),
         "n_i_compartments": 2,
         "desired_r0": 2.0,
-        "n_groups": 3
+        "n_groups": 3,
+        "connectivity_scenario": 1.0
     }
     beta_unscaled = make_beta_matrix(parms)
     r0_base = get_r0(beta_unscaled, parms["gamma"], parms["pop_sizes"], parms["n_i_compartments"])
     beta_factor = calculate_beta_factor(parms["desired_r0"], r0_base)
-    expected_beta_scaled = rescale_beta_matrix(beta_unscaled, beta_factor)
+    beta_scaled = rescale_beta_matrix(beta_unscaled, beta_factor)
+    expected_beta = modify_beta_connectivity(beta_scaled, parms["connectivity_scenario"])
     beta_scaled = construct_beta(parms)
     assert beta_scaled.shape == (3, 3), f"Expected shape (3, 3), but got {beta_scaled.shape}"
-    assert np.allclose(beta_scaled, expected_beta_scaled), f"Expected {expected_beta_scaled}, but got {beta_scaled}"
+    assert np.allclose(beta_scaled, expected_beta), f"Expected {expected_beta}, but got {beta_scaled}"
 
 def test_pop_initialization():
     parms = {
@@ -148,6 +150,8 @@ def test_run_model_once_with_config():
     parms = config["baseline_parameters"]
     parms["initial_vaccine_coverage"] = [0.9, 0.5, 0.5] # add here, griddler has it as nested params
     parms["vaccine_uptake"] = False # setting here in case default config changes
+    parms["connectivity_scenario"] = 1.0
+
     parms["beta"] = construct_beta(parms)
 
     # Define the time array and steps

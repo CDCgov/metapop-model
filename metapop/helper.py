@@ -123,9 +123,10 @@ def construct_beta(parms):
     """
 
     beta_unscaled = make_beta_matrix(parms)
-    r0_base = get_r0(beta_unscaled, parms["gamma"], parms["pop_sizes"], parms["n_i_compartments"])
+    beta_modified_connectivity = modify_beta_connectivity(beta_unscaled, parms["connectivity_scenario"])
+    r0_base = get_r0(beta_modified_connectivity, parms["gamma"], parms["pop_sizes"], parms["n_i_compartments"])
     beta_factor = calculate_beta_factor(parms["desired_r0"], r0_base)
-    beta_scaled = rescale_beta_matrix(beta_unscaled, beta_factor)
+    beta_scaled = rescale_beta_matrix(beta_modified_connectivity, beta_factor)
     return beta_scaled
 
 def initialize_population(steps, groups, parms):
