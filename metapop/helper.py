@@ -1,16 +1,25 @@
 import numpy as np
 import numpy.linalg as la
 
-def set_beta_parameter(parms):
+def make_beta_matrix(parms):
     """
-    Define matrix
+    For a 3-group population where we assume general, subpop1, and subpop2:
+    Define matrix based on within group mixing (beta_within),
+    mixing between general and sub-pops (beta_general), and subpop1-subpop2 (beta_small) mixing.
 
     Args:
-        parms (dict):
+        parms (dict): Dictionary containing beta parameters, including:
+            - beta_within (float): Transmission rate within each group.
+            - beta_general (float): Transmission rate between the general population and sub-populations.
+            - beta_small (float): Transmission rate between sub-populations.
+            - n_groups (int): Number of groups (must be 3 in this specific construction).
 
     Returns:
-        dict:
+        np.array: The beta matrix representing transmission rates between groups.
+
     """
+    assert parms['n_groups'] == 3, "The number of groups (n_groups) must be 3 to use this function."
+
     b_within = parms["beta_within"]
     b_general = parms["beta_general"]
     b_sub = parms["beta_small"]
@@ -18,19 +27,26 @@ def set_beta_parameter(parms):
     b = np.array([[b_within, b_general, b_general],
                      [b_general, b_within, b_sub],
                      [b_general, b_sub, b_within]])
-    beta_scaled = b * parms["beta_factor"]
 
-    parms["beta"] = beta_scaled
+    return b
 
-    return parms
+def get_r0(beta_matrix, gamma_unscaled, pop_sizes, n_i_compartments):
+    """
+    Calculate the basic reproduction number (R0) matrix and return its spectral radius.
 
-def get_r0(parms):
-    beta = np.array(parms["beta"])
-    gamma = parms["gamma"] / parms["n_i_compartments"]
-    pop_sizes = parms["pop_sizes"]
+    Args:
+        beta_matrix (np.array): The transmission rate matrix.
+        gamma_unscaled (float): The unscaled recovery rate.
+        pop_sizes (list or np.array): The population sizes of each group.
+        n_i_compartments (int): The number of infectious compartments.
+
+    Returns:
+        float: The spectral radius of the R0 matrix, representing the basic reproduction number.
+    """
+    gamma_scaled = gamma_unscaled / n_i_compartments
 
     # Calculate the R0 matrix with row-wise multi
-    X = (beta / gamma) * pop_sizes / sum(pop_sizes)
+    X = (beta_matrix / gamma_scaled) * pop_sizes / sum(pop_sizes)
 
     # Calculate the eigenvalues of the R0 matrix
     eigen_all = la.eig(X)
@@ -38,10 +54,80 @@ def get_r0(parms):
 
     return spectral_radius
 
+def rescale_beta_matrix(unscaled_beta, factor):
+    """
+    Rescale the beta matrix by a given factor.
 
+    Args:
+        unscaled_beta (np.array): The original transmission rate matrix.
+        factor (float): The factor by which to rescale the beta matrix.
 
+    Returns:
+        np.array: The rescaled transmission rate matrix.
+    """
 
-# initialize populations
+    beta_scaled = unscaled_beta * factor
+    return beta_scaled
+
+def calculate_beta_factor(r0_desired, current_r0):
+    """
+    Calculate the scaling factor for the beta matrix to achieve a desired R0.
+
+    Args:
+        r0_desired (float): The desired basic reproduction number (R0) from parms file.
+        current_r0 (float): The current basic reproduction number (R0).
+
+    Returns:
+        float: The scaling factor for the beta matrix to get desired R0.
+    """
+
+    factor = r0_desired / current_r0
+    return factor
+
+def modify_beta_connectivity(base_beta, connectivity_factor):
+    """
+    Modify the beta matrix to adjust the connectivity between sub-groups in a 3 pop or more model.
+
+    Args:
+        base_beta (np.array): Transmission rate matrix which we want to adjust.
+        connectivity_factor (float): The factor by which to adjust the connectivity between specific groups.
+
+    Returns:
+        np.array: The modified transmission rate matrix with adjusted connectivity.
+    """
+    # Assert statement to check that beta is at least 3x3 so this doesn't fail
+    assert base_beta.shape[0] >= 3 and base_beta.shape[1] >= 3, "The base_beta matrix must be at least 3x3."
+
+    final_beta = base_beta
+    final_beta[1,2] *= connectivity_factor
+    final_beta[2,1] *= connectivity_factor
+
+    return final_beta
+
+def construct_beta(parms):
+    """
+    Construct the scaled beta matrix based on the desired R0.
+
+    Args:
+        parms (dict): Dictionary containing the parameters, including:
+            - beta_within (float): Transmission rate within each group.
+            - beta_general (float): Transmission rate between the general population and sub-populations.
+            - beta_small (float): Transmission rate between sub-populations.
+            - gamma (float): The recovery rate.
+            - pop_sizes (list or np.array): The population sizes of each group.
+            - n_i_compartments (int): The number of infectious compartments.
+            - desired_r0 (float): The desired basic reproduction number (R0).
+
+    Returns:
+        np.array: The scaled beta matrix.
+    """
+
+    beta_unscaled = make_beta_matrix(parms)
+    r0_base = get_r0(beta_unscaled, parms["gamma"], parms["pop_sizes"], parms["n_i_compartments"])
+    beta_factor = calculate_beta_factor(parms["desired_r0"], r0_base)
+    beta_scaled = rescale_beta_matrix(beta_unscaled, beta_factor)
+    return beta_scaled
+
 def initialize_population(steps, groups, parms):
     """
     Initialize the population arrays and the initial state based on the provided parameters.

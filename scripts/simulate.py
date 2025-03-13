@@ -8,26 +8,22 @@ from metapop.helper import *
 
 def simulate(parms):
 
-    #### set beta matrix based on desired R0 and connectivity scenario ###
-    parms = set_beta_parameter(parms)
-    r0_base = get_r0(parms)
-    parms['beta_factor'] = parms["desired_r0"] / r0_base
-    parms = set_beta_parameter(parms)
+    #### Set beta matrix based on desired R0 and connectivity scenario ###
+    parms["beta"] = construct_beta(parms)
 
-    parms["beta"][1,2] *= parms["connectivity_scenario"]
-    parms["beta"][2,1] *= parms["connectivity_scenario"]
-    ############################
-
+    #### set up the model time steps
     steps = parms["tf"]
     t = np.linspace(1, steps, steps)
-    groups = parms["n_groups"]
 
+    #### Initialize population
+    groups = parms["n_groups"]
     S, V, E1, E2, I1, I2, R, Y, u = initialize_population(steps, groups, parms)
 
+    #### Run the model
     model = SEIRModel(parms)
-
     S, V, E1, E2, I1, I2, R, Y, u = run_model(model, u, t, steps, groups, S, V, E1, E2, I1, I2, R, Y)
 
+    #### Flatten into a dataframe
     df = pl.DataFrame({
         't': np.repeat(t, groups),
         'group': np.tile(np.arange(groups), steps),

@@ -4,30 +4,51 @@ import yaml
 import numpy as np
 from numpy.testing import assert_allclose
 
-def test_set_beta_parameter():
-    # Set a seed for reproducibility
-    np.random.seed(42)
-
-    # Define the parameters
+def test_make_beta_matrix():
     parms = {
-        "beta_2_low": 0.1,
-        "beta_2_high": 0.5,
-        "beta": [[0, 0], [0, 0]],
-        "n_groups": 2
+        "beta_within": 0.1,
+        "beta_general": 0.05,
+        "beta_small": 0.02,
+        "n_groups": 3
     }
+    expected_beta = np.array([
+        [0.1, 0.05, 0.05],
+        [0.05, 0.1, 0.02],
+        [0.05, 0.02, 0.1]
+    ])
+    beta_matrix = make_beta_matrix(parms)
+    assert np.array_equal(beta_matrix, expected_beta), f"Expected {expected_beta}, but got {beta_matrix}"
 
-    index = parms["n_groups"] - 1 # python indexing
+def test_get_r0():
+    beta_matrix = np.array([
+        [0.1, 0.2, 0.3],
+        [0.2, 0.1, 0.4],
+        [0.3, 0.4, 0.1]
+    ])
+    gamma_unscaled = 0.1
+    pop_sizes = np.array([1000, 200, 200])
+    n_i_compartments = 2
+    expected_r0 = 3.709795
+    r0 = get_r0(beta_matrix, gamma_unscaled, pop_sizes, n_i_compartments)
+    assert np.isclose(r0, expected_r0), f"Expected {expected_r0}, but got {r0}"
 
-    beta_original_shape = np.shape(parms["beta"])
-
-    # Call the function
-    parms = set_beta_parameter(parms)
-
-    # Check to make sure same as old dimensions
-    assert beta_original_shape == np.shape(parms["beta"])
-
-    # Check if the beta_2_value is within the expected range
-    assert 0.1 <= parms["beta"][index][index] <= 0.5
+def test_construct_beta():
+    parms = {
+        "beta_within": 0.1,
+        "beta_general": 0.05,
+        "beta_small": 0.02,
+        "gamma": 0.1,
+        "pop_sizes": np.array([100, 200, 300]),
+        "n_i_compartments": 2,
+        "desired_r0": 2.0,
+        "n_groups": 3
+    }
+    beta_unscaled = make_beta_matrix(parms)
+    r0_base = get_r0(beta_unscaled, parms["gamma"], parms["pop_sizes"], parms["n_i_compartments"])
+    beta_factor = calculate_beta_factor(parms["desired_r0"], r0_base)
+    expected_beta_scaled = rescale_beta_matrix(beta_unscaled, beta_factor)
+    beta_scaled = construct_beta(parms)
+    assert np.allclose(beta_scaled, expected_beta_scaled), f"Expected {expected_beta_scaled}, but got {beta_scaled}"
 
 def test_pop_initialization():
     parms = {
@@ -85,8 +106,6 @@ def test_calculate_foi():
     expected_foi = np.dot(beta[target_group], I_g / pop_sizes)
     assert np.isclose(foi, expected_foi), f"Expected {expected_foi}, but got {foi}"
 
-
-
 def test_get_infected():
     # Define the initial state
     u = [
@@ -118,15 +137,15 @@ def test_rate_to_frac():
     expected_frac = 0
     assert np.isclose(frac, expected_frac), f"Expected {expected_frac}, but got {frac}"
 
-
-def test_run_model():
+def test_run_model_once_with_config():
     # Define the parameters
     with open("scripts/config.yaml", "r") as file:
         config = yaml.safe_load(file)
 
     parms = config["baseline_parameters"]
-    parms["initial_vaccine_coverage"] = [0.9, 0.5, 0.5] # add here, griddler handles in nested params
+    parms["initial_vaccine_coverage"] = [0.9, 0.5, 0.5] # add here, griddler has it as nested params
     parms["vaccine_uptake"] = False # setting here in case default config changes
+    parms["beta"] = construct_beta(parms)
 
     # Define the time array and steps
     groups = parms["n_groups"]
