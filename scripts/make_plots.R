@@ -7,7 +7,7 @@ plot_cols = c("#156082",  "#78206e", "#3b7d23")
 
 #### Cumulative plot
 filtered_results <- results |>
-    filter(replicate == 3,
+    filter(replicate == 15,
            initial_coverage_scenario == "optimistic",
            connectivity_scenario == 1)
 
@@ -22,6 +22,7 @@ filtered_results |>
               color = "black", size = 1) +
     theme_minimal(base_size = 18) +
     scale_color_manual(values = plot_cols) +
+    #facet_wrap(~replicate) +
     labs(x="Days", y = "Cumulative Infections", col = "Group")
 
 
@@ -55,3 +56,15 @@ results |>
     scale_fill_manual(values = plot_cols) +
     theme_minimal(base_size = 18) +
     labs(x="Final Group Outbreak Size", y="Number of simulations",fill ="Group")
+
+#### Summary table
+outbreak_size <- 300
+res_table <- results |>
+    filter(t == 365, Y >= 30) |>
+    group_by(group, initial_coverage_scenario,
+             connectivity_scenario) |>
+    count() |>
+    mutate(n = round(n/1000, 2)) |>
+    pivot_wider(names_from = group, values_from = n) |>
+    select(initial_coverage_scenario, connectivity_scenario, Sub1 = `1`, Sub2 =`2`, General = `0`)
+write_csv(res_table, "output/res_table.csv")
