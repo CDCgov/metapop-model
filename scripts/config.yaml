@@ -5,7 +5,7 @@ baseline_parameters:
   beta_small: 0.025   # sub1 to sub2
   beta_factor: 1.0
   desired_r0: 12.0
-  n_e_compartments: 3    # number of chained E compartments
+  n_e_compartments: 2    # number of chained E compartments
   sigma: 0.19    # 2 * 1/latent_duration
   n_i_compartments: 2    # number of chained I compartments
   gamma: 0.25   # 2 * 1/infectious_duration

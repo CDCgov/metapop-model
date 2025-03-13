@@ -17,6 +17,8 @@ def test_make_beta_matrix():
         [0.05, 0.02, 0.1]
     ])
     beta_matrix = make_beta_matrix(parms)
+    assert beta_matrix.shape == (3, 3), f"Expected shape (3, 3), but got {beta_matrix.shape}"
+
     assert np.array_equal(beta_matrix, expected_beta), f"Expected {expected_beta}, but got {beta_matrix}"
 
 def test_get_r0():
@@ -48,6 +50,7 @@ def test_construct_beta():
     beta_factor = calculate_beta_factor(parms["desired_r0"], r0_base)
     expected_beta_scaled = rescale_beta_matrix(beta_unscaled, beta_factor)
     beta_scaled = construct_beta(parms)
+    assert beta_scaled.shape == (3, 3), f"Expected shape (3, 3), but got {beta_scaled.shape}"
     assert np.allclose(beta_scaled, expected_beta_scaled), f"Expected {expected_beta_scaled}, but got {beta_scaled}"
 
 def test_pop_initialization():
