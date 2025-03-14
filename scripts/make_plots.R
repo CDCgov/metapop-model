@@ -2,30 +2,20 @@ library(tidyverse)
 library(ggplot2)
 library(ggridges)
 
-results <- read_csv("output/results_test.csv")
+results <- read_csv("output/results.csv")
+reps <- max(results$replicate)
 
 plot_cols <- c("#156082", "#78206e", "#3b7d23")
 
 #### Cumulative and incidence plots ####
-vax_levs <- c("low", "optimistic")
-sub_conns <- c(0.001, 0.5)
-desired_r0s <- c(12)
+vax_levs <- c("low", "medium", "optimistic")
+sub_conns <- c(0.0001, 0.001)
 filtered_results <- results |>
     filter(
         replicate %in% 1:20,
         initial_coverage_scenario %in% vax_levs,
-        beta_small %in% sub_conns,
-        desired_r0 %in% desired_r0s
+        beta_sub1_sub2 %in% sub_conns
     )
-
-total_results <- filtered_results |>
-    group_by(
-        t, replicate,
-        desired_r0,
-        initial_coverage_scenario,
-        beta_small
-    ) |>
-    summarize(total_Y = sum(Y))
 
 p <- filtered_results |>
     ggplot() +
@@ -36,13 +26,7 @@ p <- filtered_results |>
         ),
         alpha = 0.5
     ) +
-    geom_line(
-        data = total_results,
-        aes(t, total_Y, group = replicate),
-        color = "darkgrey",
-        alpha = 0.5
-    ) +
-    facet_grid(beta_small ~ initial_coverage_scenario,
+    facet_grid(beta_sub1_sub2 ~ initial_coverage_scenario,
         labeller = label_both
     ) +
     theme_minimal(base_size = 18) +
@@ -56,31 +40,40 @@ ggsave(filename = paste0(
     ), plot = p, width = 10, height = 8)
 
 #### Incidence plot ####
-# filtered_results |>
-#     ggplot(aes(t, I1 + I2, col = factor(group))) +
-#     geom_line(size = 1) +
-#     theme_minimal(base_size = 18) +
-#     scale_color_manual(values = plot_cols) +
-#     labs(x = "Days", y = "Incident Infections", col = "Group")
+p <- filtered_results |>
+    ggplot(aes(t, I1 + I2,
+    col = factor(group),
+    group=interaction(replicate, group))) +
+    geom_line(alpha = 0.5) +
+    facet_grid(beta_sub1_sub2 ~ initial_coverage_scenario,
+        labeller = label_both
+    ) +
+    theme_minimal(base_size = 18) +
+    scale_color_manual(values = plot_cols) +
+    labs(x = "Days", y = "Incident Infections", col = "Group")
+ggsave(filename = paste0(
+        "output/incidence_curves_r0",
+        12, ".png"
+    ), plot = p, width = 10, height = 8)
 
 
 #### Overeall final size plot
-for (i in c(8, 12)) {
+for (i in c(12)) {
     p <- results |>
         filter(
             t == 365,
-            desired_r0 == i,
             initial_coverage_scenario %in% vax_levs,
-            beta_small %in% sub_conns
+            beta_sub1_sub2 %in% sub_conns
         ) |>
-        group_by(replicate, initial_coverage_scenario, beta_small) |>
+        group_by(replicate, initial_coverage_scenario, beta_sub1_sub2) |>
         summarise(final_size = sum(Y)) |> # total sum across groups
         ggplot(aes(final_size)) +
         # scale_x_log10() +
         geom_histogram(bins = 50) +
         theme_minimal(base_size = 18) +
         labs(x = "Final Outbreak Size", y = "Number of Simulations") +
-        facet_grid(beta_small ~ initial_coverage_scenario, labeller = label_both)
+        facet_grid(beta_sub1_sub2 ~ initial_coverage_scenario,
+            labeller = label_both)
 
     ggsave(filename = paste0(
         "output/overall_final_size_r0",
@@ -90,23 +83,22 @@ for (i in c(8, 12)) {
 
 
 #### Grouped outbreak size plots ####
-for (i in c(8, 12)) {
+for (i in c(12)) {
     p <- results |>
         filter(
-            t == 365, beta_small %in% sub_conns,
-            initial_coverage_scenario %in% vax_levs,
-            desired_r0 == i
+            t == 365, beta_sub1_sub2 %in% sub_conns,
+            initial_coverage_scenario %in% vax_levs
         ) |>
         ggplot(aes(Y + 1, fill = factor(group))) +
         geom_histogram(position = "identity", alpha = 0.5) +
         scale_x_log10() +
-        facet_grid(beta_small ~ initial_coverage_scenario,
+        facet_grid(beta_sub1_sub2 ~ initial_coverage_scenario,
             labeller = label_both
         ) +
         scale_fill_manual(values = plot_cols) +
         theme_minimal(base_size = 18) +
         labs(
-            title = "R0=8", x = "Final Group Outbreak Size",
+            title = "R0=12", x = "Final Group Outbreak Size",
             y = "Number of simulations", fill = "Group"
         )
     ggsave(filename = paste0(
@@ -119,17 +111,17 @@ for (i in c(8, 12)) {
 outbreak_sizes <- c(300, 1000)
 for (i in outbreak_sizes) {
     res_table <- results |>
-        filter(t == 365, Y >= 30, desired_r0 == 12) |>
+        filter(t == 365, Y >= 30) |>
         group_by(
             group, initial_coverage_scenario,
-            beta_small
+            beta_sub1_sub2
         ) |>
         count() |>
-        mutate(n = round(n / 1000, 2)) |>
+        mutate(n = round(n / reps, 2) * 100) |>
         pivot_wider(names_from = group, values_from = n) |>
         select(
             InitialCoverage = initial_coverage_scenario,
-            SubPopConnectivity = beta_small,
+            SubPopConnectivity = beta_sub1_sub2,
             Sub1 = `1`, Sub2 = `2`,
             General = `0`
         )

@@ -10,8 +10,9 @@ def make_beta_matrix(parms):
     Args:
         parms (dict): Dictionary containing beta parameters, including:
             - beta_within (float): Transmission rate within each group.
-            - beta_general (float): Transmission rate between the general population and sub-populations.
-            - beta_small (float): Transmission rate between sub-populations.
+            - beta_general_sub1 (float): Transmission rate between the general population and sub-population1.
+            - beta_general_sub2 (float): Transmission rate between the general population and sub-population2.
+            - beta_sub1_sub2 (float): Transmission rate between sub-populations.
             - n_groups (int): Number of groups (must be 3 in this specific construction).
 
     Returns:
@@ -21,12 +22,13 @@ def make_beta_matrix(parms):
     assert parms['n_groups'] == 3, "The number of groups (n_groups) must be 3 to use this function."
 
     b_within = parms["beta_within"]
-    b_general = parms["beta_general"]
-    b_sub = parms["beta_small"]
+    b_general_sub1 = parms["beta_general_sub1"]
+    b_general_sub2 = parms["beta_general_sub2"]
+    b_sub1_sub2 = parms["beta_sub1_sub2"]
 
-    b = np.array([[b_within, b_general, b_general],
-                     [b_general, b_within, b_sub],
-                     [b_general, b_sub, b_within]])
+    b = np.array([[b_within,       b_general_sub1, b_general_sub2],
+                  [b_general_sub1, b_within,       b_sub1_sub2],
+                  [b_general_sub2, b_sub1_sub2,    b_within]])
 
     return b
 
@@ -111,8 +113,9 @@ def construct_beta(parms):
     Args:
         parms (dict): Dictionary containing the parameters, including:
             - beta_within (float): Transmission rate within each group.
-            - beta_general (float): Transmission rate between the general population and sub-populations.
-            - beta_small (float): Transmission rate between sub-populations.
+            - beta_general_sub1 (float): Transmission rate between the general population and sub-population 1.
+            - beta_general_sub2 (float): Transmission rate between the general population and sub-population 2.
+            - beta_sub1_sub2 (float): Transmission rate between sub-populations.
             - gamma (float): The recovery rate.
             - pop_sizes (list or np.array): The population sizes of each group.
             - n_i_compartments (int): The number of infectious compartments.
