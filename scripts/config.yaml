@@ -2,7 +2,6 @@ baseline_parameters:
   n_groups: 3    # general, subpop1, subpop2
   beta_within: 1.0  # within group
   beta_general: 0.001 # general to sub
-  desired_r0: 12.0
   n_e_compartments: 2    # number of chained E compartments
   sigma: 0.19    # 2 * 1/latent_duration
   n_i_compartments: 2    # number of chained I compartments
@@ -19,8 +18,9 @@ baseline_parameters:
 
 grid_parameters:
   initial_coverage_scenario: ['low', 'medium', 'optimistic']
-  connectivity_scenario: [1.0, 10.0, 50.0] #
-  beta_small: [0.001, 0.01]   # sub1 to sub2
+  connectivity_scenario: [1.0] #
+  beta_small: [0.001, 0.01, 0.5]   # sub1 to sub2
+  desired_r0: [8.0, 12.0]
 
 nested_parameters:
   - initial_coverage_scenario: 'low'
