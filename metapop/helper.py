@@ -4,31 +4,43 @@ import numpy.linalg as la
 def make_beta_matrix(parms):
     """
     For a 3-group population where we assume general, subpop1, and subpop2:
-    Define matrix based on within group mixing (beta_within),
-    mixing between general and sub-pops (beta_general), and subpop1-subpop2 (beta_small) mixing.
+    Define matrix based on total contacts per group (k) and specific
+    interactions with general, and between subgroups 1 and 2
 
     Args:
         parms (dict): Dictionary containing beta parameters, including:
-            - beta_within (float): Transmission rate within each group.
-            - beta_general_sub1 (float): Transmission rate between the general population and sub-population1.
-            - beta_general_sub2 (float): Transmission rate between the general population and sub-population2.
-            - beta_sub1_sub2 (float): Transmission rate between sub-populations.
-            - n_groups (int): Number of groups (must be 3 in this specific construction).
+        k: Contacts total
+        k_g1: contacts general and sub pop 1
+        k_21: contacts between sub pop 1 and 2
+        k_g2: contacts general and sub pop 2
+        pop_sizes: array with population sizes of each group
 
     Returns:
-        np.array: The beta matrix representing transmission rates between groups.
+        np.array: The matrix representing contact rates between groups.
 
     """
     assert parms['n_groups'] == 3, "The number of groups (n_groups) must be 3 to use this function."
 
-    b_within = parms["beta_within"]
-    b_general_sub1 = parms["beta_general_sub1"]
-    b_general_sub2 = parms["beta_general_sub2"]
-    b_sub1_sub2 = parms["beta_sub1_sub2"]
+    k = parms["k"]
+    k_g1 = parms["k_g1"]
+    k_21 = parms["k_21"]
+    k_g2 = parms["k_g2"]
+    pop_sizes = np.array(parms["pop_sizes"])
 
-    b = np.array([[b_within,       b_general_sub1, b_general_sub2],
-                  [b_general_sub1, b_within,       b_sub1_sub2],
-                  [b_general_sub2, b_sub1_sub2,    b_within]])
+    edges_per_group = pop_sizes * k
+
+
+    contacts = np.array([[0,                   k_g1 * pop_sizes[1], k_g2 * pop_sizes[2]],
+                         [k_g1 * pop_sizes[1], 0,                   k_21 * pop_sizes[2]],
+                         [k_g2 * pop_sizes[2], k_21 * pop_sizes[1],         0]])
+
+    colsums = np.sum(contacts, axis=0)
+
+    edges_to_assign = edges_per_group - colsums
+
+    np.fill_diagonal(contacts, edges_to_assign)
+
+    b = contacts / pop_sizes
 
     return b
 
@@ -112,10 +124,7 @@ def construct_beta(parms):
 
     Args:
         parms (dict): Dictionary containing the parameters, including:
-            - beta_within (float): Transmission rate within each group.
-            - beta_general_sub1 (float): Transmission rate between the general population and sub-population 1.
-            - beta_general_sub2 (float): Transmission rate between the general population and sub-population 2.
-            - beta_sub1_sub2 (float): Transmission rate between sub-populations.
+            - k, kg1, kg2, k12
             - gamma (float): The recovery rate.
             - pop_sizes (list or np.array): The population sizes of each group.
             - n_i_compartments (int): The number of infectious compartments.
@@ -190,7 +199,7 @@ def calculate_foi(beta, I_g, pop_sizes, target_group):
     Calculate the force of infection (FOI) for a target group.
 
     Args:
-        beta (np.array): The transmission rate matrix.
+        beta (np.array): The contact matrix.
         I_g (np.array): The number of infected individuals in each group.
         pop_sizes (np.array): The population sizes of each group.
         target_group (int): The target group index.
@@ -198,7 +207,12 @@ def calculate_foi(beta, I_g, pop_sizes, target_group):
     Returns:
         float: The force of infection for the target group.
     """
-    return np.dot(beta[target_group], I_g / np.array(pop_sizes))
+
+    foi = 0
+    for j in range(len(pop_sizes)):
+        foi += I_g[j] * beta[target_group, j] / pop_sizes[target_group]
+
+    return foi
 
 def rate_to_frac(rate):
     """

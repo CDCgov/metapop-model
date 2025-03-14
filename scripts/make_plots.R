@@ -1,20 +1,19 @@
 library(tidyverse)
 library(ggplot2)
-library(ggridges)
 
-results <- read_csv("output/results.csv")
+results <- read_csv("output/results_test.csv")
 reps <- max(results$replicate)
 
-plot_cols <- c("#156082", "#78206e", "#3b7d23")
+plot_cols <- c("#20419a", "#cf4828", "#f78f47")
 
 #### Cumulative and incidence plots ####
 vax_levs <- c("low", "medium", "optimistic")
-sub_conns <- c(0.0001, 0.001)
+sub_conns <- c(0.01, 0.1)
 filtered_results <- results |>
     filter(
         replicate %in% 1:20,
         initial_coverage_scenario %in% vax_levs,
-        beta_sub1_sub2 %in% sub_conns
+        k_21 %in% sub_conns
     )
 
 p <- filtered_results |>
@@ -26,7 +25,7 @@ p <- filtered_results |>
         ),
         alpha = 0.5
     ) +
-    facet_grid(beta_sub1_sub2 ~ initial_coverage_scenario,
+    facet_grid(k_21 ~ initial_coverage_scenario,
         labeller = label_both
     ) +
     theme_minimal(base_size = 18) +
@@ -45,7 +44,7 @@ p <- filtered_results |>
     col = factor(group),
     group=interaction(replicate, group))) +
     geom_line(alpha = 0.5) +
-    facet_grid(beta_sub1_sub2 ~ initial_coverage_scenario,
+    facet_grid(k_21 ~ initial_coverage_scenario,
         labeller = label_both
     ) +
     theme_minimal(base_size = 18) +
@@ -63,16 +62,16 @@ for (i in c(12)) {
         filter(
             t == 365,
             initial_coverage_scenario %in% vax_levs,
-            beta_sub1_sub2 %in% sub_conns
+            k_21 %in% sub_conns
         ) |>
-        group_by(replicate, initial_coverage_scenario, beta_sub1_sub2) |>
+        group_by(replicate, initial_coverage_scenario, k_21) |>
         summarise(final_size = sum(Y)) |> # total sum across groups
         ggplot(aes(final_size)) +
         # scale_x_log10() +
         geom_histogram(bins = 50) +
         theme_minimal(base_size = 18) +
         labs(x = "Final Outbreak Size", y = "Number of Simulations") +
-        facet_grid(beta_sub1_sub2 ~ initial_coverage_scenario,
+        facet_grid(k_21 ~ initial_coverage_scenario,
             labeller = label_both)
 
     ggsave(filename = paste0(
@@ -86,13 +85,13 @@ for (i in c(12)) {
 for (i in c(12)) {
     p <- results |>
         filter(
-            t == 365, beta_sub1_sub2 %in% sub_conns,
+            t == 365, k_21 %in% sub_conns,
             initial_coverage_scenario %in% vax_levs
         ) |>
         ggplot(aes(Y + 1, fill = factor(group))) +
         geom_histogram(position = "identity", alpha = 0.5) +
         scale_x_log10() +
-        facet_grid(beta_sub1_sub2 ~ initial_coverage_scenario,
+        facet_grid(k_21 ~ initial_coverage_scenario,
             labeller = label_both
         ) +
         scale_fill_manual(values = plot_cols) +
@@ -108,20 +107,21 @@ for (i in c(12)) {
 }
 
 #### Summary table
-outbreak_sizes <- c(300, 1000)
+outbreak_sizes <- c(300, 500)
 for (i in outbreak_sizes) {
     res_table <- results |>
-        filter(t == 365, Y >= 30) |>
+        filter(t == 365, Y >= i) |>
         group_by(
-            group, initial_coverage_scenario,
-            beta_sub1_sub2
+            group,
+            initial_coverage_scenario,
+            k_21
         ) |>
         count() |>
         mutate(n = round(n / reps, 2) * 100) |>
         pivot_wider(names_from = group, values_from = n) |>
         select(
             InitialCoverage = initial_coverage_scenario,
-            SubPopConnectivity = beta_sub1_sub2,
+            SubPopConnectivity = k_21,
             Sub1 = `1`, Sub2 = `2`,
             General = `0`
         )
