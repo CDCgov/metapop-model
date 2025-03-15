@@ -1,6 +1,45 @@
 import numpy as np
 import numpy.linalg as la
 
+def get_percapita_contact_matrix(parms):
+    """
+    Calculate the per capita contact matrix based on the total contacts, average per capita degrees per population, and the population sizes for a 3-group population.
+
+    Args:
+        parms (dict): Dictionary containing the parameters, including:
+        k (int): Contacts total
+        k_g1 (int): contacts general and sub pop 1
+        k_21 (int): contacts between sub pop 1 and 2
+        k_g2 (int): contacts general and sub pop 2
+        pop_sizes (array): population sizes of each group
+
+    Returns:
+        np.array: The per capita contact matrix.
+    """
+    assert parms['n_groups'] == 3, "The number of groups (n_groups) must be 3 to use this function."
+
+    assert parms["pop_sizes"][0] == np.max(parms["pop_sizes"]), "The first population must be the largest to represent the population."
+
+    k_i = parms["k_i"]
+    k_g1 = parms["k_g1"]
+    k_21 = parms["k_21"]
+    k_g2 = parms["k_g2"]
+    pop_sizes = np.array(parms["pop_sizes"])
+
+    edges_per_group = pop_sizes * k_i
+
+    contacts = np.array([[0,                  k_g1 * pop_sizes[1], k_g2 * pop_sizes[2]],
+                         [k_g1 * pop_sizes[1],       0,            k_21 * pop_sizes[1]],
+                         [k_g2 * pop_sizes[2],k_21 * pop_sizes[1],                  0]])
+    colsums = np.sum(contacts, axis=0)
+
+    edges_to_assign = edges_per_group - colsums
+    np.fill_diagonal(contacts, edges_to_assign)
+
+    percapita_contacts = contacts / pop_sizes
+    return percapita_contacts
+
+
 def make_beta_matrix(parms):
     """
     For a 3-group population where we assume general, subpop1, and subpop2:
@@ -31,7 +70,7 @@ def make_beta_matrix(parms):
 
 
     contacts = np.array([[0,                   k_g1 * pop_sizes[1], k_g2 * pop_sizes[2]],
-                         [k_g1 * pop_sizes[1], 0,                   k_21 * pop_sizes[2]],
+                         [k_g1 * pop_sizes[1], 0,                   k_21 * pop_sizes[1]],
                          [k_g2 * pop_sizes[2], k_21 * pop_sizes[1],         0]])
 
     colsums = np.sum(contacts, axis=0)

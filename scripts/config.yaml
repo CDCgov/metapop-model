@@ -2,15 +2,16 @@ baseline_parameters:
   n_groups: 3    # general, subpop1, subpop2
   desired_r0: 12.0
   k: 10
-  k_g1: 0.1
-  k_g2: 0.01
+  k_i: [10, 10, 10]
+  k_g1: 1
+  k_g2: 1
   connectivity_scenario: 1.0 # how much to multiply the raw inputs of beta_sub1_sub2
   n_e_compartments: 2    # number of chained E compartments
   sigma: 0.19    # 2 * 1/latent_duration
   n_i_compartments: 2    # number of chained I compartments
   gamma: 0.25   # 2 * 1/infectious_duration
   iota: 0.0      # spontaneous infection rate
-  pop_sizes: [40000, 5000, 5000]    # population sizes
+  pop_sizes: [1000, 100, 500]    # population sizes
   I0: [0, 5, 0]     # initially infected
   vaccine_uptake: FALSE
   vaccine_uptake_days: [0]
@@ -21,8 +22,7 @@ baseline_parameters:
 
 grid_parameters:
   initial_coverage_scenario: ['low', 'medium', 'optimistic']
-  k_21: [0.01, 0.1]
-
+  k_21: [6]
 nested_parameters:
   - initial_coverage_scenario: 'low'
     initial_vaccine_coverage: [0.95, 0.80, 0.80]

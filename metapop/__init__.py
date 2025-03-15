@@ -4,6 +4,11 @@ from metapop.helper import* # noqa: F405
 class SEIRModel:
     def __init__(self, parms):
         self.parms = parms
+
+        # convert some lists to arrays
+        self.parms['k_i'] = np.array(parms['k_i'])
+
+        # define internal model variables
         self.groups = parms["n_groups"]
         self.E_indices = np.arange(2, # S V are first and E starts at 2
                                    2 + parms["n_e_compartments"])
