@@ -37,6 +37,10 @@ def get_percapita_contact_matrix(parms):
     np.fill_diagonal(contacts, edges_to_assign)
 
     percapita_contacts = contacts / pop_sizes
+
+    # this should go into a python test
+    assert np.allclose(np.sum(percapita_contacts, axis=0), k_i), f"The columns of the per capita contact matrix must sum to the per capita degrees k_i. The percapita contact matrix is \n{percapita_contacts} and the sum of the columns is {np.sum(percapita_contacts, axis=0)}."
+
     return percapita_contacts
 
 
@@ -172,8 +176,7 @@ def construct_beta(parms):
     Returns:
         np.array: The scaled beta matrix.
     """
-
-    beta_unscaled = make_beta_matrix(parms)
+    beta_unscaled = get_percapita_contact_matrix(parms)
     beta_modified_connectivity = modify_beta_connectivity(beta_unscaled, parms["connectivity_scenario"])
     r0_base = get_r0(beta_modified_connectivity, parms["gamma"], parms["pop_sizes"], parms["n_i_compartments"])
     beta_factor = calculate_beta_factor(parms["desired_r0"], r0_base)
