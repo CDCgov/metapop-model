@@ -4,17 +4,43 @@ import yaml
 import numpy as np
 from numpy.testing import assert_allclose
 
+
+def test_get_percapita_contact_matrix():
+    # Define the parameters
+    parms = {
+        "k_i": np.array([10, 10, 10]),
+        "k_g1": 1,
+        "k_g2": 2,
+        "k_21": 2,
+        "n_groups": 3,
+        "pop_sizes": [1000, 100, 100]
+    }
+
+    # Call the get_percapita_contact_matrix function
+    percapita_contacts = get_percapita_contact_matrix(parms)
+
+    # Check the result
+    expected_percapita_contacts = np.array([
+        [9.7, 1., 2.],
+        [0.1, 7., 2.],
+        [0.2, 2., 6.]
+    ])
+    assert np.array_equal(percapita_contacts, expected_percapita_contacts), f"Expected {expected_percapita_contacts}, but got {percapita_contacts}"
+
+
 def test_make_beta_matrix():
     parms = {
-        "beta_within": 0.1,
-        "beta_general": 0.05,
-        "beta_small": 0.02,
-        "n_groups": 3
+        "k": 10,
+        "k_g1": 1,
+        "k_g2": 2,
+        "k_21": 2,
+        "n_groups": 3,
+        "pop_sizes": np.array([1000, 100, 100]),
     }
     expected_beta = np.array([
-        [0.1, 0.05, 0.05],
-        [0.05, 0.1, 0.02],
-        [0.05, 0.02, 0.1]
+        [9.7, 1., 2.],
+        [0.1, 7., 2.],
+        [0.2, 2., 6.]
     ])
     beta_matrix = make_beta_matrix(parms)
     assert beta_matrix.shape == (3, 3), f"Expected shape (3, 3), but got {beta_matrix.shape}"
@@ -39,14 +65,18 @@ def test_construct_beta():
         "beta_within": 0.1,
         "beta_general": 0.05,
         "beta_small": 0.02,
+        "k_i": [10, 10, 10],
+        "k_g1": 1,
+        "k_g2": 2,
+        "k_21": 2,
         "gamma": 0.1,
-        "pop_sizes": np.array([100, 200, 300]),
+        "pop_sizes": np.array([1000, 100, 100]),
         "n_i_compartments": 2,
         "desired_r0": 2.0,
         "n_groups": 3,
         "connectivity_scenario": 1.0
     }
-    beta_unscaled = make_beta_matrix(parms)
+    beta_unscaled = get_percapita_contact_matrix(parms)
     r0_base = get_r0(beta_unscaled, parms["gamma"], parms["pop_sizes"], parms["n_i_compartments"])
     beta_factor = calculate_beta_factor(parms["desired_r0"], r0_base)
     beta_scaled = rescale_beta_matrix(beta_unscaled, beta_factor)

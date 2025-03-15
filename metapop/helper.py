@@ -5,6 +5,8 @@ def get_percapita_contact_matrix(parms):
     """
     Calculate the per capita contact matrix based on the total contacts, average per capita degrees per population, and the population sizes for a 3-group population.
 
+    In this model we assume the 3-group population is a general population, subpop1, and subpop2, where subpop1 and subpop2 are smaller than the general population. The matrix is defined by the total per capita degree per group (k_i), the out degree from subpop1 to the general population, the out degree from subpop2 to the general population, and the out degree from subpop1 to subpop2.
+
     Args:
         parms (dict): Dictionary containing the parameters, including:
         k (int): Contacts total
