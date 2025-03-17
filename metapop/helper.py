@@ -43,6 +43,8 @@ def get_percapita_contact_matrix(parms):
     # this should go into a python test
     assert np.allclose(np.sum(percapita_contacts, axis=0), k_i), f"The columns of the per capita contact matrix must sum to the per capita degrees k_i. The percapita contact matrix is \n{percapita_contacts} and the sum of the columns is {np.sum(percapita_contacts, axis=0)}."
 
+    assert np.all(percapita_contacts >= 0), "The per capita contact matrix must have non-negative values."
+
     return percapita_contacts
 
 
