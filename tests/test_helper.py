@@ -194,6 +194,9 @@ def test_run_model_once_with_config():
     parms["vaccine_uptake"] = False # setting here in case default config changes
     parms["connectivity_scenario"] = 1.0
 
+    # pulling k_21 from grid parameters
+    parms['k_21'] = config['grid_parameters']['k_21'][0]
+
     parms["beta"] = construct_beta(parms)
 
     # Define the time array and steps
