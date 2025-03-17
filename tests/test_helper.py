@@ -40,25 +40,6 @@ def test_get_percapita_contact_matrix():
     assert np.array_equal(percapita_contacts, expected_percapita_contacts), f"Expected {expected_percapita_contacts}, but got {percapita_contacts} when using different degree for each subgroup"
 
 
-def test_make_beta_matrix():
-    parms = {
-        "k": 10,
-        "k_g1": 1,
-        "k_g2": 2,
-        "k_21": 2,
-        "n_groups": 3,
-        "pop_sizes": np.array([1000, 100, 100]),
-    }
-    expected_beta = np.array([
-        [9.7, 1., 2.],
-        [0.1, 7., 2.],
-        [0.2, 2., 6.]
-    ])
-    beta_matrix = make_beta_matrix(parms)
-    assert beta_matrix.shape == (3, 3), f"Expected shape (3, 3), but got {beta_matrix.shape}"
-
-    assert np.array_equal(beta_matrix, expected_beta), f"Expected {expected_beta}, but got {beta_matrix}"
-
 def test_get_r0():
     beta_matrix = np.array([
         [0.1, 0.2, 0.3],

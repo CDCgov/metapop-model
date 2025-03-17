@@ -48,49 +48,6 @@ def get_percapita_contact_matrix(parms):
     return percapita_contacts
 
 
-def make_beta_matrix(parms):
-    """
-    For a 3-group population where we assume general, subpop1, and subpop2:
-    Define matrix based on total contacts per group (k) and specific
-    interactions with general, and between subgroups 1 and 2
-
-    Args:
-        parms (dict): Dictionary containing beta parameters, including:
-        k: Contacts total
-        k_g1: contacts general and sub pop 1
-        k_21: contacts between sub pop 1 and 2
-        k_g2: contacts general and sub pop 2
-        pop_sizes: array with population sizes of each group
-
-    Returns:
-        np.array: The matrix representing contact rates between groups.
-
-    """
-    assert parms['n_groups'] == 3, "The number of groups (n_groups) must be 3 to use this function."
-
-    k = parms["k"]
-    k_g1 = parms["k_g1"]
-    k_21 = parms["k_21"]
-    k_g2 = parms["k_g2"]
-    pop_sizes = np.array(parms["pop_sizes"])
-
-    edges_per_group = pop_sizes * k
-
-
-    contacts = np.array([[0,                   k_g1 * pop_sizes[1], k_g2 * pop_sizes[2]],
-                         [k_g1 * pop_sizes[1], 0,                   k_21 * pop_sizes[1]],
-                         [k_g2 * pop_sizes[2], k_21 * pop_sizes[1],         0]])
-
-    colsums = np.sum(contacts, axis=0)
-
-    edges_to_assign = edges_per_group - colsums
-
-    np.fill_diagonal(contacts, edges_to_assign)
-
-    b = contacts / pop_sizes
-
-    return b
-
 def get_r0(beta_matrix, gamma_unscaled, pop_sizes, n_i_compartments):
     """
     Calculate the basic reproduction number (R0) matrix and return its spectral radius.
