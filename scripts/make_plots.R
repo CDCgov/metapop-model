@@ -1,21 +1,23 @@
 library(tidyverse)
 library(ggplot2)
+library(lubridate)
 
 results <- read_csv("output/results.csv")
 reps <- max(results$replicate)
-
+plot_reps <- 20
 plot_cols <- c("#20419a", "#cf4828", "#f78f47")
 
-#### Cumulative and incidence plots ####
+# Get 20 simulations for plots
 vax_levs <- c("low", "medium", "optimistic")
 sub_conns <- c(0.01, 0.1)
 filtered_results <- results |>
     filter(
-        replicate %in% 1:20,
+        replicate %in% 1:plot_reps,
         initial_coverage_scenario %in% vax_levs,
         k_21 %in% sub_conns
     )
 
+#### Cumulative and incidence plots ####
 p <- filtered_results |>
     ggplot() +
     geom_line(
@@ -34,26 +36,41 @@ p <- filtered_results |>
     labs(x = "Days", y = "Cumulative Infections", col = "Group")
 
 ggsave(filename = paste0(
-        "output/cumulative_curves_r0",
-        12, ".png"
-    ), plot = p, width = 10, height = 8)
+    "output/cumulative_curves_r0",
+    12, ".png"
+), plot = p, width = 10, height = 8)
 
 #### Incidence plot ####
-p <- filtered_results |>
-    ggplot(aes(t, I1 + I2,
-    col = factor(group),
-    group=interaction(replicate, group))) +
-    geom_line(alpha = 0.5) +
+incidence_results <- filtered_results |>
+    arrange(t) |>
+    group_by(replicate, group, initial_coverage_scenario, k_21) |>
+    mutate(Y_diff = Y - lag(Y, default = 0)) |>
+    select(
+        t, replicate, group, initial_coverage_scenario,
+        k_21, Y, Y_diff
+    ) |>
+    mutate(week = t %/% 7) |>
+    group_by(week, replicate, group, initial_coverage_scenario, k_21) |>
+    summarise(weekly_Y_diff = sum(Y_diff, na.rm = TRUE))
+
+
+p <- incidence_results |>
+    ggplot(aes(week, weekly_Y_diff,
+        col = factor(group),
+        group = interaction(replicate, group)
+    )) +
+    geom_line(alpha = 0.25) +
     facet_grid(k_21 ~ initial_coverage_scenario,
         labeller = label_both
     ) +
     theme_minimal(base_size = 18) +
     scale_color_manual(values = plot_cols) +
-    labs(x = "Days", y = "Incident Infections", col = "Group")
+    labs(x = "Week", y = "Weekly Incident Infections", col = "Group")
+
 ggsave(filename = paste0(
-        "output/incidence_curves_r0",
-        12, ".png"
-    ), plot = p, width = 10, height = 8)
+    "output/incidence_curves_r0",
+    12, ".png"
+), plot = p, width = 10, height = 8)
 
 
 #### Overeall final size plot
@@ -72,7 +89,8 @@ for (i in c(12)) {
         theme_minimal(base_size = 18) +
         labs(x = "Final Outbreak Size", y = "Number of Simulations") +
         facet_grid(k_21 ~ initial_coverage_scenario,
-            labeller = label_both)
+            labeller = label_both
+        )
 
     ggsave(filename = paste0(
         "output/overall_final_size_r0",
@@ -107,18 +125,21 @@ for (i in c(12)) {
 }
 
 #### Percent of susceptible infected cumulative
-# stuff should come from config
-coverage_scenarios <- data.frame(initial_coverage_scenario = c("low", "medium", "optimistic"), # nolint
-                                 coverage_0 =  c(0.95, 0.95, 0.95),
-                                 coverage_1 = c(0.80, 0.80, 0.80),
-                                 coverage_2 = c(0.80, 0.90, 0.95))
+coverage_scenarios <- data.frame(
+    initial_coverage_scenario = c("low", "medium", "optimistic"), # nolint
+    coverage_0 = c(0.95, 0.95, 0.95),
+    coverage_1 = c(0.80, 0.80, 0.80),
+    coverage_2 = c(0.80, 0.90, 0.95)
+)
 pop_sizes <- c(40000, 5000, 5000)
 
 filtered_categories <- filtered_results |>
     left_join(coverage_scenarios, by = "initial_coverage_scenario") |>
-    mutate(sus_population = case_when(group == 0 ~ (1 - coverage_0) * pop_sizes[1], # nolint
-                                      group == 1 ~ (1 - coverage_1) * pop_sizes[2], # nolint
-                                      group == 2 ~ (1 - coverage_2) * pop_sizes[3])) |> # nolint
+    mutate(sus_population = case_when(
+        group == 0 ~ (1 - coverage_0) * pop_sizes[1], # nolint
+        group == 1 ~ (1 - coverage_1) * pop_sizes[2], # nolint
+        group == 2 ~ (1 - coverage_2) * pop_sizes[3]
+    )) |> # nolint
     mutate(Y_prop_sus = Y / sus_population)
 
 
@@ -140,9 +161,9 @@ p <- filtered_categories |>
     labs(x = "Days", y = "Cumulative Infections", col = "Group")
 
 ggsave(filename = paste0(
-        "output/cumulative_sus_infected.png",
-        12, ".png"
-    ), plot = p, width = 10, height = 8)
+    "output/cumulative_sus_infected.png",
+    12, ".png"
+), plot = p, width = 10, height = 8)
 
 
 #### Summary table
@@ -165,6 +186,8 @@ for (i in outbreak_sizes) {
             General = `0`
         )
 
-    write_csv(res_table,
-              paste0("output/res_table_outbreak_size", i, ".csv"))
+    write_csv(
+        res_table,
+        paste0("output/res_table_outbreak_size", i, ".csv")
+    )
 }
