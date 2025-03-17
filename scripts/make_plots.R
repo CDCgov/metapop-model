@@ -1,10 +1,9 @@
 library(tidyverse)
 library(ggplot2)
-library(lubridate)
 
 results <- read_csv("output/results.csv")
 reps <- max(results$replicate)
-plot_reps <- 20
+plot_reps <- 20 # sims to plot in incidence curves
 plot_cols <- c("#20419a", "#cf4828", "#f78f47")
 
 # Get 20 simulations for plots
