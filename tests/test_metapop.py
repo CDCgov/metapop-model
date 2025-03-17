@@ -6,6 +6,7 @@ def test_only_expose_susceptible():
     # Define the parameters
     parms = {
         "beta": np.array([[2, 2], [2, 2]]),
+        "k_i": [10, 10, 10],
         "sigma": 0.75,
         "n_e_compartments": 2,
         "n_i_compartments": 2,

@@ -4,27 +4,79 @@ import yaml
 import numpy as np
 from numpy.testing import assert_allclose
 
-def test_set_beta_parameter():
-    # Set a seed for reproducibility
-    np.random.seed(42)
 
+def test_get_percapita_contact_matrix():
     # Define the parameters
     parms = {
-        "beta_2_low": 0.1,
-        "beta_2_high": 0.5,
-        "beta": [[0, 0], [0, 0]]
+        "k_i": np.array([10, 10, 10]),
+        "k_g1": 1,
+        "k_g2": 2,
+        "k_21": 2,
+        "n_groups": 3,
+        "pop_sizes": [1000, 100, 100]
     }
 
-    beta_original_shape = np.shape(parms["beta"])
+    # Call the get_percapita_contact_matrix function
+    percapita_contacts = get_percapita_contact_matrix(parms)
 
-    # Call the function
-    parms = set_beta_parameter(parms)
+    # Check the result
+    expected_percapita_contacts = np.array([
+        [9.7, 1., 2.],
+        [0.1, 7., 2.],
+        [0.2, 2., 6.]
+    ])
+    assert np.array_equal(percapita_contacts, expected_percapita_contacts), f"Expected {expected_percapita_contacts}, but got {percapita_contacts} when using equal degree for all subgroups"
 
-    # Check to make sure same as old dimensions
-    assert beta_original_shape == np.shape(parms["beta"])
+    # A scenario where the degree is different for each subgroup
+    parms["k_i"] = np.array([10, 20, 15])
 
-    # Check if the beta_2_value is within the expected range
-    assert 0.1 <= parms["beta"][1][1] <= 0.5
+    percapita_contacts = get_percapita_contact_matrix(parms)
+
+    expected_percapita_contacts = np.array([
+        [9.7, 1., 2.],
+        [0.1, 17., 2.],
+        [0.2, 2., 11.]
+    ])
+    assert np.array_equal(percapita_contacts, expected_percapita_contacts), f"Expected {expected_percapita_contacts}, but got {percapita_contacts} when using different degree for each subgroup"
+
+
+def test_get_r0():
+    beta_matrix = np.array([
+        [0.1, 0.2, 0.3],
+        [0.2, 0.1, 0.4],
+        [0.3, 0.4, 0.1]
+    ])
+    gamma_unscaled = 0.1
+    pop_sizes = np.array([1000, 200, 200])
+    n_i_compartments = 2
+    expected_r0 = 3.709795
+    r0 = get_r0(beta_matrix, gamma_unscaled, pop_sizes, n_i_compartments)
+    assert np.isclose(r0, expected_r0), f"Expected {expected_r0}, but got {r0}"
+
+def test_construct_beta():
+    parms = {
+        "beta_within": 0.1,
+        "beta_general": 0.05,
+        "beta_small": 0.02,
+        "k_i": [10, 10, 10],
+        "k_g1": 1,
+        "k_g2": 2,
+        "k_21": 2,
+        "gamma": 0.1,
+        "pop_sizes": np.array([1000, 100, 100]),
+        "n_i_compartments": 2,
+        "desired_r0": 2.0,
+        "n_groups": 3,
+        "connectivity_scenario": 1.0
+    }
+    beta_unscaled = get_percapita_contact_matrix(parms)
+    r0_base = get_r0(beta_unscaled, parms["gamma"], parms["pop_sizes"], parms["n_i_compartments"])
+    beta_factor = calculate_beta_factor(parms["desired_r0"], r0_base)
+    beta_scaled = rescale_beta_matrix(beta_unscaled, beta_factor)
+    expected_beta = modify_beta_connectivity(beta_scaled, parms["connectivity_scenario"])
+    beta_scaled = construct_beta(parms)
+    assert beta_scaled.shape == (3, 3), f"Expected shape (3, 3), but got {beta_scaled.shape}"
+    assert np.allclose(beta_scaled, expected_beta), f"Expected {expected_beta}, but got {beta_scaled}"
 
 def test_pop_initialization():
     parms = {
@@ -82,8 +134,6 @@ def test_calculate_foi():
     expected_foi = np.dot(beta[target_group], I_g / pop_sizes)
     assert np.isclose(foi, expected_foi), f"Expected {expected_foi}, but got {foi}"
 
-
-
 def test_get_infected():
     # Define the initial state
     u = [
@@ -115,15 +165,20 @@ def test_rate_to_frac():
     expected_frac = 0
     assert np.isclose(frac, expected_frac), f"Expected {expected_frac}, but got {frac}"
 
-
-def test_run_model():
+def test_run_model_once_with_config():
     # Define the parameters
     with open("scripts/config.yaml", "r") as file:
         config = yaml.safe_load(file)
 
     parms = config["baseline_parameters"]
-    parms["initial_vaccine_coverage"] = [0.9, 0.5] # add here, griddler handles in nested params
+    parms["initial_vaccine_coverage"] = [0.9, 0.5, 0.5] # add here, griddler has it as nested params
     parms["vaccine_uptake"] = False # setting here in case default config changes
+    parms["connectivity_scenario"] = 1.0
+
+    # pulling k_21 from grid parameters
+    parms['k_21'] = config['grid_parameters']['k_21'][0]
+
+    parms["beta"] = construct_beta(parms)
 
     # Define the time array and steps
     groups = parms["n_groups"]
