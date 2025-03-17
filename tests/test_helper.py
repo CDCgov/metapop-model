@@ -25,7 +25,19 @@ def test_get_percapita_contact_matrix():
         [0.1, 7., 2.],
         [0.2, 2., 6.]
     ])
-    assert np.array_equal(percapita_contacts, expected_percapita_contacts), f"Expected {expected_percapita_contacts}, but got {percapita_contacts}"
+    assert np.array_equal(percapita_contacts, expected_percapita_contacts), f"Expected {expected_percapita_contacts}, but got {percapita_contacts} when using equal degree for all subgroups"
+
+    # A scenario where the degree is different for each subgroup
+    parms["k_i"] = np.array([10, 20, 15])
+
+    percapita_contacts = get_percapita_contact_matrix(parms)
+
+    expected_percapita_contacts = np.array([
+        [9.7, 1., 2.],
+        [0.1, 17., 2.],
+        [0.2, 2., 11.]
+    ])
+    assert np.array_equal(percapita_contacts, expected_percapita_contacts), f"Expected {expected_percapita_contacts}, but got {percapita_contacts} when using different degree for each subgroup"
 
 
 def test_make_beta_matrix():
