@@ -1,7 +1,7 @@
 library(tidyverse)
 library(ggplot2)
 
-results <- read_csv("output/results_test.csv")
+results <- read_csv("output/results.csv")
 reps <- max(results$replicate)
 
 plot_cols <- c("#20419a", "#cf4828", "#f78f47")
@@ -106,8 +106,47 @@ for (i in c(12)) {
     ), plot = p, width = 10, height = 8)
 }
 
+#### Percent of susceptible infected cumulative
+# stuff should come from config
+coverage_scenarios <- data.frame(initial_coverage_scenario = c("low", "medium", "optimistic"), # nolint
+                                 coverage_0 =  c(0.95, 0.95, 0.95),
+                                 coverage_1 = c(0.80, 0.80, 0.80),
+                                 coverage_2 = c(0.80, 0.90, 0.95))
+pop_sizes <- c(40000, 5000, 5000)
+
+filtered_categories <- filtered_results |>
+    left_join(coverage_scenarios, by = "initial_coverage_scenario") |>
+    mutate(sus_population = case_when(group == 0 ~ (1 - coverage_0) * pop_sizes[1], # nolint
+                                      group == 1 ~ (1 - coverage_1) * pop_sizes[2], # nolint
+                                      group == 2 ~ (1 - coverage_2) * pop_sizes[3])) |> # nolint
+    mutate(Y_prop_sus = Y / sus_population)
+
+
+p <- filtered_categories |>
+    ggplot() +
+    geom_line(
+        aes(t, Y_prop_sus,
+            col = factor(group),
+            group = interaction(replicate, group)
+        ),
+        alpha = 0.5
+    ) +
+    facet_grid(k_21 ~ initial_coverage_scenario,
+        labeller = label_both
+    ) +
+    theme_minimal(base_size = 18) +
+    scale_color_manual(values = plot_cols) +
+    # facet_wrap(~replicate) +
+    labs(x = "Days", y = "Cumulative Infections", col = "Group")
+
+ggsave(filename = paste0(
+        "output/cumulative_sus_infected.png",
+        12, ".png"
+    ), plot = p, width = 10, height = 8)
+
+
 #### Summary table
-outbreak_sizes <- c(300, 500)
+outbreak_sizes <- c(50, 100)
 for (i in outbreak_sizes) {
     res_table <- results |>
         filter(t == 365, Y >= i) |>
