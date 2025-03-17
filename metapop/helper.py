@@ -1,48 +1,52 @@
 import numpy as np
 import numpy.linalg as la
 
-def make_beta_matrix(parms):
+def get_percapita_contact_matrix(parms):
     """
-    For a 3-group population where we assume general, subpop1, and subpop2:
-    Define matrix based on total contacts per group (k) and specific
-    interactions with general, and between subgroups 1 and 2
+    Calculate the per capita contact matrix based on the total contacts, average per capita degrees per population, and the population sizes for a 3-group population.
+
+    In this model we assume the 3-group population is a general population, subpop1, and subpop2, where subpop1 and subpop2 are smaller than the general population. The matrix is defined by the total per capita degree per group (k_i), the out degree from subpop1 to the general population, the out degree from subpop2 to the general population, and the out degree from subpop1 to subpop2.
 
     Args:
-        parms (dict): Dictionary containing beta parameters, including:
-        k: Contacts total
-        k_g1: contacts general and sub pop 1
-        k_21: contacts between sub pop 1 and 2
-        k_g2: contacts general and sub pop 2
-        pop_sizes: array with population sizes of each group
+        parms (dict): Dictionary containing the parameters, including:
+        k (int): Contacts total
+        k_g1 (int): contacts general and sub pop 1
+        k_21 (int): contacts between sub pop 1 and 2
+        k_g2 (int): contacts general and sub pop 2
+        pop_sizes (array): population sizes of each group
 
     Returns:
-        np.array: The matrix representing contact rates between groups.
-
+        np.array: The per capita contact matrix.
     """
     assert parms['n_groups'] == 3, "The number of groups (n_groups) must be 3 to use this function."
 
-    k = parms["k"]
+    assert parms["pop_sizes"][0] == np.max(parms["pop_sizes"]), "The first population must be the largest to represent the population."
+
+    k_i = parms["k_i"]
     k_g1 = parms["k_g1"]
     k_21 = parms["k_21"]
     k_g2 = parms["k_g2"]
     pop_sizes = np.array(parms["pop_sizes"])
 
-    edges_per_group = pop_sizes * k
+    edges_per_group = pop_sizes * k_i
 
-
-    contacts = np.array([[0,                   k_g1 * pop_sizes[1], k_g2 * pop_sizes[2]],
-                         [k_g1 * pop_sizes[1], 0,                   k_21 * pop_sizes[2]],
-                         [k_g2 * pop_sizes[2], k_21 * pop_sizes[1],         0]])
-
+    contacts = np.array([[0,                  k_g1 * pop_sizes[1], k_g2 * pop_sizes[2]],
+                         [k_g1 * pop_sizes[1],       0,            k_21 * pop_sizes[1]],
+                         [k_g2 * pop_sizes[2],k_21 * pop_sizes[1],                  0]])
     colsums = np.sum(contacts, axis=0)
 
     edges_to_assign = edges_per_group - colsums
-
     np.fill_diagonal(contacts, edges_to_assign)
 
-    b = contacts / pop_sizes
+    percapita_contacts = contacts / pop_sizes
 
-    return b
+    # this should go into a python test
+    assert np.allclose(np.sum(percapita_contacts, axis=0), k_i), f"The columns of the per capita contact matrix must sum to the per capita degrees k_i. The percapita contact matrix is \n{percapita_contacts} and the sum of the columns is {np.sum(percapita_contacts, axis=0)}."
+
+    assert np.all(percapita_contacts >= 0), "The per capita contact matrix must have non-negative values."
+
+    return percapita_contacts
+
 
 def get_r0(beta_matrix, gamma_unscaled, pop_sizes, n_i_compartments):
     """
@@ -133,8 +137,7 @@ def construct_beta(parms):
     Returns:
         np.array: The scaled beta matrix.
     """
-
-    beta_unscaled = make_beta_matrix(parms)
+    beta_unscaled = get_percapita_contact_matrix(parms)
     beta_modified_connectivity = modify_beta_connectivity(beta_unscaled, parms["connectivity_scenario"])
     r0_base = get_r0(beta_modified_connectivity, parms["gamma"], parms["pop_sizes"], parms["n_i_compartments"])
     beta_factor = calculate_beta_factor(parms["desired_r0"], r0_base)
