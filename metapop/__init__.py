@@ -12,8 +12,8 @@ class SEIRModel:
         self.groups = parms["n_groups"]
         self.E_indices = np.arange(2, # S V are first and E starts at 2
                                    2 + parms["n_e_compartments"])
-        self.I_indices = np.arange(max(self.E_indices), # I starts after E indices
-                                   max(self.E_indices) + parms["n_i_compartments"])
+        self.I_indices = np.arange(max(self.E_indices) + 1, # I starts after E indices
+                                   max(self.E_indices) + 1 + parms["n_i_compartments"])
     def exposed(self, u):
         new_exposed = []
         old_exposed = []
