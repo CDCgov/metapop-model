@@ -81,6 +81,6 @@ class SEIRModel:
             new_I1 = I1 + new_infectious[group] - old_infectious[group]
             new_I2 = I2 + old_infectious[group] - new_recoveries[group]
             new_R = R + new_recoveries[group]
-            new_Y = Y + new_exposed[group]
+            new_Y = Y + new_infectious[group]
             new_u.append([new_S, new_V, new_E1, new_E2, new_I1, new_I2, new_R, new_Y])
         return new_u
