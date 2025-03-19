@@ -168,7 +168,6 @@ def test_rate_to_frac():
 
 def test_run_model_once_with_config():
     # Define the parameters
-    # with open("scripts/config.yaml", "r") as file:
     testdir = os.path.dirname(__file__)
     with open(os.path.join(testdir, "test_config.yaml"), "r") as file:
         config = yaml.safe_load(file)

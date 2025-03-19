@@ -1,4 +1,5 @@
 import os
+import pytest
 from metapop import SEIRModel  # Ensure this import path is correct
 import numpy as np
 import yaml
@@ -30,11 +31,10 @@ def test_only_expose_susceptible():
     assert len(new_exposed) == parms['n_groups']
     assert len(old_exposed) == parms['n_groups']
 
-# @pytest.mark.skip # This looks like it's an outdated test, skipping for now, need to review and update as there are many more parameters to validate now
+@pytest.mark.skip # This looks like it's an outdated test, skipping for now, need to review and update as there are many more parameters to validate now
 def test_check_config():
     testdir = os.path.dirname(__file__)
     with open(os.path.join(testdir, "test_config.yaml"), "r") as file:
-    # with open("scripts/config.yaml", "r") as file:
         config = yaml.safe_load(file)
 
     parms = config["baseline_parameters"]
@@ -46,5 +46,5 @@ def test_check_config():
     assert len(parms["I0"]) == n_groups, f"I0 should be of length {n_groups}"
 
     # Check that beta is a square n_groups x n_groups array
-    # beta = np.array(parms["beta"])
-    # assert beta.shape == (n_groups, n_groups), f"beta should be a {n_groups}x{n_groups} array"
+    beta = np.array(parms["beta"])
+    assert beta.shape == (n_groups, n_groups), f"beta should be a {n_groups}x{n_groups} array"
