@@ -1,0 +1,38 @@
+name: metapop CI workflow
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  install_and_test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        python-version: ['^3.10']
+
+    name: Install and run tests
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: x64
+
+      - name: Install global dependencies
+        run: |
+          pip install poetry
+          pip install pytest
+
+      - name: Run tests
+        working-directory: tests
+        run: |
+          poetry install
+          poetry run pytest -v test_*.py
