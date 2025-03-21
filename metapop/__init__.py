@@ -1,5 +1,6 @@
 import numpy as np
 from metapop.helper import* # noqa: F405
+from metapop.plotting import* # noqa: F405
 
 class SEIRModel:
     def __init__(self, parms):
