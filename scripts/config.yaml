@@ -16,7 +16,7 @@ baseline_parameters:
   isolation_success: 0.0
   symptomatic_isolation_day: 400
   tf: 365        # total time modeled
-  n_replicates: 1000
+  n_replicates: 10
   seed: 123
 
 grid_parameters:

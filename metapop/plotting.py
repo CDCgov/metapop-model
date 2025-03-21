@@ -135,6 +135,7 @@ def plot_daily_infectious(results, **plkwargs):
     figpath = os.path.join("output", figname)
     fig.savefig(figpath, dpi=dpi, transparent=transparent)
     plt.close(fig)
+    return fig, axes
 
 def plot_interval_incidence(results, interval=1, **plkwargs):
 
@@ -248,6 +249,7 @@ def plot_interval_incidence(results, interval=1, **plkwargs):
     figpath = os.path.join("output", figname)
     fig.savefig(figpath, dpi=dpi, transparent=transparent)
     plt.close(fig)
+    return fig, axes
 
 def plot_interval_cumulative_incidence(results, **plkwargs):
 
@@ -351,3 +353,4 @@ def plot_interval_cumulative_incidence(results, **plkwargs):
     figpath = os.path.join("output", figname)
     fig.savefig(figpath, dpi=dpi, transparent=transparent)
     plt.close(fig)
+    return fig, axes
