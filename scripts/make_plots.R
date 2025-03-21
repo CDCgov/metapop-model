@@ -1,7 +1,29 @@
 library(tidyverse)
 library(ggplot2)
 
-results <- read_csv("output/results.csv")
+date <- "2025-03-21"
+suffix <- ""
+R0 <- 12
+
+# Function to create filename for experiment results
+create_filename <- function(base_name = "output/results", date = "", suffix = "", format=".csv") {
+  filename <- base_name
+  if (date != '') {
+    filename <- paste0(filename, "_", date)
+  }
+  if (suffix != '') {
+    filename <- paste0(filename, "_", suffix)
+  }
+  filename <- paste0(filename, format)
+  return(filename)
+}
+
+# Use the function to create the filename for results
+filename <- create_filename(date = date, suffix = suffix)
+# read in the results
+results <- read_csv(filename)
+
+# get the number of replicates
 reps <- max(results$replicate)
 plot_reps <- 20 # sims to plot in incidence curves
 plot_cols <- c("#20419a", "#cf4828", "#f78f47")
@@ -34,10 +56,11 @@ p <- filtered_results |>
     # facet_wrap(~replicate) +
     labs(x = "Days", y = "Cumulative Infections", col = "Group")
 
-ggsave(filename = paste0(
-    "output/cumulative_curves_r0",
-    12, ".png"
-), plot = p, width = 10, height = 8)
+# png file name
+png_name <- create_filename(base_name = paste0("output/cumulative_curves_r0_", R0), date = date, suffix = suffix, format = ".png")
+ggsave(filename = png_name,
+    plot = p, width = 10, height = 8)
+
 
 #### Incidence plot ####
 incidence_results <- filtered_results |>
@@ -66,10 +89,9 @@ p <- incidence_results |>
     scale_color_manual(values = plot_cols) +
     labs(x = "Week", y = "Weekly Incident Infections", col = "Group")
 
-ggsave(filename = paste0(
-    "output/incidence_curves_r0",
-    12, ".png"
-), plot = p, width = 10, height = 8)
+png_name <- create_filename(base_name = paste0("output/incidence_curves_r0_", R0), date = date, suffix = suffix, format = ".png")
+ggsave(filename = png_name,
+    plot = p, width = 10, height = 8)
 
 
 #### Overeall final size plot
@@ -91,10 +113,10 @@ for (i in c(12)) {
             labeller = label_both
         )
 
-    ggsave(filename = paste0(
-        "output/overall_final_size_r0",
-        i, ".png"
-    ), plot = p, width = 10, height = 8)
+
+    png_name <- create_filename(base_name = paste0("output/overall_final_size_r0_", i), date = date, suffix = suffix, format = ".png")
+    ggsave(filename = png_name,
+        plot = p, width = 10, height = 8)
 }
 
 
@@ -117,10 +139,9 @@ for (i in c(12)) {
             title = "R0=12", x = "Final Group Outbreak Size",
             y = "Number of simulations", fill = "Group"
         )
-    ggsave(filename = paste0(
-        "output/group_final_size_r0",
-        i, ".png"
-    ), plot = p, width = 10, height = 8)
+    png_name <- create_filename(base_name = paste0("output/group_final_size_r0_", i), date = date, suffix = suffix, format = ".png")
+    ggsave(filename = png_name,
+        plot = p, width = 10, height = 8)
 }
 
 #### Percent of susceptible infected cumulative
@@ -159,10 +180,9 @@ p <- filtered_categories |>
     # facet_wrap(~replicate) +
     labs(x = "Days", y = "Cumulative Infections", col = "Group")
 
-ggsave(filename = paste0(
-    "output/cumulative_sus_infected.png",
-    12, ".png"
-), plot = p, width = 10, height = 8)
+png_name <- create_filename(base_name = paste0("output/cumulative_sus_infected_r0_", R0), date = date, suffix = suffix, format = ".png")
+ggsave(filename = png_name,
+    plot = p, width = 10, height = 8)
 
 
 #### Summary table
@@ -184,9 +204,9 @@ for (i in outbreak_sizes) {
             Sub1 = `1`, Sub2 = `2`,
             General = `0`
         )
-
+    output_name <- create_filename(base_name = paste0("output/res_table_outbreak_size", i, "_r0_", 12), date = date, suffix = suffix, format = ".csv")
     write_csv(
         res_table,
-        paste0("output/res_table_outbreak_size", i, ".csv")
+        output_name
     )
 }
