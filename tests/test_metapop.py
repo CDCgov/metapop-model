@@ -18,15 +18,15 @@ def test_only_expose_susceptible():
 
     # Initial state for each group
     u = [
-        [99, 0, 0, 0, 1, 0, 0, 0],     # S V E1 E2 I1 I2 R Y
-        [ 0, 0, 0, 0, 0, 0, 100, 0]    # group has no susceptibles
+        [99, 0, 0, 0, 1, 0, 0, 0, 0],     # S V E1 E2 I1 I2 R Y X
+        [ 0, 0, 0, 0, 0, 0, 100, 0, 0]    # group has no susceptibles
     ]
 
     # Create an instance of SEIRModel
     model = SEIRModel(parms)
 
     # Call the exposed method
-    new_exposed, old_exposed = model.exposed(u)
+    new_exposed, old_exposed = model.exposed(u, current_susceptibles=[99, 0])
     assert new_exposed[1] == 0 # No new exposures in this group bc no susceptibles
     assert len(new_exposed) == parms['n_groups']
     assert len(old_exposed) == parms['n_groups']

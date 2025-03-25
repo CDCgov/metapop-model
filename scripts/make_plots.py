@@ -1,3 +1,5 @@
+######## DEPRACATED: USE make_plots.R #########
+
 import matplotlib.pyplot as plt
 import seaborn as sns
 import polars as pl

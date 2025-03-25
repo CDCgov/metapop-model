@@ -40,7 +40,6 @@ def test_get_percapita_contact_matrix():
     ])
     assert np.array_equal(percapita_contacts, expected_percapita_contacts), f"Expected {expected_percapita_contacts}, but got {percapita_contacts} when using different degree for each subgroup"
 
-
 def test_get_r0():
     beta_matrix = np.array([
         [0.1, 0.2, 0.3],
@@ -82,13 +81,13 @@ def test_construct_beta():
 def test_pop_initialization():
     parms = {
         "pop_sizes": [1000, 2000],
-        "initial_vaccine_coverage": [0.0, 0.99],
-        "I0": [10, 0]
+        "initial_vaccine_coverage": [0.0, 0.95],
+        "I0": [10, 2]
     }
     steps = 3
     groups = 2
 
-    S, V, E1, E2, I1, I2, R, Y, u = initialize_population(steps, groups, parms)
+    S, V, E1, E2, I1, I2, R, Y, X, u = initialize_population(steps, groups, parms)
 
     # correct dimensions
     assert len(S) == steps
@@ -104,8 +103,12 @@ def test_pop_initialization():
 
     # initial state vector is correct
     assert len(u) == groups
-    assert len(u[0]) == 8 # S V E1 E2 I1 I2 R Y
+    assert len(u[0]) == 9 # S V E1 E2 I1 I2 R Y X
     assert u[0][0] == S[0][0]
+
+    assert sum(u[0]) == parms["pop_sizes"][0], f"Sum of u[0] ({sum(u[0])}) does not equal pop_sizes[0] ({parms['pop_sizes'][0]})"
+    assert sum(u[1]) == parms["pop_sizes"][1], f"Sum of u[1] ({sum(u[1])}) does not equal pop_sizes[1] ({parms['pop_sizes'][1]})"
+
 
 def test_calculate_foi_0():
     # Define the parameters
@@ -134,6 +137,36 @@ def test_calculate_foi():
     # Check the result
     expected_foi = np.dot(beta[target_group], I_g / pop_sizes)
     assert np.isclose(foi, expected_foi), f"Expected {expected_foi}, but got {foi}"
+
+def test_active_vaccination():
+    parms = {
+        "n_groups": 3,
+        "vaccine_uptake_range": [10, 11],
+        "total_vaccine_uptake_doses": 100,
+        "vaccinated_group": 2
+    }
+
+    # Initial state for each group: Group 2 has no E or I individuals yet
+    u = [
+        [1000, 0, 100, 50, 0, 0, 0, 0, 0],  # Group 0: S, V, E1, E2, I1, I2, R, Y, X
+        [700, 0, 60, 40, 0, 0, 0, 0, 0],    # Group 1: S, V, E1, E2, I1, I2, R, Y, X
+        [600, 0, 0, 0, 0, 0, 0, 0, 0]     # Group 2: S, V, E1, E2, I1, I2, R, Y, X
+    ]
+
+    vaccination_uptake_schedule = build_vax_schedule(parms)
+
+    # Assertions to check the expected results: in group 2, 100% of eligible are susceptible
+    assert np.array_equal(vaccinate_groups(parms["n_groups"], u, 5, vaccination_uptake_schedule, parms), [0, 0, 0])
+    assert np.array_equal(vaccinate_groups(parms["n_groups"], u, 10, vaccination_uptake_schedule, parms), [0, 0, 50])
+    assert np.array_equal(vaccinate_groups(parms["n_groups"], u, 11, vaccination_uptake_schedule, parms), [0, 0, 50])
+    assert np.array_equal(vaccinate_groups(parms["n_groups"], u, 12, vaccination_uptake_schedule, parms), [0, 0, 0])
+
+    ### Check: If vaccine_doses >> than S population
+    parms["total_vaccine_uptake_doses"] = 10000 # more doses than number of S in group 2
+    vaccination_uptake_schedule = build_vax_schedule(parms)
+    uptake = vaccinate_groups(parms["n_groups"], u, 10, vaccination_uptake_schedule, parms)
+
+    assert uptake[parms["vaccinated_group"]] == u[parms['vaccinated_group']][0], "Group 2 uptake is size of Susceptible population"
 
 def test_get_infected():
     # Define the initial state
@@ -187,13 +220,13 @@ def test_run_model_once_with_config():
     steps = parms["tf"]
     t = np.linspace(1, steps, steps)
 
-    S, V, E1, E2, I1, I2, R, Y, u = initialize_population(steps, groups, parms)
+    S, V, E1, E2, I1, I2, R, Y, X, u = initialize_population(steps, groups, parms)
 
     # Create an instance of SEIRModel
     model = SEIRModel(parms)
 
     # Call the run_model function
-    S, V, E1, E2, I1, I2, R, Y, u = run_model(model, u, t, steps, groups, S, V, E1, E2, I1, I2, R, Y)
+    S, V, E1, E2, I1, I2, R, Y, X, u = run_model(model, u, t, steps, groups, S, V, E1, E2, I1, I2, R, Y, X)
 
     # Check the results
     assert S.shape ==  (steps, groups)
@@ -204,6 +237,7 @@ def test_run_model_once_with_config():
     assert I2.shape == (steps, groups)
     assert R.shape ==  (steps, groups)
     assert Y.shape ==  (steps, groups)
+    assert X.shape ==  (steps, groups)
 
     # Check initial vax = end vax
     if parms["vaccine_uptake"] is False:

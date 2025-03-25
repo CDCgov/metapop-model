@@ -47,7 +47,6 @@ def get_percapita_contact_matrix(parms):
 
     return percapita_contacts
 
-
 def get_r0(beta_matrix, gamma_unscaled, pop_sizes, n_i_compartments):
     """
     Calculate the basic reproduction number (R0) matrix and return its spectral radius.
@@ -157,31 +156,22 @@ def initialize_population(steps, groups, parms):
         tuple: A tuple containing the initialized arrays (S, V, E1, E2, I1, I2, R, Y) and the initial state (u).
     """
     # arrays for each state
-    S  = np.zeros((steps, groups))
-    V  = np.zeros((steps, groups))
-    E1 = np.zeros((steps, groups))
-    E2 = np.zeros((steps, groups))
-    I1 = np.zeros((steps, groups))
-    I2 = np.zeros((steps, groups))
-    R  = np.zeros((steps, groups))
-    Y  = np.zeros((steps, groups))
+    state_arrays = [np.zeros((steps, groups)) for _ in range(9)]
+    S, V, E1, E2, I1, I2, R, Y, X = state_arrays
 
-    # initial states
-    u = [[int(parms["pop_sizes"][group] * (1 - parms["initial_vaccine_coverage"][group])) - parms["I0"][group],
-          int(parms["pop_sizes"][group] * (parms["initial_vaccine_coverage"][group])), # at some point we will need to ensure that these are integer values
-          0,
-          0,
-          parms["I0"][group],
-          0,
-          0,
-          0
-         ] for group in range(groups)]
+    # set up u vector
+    u = []
+
+    for group in range(groups):
+        u_i = [0, int(parms["pop_sizes"][group] * parms["initial_vaccine_coverage"][group]), 0, 0, parms["I0"][group], 0, 0, 0, 0]
+        u_i[0] = int(parms["pop_sizes"][group] - np.sum(u_i))
+        u.append(u_i)
 
     # first time step is initial state
     for group in range(groups):
-        S[0, group], V[0, group], E1[0, group], E2[0, group], I1[0, group], I2[0, group], R[0, group], Y[0, group] = u[group]
+        S[0, group], V[0, group], E1[0, group], E2[0, group], I1[0, group], I2[0, group], R[0, group], Y[0, group], X[0, group]= u[group]
 
-    return S, V, E1, E2, I1, I2, R, Y, u
+    return S, V, E1, E2, I1, I2, R, Y, X, u
 
 def get_infected(u, I_indices, groups):
     """
@@ -229,7 +219,58 @@ def rate_to_frac(rate):
     """
     return 1.0 - np.exp(-rate)
 
-def run_model(model, u, t, steps, groups, S, V, E1, E2, I1, I2, R, Y):
+def build_vax_schedule(parms):
+    """
+    Build dictionary desribing vaccination schedule for group 2
+
+    Args:
+        parms(dict): contains columns vaccine_uptake_days and vaccine_uptake_doses
+    Returns:
+        dict: dictionary with days and doses
+    """
+    assert "vaccine_uptake_range" in parms, "vaccine_uptake_range must be provided in parms"
+    assert "total_vaccine_uptake_doses" in parms, "total_vaccine_uptake_doses must be provided in parms"
+
+    # Generate a sequence of days between the start and end of the vaccine_uptake_range
+    vaccine_uptake_days = list(range(parms["vaccine_uptake_range"][0], parms["vaccine_uptake_range"][1] + 1))
+    doses_per_day = round(parms["total_vaccine_uptake_doses"] / len(vaccine_uptake_days))
+
+    # Create the schedule dictionary
+    schedule = {day: doses_per_day for day in vaccine_uptake_days}
+    return(schedule)
+
+def vaccinate_groups(groups, u, t, vaccination_uptake_schedule, parms):
+    """
+    Incorporate active vaccination given an uptake schedule, for group 2 only
+
+    Args:
+        groups (int): The number of groups.
+        u (list): The state of the system.
+        t: timestep
+        vaccination_uptake_schedule (dict): dictionary with keys of days and values of doses on that day for group 2
+        vaccinated_group: group to vaccinate
+    Returns:
+        np.array: Number of susceptibles vaccinated on that day for each group (should only be group 2)
+    """
+    new_vaccinated = np.zeros(groups, dtype=int)
+    vaccinated_group = parms["vaccinated_group"]
+
+    if t in vaccination_uptake_schedule:
+        S, V, E1, E2, I1, I2, R, Y, X = u[vaccinated_group] # get group 2
+        vaccine_eligible = S + E1 + E2
+        doses = vaccination_uptake_schedule[t]
+        # Calculate the proportion of doses to assign to S, E1, and E2
+        if vaccine_eligible > 0:
+            S_doses = int(doses * S / vaccine_eligible)  # proportion of doses going to S
+            S_doses = min(S_doses, S)  # Ensure S_doses does not exceed S
+        else:
+            S_doses = 0
+
+        new_vaccinated[vaccinated_group] = S_doses
+
+    return new_vaccinated
+
+def run_model(model, u, t, steps, groups, S, V, E1, E2, I1, I2, R, Y, X):
     """
     Update the population arrays based on the SEIR model.
 
@@ -239,14 +280,14 @@ def run_model(model, u, t, steps, groups, S, V, E1, E2, I1, I2, R, Y):
         t: The time array.
         steps: The number of time steps.
         groups: The number of groups.
-        S, V, E1, E2, I1, I2, R, Y: The population arrays to be updated.
+        S, V, E1, E2, I1, I2, R, Y, X: The population arrays to be updated. Y is a infection counter (counted when they become infectious I1). X is vaccine uptake counter.
 
     Returns:
-        S, V, E1, E2, I1, I2, R, Y, u
+        S, V, E1, E2, I1, I2, R, Y, X, u
     """
     for j in range(1, steps):
         u = model.seirmodel(u, t[j])
         for group in range(groups):
-            S[j, group], V[j, group], E1[j, group], E2[j, group], I1[j, group], I2[j, group], R[j, group], Y[j, group] = u[group]
+            S[j, group], V[j, group], E1[j, group], E2[j, group], I1[j, group], I2[j, group], R[j, group], Y[j, group], X[j, group] = u[group]
 
-    return S, V, E1, E2, I1, I2, R, Y, u
+    return S, V, E1, E2, I1, I2, R, Y, X, u
