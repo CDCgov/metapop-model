@@ -186,9 +186,13 @@ def get_infected(u, I_indices, groups, parms, t):
         np.array: An array of the number of infected individuals for each group.
     """
     if (parms["symptomatic_isolation"] & (t > parms["symptomatic_isolation_day"])):
-        return np.array([sum(u[group][i] for i in I_indices[:-1]) for group in range(groups)])
+        i_max = max(I_indices)
+        infected = np.array([sum(u[group][i] for i in I_indices[:-1]) for group in range(groups)])
+        infected = infected + np.array([(u[group][i_max] * parms["isolation_success"]) for group in range(groups)])
+        return infected
     else:
         return np.array([sum(u[group][i] for i in I_indices) for group in range(groups)])
+    
 
 def calculate_foi(beta, I_g, pop_sizes, target_group):
     """

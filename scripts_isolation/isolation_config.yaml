@@ -18,6 +18,7 @@ baseline_parameters:
   vaccine_uptake_range:  [30, 60] # start and end of vaccine campaign
   total_vaccine_uptake_doses: 0 # constant, to be divided out among the days
   symptomatic_isolation: True
+  isolation_success: 0.5
   tf: 365        # total time modeled
   n_replicates: 100
   seed: 123
