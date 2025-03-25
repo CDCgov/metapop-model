@@ -173,7 +173,7 @@ def initialize_population(steps, groups, parms):
 
     return S, V, E1, E2, I1, I2, R, Y, X, u
 
-def get_infected(u, I_indices, groups):
+def get_infected(u, I_indices, groups, parms, t):
     """
     Calculate the number of infected individuals for each group. If there is only one infected compartment, n_i_compartments=1, then return I for each group
 
@@ -185,7 +185,10 @@ def get_infected(u, I_indices, groups):
     Returns:
         np.array: An array of the number of infected individuals for each group.
     """
-    return np.array([sum(u[group][i] for i in I_indices) for group in range(groups)])
+    if (parms["symptomatic_isolation"] & (t > parms["symptomatic_isolation_day"])):
+        return np.array([sum(u[group][i] for i in I_indices[:-1]) for group in range(groups)])
+    else:
+        return np.array([sum(u[group][i] for i in I_indices) for group in range(groups)])
 
 def calculate_foi(beta, I_g, pop_sizes, target_group):
     """
