@@ -26,10 +26,10 @@ def test_only_expose_susceptible():
 
     # Set time
     t = 1
-    
+
     # set susceptibles
     current_susceptibles = [99, 0]
-    
+
     # Create an instance of SEIRModel
     model = SEIRModel(parms)
 
