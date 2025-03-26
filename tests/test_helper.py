@@ -181,8 +181,17 @@ def test_get_infected():
     # Define the number of groups
     groups = 2
 
+    # Define time
+    t = 1
+
+    # Define parms
+    parms = {
+        "symptomatic_isolation": False,
+        "symptomatic_isolation_day": 400
+    }
+
     # Call the get_infected function
-    infected = get_infected(u, I_indices, groups)
+    infected = get_infected(u, I_indices, groups, parms, t)
 
     # Check the results
     expected_infected = np.array([3, 7])  # Sum of I1 and I2 for each group
@@ -209,7 +218,8 @@ def test_run_model_once_with_config():
     parms["initial_vaccine_coverage"] = [0.9, 0.5, 0.5] # add here, griddler has it as nested params
     parms["vaccine_uptake"] = False # setting here in case default config changes
     parms["connectivity_scenario"] = 1.0
-
+    parms["symptomatic_isolation"] = False
+    parms["symptomatic_isolation_day"] = 400
     # pulling k_21 from grid parameters
     parms['k_21'] = config['grid_parameters']['k_21'][0]
 
