@@ -5,7 +5,7 @@
 ## Model features
 
 * Stochastic SEIRV model
-* Flexible numbers of groups (e.g., age classes) that is changeable using the config
+* Flexible numbers of groups (e.g., age classes or connected populations) that is changeable using the config
 * Basic example of how to do a calibration
 
 ## Getting started
@@ -21,11 +21,15 @@
 * Instead of two groups (e.g., age classes), you can easily change the number of groups by changing the config file (`scripts/config.yaml`)
 * For example, if we wanted 6 groups, you could specify   `n_groups: 6`  and then change `N: [100, 200, 300, 400, 500, 600]` (i.e., a list of 6 population sizes), same for `I0: [1, 0, 0, 0, 0, 0]`, and then the beta_matrix would have to be a matrix 6x6. In the future, it would be good to have funcitonality to read beta matrix from a csv.
 
+## Local app
+You can run the app locally using Streamlit with `streamlit run metapop/app.py`
+
+
 ## Project Admin
 
-Paige Miller (CDC/IOD/ORR/CFA)
-Theresa Sheets (CDC/IOD/ORR/CFA)
-Dina Mistry (CDC/IOD/ORR/CFA)
+Paige Miller, yub1@cdc.gov (CDC/IOD/ORR/CFA)
+Theresa Sheets, utg8@cdc.gov (CDC/IOD/ORR/CFA)
+Dina Mistry, uqx8@cdc.gov (CDC/IOD/ORR/CFA)
 
 ## General Disclaimer
 This repository was created for use by CDC programs to collaborate on public health related projects in support of the [CDC mission](https://www.cdc.gov/about/organization/mission.htm).  GitHub is not hosted by the CDC, but is a third party website used by CDC and its partners to share information and collaborate on software. CDC use of GitHub does not imply an endorsement of any one particular service, product, or enterprise.

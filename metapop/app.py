@@ -1,658 +1,345 @@
 import streamlit as st
 import numpy as np
 import polars as pl
-import griddler
-import griddler.griddle
 import metapop as mt
 import altair as alt
+import copy
+
+### Methods to create user inputs interfaces ###
+def app_editors(element, scenario_name, parms, ordered_keys, list_keys, slide_keys, show_parameter_mapping, min_values, max_values, steps, helpers, formats, element_keys):
+    """
+    Create the sidebar for editing parameters.
+
+    Args:
+        element: The Streamlit element to place the sidebar in.
+        scenario_name: The name of the scenario.
+        parms: The parameters to edit.
+        ordered_keys: The keys of the parameters to edit.
+        list_keys: The keys of the parameters that are lists.
+        slide_keys: The keys of the parameters that are sliders.
+        show_parameter_mapping: The mapping of parameter names to display names.
+        min_values: The minimum values for the parameters.
+        max_values: The maximum values for the parameters.
+        steps: The step sizes for the parameters.
+        helpers: The help text for the parameters.
+        formats: The formats for the parameters.
+        element_keys: The keys for the Streamlit elements.
+
+    Returns:
+        edited_parms: The edited parameters.
+
+    """
+    edited_parms = copy.deepcopy(parms)
+
+    with element:
+        st.subheader(scenario_name)
+
+        for key in ordered_keys:
+            if key not in list_keys:
+                if key in slide_keys:
+                    value = st.slider(show_parameter_mapping[key],
+                                      min_value=min_values[key], max_value=max_values[key],
+                                      value=parms[key],
+                                      step=steps[key],
+                                      help=helpers[key],
+                                      format=formats[key],
+                                      key=element_keys[key],
+                                      )
+                else:
+                    value = st.number_input(show_parameter_mapping[key],
+                                        min_value=min_values[key], max_value=max_values[key],
+                                        value=parms[key],
+                                        step=steps[key],
+                                        help=helpers[key],
+                                        format=formats[key],
+                                        key=element_keys[key])
+                edited_parms[key] = value
+            if key in list_keys:
+                for index in range(len(parms[key])):
+                    if key in slide_keys:
+                        value = st.slider(show_parameter_mapping[f"{key}_{index}"],
+                                            min_value=min_values[key][index], max_value=max_values[key][index],
+                                            value=parms[key][index],
+                                            step=steps[key],
+                                            help=helpers[key][index],
+                                            format=formats[key],
+                                            key=element_keys[key][index])
+                    else:
+                        value = st.number_input(show_parameter_mapping[f"{key}_{index}"],
+                                            min_value=min_values[key][index], max_value=max_values[key][index],
+                                            value=parms[key][index],
+                                            step=steps[key],
+                                            help=helpers[key][index],
+                                            format=formats[key],
+                                            key=element_keys[key][index])
+                    edited_parms[key][index] = value
+
+    return edited_parms
 
 
-def simulate(parms):
+def get_min_values():
+    return dict(
+            desired_r0=0.,
+            pop_sizes=[15000, 100, 100],
+            vaccine_uptake_range=[0, 0],
+            total_vaccine_uptake_doses=0,
+            I0=[0, 0, 0],
+            initial_vaccine_coverage=[0., 0., 0.],
+            k_i=[0., 0., 0.],
+            sigma = 0.025,
+            gamma = 0.025,
+            k_g1 = 0.,
+            k_21 = 0.,
+            isolation_success = 0.,
+            symptomatic_isolation_day = 0,
+            )
 
-    #### Set beta matrix based on desired R0 and connectivity scenario ###
+def get_max_values():
+    return dict(
+            desired_r0=20.0,
+            pop_sizes=[100000, 15000, 15000],
+            vaccine_uptake_range=[400, 400],
+            total_vaccine_uptake_doses=1000,
+            I0=[100, 100, 100],
+            initial_vaccine_coverage=[1.00, 1.00, 1.00],
+            k_i=[30., 30., 30.],
+            sigma = 1.,
+            gamma = 1.,
+            k_g1 = 30.,
+            k_21 = 30.,
+            isolation_success = 1.,
+            symptomatic_isolation_day = 365,
+            )
 
-    parms["beta"] = mt.construct_beta(parms)
+def get_steps():
+    return dict(
+            desired_r0=0.1,
+            pop_sizes=100,
+            vaccine_uptake_range=1,
+            total_vaccine_uptake_doses=1,
+            I0=1,
+            initial_vaccine_coverage=0.01,
+            k_i = 0.1,
+            sigma = 0.01,
+            gamma = 0.01,
+            k_g1 = 0.01,
+            k_21 = 0.01,
+            isolation_success = 0.01,
+            symptomatic_isolation_day = 1,
+            )
 
-    #### set up the model time steps
-    steps = parms["tf"]
-    t = np.linspace(1, steps, steps)
+def get_helpers():
+    return dict(
+            desired_r0="Basic reproduction number (R0) can not be negative",
+            pop_sizes=["Size of the large population (15,000 - 100,000)",
+                       "Size of the small population 1 (0 - 15,000)",
+                       "Size of the small population 2 (0 - 15,000)"],
+            vaccine_uptake_range=["Day vaccination starts",
+                                 "Day vaccination ends"],
+            total_vaccine_uptake_doses="Total vaccine doses",
+            I0=["Initial infections in large population",
+                "Initial infections in small population 1",
+                "Initial infections in small population 2"],
+            initial_vaccine_coverage=["Baseline vaccination in large population",
+                                      "Baseline vaccination in small population 1",
+                                      "Baseline vaccination in small population 2"],
+            k_i=["Average degree for large population",
+                 "Average degree for small population 1",
+                 "Average degree for small population 2"],
+            sigma = "Rate of progression from exposed to infectious",
+            gamma = "Rate of recovery",
+            k_g1 = "Average degree of small population 1 connecting to large population",
+            k_21 = "Average degree between small populations",
+            isolation_success = "Percentage of symptomatic cases isolated",
+            symptomatic_isolation_day = "Day symptomatic isolation starts",
+            )
 
-    #### Initialize population
-    groups = parms["n_groups"]
-    S, V, E1, E2, I1, I2, R, Y, u = mt.initialize_population(steps, groups, parms)
-
-    #### Run the model
-    model = mt.SEIRModel(parms)
-    S, V, E1, E2, I1, I2, R, Y, u = mt.run_model(model, u, t, steps, groups, S, V, E1, E2, I1, I2, R, Y)
-
-    #### Flatten into a dataframe
-    df = pl.DataFrame({
-        't': np.repeat(t, groups),
-        'group': np.tile(np.arange(groups), steps),
-        'S': S.flatten(),
-        'V': V.flatten(),
-        'E1': E1.flatten(),
-        'E2': E2.flatten(),
-        'I1': I1.flatten(),
-        'I2': I2.flatten(),
-        'R': R.flatten(),
-        'Y': Y.flatten()
-    })
-
-    return df
-
-
-def get_scenario_results(parms):
-    results = griddler.run_squash(griddler.replicated(simulate), parms)
-    # cast group to string
-    results = results.with_columns(pl.col("group").cast(pl.Utf8))
-    # select subset of values to return
-    results = results.select(
-        [
-            "initial_coverage_scenario",
-            "k_21",
-            "t",
-            "group",
-            "S",
-            "V",
-            "E1",
-            "E2",
-            "I1",
-            "I2",
-            "R",
-            "Y",
-            "replicate"
-        ]
-    )
-    # add a column for total infections
-    results = results.with_columns((pl.col("I1") + pl.col("I2")).alias("I"))
-    return results
-
-def read_parameters():
-    parameter_sets = griddler.griddle.read("scripts/app_config.yaml")
-    parms = parameter_sets[0]
-    return parms
-
-
-def get_list_keys(parms):
-    list_keys = [key for key, value in parms.items() if isinstance(value, list)]
-    return list_keys
-
-
-def get_default_full_parameters_v2():
-    parms = read_parameters()
-
-    list_keys = get_list_keys(parms)
-
-    for key in list_keys:
-        for i, value in enumerate(parms[key]):
-            parms['{}_{}'.format(key, i)] = value
-        del parms[key]
-
-    keys = [key for key in parms.keys()]
-    values = [parms[key] for key in keys]
-
-    defaults = pl.DataFrame(
-        {
-            "Parameter": keys,
-            "Scenario 1": values,
-            "Scenario 2": values,
-        },
-        strict=False
-    )
-    return defaults
-
-
-def get_show_parameter_mapping2():
-    show_mapping = dict(
-        desired_r0="R0",
-        I0_1="initial infections in small population 1",
-        I0_2="initial infections in small population 2",
-        vaccine_uptake_doses_0="vaccine doses per day",
-        isolation_percentage_1="percent isolation in population 1",
-        isolation_percentage_2="percent isolation in population 2",
-        isolation_effectiveness="isolation effectiveness",
-        gamma="gamma"
-    )
-    return show_mapping
-
-def get_show_keys2():
-    show_keys = [key for key in get_show_parameter_mapping2().keys()]
-    return show_keys
-
-def get_show_names2():
-    show_keys = get_show_keys2()
-    show_parameter_mapping = get_show_parameter_mapping2()
-    show_names = [show_parameter_mapping[key] for key in show_keys]
-    return show_names
+def get_formats():
+    return  dict(
+            desired_r0="%.1f",
+            pop_sizes="%.0d",
+            vaccine_uptake_range="%.0d",
+            total_vaccine_uptake_doses="%.0d",
+            I0="%.0d",
+            initial_vaccine_coverage="%.2f",
+            k_i="%.1f",
+            sigma = "%.2f",
+            gamma = "%.2f",
+            k_g1 = "%.2f",
+            k_21 = "%.2f",
+            isolation_success = "%.2f",
+            symptomatic_isolation_day = "%.0d",
+            )
 
 
-def get_default_show_parameters_table():
-    full_defaults = get_default_full_parameters_v2()
-    show_keys = get_show_keys2()
-    # show_names = get_show_names2()
-    show_defaults = full_defaults.filter(pl.col("Parameter").is_in(show_keys))
-
-    # casting values to float
-    show_defaults = show_defaults.with_columns(pl.col("Scenario 1").cast(pl.Float64))
-    show_defaults = show_defaults.with_columns(pl.col("Scenario 2").cast(pl.Float64))
-
-    # renaming keys
-    # show_defaults = show_defaults.with_columns(pl.Series(name="Parameter", values=show_names))
-
-    return show_defaults
-
-def get_advanced_parameters_table():
-    full_defaults = get_default_full_parameters_v2()
-    show_keys = get_show_keys2()
-    advanced_defaults = full_defaults.filter(~pl.col("Parameter").is_in(show_keys))
-    advanced_defaults = advanced_defaults.with_columns(
-        pl.when(pl.col("Scenario 1").cast(pl.Float64, strict=False).is_not_null())
-        .then(pl.col("Scenario 1").cast(pl.Float64, strict=False))
-        .otherwise(pl.col("Scenario 1"))
-        .alias("Scenario 1")
-    )
-    advanced_defaults = advanced_defaults.with_columns(
-        pl.when(pl.col("Scenario 2").cast(pl.Float64, strict=False).is_not_null())
-        .then(pl.col("Scenario 2").cast(pl.Float64, strict=False))
-        .otherwise(pl.col("Scenario 2"))
-        .alias("Scenario 2")
-    )
-    return advanced_defaults
-
-
-
-def app_old():
+def app(replicates=20):
     st.title("Metapopulation Model")
+    parms = mt.read_parameters()
 
-    # some default dataframe
-
-    full_defaults = get_default_full_parameters_v2() # noqa
-    show_table = get_default_show_parameters_table()
-    advanced_table = get_advanced_parameters_table() # noqa
-
-    # print("advanced_table")
-    # print(advanced_table["Parameter"].to_list())
-    with st.sidebar:
-        st.header(
-            "Scenario parameters",
-            help="TODO",
-        )
-
-        st.subheader(
-            "Table subheader",
-            help="subhead TODO",
-        )
-        new_params = st.sidebar.data_editor(show_table, hide_index=True) #noqa
-
-        with st.expander("Advanced options"):
-            st.write("TODO")
-
-    print(new_params)
-
-    # new_params_full = pl.concat(
-    #     [
-    #         new_params.with_columns(
-    #             pl.col("Scenario 1").cast(pl.Utf8, strict=False),
-    #             pl.col("Scenario 2").cast(pl.Utf8, strict=False)
-    #         ),
-    #         advanced_table.with_columns(
-    #             pl.col("Scenario 1").cast(pl.Utf8, strict=False),
-    #             pl.col("Scenario 2").cast(pl.Utf8, strict=False)
-    #         )
-    #     ],
-    #     how="vertical"
-    # )
-    # new_scenario1 = dict(
-    #     (key, float(value) if value.replace('.', '', 1).isdigit() else value)
-    #     for key, value in zip(new_params_full["Parameter"].to_list(), new_params_full["Scenario 1"].to_list())
-    # )
-    # new_scenario2 = dict(
-    #     (key, float(value) if value.replace('.', '', 1).isdigit() else value)
-    #     for key, value in zip(new_params_full["Parameter"].to_list(), new_params_full["Scenario 2"].to_list())
-    # )
-
-
-    # keys_in_list = [key for key in new_scenario1.keys() if any(key.startswith(list_key) for list_key in list_keys)]
-    # print("keys_in_list")
-    # print(keys_in_list)
-
-    # recombined_parms1 = dict()
-    # for key in keys_in_list:
-    #     key_split = key.split("_")
-    #     list_key = "_".join(key_split[:-1])
-    #     if list_key not in recombined_parms1:
-    #         recombined_parms1[list_key] = []
-    #     recombined_parms1[list_key].append(float(new_scenario1[key]))
-
-
-    # recombined_parms2 = dict()
-    # for key in keys_in_list:
-    #     key_split = key.split("_")
-    #     list_key = "_".join(key_split[:-1])
-    #     if list_key not in recombined_parms2:
-    #         recombined_parms2[list_key] = []
-    #     recombined_parms2[list_key].append(float(new_scenario2[key]))
-
-
-    # scenario1 = {**new_scenario1, **recombined_parms1}
-    # scenario2 = {**new_scenario2, **recombined_parms2}
-
-    # diff_keys2 = set(scenario1.keys()).difference(parms.keys())
-
-
-    # # Remove keys in diff_keys2 from scenario1
-    # for key in diff_keys2:
-    #     if key in scenario1:
-    #         del scenario1[key]
-    #         del scenario2[key]
-
-    # # correct the types
-    # for key, value in scenario1.items():
-    #     if type(parms[key]) == int:
-    #         scenario1[key] = int(value)
-    #         scenario2[key] = int(scenario2[key])
-    #     elif type(parms[key]) == float:
-    #         scenario1[key] = float(value)
-    #         scenario2[key] = float(scenario2[key])
-    #     elif type(parms[key]) == list:
-    #         scenario1[key] = [float(i) for i in value]
-    #         scenario2[key] = [float(i) for i in scenario2[key]]
-
-
-    # scenario1 = [scenario1]
-
-    # scenario1_copy = scenario1.copy()
-    # print("scenario1")
-
-
-    # define scenarios
-    parameter_sets = griddler.griddle.read("scripts/app_config.yaml")
-    scenario1 = parameter_sets[0:1]
-    # scenario2 = parameter_sets[1:2]
-
-    # for k in scenario1[0].keys():
-    #     print(k, scenario1[0][k], scenario1_copy[0][k])
-
-    results1 = griddler.run_squash(griddler.replicated(simulate), scenario1)
-    results1 = results1.select([
-        "initial_coverage_scenario", "k_21", "t", "group", "S", "V",
-        "E1", "E2", "I1", "I2", "R", "Y", "replicate"
-    ])
-
-    results1 = results1.with_columns(pl.col("group").cast(pl.Utf8))
-
-    seed = 0 # should be a parameter
-    np.random.seed(seed)
-
-    replicates = 3 # should be fixed value or at least a slider with a fixed range
-    # choose replicates to show
-    replicate_inds = np.random.choice(results1["replicate"].unique().to_numpy(), replicates, replace=False)
-
-    results1 = results1.filter(pl.col("replicate").is_in(replicate_inds))
-    results1 = results1.with_columns((pl.col("I1") + pl.col("I2")).alias("I"))
-
-    print("how many replicates")
-    print(len(results1["replicate"].unique().to_list()))
-
-    groups = results1["group"].unique().to_list()
-    domain = [str(i) for i in range(len(groups))]
-    group_labels = ["General population", "Small population 1", "Small population 2"]
-
-    # Plotting with Altair
-    # Define a color scale for groups
-
-    color_scale = alt.Scale(
-        domain=[str(i) for i in range(len(results1["group"].unique()))],
-        range=[
-            "#20419a",  # Group 0
-            "#cf4828",  # Group 1
-            "#f78f47",  # Group 2
-        ]
-    )
-
-    chart1 = (
-        alt.Chart(
-        results1,
-        title="Daily Infections")
-        .mark_line(opacity=0.5)  # Set line opacity for partial transparency
-        .encode(
-            x=alt.X("t:Q", title="Time (days)"),  # Updated x-axis label
-            y=alt.X("I1:Q", title="Daily Infections"),  # Updated y-axis label
-            color=alt.Color(
-                "group",
-                scale=color_scale,
-                legend=alt.Legend(
-                    title="Population",
-                    values=domain,  # Specify the group values to show in the legend
-                    labelExpr=f"datum.value == '0' ? '{group_labels[0]}' : datum.value == '1' ? '{group_labels[1]}' : '{group_labels[2]}'",  # Rename legend labels
-                ),
-            ),  # Specify color scale for groups
-            detail="replicate:N",  # Separate line for each replicate
-        )
-    )
-
-
-    st.altair_chart(chart1, use_container_width=True)
-
-
-
-def get_outcome_options():
-    return ("Daily Infections", "Daily Incidence", "Cumulative Daily Incidence", "Weekly Infections", "Weekly Incidence", "Weekly Cumulative Incidence")
-
-
-def get_outcome_mapping():
-    return {
-        "Daily Infections": "I",
-        "Daily Incidence": "inc",
-        "Cumulative Daily Incidence": "Y",
-        "Weekly Infections": "WI",
-        "Weekly Incidence": "inc_7",
-        "Weekly Cumulative Incidence": "WCI",
-    }
-
-def get_parms_from_table(table, value_col="Scenario 1"):
-    # get updated parameter dictionaries
-    parms = dict()
-    # expect the table to have the following columns
-    # Parameter, Scenario 1, Scenario 2
-    for key, value in zip(table["Parameter"].to_list(), table[value_col].to_list()):
-        parms[key] = value
-    return parms
-
-
-def update_parms_from_table(parms, table, value_col="Scenario 1"):
-    # get updated values from user throught the sidebar
-    for key, value in zip(table["Parameter"].to_list(), table[value_col].to_list()):
-        parms[key] = value
-    return parms
-
-def update_column_ranges(table):
-    for row in table.iter_rows(named=True):
-        parameter = row["Parameter"]
-        if parameter == "R0":
-            row["Scenario 1"].min_value = 0.5
-            row["Scenario 1"].max_value = 5.0
-            row["Scenario 2"].min_value = 0.5
-            row["Scenario 2"].max_value = 5.0
-        elif parameter == "gamma":
-            row["Scenario 1"].min_value = 0.1
-            row["Scenario 1"].max_value = 1.0
-            row["Scenario 2"].min_value = 0.1
-            row["Scenario 2"].max_value = 1.0
-            # Add more conditions for other parameters as needed
-
-def correct_parameter_types(original_parms, parms_from_table):
-    for key, value in original_parms.items():
-        if isinstance(value, int) and not isinstance(value, bool):
-            parms_from_table[key] = int(parms_from_table[key])
-        elif isinstance(value, bool):
-            if parms_from_table[key] in [True, 'True', 'true', '1']:
-                parms_from_table[key] = True
-            else:
-                parms_from_table[key] = False
-        elif isinstance(value, float):
-            parms_from_table[key] = float(parms_from_table[key])
-        elif isinstance(value, str):
-            parms_from_table[key] = str(parms_from_table[key])
-    return parms_from_table
-
-def get_keys_in_list(parms, updated_parms):
-    list_keys = get_list_keys(parms)
-    keys_in_list = [key for key in updated_parms.keys() if any(key.startswith(list_key) for list_key in list_keys)]
-    keys_in_list = [key for key in sorted(keys_in_list)]
-    return keys_in_list
-
-def repack_list_parameters(parms, updated_parms, keys_in_list):
-    for key in keys_in_list:
-        key_split = key.split("_")
-        list_key = "_".join(key_split[:-1])
-
-        if list_key not in updated_parms:
-            updated_parms[list_key] = []
-        if isinstance(parms[list_key][0], int) and not isinstance(parms[list_key][0], bool):
-            updated_parms[list_key].append(int(updated_parms[key]))
-        elif isinstance(parms[list_key][0], bool):
-            updated_parms[list_key].append(True if updated_parms[key] in [True, 'True', 'true', '1'] else False)
-        elif isinstance(parms[list_key][0], float):
-            updated_parms[list_key].append(float(updated_parms[key]))
-        elif isinstance(parms[list_key][0], str):
-            updated_parms[list_key].append(str(updated_parms[key]))
-
-    for key in keys_in_list:
-        del updated_parms[key]
-
-    return updated_parms
-
-
-def add_daily_incidence(results, replicate_inds, groups):
-    # add a column for daily incidence
-    results = results.with_columns(pl.lit(None).alias("inc"))
-    updated_rows = []
-
-    for replicate in replicate_inds:
-        tempdf = results.filter(pl.col("replicate") == replicate)
-        for group in groups:
-            group_data = tempdf.filter(pl.col("group") == group)
-            group_data = group_data.sort("t")
-            inc = group_data["Y"] - group_data["Y"].shift(1)
-            group_data = group_data.with_columns(inc.alias("inc"))
-            updated_rows.append(group_data)
-
-    results = pl.concat(updated_rows, how="vertical")
-    return results
-
-# def add_interval_incidence(results, replicate_inds, groups, interval=7):
-#     # add a column for interval incidence
-#     if interval == 1:
-#         metric = "inc"
-#     else:
-#         metric = f"inc_{interval}"
-#     results = results.with_columns(pl.lit(None).alias(metric))
-#     updated_rows = []
-#     for replicate in replicate_inds:
-#         tempdf = results.filter(pl.col("replicate") == replicate)
-#         for group in groups:
-#             group_data = tempdf.filter(pl.col("group") == group)
-#             group_data = group_data.sort("t")
-#             inc = group_data["Y"] - group_data["Y"].shift(interval)
-#             group_data = group_data.with_columns(inc.alias(metric))
-#             updated_rows.append(group_data)
-
-#     results = pl.concat(updated_rows)
-#     return results
-
-
-def get_interval_cumulative_incidence(results, replicate_inds, groups, interval=7):
-    interval_results = results.clone()
-    interval_results.sort(["replicate", "group", "t"])
-    # extract time points for every interval days
-    time_points = results["t"].unique().sort().gather_every(interval)
-    # make a single time array
-    interval_points = np.arange(len(time_points), dtype=float)
-    interval_results = interval_results.filter(pl.col("t").is_in(time_points))
-
-    # tile the interval time points for each group and replicate
-    repeated_interval_points = np.tile(interval_points, len(groups) * len(replicate_inds))
-    # add the interval time points to the interval results table
-    interval_results = interval_results.with_columns(pl.Series(name="interval_t", values=repeated_interval_points))
-
-    # now Y is the cumulative incidence at each time point and interval_t is the interval time point
-    return interval_results
-
-
-
-def get_interval_results(results, replicate_inds, groups, interval=7):
-    # get a table with results, in particular cumulative incidence at each interval time point
-    # in this table, Y is the cumulative incidence
-    interval_results = get_interval_cumulative_incidence(results, replicate_inds, groups, interval)
-    # now process this table to get the interval incidence
-    updated_rows = []
-    for replicate in replicate_inds:
-        tempdf = interval_results.filter(pl.col("replicate") == replicate)
-        for group in groups:
-            group_data = tempdf.filter(pl.col("group") == group)
-            group_data = group_data.sort("t")
-            inc = group_data["Y"] - group_data["Y"].shift(1)
-            group_data = group_data.with_columns(inc.alias(f"inc_{interval}"))
-            updated_rows.append(group_data)
-    interval_results = pl.concat(updated_rows)
-    # drop column inc
-    interval_results = interval_results.drop("inc")
-    # interval_results = interval_results.with_columns(f"inc_{interval}".alias("inc"))
-    return interval_results
-
-
-
-
-def app(replicates=3):
-    st.title("Metapopulation Model")
-    parms = read_parameters()
-
-    default_table = get_default_show_parameters_table()
-    default_table_2 = get_default_show_parameters_table()
-    # show_parameters_mapping = get_show_parameter_mapping()
-    show_parameters_mapping = get_show_parameter_mapping2()
-    default_table_2 = default_table_2.with_columns(pl.Series(name="Parameter", values=[show_parameters_mapping.get(key) for key in default_table_2["Parameter"].to_list()]))
+    show_parameter_mapping = mt.get_show_parameter_mapping()
+    advanced_parameter_mapping = mt.get_advanced_parameter_mapping()
 
     with st.sidebar:
         st.header(
             "Scenario parameters",
-            help="TODO",
-        )
-        st.subheader(
-            "Table subheader",
-            help="subhead TODO",
+            help="Enter model parameters for each scenario. Hover over the ? for more information about each parameter.",
         )
 
-        # column_config = {
-        #     "Scenario 1": st.column_config.NumberColumn(
-        #         min_value=0,  # default minimum value
-        #         max_value=100,  # default maximum value
-        #         help="Adjust values for Scenario 1"
-        #     ),
-        #     "Scenario 2": st.column_config.NumberColumn(
-        #         min_value=0,  # default minimum value
-        #         max_value=100,  # default maximum value
-        #         help="Adjust values for Scenario 2"
-        #     ),
-        # }
+        min_values = get_min_values()
+        max_values = get_max_values()
+        steps = get_steps()
+        helpers = get_helpers()
+        formats = get_formats()
+        # this can likely be done more programmatically but works for now
+        keys1 = dict(
+            desired_r0="R0_1",
+            pop_sizes=["pop_size_0_1", "pop_size_1_1", "pop_size_2_1"],
+            vaccine_uptake_range=["vaccine_uptake_days_0_1", "vaccine_uptake_days_1_1"],
+            total_vaccine_uptake_doses="total_vaccine_uptake_doses_1",
+            I0=["I0_0_1", "I0_1_1", "I0_2_1"],
+            initial_vaccine_coverage=["initial_vaccine_coverage_0_1", "initial_vaccine_coverage_1_1", "initial_vaccine_coverage_2_1"],
+            k_i=["k_i_0_1", "k_i_1_1", "k_i_2_1"],
+            sigma = "sigma_1",
+            gamma = "gamma_1",
+            k_g1 = "k_g1_1",
+            k_21 = "k_21_1",
+            isolation_success = "isolation_success_1",
+            symptomatic_isolation_day = "symptomatic_isolation_day_1",
+            )
+        keys2 = dict(
+            desired_r0="R0_2",
+            pop_sizes=["pop_size_0_2", "pop_size_1_2", "pop_size_2_2"],
+            vaccine_uptake_range=["vaccine_uptake_days_0_2", "vaccine_uptake_days_1_2"],
+            total_vaccine_uptake_doses="total_vaccine_uptake_doses_2",
+            I0=["I0_0_2", "I0_1_2", "I0_2_2"],
+            initial_vaccine_coverage=["initial_vaccine_coverage_0_2", "initial_vaccine_coverage_1_2", "initial_vaccine_coverage_2_2"],
+            k_i=["k_i_0_2", "k_i_1_2", "k_i_2_2"],
+            sigma = "sigma_2",
+            gamma = "gamma_2",
+            k_g1 = "k_g1_2",
+            k_21 = "k_21_2",
+            isolation_success = "isolation_success_2",
+            symptomatic_isolation_day = "symptomatic_isolation_day_2",
+            )
+        # order of parameters in the sidebar
+        ordered_keys = [
+                        # 'desired_r0',
+                        'pop_sizes',
+                        'I0',
+                        'initial_vaccine_coverage',
+                        'total_vaccine_uptake_doses',
+                        'vaccine_uptake_range',
+                        'isolation_success',
+                        'symptomatic_isolation_day'
+                        ]
 
-        edited_table = st.sidebar.data_editor(
-            default_table,
-            hide_index=True,
-            disabled=["Parameter"],  # prevent editing of the parameter names
-            # column_config=column_config,
-            # on_change=update_column_ranges  # dynamically update ranges
+        list_parameter_keys = [
+                              'pop_sizes',
+                              'I0',
+                              'vaccine_uptake_range',
+                              'initial_vaccine_coverage',
+                              'vaccine_uptake_doses',
+                              ]
+
+        slide_keys = ['desired_r0','pop_sizes', 'I0']
+        # number of scenarios
+        col1, col2 = st.columns(2)
+
+        edited_parms1 = app_editors(
+            col1, "Scenario 1", parms, ordered_keys, list_parameter_keys,
+            slide_keys, show_parameter_mapping, min_values, max_values,
+            steps, helpers, formats, keys1
+        )
+
+        edited_parms2 = app_editors(
+            col2, "Scenario 2", parms, ordered_keys, list_parameter_keys,
+            slide_keys, show_parameter_mapping, min_values, max_values,
+            steps, helpers, formats, keys2
         )
 
         with st.expander("Advanced options"):
-            st.write("TODO")
+            # try to place two sliders side by side
+            advanced_ordered_keys = ["desired_r0", "sigma", "gamma", "k_g1", "k_21", "k_i"]
+            advanced_list_keys = ["k_i"]
+            advanced_slide_keys = ["sigma", "gamma"]
 
-    with st.sidebar:
-        st.header(
-            "Scenario parameters 2",
-            help="TODO",
-        )
-        st.subheader(
-            "Table subheader 2",
-            help="subhead TODO",
-        )
-        edited_parms_2 = st.sidebar.data_editor(default_table_2, hide_index=True)
+            adv_col1, adv_col2 = st.columns(2)
 
+            edited_advanced_parms1 = app_editors(
+                adv_col1, "Scenario 1", edited_parms1, advanced_ordered_keys,
+                advanced_list_keys, advanced_slide_keys, advanced_parameter_mapping,
+                min_values, max_values, steps, helpers, formats, keys1
+            )
 
+            edited_advanced_parms2 = app_editors(
+                adv_col2, "Scenario 2", edited_parms2, advanced_ordered_keys,
+                advanced_list_keys, advanced_slide_keys, advanced_parameter_mapping,
+                min_values, max_values, steps, helpers, formats, keys2
+            )
+    # get the selected outcome from the sidebar
     outcome_option = st.selectbox(
         "Metric",
-        get_outcome_options()
-        ,
-        index=2,  # Corrected index for "Daily Incidence"
+        mt.get_outcome_options(),
+        index=0,  # by default display weekly incidence
         placeholder="Select an outcome to plot",
     )
 
     # Map the selected option to the outcome variable
-    outcome_mapping = get_outcome_mapping()
+    outcome_mapping = mt.get_outcome_mapping()
     outcome = outcome_mapping[outcome_option]
 
-
-    full_defaults = get_default_full_parameters_v2()
+    full_defaults = mt.get_default_full_parameters()
 
     # get updated parameter dictionaries
-    updated_parms1 = get_parms_from_table(full_defaults, value_col="Scenario 1")
-    updated_parms2 = get_parms_from_table(full_defaults, value_col="Scenario 2")
+    updated_parms1 = mt.get_parms_from_table(full_defaults, value_col="Scenario 1")
+    updated_parms2 = mt.get_parms_from_table(full_defaults, value_col="Scenario 2")
 
+    # get updated values from user through the sidebar
+    for key, value in edited_parms1.items():
+        updated_parms1[key] = value
+    for key, value in edited_parms2.items():
+        updated_parms2[key] = value
 
-    # get updated values from user throught the sidebar
-    updated_parms1 = update_parms_from_table(updated_parms1, edited_table)
-    updated_parms2 = update_parms_from_table(updated_parms2, edited_table, value_col="Scenario 2")
-
-    # dummy parms to see if we can repack to the correct format
-    dummy_parms = dict()
-    for key, value in zip(full_defaults["Parameter"].to_list(), full_defaults["Scenario 1"].to_list()):
-        # original_key = next((k for k, v in show_parameters_mapping.items() if v == key), key)
-        original_key = key
-        dummy_parms[original_key] = value
-        print(f"adding {key} with value {value}")
-    for key, value in zip(edited_parms_2["Parameter"].to_list(), edited_parms_2["Scenario 1"].to_list()):
-        original_key = next((k for k, v in show_parameters_mapping.items() if v == key), key)
-        dummy_parms[original_key] = value
-        print(f"updating {original_key} with value {value}")
-
-    print("dummy_parms")
-    print(dummy_parms)
+    for key, value in edited_advanced_parms1.items():
+        updated_parms1[key] = value
+    for key, value in edited_advanced_parms2.items():
+        updated_parms2[key] = value
 
     # correct types for single values
-    updated_parms1 = correct_parameter_types(parms, updated_parms1)
-    updated_parms2 = correct_parameter_types(parms, updated_parms2)
-    dummy_parms = correct_parameter_types(parms, dummy_parms)
-
-    # find all the values that should be arrays or lists
-
-    keys_in_list = get_keys_in_list(parms, updated_parms1)
-
-
-    # find the original keys and repack the list values in each updated parameters dictionary
-    updated_parms1 = repack_list_parameters(parms, updated_parms1, keys_in_list)
-    updated_parms2 = repack_list_parameters(parms, updated_parms2, keys_in_list)
-    dummy_parms = repack_list_parameters(parms, dummy_parms, keys_in_list)
+    updated_parms1 = mt.correct_parameter_types(parms, updated_parms1)
+    updated_parms2 = mt.correct_parameter_types(parms, updated_parms2)
 
     scenario1 = [updated_parms1]
     scenario2 = [updated_parms2]
-    dummy_scenario = [dummy_parms]
-
-    print(f"there are {len(dummy_parms)} dummy parms")
-    print(f"there are {len(updated_parms1)} updated parms")
 
     # run the model with the updated parameters
+    results1 = mt.get_scenario_results(scenario1)
+    results2 = mt.get_scenario_results(scenario2)
 
-    results1 = get_scenario_results(scenario1)
-    results2 = get_scenario_results(scenario2)
-    dummy_results = get_scenario_results(dummy_scenario) # noqa
+    # extract groups
+    groups = results1["group"].unique().to_list()
 
     # filter for a sample of replicates
     replicate_inds = np.random.choice(results1["replicate"].unique().to_numpy(), replicates, replace=False)
     results1 = results1.filter(pl.col("replicate").is_in(replicate_inds))
     results2 = results2.filter(pl.col("replicate").is_in(replicate_inds))
 
-    # extract groups
-    groups = results1["group"].unique().to_list()
-
     # do some processing here to get daily incidence
-    results1 = add_daily_incidence(results1, replicate_inds, groups)
-    results2 = add_daily_incidence(results2, replicate_inds, groups)
+    results1 = mt.add_daily_incidence(results1, replicate_inds, groups)
+    results2 = mt.add_daily_incidence(results2, replicate_inds, groups)
 
     # create tables with interval results - weekly incidence, weekly cumulative incidence
     interval = 7
 
-    interval_results1 = get_interval_results(results1, replicate_inds, groups, interval)
-    interval_results2 = get_interval_results(results2, replicate_inds, groups, interval)
+    interval_results1 = mt.get_interval_results(results1, replicate_inds, groups, interval)
+    interval_results2 = mt.get_interval_results(results2, replicate_inds, groups, interval)
 
-    print("interval results 2")
-    print(interval_results2.head(n=20)[["t", "group", "replicate","Y", "inc_7", "interval_t"]])
+    # rename columns for the app
+    app_column_mapping = {f"inc_{interval}": "Winc", "Y": "WCI"}
+    interval_results1 = interval_results1.rename(app_column_mapping)
+    interval_results2 = interval_results2.rename(app_column_mapping)
 
-    print("interval results")
-    print(interval_results1.head(n=20)[["t", "group", "replicate","Y", "inc_7", "interval_t"]])
-
-
+    # set up the color scale
     domain = [str(i) for i in range(len(groups))]
     group_labels = ["General population", "Small population 1", "Small population 2"]
 
@@ -660,58 +347,49 @@ def app(replicates=3):
     color_scale = alt.Scale(
         domain=[str(i) for i in range(len(results1["group"].unique()))],
         range = [
-            "#20419a",
-            "#cf4828",
-            "#f78f47",
+            "#20419a", # blue
+            "#cf4828", # red
+            "#f78f47", # orange
         ]
     )
-    if outcome not in ["I", "Y", "inc", "inc_7"]:
-        print("outcome not available yet, defaulting to Y")
+    if outcome not in ["I", "Y", "inc", "Winc", "WCI"]:
+        print("outcome not available yet, defaulting to Cumulative Daily Incidence")
+        outcome = "Y"
 
-    min_y, max_y = 0, max(results1[outcome].max(), results2[outcome].max())
+    if outcome_option in ['Daily Infections', 'Daily Incidence', 'Cumulative Daily Incidence']:
+        alt_results1 = results1
+        alt_results2 = results2
+        min_y, max_y = 0, max(results1[outcome].max(), results2[outcome].max())
+        x = "t:Q"
+        time_label = "Time (days)"
+    elif outcome_option in ['Weekly Incidence', 'Weekly Cumulative Incidence']:
+        alt_results1 = interval_results1
+        alt_results2 = interval_results2
+        min_y, max_y = 0, max(interval_results1[outcome].max(), interval_results2[outcome].max())
+        x = "interval_t:Q"
+        time_label = "Time (weeks)"
 
-    chart1 = alt.Chart(
-        results1,
-        title="Daily Infections"
-        ).mark_line(opacity=0.5).encode(
-            x=alt.X("t:Q", title="Time (days)"),
-            y=alt.Y(f"{outcome}:Q", title="Daily Infections").scale(domain=[min_y, max_y]),
-            color=alt.Color(
-                "group",
-                scale=color_scale,
-                legend=alt.Legend(
-                    title="Population",
-                    values=domain,
-                    labelExpr=f"datum.value == '0' ? '{group_labels[0]}' : datum.value == '1' ? '{group_labels[1]}' : '{group_labels[2]}'",
-                ),
-            ),
-            detail="replicate:N",
-        ).properties(width=300, height=300)
+    y = f"{outcome}:Q"
+    yscale = [min_y, max_y]
+    color_key = "group"
+    labelExpr=f"datum.value == '0' ? '{group_labels[0]}' : datum.value == '1' ? '{group_labels[1]}' : '{group_labels[2]}'"
+    detail="replicate:N"
 
-
-    chart2 = alt.Chart(
-        results2,
-        title="Daily Infections"
-        ).mark_line(opacity=0.5).encode(
-            x=alt.X("t:Q", title="Time (days)"),
-            y=alt.X(f"{outcome}:Q", title="Daily Infections").scale(domain=[min_y, max_y]),
-            color=alt.Color(
-                "group",
-                scale=color_scale,
-                legend=alt.Legend(
-                    title="Population",
-                    values=domain,
-                    labelExpr=f"datum.value == '0' ? '{group_labels[0]}' : datum.value == '1' ? '{group_labels[1]}' : '{group_labels[2]}'",
-            ),
-        ),
-        detail="replicate:N",
-    ).properties(width=300, height=300)
-
+    chart1 = mt.create_chart(alt_results1, outcome_option,
+                          x, time_label,
+                          y, outcome_option, yscale,
+                          color_key, color_scale, domain,
+                          labelExpr,
+                          detail)
+    chart2 = mt.create_chart(alt_results2, outcome_option,
+                          x, time_label,
+                          y, outcome_option, yscale,
+                          color_key, color_scale, domain,
+                          labelExpr,
+                          detail)
     st.altair_chart(chart1 | chart2, use_container_width=True)
+
 
 
 if __name__ == "__main__":
     app()
-
-    # default_table = get_default_show_parameters_table()
-    # print(default_table)

@@ -1,5 +1,7 @@
+import os
 import numpy as np
 import polars as pl
+import polars.selectors as cs
 import griddler
 import griddler.griddle
 from metapop import SEIRModel

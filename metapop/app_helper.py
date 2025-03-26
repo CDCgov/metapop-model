@@ -1,0 +1,576 @@
+# This file contains helper functions for the metapop app.
+import numpy as np
+import polars as pl
+import altair as alt
+import griddler
+import griddler.griddle
+import metapop as mt
+
+
+### Methods to simulate the model ###
+def simulate(parms):
+    """
+    Simulate the SEIR model with the given parameters.
+
+    Args:
+        parms (dict): Dictionary of model parameters.
+
+    Returns:
+        pl.DataFrame: DataFrame containing the simulation results.
+    """
+
+    #### Set beta matrix based on desired R0 and connectivity scenario ###
+
+    parms["beta"] = mt.construct_beta(parms)
+
+    #### Set up vaccine schedule for group 2
+    parms["vaccination_uptake_schedule"] = mt.build_vax_schedule(parms)
+
+    #### set up the model time steps
+    steps = parms["tf"]
+    t = np.linspace(1, steps, steps)
+
+    #### Initialize population
+    groups = parms["n_groups"]
+    S, V, E1, E2, I1, I2, R, Y, X, u = mt.initialize_population(steps, groups, parms)
+
+    #### Run the model
+    model = mt.SEIRModel(parms)
+    S, V, E1, E2, I1, I2, R, Y, X, u = mt.run_model(model, u, t, steps, groups, S, V, E1, E2, I1, I2, R, Y, X)
+
+    #### Flatten into a dataframe
+    df = pl.DataFrame({
+        't': np.repeat(t, groups),
+        'group': np.tile(np.arange(groups), steps),
+        'S': S.flatten(),
+        'V': V.flatten(),
+        'E1': E1.flatten(),
+        'E2': E2.flatten(),
+        'I1': I1.flatten(),
+        'I2': I2.flatten(),
+        'R': R.flatten(),
+        'Y': Y.flatten(),
+        'X': X.flatten(),
+    })
+
+    return df
+
+
+def get_scenario_results(parms):
+    """
+    Run simulations for a grid set of parameters and return the combined results Dataframe.
+
+    Args:
+        parms (list): List of dictionaries containing model parameters.
+
+    Returns:
+
+    """
+    results = griddler.run_squash(griddler.replicated(simulate), parms)
+    # cast group to string
+    results = results.with_columns(pl.col("group").cast(pl.Utf8))
+    # select subset of values to return
+    results = results.select([
+        "initial_coverage_scenario", "k_21", "t", "group",
+        "S", "V", "E1", "E2", "I1", "I2", "R", "Y", "X", "replicate"
+    ])
+    # add a column for total infections
+    results = results.with_columns((pl.col("I1") + pl.col("I2")).alias("I"))
+    return results
+
+
+### Methods to read in default parameters ###
+def read_parameters():
+    """"
+    Read parameters from a YAML file and return the first set of parameters.
+
+    Returns:
+        dict: Dictionary of parameters for the metapopulation model.
+    """
+    parameter_sets = griddler.griddle.read("scripts/app_config.yaml")
+    parms = parameter_sets[0]
+    return parms
+
+
+def get_default_full_parameters():
+    """
+    Read in the default parameters for the metapopulation model from a YAML
+    file and return it as a Dataframe for two scenarios to be updated with user
+    input.
+
+    Returns:
+        pl.DataFrame: DataFrame containing the default parameters and their values for two scenarios.
+    """
+    # read in parms, some of which are lists
+    parms = read_parameters()
+
+    # get keys that are lists, unpack them and add to the dictionary
+    list_keys = get_list_keys(parms)
+    for key in list_keys:
+        for i, value in enumerate(parms[key]):
+            parms['{}_{}'.format(key, i)] = value
+
+        del parms[key]
+
+    keys = [key for key in parms.keys()]
+    values = [parms[key] for key in keys]
+
+    defaults = pl.DataFrame(
+        {
+            "Parameter": keys,
+            "Scenario 1": values,
+            "Scenario 2": values,
+        },
+        strict=False
+    )
+    return defaults
+
+
+def get_default_show_parameters_table():
+    """"
+    Get a Dataframe of the default simulation parameters that users always see
+    in the app sidebar. This Dataframe contains default values for two
+    scenarios that can be updated by the user through other methods.
+
+    Returns:
+        pl.DataFrame: DataFrame containing the default parameters and their values for two scenarios.
+    """
+
+    full_defaults = get_default_full_parameters()
+    show_parameter_mapping = get_show_parameter_mapping()
+    show_defaults = full_defaults.filter(pl.col("Parameter").is_in(show_parameter_mapping.keys()))
+
+    # replace specific values with integers
+    for key in ['Scenario 1', 'Scenario 2']:
+        show_defaults = show_defaults.with_columns(
+            pl.when(pl.col(key).str.to_lowercase() == "true")
+            .then(1)
+            .when(pl.col(key).str.to_lowercase() == "false")
+            .then(0)
+            .otherwise(pl.col(key))
+            .alias(key)
+        )
+
+    # cast to float
+    show_defaults = show_defaults.with_columns(pl.col("Scenario 1").cast(pl.Float64))
+    show_defaults = show_defaults.with_columns(pl.col("Scenario 2").cast(pl.Float64))
+
+    # renaming keys with longer names
+    show_defaults = show_defaults.with_columns(
+        pl.Series(name="Parameter",
+                  values=[show_parameter_mapping.get(key) for key in show_defaults["Parameter"].to_list()]))
+
+    return show_defaults
+
+
+def get_advanced_parameters_table():
+    full_defaults = get_default_full_parameters()
+    show_parameter_mapping = get_show_parameter_mapping()
+    advanced_parameter_mapping = get_advanced_parameter_mapping()
+    advanced_defaults = full_defaults.filter(
+        ~pl.col("Parameter").is_in(show_parameter_mapping.keys())
+        & pl.col("Parameter").is_in(advanced_parameter_mapping.keys())
+    )
+
+    # replace specific values with integers
+    for key in ['Scenario 1', 'Scenario 2']:
+        advanced_defaults = advanced_defaults.with_columns(
+            pl.when(pl.col(key).str.to_lowercase() == "true")
+            .then(1)
+            .when(pl.col(key).str.to_lowercase() == "false")
+            .then(0)
+            .otherwise(pl.col(key))
+            .alias(key)
+        )
+
+    # cast to float
+    advanced_defaults = advanced_defaults.with_columns(pl.col("Scenario 1").cast(pl.Float64))
+    advanced_defaults = advanced_defaults.with_columns(pl.col("Scenario 2").cast(pl.Float64))
+
+    # renaming keys with longer names
+    advanced_defaults = advanced_defaults.with_columns(
+        pl.Series(name="Parameter",
+                  values=[advanced_parameter_mapping.get(key) for key in advanced_defaults["Parameter"].to_list()]))
+    return advanced_defaults
+
+
+
+### Methods to handle how parameters are displayed in the app ###
+def get_show_parameter_mapping():
+    """
+    Get a mapping of parameter names to their display names.
+
+    Returns:
+        dict: A dictionary mapping parameter names to their display names.
+    """
+    # Define the mapping of parameter names to display names
+    show_mapping = dict(
+        # n_groups = "number of groups",
+        # desired_r0="R0",
+        # k = "average degree",
+        # k_i_0 = "average degree per person in large population",
+        # k_i_1 = "average degree per person in small population 1",
+        # k_i_2 = "average degree per person in small population 2",
+        # k_g1 = "average degree of small population 1 connecting to large population",
+        # k_g2 = "average degree of small population 2 connecting to large population",
+        # k_21 = "average degree between small populations",
+        # connectivity_scenario = "connectivity scenario",
+        # n_e_compartments = "number of exposed compartments",
+        # sigma = "sigma",
+        # n_i_compartments = "number of infectious compartments",
+        # gamma = "gamma",
+        pop_sizes_0 = "size of large population",
+        pop_sizes_1 = "size of small population 1",
+        pop_sizes_2 = "size of small population 2",
+        I0_0="initial infections in large population",
+        I0_1="initial infections in small population 1",
+        I0_2="initial infections in small population 2",
+        # vaccine_uptake = "Enable vaccine uptake",
+        total_vaccine_uptake_doses="vaccine doses total",
+        vaccine_uptake_range_0="active vaccination start day",
+        vaccine_uptake_range_1="active vaccination end day",
+        vaccinated_group = "vaccinated group",
+        # symptomatic_isolation = "Enable symptomatic isolation",
+        isolation_success = "Symptomatic isolation percentage",
+        symptomatic_isolation_day = "Symptomatic isolation start day",
+        tf = "time steps",
+        # n_replicates = "number of replicates",
+        # seed = "random seed",
+        initial_vaccine_coverage_0 = "baseline vaccination in large population",
+        initial_vaccine_coverage_1 = "baseline vaccination in small population 1",
+        initial_vaccine_coverage_2 = "baseline vaccination in small population 2",
+    )
+    return show_mapping
+
+
+def get_advanced_parameter_mapping():
+    """
+    Get a mapping of advanced parameter names to their display names.
+
+    Returns:
+        dict: A dictionary mapping advanced parameter names to their display names.
+    """
+    # Define the mapping of advanced parameter names to display names
+    advanced_mapping = dict(
+        desired_r0="R0",
+        n_groups="number of groups",
+        gamma="gamma",
+        sigma="sigma",
+        # n_e_compartments="number of exposed compartments",
+        # n_i_compartments="number of infectious compartments",
+        # tf="number of time steps",
+        # pop_sizes_0="size of large population",
+        # pop_sizes_1="size of small population 1",
+        # pop_sizes_2="size of small population 2",
+        k_i_0 = "average degree for large population",
+        k_i_1 = "average degree for small population 1",
+        k_i_2 = "average degree for small population 2",
+        k_g1 = "average degree of small population 1 connecting to large population",
+        k_g2 = "average degree of small population 2 connecting to large population",
+        k_21 = "connectivity between smaller populations",
+        # vaccine_uptake="vaccine uptake",
+        # vaccine_uptake_doses="vaccine doses",
+        # isolation_percentage="isolation percentage",
+        # isolation_effectiveness="isolation effectiveness",
+    )
+    return advanced_mapping
+
+
+def get_outcome_options():
+    """
+    Get the available outcome options for the app.
+
+    Returns:
+        tuple: A tuple containing the available outcome options.
+    """
+    return (
+            # "Weekly Infections",
+            "Weekly Incidence", "Weekly Cumulative Incidence",
+            "Daily Infections", "Daily Incidence", "Cumulative Daily Incidence",
+    )
+
+
+def get_outcome_mapping():
+    """
+    Get a mapping of outcome names to their corresponding codes.
+
+    Returns:
+        dict: A dictionary mapping outcome names to their corresponding output column name.
+    """
+    # Define the mapping of outcome names to their corresponding codes
+    return {
+        "Daily Infections": "I",
+        "Daily Incidence": "inc",
+        "Cumulative Daily Incidence": "Y",
+        # "Weekly Infections": "WI",
+        "Weekly Incidence": "Winc",
+        "Weekly Cumulative Incidence": "WCI",
+    }
+
+
+### Methods to handle parameter keys based on their value types ###
+def get_list_keys(parms):
+    """
+    Get the keys of parameters that have list values.
+
+    Args:
+        parms (dict): The parameters dictionary.
+
+    Returns:
+        list: The keys of the parameters that have lists values.
+    """
+    list_keys = [key for key, value in parms.items() if isinstance(value, list)]
+    return list_keys
+
+
+def get_keys_in_list(parms, updated_parms):
+    """
+    Get the expanded keys of parameters from updated_parms that map to keys that have list values in the parms dictionary.
+
+    Args:
+        parms         (dict): The original parameters dictionary.
+        updated_parms (dict): The updated parameters dictionary.
+
+    Returns:
+        list: The keys of the parameters that are in the list keys of the updated parameters.
+    """
+    list_keys = get_list_keys(parms)
+    keys_in_list = [key for key in updated_parms.keys() if any(key.startswith(list_key) for list_key in list_keys)]
+    keys_in_list = [key for key in sorted(keys_in_list)]
+    return keys_in_list
+
+
+def repack_list_parameters(parms, updated_parms, keys_in_list):
+    """
+    Repack the list parameters in the updated parameters dictionary.
+
+    Args:
+        parms         (dict): The original parameters dictionary.
+        updated_parms (dict): The updated parameters dictionary.
+        keys_in_list  (list): The keys of the parameters that are in the list keys of the updated parameters.
+
+    Returns:
+        dict: The updated parameters dictionary with repacked list parameters.
+    """
+    for key in keys_in_list:
+        key_split = key.split("_")
+        list_key = "_".join(key_split[:-1])
+
+        if list_key not in updated_parms:
+            updated_parms[list_key] = []
+        if isinstance(parms[list_key][0], int) and not isinstance(parms[list_key][0], bool):
+            updated_parms[list_key].append(int(updated_parms[key]))
+        elif isinstance(parms[list_key][0], bool):
+            updated_parms[list_key].append(True if updated_parms[key] in [True, 'TRUE', 'True', 'true', '1'] else False)
+        elif isinstance(parms[list_key][0], float):
+            updated_parms[list_key].append(float(updated_parms[key]))
+        elif isinstance(parms[list_key][0], str):
+            updated_parms[list_key].append(str(updated_parms[key]))
+
+    for key in keys_in_list:
+        del updated_parms[key]
+
+    return updated_parms
+
+
+### Methods to handle extraction of user inputs and updating parameter dictionaries to send for simulation ##
+def get_parms_from_table(table, value_col="Scenario 1"):
+    """
+    Extract a parameter dictionary from a table.
+
+    Args:
+        table (pl.DataFrame): The input table containing parameters.
+        value_col      (str): The column name for the parameter values.
+
+    Returns:
+        dict: A dictionary containing the parameters.
+    """
+  # get parameter dictionary from a table
+    parms = dict()
+    # expect the table to have the following columns
+    # Parameter, Scenario 1, Scenario 2
+    for key, value in zip(table["Parameter"].to_list(), table[value_col].to_list()):
+        parms[key] = value
+    return parms
+
+
+def update_parms_from_table(parms, table, parameters_mapping, value_col="Scenario 1"):
+    """
+    Update the parameter dictionary with new values from a user input table.
+
+    Args:
+        parms              (dict): The original parameters dictionary.
+        table      (pl.DataFrame): The input table containing parameters.
+        parameters_mapping (dict): A mapping of parameter names to their display names.
+        value_col           (str): The column name for the parameter values.
+
+    Returns:
+        dict: The updated parameters dictionary.
+    """
+    # get updated values from user through the sidebar
+    for key, value in zip(table["Parameter"].to_list(), table[value_col].to_list()):
+        original_key = next((k for k, v in parameters_mapping.items() if v == key), key)
+        parms[original_key] = value
+    return parms
+
+
+def correct_parameter_types(original_parms, parms_from_table):
+    """
+    Correct the parameter types in the updated parameters dictionary.
+
+    Args:
+        original_parms   (dict): The original parameters dictionary.
+        parms_from_table (dict): The updated parameters dictionary from the table.
+
+    Returns:
+        dict: The updated parameters dictionary with corrected types.
+    """
+    for key, value in original_parms.items():
+        if isinstance(value, int) and not isinstance(value, bool):
+            parms_from_table[key] = int(parms_from_table[key])
+        elif isinstance(value, bool):
+            if parms_from_table[key] in [True, 'TRUE', 'True', 'true', '1']:
+                parms_from_table[key] = True
+            else:
+                parms_from_table[key] = False
+        elif isinstance(value, float):
+            parms_from_table[key] = float(parms_from_table[key])
+        elif isinstance(value, str):
+            parms_from_table[key] = str(parms_from_table[key])
+    return parms_from_table
+
+
+### Methods to calculate different metrics from simulation results ###
+def add_daily_incidence(results, replicate_inds, groups):
+    """
+    Add daily incidence to the results DataFrame."
+
+    Args:
+        results (pl.DataFrame): The results DataFrame.
+        replicate_inds  (list): List of replicate indices.
+        groups          (list): List of group indices.
+
+    Returns:
+        pl.DataFrame: The updated results DataFrame with daily incidence added.
+    """
+    # add a column for daily incidence
+    results = results.with_columns(pl.lit(None).alias("inc"))
+    updated_rows = []
+
+    for replicate in replicate_inds:
+        tempdf = results.filter(pl.col("replicate") == replicate)
+        for group in groups:
+            group_data = tempdf.filter(pl.col("group") == group)
+            group_data = group_data.sort("t")
+            inc = group_data["Y"] - group_data["Y"].shift(1)
+            group_data = group_data.with_columns(inc.alias("inc"))
+            updated_rows.append(group_data)
+
+    results = pl.concat(updated_rows, how="vertical")
+    return results
+
+
+def get_interval_cumulative_incidence(results, replicate_inds, groups, interval=7):
+    """"
+    Calculate cumulative incidence over specified intervals.
+
+    Args:
+        results (pl.DataFrame): The results DataFrame.
+        replicate_inds  (list): List of replicate indices.
+        groups          (list): List of group indices.
+        interval         (int): The interval in days.
+
+    Returns:
+        pl.DataFrame: The updated results DataFrame with interval cumulative incidence added.
+    """
+    interval_results = results.clone()
+    interval_results.sort(["replicate", "group", "t"])
+    # extract time points for every interval days
+    time_points = results["t"].unique().sort().gather_every(interval)
+    # make a single time array
+    interval_points = np.arange(len(time_points), dtype=float)
+    interval_results = interval_results.filter(pl.col("t").is_in(time_points))
+
+    # tile the interval time points for each group and replicate
+    repeated_interval_points = np.tile(interval_points, len(groups) * len(replicate_inds))
+    # add the interval time points to the interval results table
+    interval_results = interval_results.with_columns(pl.Series(name="interval_t", values=repeated_interval_points))
+
+    # now Y is the cumulative incidence at each time point and interval_t is the interval time point
+    return interval_results
+
+
+def get_interval_results(results, replicate_inds, groups, interval=7):
+    """"
+    Calculate interval results for cumulative incidence.
+
+    Args:
+        results (pl.DataFrame): The results DataFrame.
+        replicate_inds  (list): List of replicate indices.
+        groups          (list): List of group indices.
+        interval         (int): The interval in days
+
+    Returns:
+         pl.DataFrame: The updated results DataFrame with interval cumulative incidence added.""
+    """
+    # get a table with results, in particular cumulative incidence at each interval time point
+    # in this table, Y is the cumulative incidence
+    interval_results = get_interval_cumulative_incidence(results, replicate_inds, groups, interval)
+    # now process this table to get the interval incidence
+    updated_rows = []
+    for replicate in replicate_inds:
+        tempdf = interval_results.filter(pl.col("replicate") == replicate)
+        for group in groups:
+            group_data = tempdf.filter(pl.col("group") == group)
+            group_data = group_data.sort("t")
+            inc = group_data["Y"] - group_data["Y"].shift(1)
+            group_data = group_data.with_columns(inc.alias(f"inc_{interval}"))
+            updated_rows.append(group_data)
+    interval_results = pl.concat(updated_rows)
+    # drop column inc
+    interval_results = interval_results.drop("inc")
+    return interval_results
+
+
+### Methods to create charts for the app ###
+def create_chart(alt_results, outcome_option, x, xlabel, y, ylabel, yscale, color_key, color_scale, domain, labelExpr, detail, width=300, height=300):
+    """
+    Create a chart using Altair.
+
+    Args:
+        alt_results (pl.DataFrame): The results DataFrame.
+        outcome_option       (str): The selected outcome option.
+        x                    (str): The x-axis column name.
+        xlabel               (str): The x-axis label.
+        y                    (str): The y-axis column name.
+        ylabel               (str): The y-axis label.
+        yscale             (tuple): The y-axis scale limits.
+        color_key            (str): The color key for the chart.
+        color_scale    (alt.Scale): The color scale for the chart.
+        domain              (list): The domain for the color scale.
+        labelExpr            (str): The expression for the legend labels.
+        detail               (str): Additional detail for the chart.
+        width                (int): Width of the chart. Defaults to 300.
+        height               (int): Height of the chart. Defaults to 300.
+
+    Returns:
+            alt.Chart: The Altair chart object.
+    """
+    chart = alt.Chart(
+        alt_results,
+        title=outcome_option
+        ).mark_line(opacity=0.4).encode(
+            x=alt.X(x, title=xlabel),
+            y=alt.Y(y, title=ylabel).scale(domain=yscale),
+            color=alt.Color(
+                color_key,
+                scale=color_scale,
+                legend=alt.Legend(
+                    title="Population",
+                    values=domain,
+                    labelExpr=labelExpr,
+                ),
+            ),
+            detail=detail,
+        ).properties(width=width, height=height)
+    return chart
