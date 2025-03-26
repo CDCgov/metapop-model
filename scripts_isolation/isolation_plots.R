@@ -187,4 +187,3 @@ for (i in outbreak_sizes) {
         paste0("output/isolation/res_table_outbreak_size", i, ".csv")
     )
 }
-

@@ -192,7 +192,7 @@ def get_infected(u, I_indices, groups, parms, t):
         return infected
     else:
         return np.array([sum(u[group][i] for i in I_indices) for group in range(groups)])
-    
+
 
 def calculate_foi(beta, I_g, pop_sizes, target_group):
     """
