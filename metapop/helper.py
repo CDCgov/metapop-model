@@ -185,10 +185,19 @@ def get_infected(u, I_indices, groups, parms, t):
     Returns:
         np.array: An array of the number of infected individuals for each group.
     """
-    if (parms["symptomatic_isolation"] & (t > parms["symptomatic_isolation_day"])):
+    if (parms["symptomatic_isolation"] & (t >= parms["symptomatic_isolation_day"])):
+        # last I compartment
         i_max = max(I_indices)
-        infected = np.array([sum(u[group][i] for i in I_indices if i != i_max) for group in range(groups)])
-        infected = infected + np.array([(u[group][i_max] * parms["isolation_success"]) for group in range(groups)])
+
+        # Prerash infected = I1 infecteds
+        pre_rash_infected = np.array([sum(u[group][i] for i in I_indices if i != i_max) for group in range(groups)])
+
+        # Postrash infected that are not isolating
+        post_rash = np.array([(u[group][i_max] * (1 - parms["isolation_success"])) for group in range(groups)])
+
+        # Total infected = prerash (I1) + postrash infected (I2)
+        infected = pre_rash_infected + post_rash
+
         return infected
     else:
         return np.array([sum(u[group][i] for i in I_indices) for group in range(groups)])

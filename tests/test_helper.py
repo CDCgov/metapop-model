@@ -168,6 +168,8 @@ def test_active_vaccination():
 
     assert uptake[parms["vaccinated_group"]] == u[parms['vaccinated_group']][0], "Group 2 uptake is size of Susceptible population"
 
+
+
 def test_get_infected():
     # Define the initial state
     u = [
@@ -196,6 +198,47 @@ def test_get_infected():
     # Check the results
     expected_infected = np.array([3, 7])  # Sum of I1 and I2 for each group
     assert np.array_equal(infected, expected_infected), f"Expected {expected_infected}, but got {infected}"
+
+def test_symptomatic_isolation():
+    parms = {
+        "symptomatic_isolation": True,
+        "symptomatic_isolation_day": 10,
+        "isolation_success": 1.0
+    }
+
+    # Initial state for each group: Group 2 has no E or I individuals yet
+    u = [
+        [1000, 0, 0, 0, 100, 100, 0, 0, 0],  # Group 0: S, V, E1, E2, I1, I2, R, Y, X
+        [600, 0, 0, 0, 0, 0, 0, 0, 0]     # Group 2: S, V, E1, E2, I1, I2, R, Y, X
+    ]
+
+    # Define the indices of the I compartments
+    I_indices = [4, 5]
+
+    # Define the number of groups
+    groups = 2
+
+    # First test that no isolation happens before isolation day
+    t = 1
+
+    # Call the get_infected function
+    infected = get_infected(u, I_indices, groups, parms, t)
+
+    # Check the results
+    expected_infected = np.array([200, 0])  # Sum of I1 and I2 for each group
+    assert np.array_equal(infected, expected_infected), f"Expected {expected_infected}, but got {infected}"
+
+    # Next test that isolation happens on isolation day
+    t2 = 10
+
+    # Call the get_infected function
+    infected2 = get_infected(u, I_indices, groups, parms, t2)
+
+    # Check the results
+    expected_infected2 = np.array([100, 0])  # Should just be I1
+    assert np.array_equal(infected2, expected_infected2), f"Expected {expected_infected2}, but got {infected2}"
+
+
 
 def test_rate_to_frac():
     # Define the rate
