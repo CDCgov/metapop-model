@@ -1,7 +1,29 @@
 library(tidyverse)
 library(ggplot2)
 
-results <- read_csv("output/isolation/results.csv")
+date <- "2025-03-25"
+suffix <- "isolation"
+R0 <- 12
+
+# Function to create filename for experiment results
+create_filename <- function(base_name = "output/results", date = "", suffix = "", format=".csv") {
+  filename <- base_name
+  if (date != '') {
+    filename <- paste0(filename, "_", date)
+  }
+  if (suffix != '') {
+    filename <- paste0(filename, "_", suffix)
+  }
+  filename <- paste0(filename, format)
+  return(filename)
+}
+
+# Use the function to create the filename for results
+filename <- create_filename(date = date, suffix = suffix)
+# read in the results
+results <- read_csv(filename)
+
+# get the number of replicates
 reps <- max(results$replicate)
 plot_reps <- 20 # sims to plot in incidence curves
 plot_cols <- c("#20419a", "#cf4828", "#f78f47")
