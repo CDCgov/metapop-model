@@ -53,7 +53,7 @@ class SEIRModel:
 
         return new_vaccinated
 
-    def infectious(self, u, t):
+    def infectious(self, u):
         new_infectious = []
         old_infectious = []
         for group in range(self.groups):
@@ -91,7 +91,7 @@ class SEIRModel:
         new_vaccinated = self.vaccinate(u, t)
         current_susceptibles = self.get_updated_susceptibles(u, new_vaccinated)
         new_exposed, old_exposed = self.exposed(u, current_susceptibles, t)
-        new_infectious, old_infectious = self.infectious(u, t)
+        new_infectious, old_infectious = self.infectious(u)
         new_recoveries = self.recovery(u, t)
         for group in range(self.groups):
             S, V, E1, E2, I1, I2, R, Y, X = u[group]
