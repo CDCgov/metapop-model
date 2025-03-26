@@ -187,7 +187,7 @@ def get_infected(u, I_indices, groups, parms, t):
     """
     if (parms["symptomatic_isolation"] & (t > parms["symptomatic_isolation_day"])):
         i_max = max(I_indices)
-        infected = np.array([sum(u[group][i] for i in I_indices[:-1]) for group in range(groups)])
+        infected = np.array([sum(u[group][i] for i in I_indices if i != i_max) for group in range(groups)])
         infected = infected + np.array([(u[group][i_max] * parms["isolation_success"]) for group in range(groups)])
         return infected
     else:
