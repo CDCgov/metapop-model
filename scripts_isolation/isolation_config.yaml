@@ -16,11 +16,12 @@ baseline_parameters:
   I0: [0, 5, 0]     # initially infected
   vaccine_uptake: True
   vaccine_uptake_range:  [30, 60] # start and end of vaccine campaign
+  vaccinated_group: 2
   total_vaccine_uptake_doses: 0 # constant, to be divided out among the days
   symptomatic_isolation: True
   isolation_success: 0.5
   tf: 365        # total time modeled
-  n_replicates: 100
+  n_replicates: 1000
   seed: 123
 
 grid_parameters:
