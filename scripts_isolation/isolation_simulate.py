@@ -7,10 +7,6 @@ import griddler.griddle
 from metapop import SEIRModel
 from metapop.helper import *
 
-# setup output directory
-output_dir = "output/isolation"
-os.makedirs(output_dir, exist_ok=True)
-
 def simulate(parms):
     #### Set up rate params
     parms["sigma"] = time_to_rate(parms["latent_duration"]) * parms["n_e_compartments"]
@@ -52,6 +48,10 @@ def simulate(parms):
     return df
 
 if __name__ == "__main__":
+    # setup output directory
+    output_dir = "output/isolation"
+    os.makedirs(output_dir, exist_ok=True)
+
     parameter_sets = griddler.griddle.read("scripts_isolation/isolation_config.yaml")
     results_all = griddler.run_squash(griddler.replicated(simulate), parameter_sets)
     results = results_all.select(cs.by_name(['initial_coverage_scenario', 'symptomatic_isolation_day', 't', 'group', 'S', 'V', 'E1', 'E2', 'I1', 'I2', 'R', 'Y', 'X', 'replicate']))
