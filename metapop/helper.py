@@ -226,6 +226,18 @@ def rate_to_frac(rate):
     """
     return 1.0 - np.exp(-rate)
 
+def time_to_rate(duration):
+    """
+    Calculate the rate parameters of transitions based on the length of time in compartment
+
+    Args:
+        duration (float): The duration of time in compartment
+
+    Returns:
+        float: The rate parameter
+    """
+    return 1.0/duration
+
 def build_vax_schedule(parms):
     """
     Build dictionary desribing vaccination schedule for group 2
