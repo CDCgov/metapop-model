@@ -19,7 +19,6 @@ def get_percapita_contact_matrix(parms):
         np.array: The per capita contact matrix.
     """
     assert parms['n_groups'] == 3, "The number of groups (n_groups) must be 3 to use this function."
-
     assert parms["pop_sizes"][0] == np.max(parms["pop_sizes"]), "The first population must be the largest to represent the population."
 
     k_i = parms["k_i"]
@@ -31,8 +30,8 @@ def get_percapita_contact_matrix(parms):
     edges_per_group = pop_sizes * k_i
 
     contacts = np.array([[0,                  k_g1 * pop_sizes[1], k_g2 * pop_sizes[2]],
-                         [k_g1 * pop_sizes[1],       0,            k_21 * pop_sizes[1]],
-                         [k_g2 * pop_sizes[2],k_21 * pop_sizes[1],                  0]])
+                        [k_g1 * pop_sizes[1],       0,            k_21 * pop_sizes[1]],
+                        [k_g2 * pop_sizes[2],k_21 * pop_sizes[1],                  0]])
     colsums = np.sum(contacts, axis=0)
 
     edges_to_assign = edges_per_group - colsums
@@ -47,25 +46,24 @@ def get_percapita_contact_matrix(parms):
 
     return percapita_contacts
 
-def get_r0(beta_matrix, gamma_unscaled, pop_sizes, n_i_compartments):
+def get_r0(beta_matrix, gamma, pop_sizes):
     """
-    Calculate the basic reproduction number (R0) matrix and return its spectral radius.
+    Calculate the basic reproduction number (R0) matrix and return its spectral radius when the beta matrix is at least a 2x2 array.
 
     Args:
         beta_matrix (np.array): The transmission rate matrix.
-        gamma_unscaled (float): The unscaled recovery rate.
+        gamma (float): The recovery rate.
         pop_sizes (list or np.array): The population sizes of each group.
         n_i_compartments (int): The number of infectious compartments.
 
     Returns:
         float: The spectral radius of the R0 matrix, representing the basic reproduction number.
     """
-    gamma_scaled = gamma_unscaled / n_i_compartments
 
-    # Calculate the R0 matrix with row-wise multi
-    X = (beta_matrix / gamma_scaled) * pop_sizes / sum(pop_sizes)
+    # Calculate the R matrix with row-wise multiplication
+    X = (beta_matrix / gamma) * pop_sizes / sum(pop_sizes)
 
-    # Calculate the eigenvalues of the R0 matrix
+    # More than one population, calculate R0 based on spectral radius of R matrix
     eigen_all = la.eig(X)
     spectral_radius = np.max(np.abs(eigen_all[0]))
 
@@ -101,25 +99,22 @@ def calculate_beta_factor(r0_desired, current_r0):
     factor = r0_desired / current_r0
     return factor
 
-def modify_beta_connectivity(base_beta, connectivity_factor):
+def get_r0_one_group(k, gamma):
     """
-    Modify the beta matrix to adjust the connectivity between sub-groups in a 3 pop or more model.
+    Calculate the basic reproduction number (R0) number when there's only one group.
 
     Args:
-        base_beta (np.array): Transmission rate matrix which we want to adjust.
-        connectivity_factor (float): The factor by which to adjust the connectivity between specific groups.
+        k (list): Contacts per day (unscaled)
+        gamma (float): The recovery rate.
+        pop_sizes (list or np.array): The population sizes of each group.
+        n_i_compartments (int): The number of infectious compartments.
 
     Returns:
-        np.array: The modified transmission rate matrix with adjusted connectivity.
+        float: R0, contacts per day / recovery rate
     """
-    # Assert statement to check that beta is at least 3x3 so this doesn't fail
-    assert base_beta.shape[0] >= 3 and base_beta.shape[1] >= 3, "The base_beta matrix must be at least 3x3."
+    X = (k / gamma)
 
-    final_beta = base_beta
-    final_beta[1,2] *= connectivity_factor
-    final_beta[2,1] *= connectivity_factor
-
-    return final_beta
+    return X
 
 def construct_beta(parms):
     """
@@ -136,11 +131,17 @@ def construct_beta(parms):
     Returns:
         np.array: The scaled beta matrix.
     """
-    beta_unscaled = get_percapita_contact_matrix(parms)
-    beta_modified_connectivity = modify_beta_connectivity(beta_unscaled, parms["connectivity_scenario"])
-    r0_base = get_r0(beta_modified_connectivity, parms["gamma"], parms["pop_sizes"], parms["n_i_compartments"])
-    beta_factor = calculate_beta_factor(parms["desired_r0"], r0_base)
-    beta_scaled = rescale_beta_matrix(beta_modified_connectivity, beta_factor)
+    if parms['n_groups'] == 3:
+        beta_unscaled = get_percapita_contact_matrix(parms)
+        r0_base = get_r0(beta_unscaled, parms["gamma"], parms["pop_sizes"])
+        beta_factor = calculate_beta_factor(parms["desired_r0"], r0_base)
+        beta_scaled = rescale_beta_matrix(beta_unscaled, beta_factor)
+    else:
+        assert parms['n_groups'] == 1, "Setups only designed for one or three groups currently."
+        # skip per capita contact matrix building, get R0 directly
+        r0_base = get_r0_one_group(parms["k_i"], parms["gamma"])
+        beta_factor = calculate_beta_factor(parms["desired_r0"], r0_base)
+        beta_scaled = rescale_beta_matrix(parms["k_i"], beta_factor)
     return beta_scaled
 
 def initialize_population(steps, groups, parms):
@@ -202,7 +203,6 @@ def get_infected(u, I_indices, groups, parms, t):
     else:
         return np.array([sum(u[group][i] for i in I_indices) for group in range(groups)])
 
-
 def calculate_foi(beta, I_g, pop_sizes, target_group):
     """
     Calculate the force of infection (FOI) for a target group.
@@ -216,11 +216,11 @@ def calculate_foi(beta, I_g, pop_sizes, target_group):
     Returns:
         float: The force of infection for the target group.
     """
-
     foi = 0
-    for j in range(len(pop_sizes)):
-        foi += I_g[j] * beta[target_group, j] / pop_sizes[target_group]
 
+    for j in range(len(pop_sizes)):
+        beta_value = beta if len(pop_sizes) == 1 else beta[target_group, j]
+        foi += I_g[j] * beta_value / pop_sizes[target_group]
     return foi
 
 def rate_to_frac(rate):
