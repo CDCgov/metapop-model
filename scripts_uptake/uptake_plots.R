@@ -1,12 +1,12 @@
 library(tidyverse)
 library(ggplot2)
 
-date <- "2025-03-25"
-suffix <- "uptake"
+date <- ""
+suffix <- ""
 R0 <- 12
 
 # Function to create filename for experiment results
-create_filename <- function(base_name = "output/results", date = "", suffix = "", format=".csv") {
+create_filename <- function(base_name = "output/uptake/results", date = "", suffix = "", format=".csv") {
   filename <- base_name
   if (date != '') {
     filename <- paste0(filename, "_", date)

@@ -6,7 +6,7 @@ suffix <- ""
 R0 <- 12 # not varied
 
 # Function to create filename for experiment results
-create_filename <- function(base_name = "output/results", date = "", suffix = "", format = ".csv") {
+create_filename <- function(base_name = "output/one_pop/results", date = "", suffix = "", format = ".csv") {
     filename <- base_name
     if (date != "") {
         filename <- paste0(filename, "_", date)
@@ -19,7 +19,7 @@ create_filename <- function(base_name = "output/results", date = "", suffix = ""
 }
 
 # Use the function to create the filename for results
-filename <- create_filename(base_name = "output/one_pop/results", date = date, suffix = suffix)
+filename <- create_filename( date = date, suffix = suffix)
 # read in the results
 results <- read_csv(filename)
 

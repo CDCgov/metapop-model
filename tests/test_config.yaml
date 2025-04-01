@@ -14,6 +14,10 @@ baseline_parameters:
   vaccine_uptake: FALSE
   vaccine_uptake_days: [0]
   vaccine_updake_doses: [0]
+  connectivity_scenario: 1.0
+  symptomatic_isolation: False
+  symptomatic_isolation_day: 400
+  isolation_success: 0.0
   tf: 365        # total time modeled
   n_replicates: 1000
   seed: 123

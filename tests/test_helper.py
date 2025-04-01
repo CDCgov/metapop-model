@@ -275,9 +275,6 @@ def test_run_model_once_with_config():
 
     parms = config["baseline_parameters"]
     parms["initial_vaccine_coverage"] = [0.9, 0.5, 0.5] # add here, griddler has it as nested params
-    parms["vaccine_uptake"] = False # setting here in case default config changes
-    parms["symptomatic_isolation"] = False
-    parms["symptomatic_isolation_day"] = 400
     # pulling k_21 from grid parameters
     parms['k_21'] = config['grid_parameters']['k_21'][0]
 
