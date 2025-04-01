@@ -20,12 +20,12 @@ class SEIRModel:
         self.Y = 7
         self.X = 8
 
-    def exposed(self, u, current_susceptibles):
+    def exposed(self, u, current_susceptibles, t):
         new_exposed = []
         old_exposed = []
 
         # Extract the number of infected individuals for each group
-        I_g = get_infected(u, [self.I1, self.I2], self.groups)
+        I_g = get_infected(u, [self.I1, self.I2], self.groups, self.parms, t)
 
         for target_group in range(self.groups):
             S = current_susceptibles[target_group]
@@ -63,7 +63,7 @@ class SEIRModel:
             old_infectious.append(np.random.binomial(u[group][self.I1], i1_to_i2_frac))
         return [new_infectious, old_infectious]
 
-    def recovery(self, u):
+    def recovery(self, u, t):
         new_recoveries = []
         for group in range(self.groups):
             new_r_frac = rate_to_frac(self.parms["gamma"])
@@ -90,9 +90,9 @@ class SEIRModel:
         new_u = []
         new_vaccinated = self.vaccinate(u, t)
         current_susceptibles = self.get_updated_susceptibles(u, new_vaccinated)
-        new_exposed, old_exposed = self.exposed(u, current_susceptibles)
+        new_exposed, old_exposed = self.exposed(u, current_susceptibles, t)
         new_infectious, old_infectious = self.infectious(u)
-        new_recoveries = self.recovery(u)
+        new_recoveries = self.recovery(u, t)
         for group in range(self.groups):
             S, V, E1, E2, I1, I2, R, Y, X = u[group]
             new_S = S - new_exposed[group] - new_vaccinated[group]

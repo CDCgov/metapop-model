@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import polars as pl
 import polars.selectors as cs
@@ -14,7 +15,10 @@ def simulate(parms):
     #### Set beta matrix based on desired R0 and connectivity scenario ###
     parms["beta"] = construct_beta(parms)
 
-    #### set up the model time steps
+    #### Set up vaccine schedule for group 2
+    parms["vaccination_uptake_schedule"] = build_vax_schedule(parms)
+
+    #### Set up the model time steps
     steps = parms["tf"]
     t = np.linspace(1, steps, steps)
 
@@ -44,7 +48,11 @@ def simulate(parms):
     return df
 
 if __name__ == "__main__":
-    parameter_sets = griddler.griddle.read("scripts/config.yaml")
+    # setup output directory
+    output_dir = "output/isolation"
+    os.makedirs(output_dir, exist_ok=True)
+
+    parameter_sets = griddler.griddle.read("scripts_isolation/isolation_config.yaml")
     results_all = griddler.run_squash(griddler.replicated(simulate), parameter_sets)
-    results = results_all.select(cs.by_name(['initial_coverage_scenario', 'k_21', 't', 'group', 'S', 'V', 'E1', 'E2', 'I1', 'I2', 'R', 'Y', 'X', 'replicate']))
-    results.write_csv("output/results.csv")
+    results = results_all.select(cs.by_name(['initial_coverage_scenario', 'symptomatic_isolation_day', 't', 'group', 'S', 'V', 'E1', 'E2', 'I1', 'I2', 'R', 'Y', 'X', 'replicate']))
+    results.write_csv(os.path.join(output_dir, "results.csv"))

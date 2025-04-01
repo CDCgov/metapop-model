@@ -13,7 +13,9 @@ def test_only_expose_susceptible():
         "n_e_compartments": 2,
         "n_i_compartments": 2,
         "pop_sizes": [100, 100],
-        "n_groups": 2
+        "n_groups": 2,
+        "symptomatic_isolation": False,
+        "symptomatic_isolation_day": 400
     }
 
     # Initial state for each group
@@ -22,11 +24,17 @@ def test_only_expose_susceptible():
         [ 0, 0, 0, 0, 0, 0, 100, 0, 0]    # group has no susceptibles
     ]
 
+    # Set time
+    t = 1
+
+    # set susceptibles
+    current_susceptibles = [99, 0]
+
     # Create an instance of SEIRModel
     model = SEIRModel(parms)
 
     # Call the exposed method
-    new_exposed, old_exposed = model.exposed(u, current_susceptibles=[99, 0])
+    new_exposed, old_exposed = model.exposed(u, current_susceptibles, t)
     assert new_exposed[1] == 0 # No new exposures in this group bc no susceptibles
     assert len(new_exposed) == parms['n_groups']
     assert len(old_exposed) == parms['n_groups']

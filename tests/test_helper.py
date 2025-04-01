@@ -41,23 +41,19 @@ def test_get_percapita_contact_matrix():
     assert np.array_equal(percapita_contacts, expected_percapita_contacts), f"Expected {expected_percapita_contacts}, but got {percapita_contacts} when using different degree for each subgroup"
 
 def test_get_r0():
+    # keeling and rohani example
     beta_matrix = np.array([
-        [0.1, 0.2, 0.3],
-        [0.2, 0.1, 0.4],
-        [0.3, 0.4, 0.1]
+        [10.0, 0.1],
+        [ 0.1, 1.0]
     ])
-    gamma_unscaled = 0.1
-    pop_sizes = np.array([1000, 200, 200])
-    n_i_compartments = 2
-    expected_r0 = 3.709795
-    r0 = get_r0(beta_matrix, gamma_unscaled, pop_sizes, n_i_compartments)
+    gamma = 1.0
+    pop_sizes = np.array([20, 80])
+    expected_r0 = 2.001331855134916
+    r0 = get_r0(beta_matrix, gamma, pop_sizes)
     assert np.isclose(r0, expected_r0), f"Expected {expected_r0}, but got {r0}"
 
 def test_construct_beta():
     parms = {
-        "beta_within": 0.1,
-        "beta_general": 0.05,
-        "beta_small": 0.02,
         "k_i": [10, 10, 10],
         "k_g1": 1,
         "k_g2": 2,
@@ -70,13 +66,33 @@ def test_construct_beta():
         "connectivity_scenario": 1.0
     }
     beta_unscaled = get_percapita_contact_matrix(parms)
-    r0_base = get_r0(beta_unscaled, parms["gamma"], parms["pop_sizes"], parms["n_i_compartments"])
+    r0_base = get_r0(beta_unscaled, parms["gamma"], parms["pop_sizes"])
     beta_factor = calculate_beta_factor(parms["desired_r0"], r0_base)
     beta_scaled = rescale_beta_matrix(beta_unscaled, beta_factor)
-    expected_beta = modify_beta_connectivity(beta_scaled, parms["connectivity_scenario"])
-    beta_scaled = construct_beta(parms)
+    expected_beta = construct_beta(parms)
     assert beta_scaled.shape == (3, 3), f"Expected shape (3, 3), but got {beta_scaled.shape}"
     assert np.allclose(beta_scaled, expected_beta), f"Expected {expected_beta}, but got {beta_scaled}"
+
+    # one_group setup
+    parms = {
+        "k_i": 10.0,
+        "k_g1": 0,
+        "k_g2": 0,
+        "k_21": 0,
+        "gamma": 0.1,
+        "pop_sizes": np.array([1000]),
+        "n_i_compartments": 2,
+        "desired_r0": 2.0,
+        "n_groups": 1
+    }
+    r0_base = get_r0_one_group(parms["k_i"], parms["gamma"])
+    beta_factor = calculate_beta_factor(parms["desired_r0"], r0_base)
+    beta_scaled = rescale_beta_matrix(parms["k_i"], beta_factor)
+    expected_beta = construct_beta(parms)
+    assert np.allclose(r0_base, 100.0), f"Expected beta / gamma = 100, but got {r0_base}"
+    assert isinstance(beta_scaled, float), f"Expected float, but got {type(beta_scaled)}"
+    assert np.allclose(beta_scaled, expected_beta), f"Expected {expected_beta}, but got {beta_scaled}"
+
 
 def test_pop_initialization():
     parms = {
@@ -168,6 +184,8 @@ def test_active_vaccination():
 
     assert uptake[parms["vaccinated_group"]] == u[parms['vaccinated_group']][0], "Group 2 uptake is size of Susceptible population"
 
+
+
 def test_get_infected():
     # Define the initial state
     u = [
@@ -181,12 +199,62 @@ def test_get_infected():
     # Define the number of groups
     groups = 2
 
+    # Define time
+    t = 1
+
+    # Define parms
+    parms = {
+        "symptomatic_isolation": False,
+        "symptomatic_isolation_day": 400
+    }
+
     # Call the get_infected function
-    infected = get_infected(u, I_indices, groups)
+    infected = get_infected(u, I_indices, groups, parms, t)
 
     # Check the results
     expected_infected = np.array([3, 7])  # Sum of I1 and I2 for each group
     assert np.array_equal(infected, expected_infected), f"Expected {expected_infected}, but got {infected}"
+
+def test_symptomatic_isolation():
+    parms = {
+        "symptomatic_isolation": True,
+        "symptomatic_isolation_day": 10,
+        "isolation_success": 1.0
+    }
+
+    # Initial state for each group: Group 2 has no E or I individuals yet
+    u = [
+        [1000, 0, 0, 0, 100, 100, 0, 0, 0],  # Group 0: S, V, E1, E2, I1, I2, R, Y, X
+        [600, 0, 0, 0, 0, 0, 0, 0, 0]     # Group 2: S, V, E1, E2, I1, I2, R, Y, X
+    ]
+
+    # Define the indices of the I compartments
+    I_indices = [4, 5]
+
+    # Define the number of groups
+    groups = 2
+
+    # First test that no isolation happens before isolation day
+    t = 1
+
+    # Call the get_infected function
+    infected = get_infected(u, I_indices, groups, parms, t)
+
+    # Check the results
+    expected_infected = np.array([200, 0])  # Sum of I1 and I2 for each group
+    assert np.array_equal(infected, expected_infected), f"Expected {expected_infected}, but got {infected}"
+
+    # Next test that isolation happens on isolation day
+    t2 = 10
+
+    # Call the get_infected function
+    infected2 = get_infected(u, I_indices, groups, parms, t2)
+
+    # Check the results
+    expected_infected2 = np.array([100, 0])  # Should just be I1
+    assert np.array_equal(infected2, expected_infected2), f"Expected {expected_infected2}, but got {infected2}"
+
+
 
 def test_rate_to_frac():
     # Define the rate
@@ -207,9 +275,6 @@ def test_run_model_once_with_config():
 
     parms = config["baseline_parameters"]
     parms["initial_vaccine_coverage"] = [0.9, 0.5, 0.5] # add here, griddler has it as nested params
-    parms["vaccine_uptake"] = False # setting here in case default config changes
-    parms["connectivity_scenario"] = 1.0
-
     # pulling k_21 from grid parameters
     parms['k_21'] = config['grid_parameters']['k_21'][0]
 

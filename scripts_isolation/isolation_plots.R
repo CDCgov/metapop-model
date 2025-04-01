@@ -6,7 +6,7 @@ suffix <- ""
 R0 <- 12
 
 # Function to create filename for experiment results
-create_filename <- function(base_name = "output/uptake/results", date = "", suffix = "", format=".csv") {
+create_filename <- function(base_name = "output/isolation/results", date = "", suffix = "", format=".csv") {
   filename <- base_name
   if (date != '') {
     filename <- paste0(filename, "_", date)
@@ -30,11 +30,12 @@ plot_cols <- c("#20419a", "#cf4828", "#f78f47")
 
 # Get 20 simulations for plots
 vax_levs <- c("low", "medium", "optimistic")
-uptake_levs <- c(0, 500)
+isolation_days <- c(400, 0)
 filtered_results <- results |>
     filter(
         replicate %in% 1:plot_reps
-    )
+    )|>
+    mutate(symptomatic_isolation_day = factor(symptomatic_isolation_day, levels = isolation_days))
 
 #### Cumulative and incidence plots ####
 p <- filtered_results |>
@@ -46,7 +47,7 @@ p <- filtered_results |>
         ),
         alpha = 0.5
     ) +
-    facet_grid(total_vaccine_uptake_doses ~ initial_coverage_scenario,
+    facet_grid(symptomatic_isolation_day ~ initial_coverage_scenario,
         labeller = label_both
     ) +
     theme_minimal(base_size = 18) +
@@ -54,21 +55,21 @@ p <- filtered_results |>
     labs(x = "Days", y = "Cumulative Infections", col = "Group")
 
 ggsave(filename = paste0(
-    "output/uptake/cumulative_curves",
+    "output/isolation/cumulative_curves",
     12, ".png"
 ), plot = p, width = 10, height = 8)
 
 #### Incidence plot ####
 incidence_results <- filtered_results |>
     arrange(t) |>
-    group_by(replicate, group, initial_coverage_scenario, total_vaccine_uptake_doses) |>
+    group_by(replicate, group, initial_coverage_scenario, symptomatic_isolation_day) |>
     mutate(Y_diff = Y - lag(Y, default = 0)) |>
     select(
         t, replicate, group, initial_coverage_scenario,
-        total_vaccine_uptake_doses, Y, Y_diff
+        symptomatic_isolation_day, Y, Y_diff
     ) |>
     mutate(week = t %/% 7) |>
-    group_by(week, replicate, group, initial_coverage_scenario, total_vaccine_uptake_doses) |>
+    group_by(week, replicate, group, initial_coverage_scenario, symptomatic_isolation_day) |>
     summarise(weekly_Y_diff = sum(Y_diff, na.rm = TRUE))
 
 
@@ -78,7 +79,7 @@ p <- incidence_results |>
         group = interaction(replicate, group)
     )) +
     geom_line(alpha = 0.25) +
-    facet_grid(total_vaccine_uptake_doses ~ initial_coverage_scenario,
+    facet_grid(symptomatic_isolation_day ~ initial_coverage_scenario,
         labeller = label_both
     ) +
     theme_minimal(base_size = 18) +
@@ -86,31 +87,31 @@ p <- incidence_results |>
     labs(x = "Week", y = "Weekly Incident Infections", col = "Group")
 
 ggsave(filename = paste0(
-    "output/uptake/incidence_curves",
+    "output/isolation/incidence_curves",
     12, ".png"
 ), plot = p, width = 10, height = 8)
 
 
-#### Overeall final size plot
+#### Overall final size plot
 for (i in c(12)) {
     p <- results |>
         filter(
             t == 365,
             initial_coverage_scenario %in% vax_levs
         ) |>
-        group_by(replicate, initial_coverage_scenario, total_vaccine_uptake_doses) |>
+        group_by(replicate, initial_coverage_scenario, symptomatic_isolation_day) |>
         summarise(final_size = sum(Y)) |> # total sum across groups
         ggplot(aes(final_size)) +
         # scale_x_log10() +
         geom_histogram(bins = 50) +
         theme_minimal(base_size = 18) +
         labs(x = "Final Outbreak Size", y = "Number of Simulations") +
-        facet_grid(total_vaccine_uptake_doses ~ initial_coverage_scenario,
+        facet_grid(symptomatic_isolation_day ~ initial_coverage_scenario,
             labeller = label_both
         )
 
     ggsave(filename = paste0(
-        "output/uptake/overall_final_size",
+        "output/isolation/overall_final_size",
         i, ".png"
     ), plot = p, width = 10, height = 8)
 }
@@ -126,7 +127,7 @@ for (i in c(12)) {
         ggplot(aes(Y + 1, fill = factor(group))) +
         geom_histogram(position = "identity", alpha = 0.5) +
         scale_x_log10() +
-        facet_grid(total_vaccine_uptake_doses ~ initial_coverage_scenario,
+        facet_grid(symptomatic_isolation_day ~ initial_coverage_scenario,
             labeller = label_both
         ) +
         scale_fill_manual(values = plot_cols) +
@@ -136,7 +137,7 @@ for (i in c(12)) {
             y = "Number of simulations", fill = "Group"
         )
     ggsave(filename = paste0(
-        "output/uptake/group_final_size_r0",
+        "output/isolation/group_final_size_r0",
         i, ".png"
     ), plot = p, width = 10, height = 8)
 }
@@ -169,7 +170,7 @@ p <- filtered_categories |>
         ),
         alpha = 0.5
     ) +
-    facet_grid(total_vaccine_uptake_doses ~ initial_coverage_scenario,
+    facet_grid(symptomatic_isolation_day ~ initial_coverage_scenario,
         labeller = label_both
     ) +
     theme_minimal(base_size = 18) +
@@ -178,7 +179,7 @@ p <- filtered_categories |>
     labs(x = "Days", y = "Cumulative Infections", col = "Group")
 
 ggsave(filename = paste0(
-    "output/uptake/cumulative_sus_infected.png",
+    "output/isolation/cumulative_sus_infected.png",
     12, ".png"
 ), plot = p, width = 10, height = 8)
 
@@ -191,20 +192,20 @@ for (i in outbreak_sizes) {
         group_by(
             group,
             initial_coverage_scenario,
-            total_vaccine_uptake_doses
+            symptomatic_isolation_day
         ) |>
         count() |>
         mutate(n = round(n / reps, 2) * 100) |>
         pivot_wider(names_from = group, values_from = n) |>
         select(
             InitialCoverage = initial_coverage_scenario,
-            DailyDoses = total_vaccine_uptake_doses,
+            IsolationDay = symptomatic_isolation_day,
             Sub1 = `1`, Sub2 = `2`,
             General = `0`
         )
 
     write_csv(
         res_table,
-        paste0("output/uptake/res_table_outbreak_size", i, ".csv")
+        paste0("output/isolation/res_table_outbreak_size", i, ".csv")
     )
 }
