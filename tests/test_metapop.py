@@ -10,6 +10,7 @@ def test_only_expose_susceptible():
         "beta": np.array([[2, 2], [2, 2]]),
         "k_i": [10, 10, 10],
         "sigma": 0.75,
+        "sigma_scaled": 0.75 * 2,
         "n_e_compartments": 2,
         "n_i_compartments": 2,
         "pop_sizes": [100, 100],

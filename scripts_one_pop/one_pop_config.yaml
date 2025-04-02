@@ -11,19 +11,17 @@ baseline_parameters:
   infectious_duration: 9.0   # 2 * 1/infectious_duration
   pop_sizes: [5000]    # population sizes
   I0: [5]     # initially infected
-  vaccine_uptake: True
   vaccine_uptake_range:  [30, 60] # start and end of vaccine campaign
   vaccinated_group: 0
-  symptomatic_isolation: False
-  isolation_success: 0.0
-  symptomatic_isolation_day: 400
+  isolation_success: 0.8
+  symptomatic_isolation_day: 0
   tf: 365        # total time modeled
   n_replicates: 1000
   seed: 123
 
 grid_parameters:
   initial_coverage_scenario: ['low', 'medium', 'optimistic'] #
-  total_vaccine_uptake_doses: [0, 500] # constant, to be divided out among the days
+  total_vaccine_uptake_doses: [0, 250] # constant, to be divided out among the days
 
 nested_parameters:
   - initial_coverage_scenario: 'low'

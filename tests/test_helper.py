@@ -274,10 +274,14 @@ def test_run_model_once_with_config():
         config = yaml.safe_load(file)
 
     parms = config["baseline_parameters"]
-    parms["initial_vaccine_coverage"] = [0.9, 0.5, 0.5] # add here, griddler has it as nested params
-    # pulling k_21 from grid parameters
-    parms['k_21'] = config['grid_parameters']['k_21'][0]
 
+    # cast rate params
+    parms["sigma"] = time_to_rate(parms["latent_duration"])
+    parms["gamma"] = time_to_rate(parms["infectious_duration"])
+    parms["sigma_scaled"] = parms["sigma"] * parms["n_e_compartments"]
+    parms["gamma_scaled"] = parms["gamma"] * parms["n_i_compartments"]
+
+    # matrix construction
     parms["beta"] = construct_beta(parms)
 
     # Define the time array and steps

@@ -30,11 +30,11 @@ plot_cols <- c("#20419a", "#cf4828", "#f78f47")
 
 # Get 20 simulations for plots
 pop_sizes <- c(5000) # read from config
-vax_levs <- c("low", "medium", "optimistic")
-uptake_levs <- c(0, 500)
+vax_levs <- c("low") # also: "medium", "optimistic"
+uptake_levs <- c(0, 250)
 filtered_results <- results |>
     filter(
-        replicate %in% 1:plot_reps
+        replicate %in% 1:plot_reps, initial_coverage_scenario %in% vax_levs
     )
 
 #### Cumulative and incidence plots ####
@@ -116,46 +116,16 @@ for (i in c(R0)) {
     ), plot = p, width = 10, height = 8)
 }
 
-
-#### Grouped outbreak size plots ####
-for (i in c(12)) {
-    p <- results |>
-        filter(
-            t == 365,
-            initial_coverage_scenario %in% vax_levs
-        ) |>
-        ggplot(aes(Y + 1, fill = factor(group))) +
-        geom_histogram(position = "identity", alpha = 0.5) +
-        scale_x_log10() +
-        facet_grid(total_vaccine_uptake_doses ~ initial_coverage_scenario,
-            labeller = label_both
-        ) +
-        scale_fill_manual(values = plot_cols) +
-        theme_minimal(base_size = 18) +
-        labs(
-            title = "R0=12", x = "Final Group Outbreak Size",
-            y = "Number of simulations", fill = "Group"
-        )
-    ggsave(filename = paste0(
-        "output/one_pop/group_final_size_r0",
-        i, ".png"
-    ), plot = p, width = 10, height = 8)
-}
-
 #### Percent of susceptible infected cumulative
 coverage_scenarios <- data.frame(
     initial_coverage_scenario = c("low", "medium", "optimistic"), # nolint
-    coverage_0 = c(0.95, 0.95, 0.95),
-    coverage_1 = c(0.80, 0.80, 0.80),
-    coverage_2 = c(0.80, 0.90, 0.95)
+    coverage_0 = c(0.8, 0.9, 0.95)
 )
 
 filtered_categories <- filtered_results |>
     left_join(coverage_scenarios, by = "initial_coverage_scenario") |>
     mutate(sus_population = case_when(
-        group == 0 ~ (1 - coverage_0) * pop_sizes[1], # nolint
-        group == 1 ~ (1 - coverage_1) * pop_sizes[2], # nolint
-        group == 2 ~ (1 - coverage_2) * pop_sizes[3]
+        group == 0 ~ (1 - coverage_0) * pop_sizes[1] # nolint
     )) |> # nolint
     mutate(Y_prop_sus = Y / sus_population)
 

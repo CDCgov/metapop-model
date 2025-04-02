@@ -36,7 +36,7 @@ class SEIRModel:
             new_exposed.append(np.random.binomial(S, new_e_frac))  # Ensure S is non-negative
 
             # Get within E chain movement (E1 -> E2)
-            e1_to_e2_frac = rate_to_frac(self.parms["sigma"])
+            e1_to_e2_frac = rate_to_frac(self.parms["sigma_scaled"])
             old_exposed.append(np.random.binomial(u[target_group][self.E1], e1_to_e2_frac))
 
         return [new_exposed, old_exposed]
@@ -44,7 +44,7 @@ class SEIRModel:
     def vaccinate(self, u, t):
         new_vaccinated = []
 
-        if self.parms["vaccine_uptake"]:
+        if self.parms["total_vaccine_uptake_doses"] > 0:
             vaccination_uptake_schedule = self.parms["vaccination_uptake_schedule"]
             new_vaccinated = vaccinate_groups(self.groups, u, t, vaccination_uptake_schedule, self.parms)
         else:
@@ -57,16 +57,16 @@ class SEIRModel:
         new_infectious = []
         old_infectious = []
         for group in range(self.groups):
-            new_i_frac = rate_to_frac(self.parms["sigma"])
+            new_i_frac = rate_to_frac(self.parms["sigma_scaled"])
             new_infectious.append(np.random.binomial(u[group][self.E2], new_i_frac))
-            i1_to_i2_frac = rate_to_frac(self.parms["gamma"])
+            i1_to_i2_frac = rate_to_frac(self.parms["gamma_scaled"])
             old_infectious.append(np.random.binomial(u[group][self.I1], i1_to_i2_frac))
         return [new_infectious, old_infectious]
 
     def recovery(self, u, t):
         new_recoveries = []
         for group in range(self.groups):
-            new_r_frac = rate_to_frac(self.parms["gamma"])
+            new_r_frac = rate_to_frac(self.parms["gamma_scaled"])
             new_recoveries.append(np.random.binomial(u[group][self.I2], new_r_frac))
         return new_recoveries
 

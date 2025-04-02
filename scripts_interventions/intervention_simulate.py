@@ -51,10 +51,10 @@ def simulate(parms):
 
 if __name__ == "__main__":
     # setup output directory
-    output_dir = "output/uptake"
+    output_dir = "output/interventions"
     os.makedirs(output_dir, exist_ok=True)
 
-    parameter_sets = griddler.griddle.read("scripts_uptake/uptake_config.yaml")
+    parameter_sets = griddler.griddle.read("scripts_interventions/intervention_config.yaml")
     results_all = griddler.run_squash(griddler.replicated(simulate), parameter_sets)
-    results = results_all.select(cs.by_name(['initial_coverage_scenario', 'total_vaccine_uptake_doses', 't', 'group', 'S', 'V', 'E1', 'E2', 'I1', 'I2', 'R', 'Y', 'X', 'replicate']))
+    results = results_all.select(cs.by_name(['total_vaccine_uptake_doses', 'symptomatic_isolation_day', 't', 'group', 'S', 'V', 'E1', 'E2', 'I1', 'I2', 'R', 'Y', 'X', 'replicate']))
     results.write_csv(os.path.join(output_dir, "results.csv"))

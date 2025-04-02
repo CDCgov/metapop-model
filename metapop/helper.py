@@ -112,6 +112,7 @@ def get_r0_one_group(k, gamma):
     Returns:
         float: R0, contacts per day / recovery rate
     """
+
     X = (k / gamma)
 
     return X
@@ -186,7 +187,7 @@ def get_infected(u, I_indices, groups, parms, t):
     Returns:
         np.array: An array of the number of infected individuals for each group.
     """
-    if (parms["symptomatic_isolation"] & (t >= parms["symptomatic_isolation_day"])):
+    if t >= parms["symptomatic_isolation_day"]:
         # last I compartment
         i_max = max(I_indices)
 

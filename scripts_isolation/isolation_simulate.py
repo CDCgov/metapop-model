@@ -9,8 +9,10 @@ from metapop.helper import *
 
 def simulate(parms):
     #### Set up rate params
-    parms["sigma"] = time_to_rate(parms["latent_duration"]) * parms["n_e_compartments"]
-    parms["gamma"] = time_to_rate(parms["infectious_duration"]) * parms["n_i_compartments"]
+    parms["sigma"] = time_to_rate(parms["latent_duration"])
+    parms["gamma"] = time_to_rate(parms["infectious_duration"])
+    parms["sigma_scaled"] = parms["sigma"] * parms["n_e_compartments"]
+    parms["gamma_scaled"] = parms["gamma"] * parms["n_i_compartments"]
 
     #### Set beta matrix based on desired R0 and connectivity scenario ###
     parms["beta"] = construct_beta(parms)
