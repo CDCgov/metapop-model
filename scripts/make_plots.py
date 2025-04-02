@@ -13,9 +13,7 @@ sns.set_context("notebook", font_scale=1.5)
 
 #### Visualization of one simulation ####
 # Filter the data for replicate == 0 and initial_coverage_scenario == "low"
-# replicate_0_results = results.filter((pl.col("replicate") == 0) & (pl.col("initial_coverage_scenario") == "optimistic") & (pl.col("connectivity_scenario") == 1.0))
 replicate_0_results = results.filter((pl.col("replicate") == 0) & (pl.col("initial_coverage_scenario") == "optimistic") & (pl.col("k_21") == 0.01))
-
 
 # Plot the line plot for each group
 plt.figure()
@@ -49,7 +47,6 @@ bins = np.linspace(min_value, max_value, 100)  # 40 bins
 # Create the faceted histogram with the same bin width for all histograms
 g = sns.FacetGrid(filtered_results_df,
                   row="initial_coverage_scenario",
-                  #col = "connectivity_scenario",
                   col = "k_21",
                   row_order=vax_scenario_order,
                   sharex=True, sharey=True, height=4, aspect=3)
@@ -71,7 +68,6 @@ filtered_results = results.filter(pl.col("t") == 365)
 filtered_results_df = filtered_results.to_pandas()
 
 # Group by simulation, vaccination scenario, and connectivity scenario, and sum the Y column
-# grouped_results = filtered_results_df.groupby(['replicate', 'initial_coverage_scenario', 'connectivity_scenario']).agg({'Y': 'sum'}).reset_index()
 grouped_results = filtered_results_df.groupby(['replicate', 'initial_coverage_scenario', 'k_21']).agg({'Y': 'sum'}).reset_index()
 grouped_results.rename(columns={'Y': 'total_outbreak_size'}, inplace=True)
 
@@ -83,7 +79,6 @@ bins = np.linspace(min_value, max_value, 100)  # 20 bins
 # Create the faceted histogram with the same bin width for all histograms
 g = sns.FacetGrid(grouped_results,
                   row="initial_coverage_scenario",
-                #   col="connectivity_scenario",
                   col = "k_21",
                   row_order=vax_scenario_order,
                   sharex=True, sharey=True, height=4, aspect=3)
