@@ -19,8 +19,13 @@ def simulate(parms):
         pl.DataFrame: DataFrame containing the simulation results.
     """
 
-    #### Set beta matrix based on desired R0 and connectivity scenario ###
+    #### Set up rate params, convert duration periods to rates
+    parms["sigma"] = mt.time_to_rate(parms["latent_duration"])
+    parms["gamma"] = mt.time_to_rate(parms["infectious_duration"])
+    parms["sigma_scaled"] = parms["sigma"] * parms["n_e_compartments"]
+    parms["gamma_scaled"] = parms["gamma"] * parms["n_i_compartments"]
 
+    #### Set beta matrix based on desired R0 and connectivity scenario ###
     parms["beta"] = mt.construct_beta(parms)
 
     #### Set up vaccine schedule for group 2
@@ -216,9 +221,9 @@ def get_show_parameter_mapping():
         # k_21 = "average degree between small populations",
         # connectivity_scenario = "connectivity scenario",
         # n_e_compartments = "number of exposed compartments",
-        # sigma = "sigma",
+        # latent_duration = "latent period",
         # n_i_compartments = "number of infectious compartments",
-        # gamma = "gamma",
+        # infectious_duration = "infectious period",
         pop_sizes_0 = "size of large population",
         pop_sizes_1 = "size of small population 1",
         pop_sizes_2 = "size of small population 2",
@@ -254,8 +259,8 @@ def get_advanced_parameter_mapping():
     advanced_mapping = dict(
         desired_r0="R0",
         n_groups="number of groups",
-        gamma="gamma",
-        sigma="sigma",
+        infectious_duration="infectious period",
+        latent_duration="latent period",
         # n_e_compartments="number of exposed compartments",
         # n_i_compartments="number of infectious compartments",
         # tf="number of time steps",

@@ -86,8 +86,8 @@ def get_min_values():
             I0=[0, 0, 0],
             initial_vaccine_coverage=[0., 0., 0.],
             k_i=[0., 0., 0.],
-            sigma = 0.025,
-            gamma = 0.025,
+            latent_duration = 6.,
+            infectious_duration = 5.,
             k_g1 = 0.,
             k_21 = 0.,
             isolation_success = 0.,
@@ -103,8 +103,8 @@ def get_max_values():
             I0=[100, 100, 100],
             initial_vaccine_coverage=[1.00, 1.00, 1.00],
             k_i=[30., 30., 30.],
-            sigma = 1.,
-            gamma = 1.,
+            latent_duration = 18.,
+            infectious_duration = 10.,
             k_g1 = 30.,
             k_21 = 30.,
             isolation_success = 1.,
@@ -120,8 +120,8 @@ def get_steps():
             I0=1,
             initial_vaccine_coverage=0.01,
             k_i = 0.1,
-            sigma = 0.01,
-            gamma = 0.01,
+            latent_duration = 0.1,
+            infectious_duration = 0.1,
             k_g1 = 0.01,
             k_21 = 0.01,
             isolation_success = 0.01,
@@ -146,8 +146,8 @@ def get_helpers():
             k_i=["Average degree for large population",
                  "Average degree for small population 1",
                  "Average degree for small population 2"],
-            sigma = "Rate of progression from exposed to infectious",
-            gamma = "Rate of recovery",
+            latent_duration = "Latent period (days)",
+            infectious_duration = "Infectious period (days)",
             k_g1 = "Average degree of small population 1 connecting to large population",
             k_21 = "Average degree between small populations",
             isolation_success = "Percentage of symptomatic cases isolated",
@@ -163,8 +163,8 @@ def get_formats():
             I0="%.0d",
             initial_vaccine_coverage="%.2f",
             k_i="%.1f",
-            sigma = "%.2f",
-            gamma = "%.2f",
+            latent_duration = "%.1f",
+            infectious_duration = "%.1f",
             k_g1 = "%.2f",
             k_21 = "%.2f",
             isolation_success = "%.2f",
@@ -199,8 +199,8 @@ def app(replicates=20):
             I0=["I0_0_1", "I0_1_1", "I0_2_1"],
             initial_vaccine_coverage=["initial_vaccine_coverage_0_1", "initial_vaccine_coverage_1_1", "initial_vaccine_coverage_2_1"],
             k_i=["k_i_0_1", "k_i_1_1", "k_i_2_1"],
-            sigma = "sigma_1",
-            gamma = "gamma_1",
+            latent_duration = "latent_duration_1",
+            infectious_duration = "infectious_duration_1",
             k_g1 = "k_g1_1",
             k_21 = "k_21_1",
             isolation_success = "isolation_success_1",
@@ -214,8 +214,8 @@ def app(replicates=20):
             I0=["I0_0_2", "I0_1_2", "I0_2_2"],
             initial_vaccine_coverage=["initial_vaccine_coverage_0_2", "initial_vaccine_coverage_1_2", "initial_vaccine_coverage_2_2"],
             k_i=["k_i_0_2", "k_i_1_2", "k_i_2_2"],
-            sigma = "sigma_2",
-            gamma = "gamma_2",
+            latent_duration = "latent_duration_2",
+            infectious_duration= "infectious_duration_2",
             k_g1 = "k_g1_2",
             k_21 = "k_21_2",
             isolation_success = "isolation_success_2",
@@ -259,9 +259,9 @@ def app(replicates=20):
 
         with st.expander("Advanced options"):
             # try to place two sliders side by side
-            advanced_ordered_keys = ["desired_r0", "sigma", "gamma", "k_g1", "k_21", "k_i"]
+            advanced_ordered_keys = ["desired_r0", "latent_duration", "infectious_duration", "k_g1", "k_21", "k_i"]
             advanced_list_keys = ["k_i"]
-            advanced_slide_keys = ["sigma", "gamma"]
+            advanced_slide_keys = ["latent_duration", "infectious_duration"]
 
             adv_col1, adv_col2 = st.columns(2)
 
