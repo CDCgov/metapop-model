@@ -406,6 +406,5 @@ def app(replicates=20):
     st.altair_chart(chart1 | chart2, use_container_width=True)
 
 
-
 if __name__ == "__main__":
     app()
