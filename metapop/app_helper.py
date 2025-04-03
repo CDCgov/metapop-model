@@ -624,6 +624,7 @@ def get_formats(parms=None):
             initial_vaccine_coverage="%.2f",
             vaccine_uptake_range="%.0d",
             total_vaccine_uptake_doses="%.0d",
+            vaccinated_group="%.0d",
             isolation_success = "%.2f",
             symptomatic_isolation_day = "%.0d",
             tf="%.0d",
@@ -632,6 +633,47 @@ def get_formats(parms=None):
         # update with parms if provided
         defaults.update(parms)
     return defaults
+
+
+def get_base_widget_idkeys(parms=None):
+    widget_idkeys = dict(
+        desired_r0="R0",
+        k_i=["k_i_0", "k_i_1", "k_i_2"],
+        k_g1 = "k_g1",
+        k_g2 = "k_g2",
+        k_21 = "k_21",
+        pop_sizes=["pop_size_0",
+                   "pop_size_1",
+                   "pop_size_2"],
+        latent_duration = "latent_duration",
+        infectious_duration = "infectious_duration",
+        I0=["I0_0", "I0_1", "I0_2"],
+        initial_vaccine_coverage=["initial_vaccine_coverage_0",
+                                  "initial_vaccine_coverage_1",
+                                  "initial_vaccine_coverage_2"],
+
+        vaccine_uptake_range=["vaccine_uptake_days_0",
+                              "vaccine_uptake_days_1"],
+        total_vaccine_uptake_doses="total_vaccine_uptake_doses",
+        vaccinated_group = "vaccinated_group",
+        isolation_success = "isolation_success",
+        symptomatic_isolation_day = "symptomatic_isolation_day",
+        tf = "tf",
+        )
+    if parms is not None and isinstance(parms, dict):
+        # update with parms if provided
+        widget_idkeys.update(parms)
+    return widget_idkeys
+
+def get_widget_idkeys(widget_no):
+    widget_idkeys = get_base_widget_idkeys()
+    for key, value in widget_idkeys.items():
+        if isinstance(value, list):
+            widget_idkeys[key] = [f"{widget_idkeys[key][i]}_{widget_no}" for i in range(len(widget_idkeys[key]))]
+        else:
+            widget_idkeys[key] = f"{widget_idkeys[key]}_{widget_no}"
+
+    return widget_idkeys
 
 
 ### Methods to handle extraction of user inputs and updating parameter dictionaries to send for simulation ##
