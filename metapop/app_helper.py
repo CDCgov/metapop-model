@@ -28,6 +28,9 @@ def simulate(parms):
     parms["sigma_scaled"] = parms["sigma"] * parms["n_e_compartments"]
     parms["gamma_scaled"] = parms["gamma"] * parms["n_i_compartments"]
 
+
+    parms['k_i'] = np.array(parms['k_i'])#### Set up population size
+
     #### Set beta matrix based on desired R0 and connectivity scenario ###
     parms["beta"] = construct_beta(parms)
 
@@ -88,14 +91,14 @@ def get_scenario_results(parms):
 
 
 ### Methods to read in default parameters ###
-def read_parameters():
+def read_parameters(filepath="scripts/app_config.yaml"):
     """"
     Read parameters from a YAML file and return the first set of parameters.
 
     Returns:
         dict: Dictionary of parameters for the metapopulation model.
     """
-    parameter_sets = griddler.griddle.read("scripts/app_config.yaml")
+    parameter_sets = griddler.griddle.read(filepath)
     parms = parameter_sets[0]
     return parms
 
@@ -271,6 +274,7 @@ def get_advanced_parameter_mapping():
         # pop_sizes_0="size of large population",
         # pop_sizes_1="size of small population 1",
         # pop_sizes_2="size of small population 2",
+        # k_i = "average degree",
         k_i_0 = "average degree for large population",
         k_i_1 = "average degree for small population 1",
         k_i_2 = "average degree for small population 2",
@@ -870,7 +874,7 @@ def create_chart(alt_results, outcome_option, x, xlabel, y, ylabel, yscale, colo
     chart = alt.Chart(
         alt_results,
         title=outcome_option
-        ).mark_line(opacity=0.4).encode(
+        ).mark_line(opacity=0.5).encode(
             x=alt.X(x, title=xlabel),
             y=alt.Y(y, title=ylabel).scale(domain=yscale),
             color=alt.Color(

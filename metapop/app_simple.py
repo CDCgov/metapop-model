@@ -7,7 +7,7 @@ import altair as alt
 
 def app(replicates=5):
     st.title("Metapopulation Model")
-    parms = mt.read_parameters()
+    parms = mt.read_parameters("scripts/app_simple_config.yaml")
 
     show_parameter_mapping = mt.get_show_parameter_mapping()
     advanced_parameter_mapping = mt.get_advanced_parameter_mapping()
@@ -109,7 +109,9 @@ def app(replicates=5):
                 "k_21",
                 "k_i",
                 ]
-            advanced_list_keys = ["k_i"]
+            advanced_list_keys = [
+                "k_i"
+                ]
             advanced_slide_keys = ["latent_duration", "infectious_duration"]
 
             adv_col1, adv_col2 = st.columns(2)
@@ -195,14 +197,22 @@ def app(replicates=5):
     group_labels = ["General population", "Small population 1", "Small population 2"]
 
     # plot with Altair
-    color_scale = alt.Scale(
-        domain=[str(i) for i in range(len(results1["group"].unique()))],
-        range = [
-            "#20419a", # blue
-            "#cf4828", # red
-            "#f78f47", # orange
-        ]
-    )
+    if len(groups) == 3:
+        color_scale = alt.Scale(
+            domain=[str(i) for i in range(len(results1["group"].unique()))],
+            range = [
+                "#20419a", # blue
+                "#cf4828", # red
+                "#f78f47", # orange
+            ]
+        )
+    elif len(groups) == 1:
+        color_scale = alt.Scale(
+            domain=[str(i) for i in range(len(results1["group"].unique()))],
+            range = [
+                "#068482", # green
+            ]
+        )
     if outcome not in ["I", "Y", "inc", "Winc", "WCI"]:
         print("outcome not available yet, defaulting to Cumulative Daily Incidence")
         outcome = "Y"
