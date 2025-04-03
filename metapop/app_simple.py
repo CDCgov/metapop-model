@@ -71,11 +71,13 @@ def app(replicates=5):
                               #'I0',
                               'vaccine_uptake_range',
                               # 'initial_vaccine_coverage',
-                              'vaccine_uptake_doses',
                               ]
 
         slide_keys = [
+            'vaccine_uptake_range',
             'total_vaccine_uptake_doses',
+            'isolation_success',
+            'symptomatic_isolation_day',
             #'desired_r0',
             #'pop_sizes',
             #'I0'
@@ -83,10 +85,11 @@ def app(replicates=5):
         # number of scenarios
         col1, col2 = st.columns(2)
 
+        # show the parameters for scenario 1 but do not allow editing
         edited_parms1 = mt.app_editors(
             col1, "Scenario 1", edited_parms, ordered_keys, list_parameter_keys,
             slide_keys, show_parameter_mapping, min_values, max_values,
-            steps, helpers, formats, keys1
+            steps, helpers, formats, keys1, disabled=True
         )
 
         edited_parms2 = mt.app_editors(
@@ -111,10 +114,12 @@ def app(replicates=5):
 
             adv_col1, adv_col2 = st.columns(2)
 
+            # show the parameters for scenario 1 but do not allow editing
             edited_advanced_parms1 = mt.app_editors(
                 adv_col1, "Scenario 1", edited_parms1, advanced_ordered_keys,
                 advanced_list_keys, advanced_slide_keys, advanced_parameter_mapping,
-                min_values, max_values, steps, helpers, formats, keys1
+                min_values, max_values, steps, helpers, formats, keys1,
+                disabled=True
             )
 
             edited_advanced_parms2 = mt.app_editors(

@@ -383,7 +383,11 @@ def repack_list_parameters(parms, updated_parms, keys_in_list):
 
 
 ### Methods to create user inputs interfaces ###
-def app_editors(element, scenario_name, parms, ordered_keys, list_keys, slide_keys, show_parameter_mapping, min_values, max_values, steps, helpers, formats, element_keys):
+def app_editors(element, scenario_name, parms,
+                ordered_keys, list_keys, slide_keys,
+                show_parameter_mapping,
+                min_values, max_values, steps, helpers, formats, element_keys,
+                disabled=False):
     """
     Create the sidebar for editing parameters.
 
@@ -421,6 +425,7 @@ def app_editors(element, scenario_name, parms, ordered_keys, list_keys, slide_ke
                                       help=helpers[key],
                                       format=formats[key],
                                       key=element_keys[key],
+                                      disabled=disabled
                                       )
                 else:
                     value = st.number_input(show_parameter_mapping[key],
@@ -429,7 +434,8 @@ def app_editors(element, scenario_name, parms, ordered_keys, list_keys, slide_ke
                                         step=steps[key],
                                         help=helpers[key],
                                         format=formats[key],
-                                        key=element_keys[key])
+                                        key=element_keys[key],
+                                        disabled=disabled)
                 edited_parms[key] = value
             if key in list_keys:
                 for index in range(len(parms[key])):
@@ -440,7 +446,8 @@ def app_editors(element, scenario_name, parms, ordered_keys, list_keys, slide_ke
                                             step=steps[key],
                                             help=helpers[key][index],
                                             format=formats[key],
-                                            key=element_keys[key][index])
+                                            key=element_keys[key][index],
+                                            disabled=disabled)
                     else:
                         value = st.number_input(show_parameter_mapping[f"{key}_{index}"],
                                             min_value=min_values[key][index], max_value=max_values[key][index],
@@ -448,7 +455,8 @@ def app_editors(element, scenario_name, parms, ordered_keys, list_keys, slide_ke
                                             step=steps[key],
                                             help=helpers[key][index],
                                             format=formats[key],
-                                            key=element_keys[key][index])
+                                            key=element_keys[key][index],
+                                            disabled=disabled)
                     edited_parms[key][index] = value
 
     return edited_parms
@@ -511,12 +519,12 @@ def get_max_values(parms=None):
             infectious_duration=11.,
             I0=[100, 100, 100],
             initial_vaccine_coverage=[1., 1., 1.],
-            vaccine_uptake_range=[500, 500],
-            total_vaccine_uptake_doses=50_000,
+            vaccine_uptake_range=[400, 400],
+            total_vaccine_uptake_doses=1_000,
             vaccinated_group=2,
             isolation_success = 1.,
-            symptomatic_isolation_day = 500,
-            tf=500,
+            symptomatic_isolation_day = 400,
+            tf=400,
             )
     # update with parms if provided
     if parms is not None and isinstance(parms, dict):
