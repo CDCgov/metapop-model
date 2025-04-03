@@ -196,11 +196,11 @@ def app(replicates=20):
             help="Enter model parameters for each scenario. Hover over the ? for more information about each parameter.",
         )
 
-        min_values = get_min_values()
-        max_values = get_max_values()
-        steps = get_steps()
-        helpers = get_helpers()
-        formats = get_formats()
+        min_values = mt.get_min_values()
+        max_values = mt.get_max_values()
+        steps = mt.get_step_values()
+        helpers = mt.get_helpers()
+        formats = mt.get_formats()
         # this can likely be done more programmatically but works for now
         keys1 = dict(
             desired_r0="R0_1",
@@ -261,13 +261,13 @@ def app(replicates=20):
         # number of scenarios
         col1, col2 = st.columns(2)
 
-        edited_parms1 = app_editors(
+        edited_parms1 = mt.app_editors(
             col1, "Scenario 1", parms, ordered_keys, list_parameter_keys,
             slide_keys, show_parameter_mapping, min_values, max_values,
             steps, helpers, formats, keys1
         )
 
-        edited_parms2 = app_editors(
+        edited_parms2 = mt.app_editors(
             col2, "Scenario 2", parms, ordered_keys, list_parameter_keys,
             slide_keys, show_parameter_mapping, min_values, max_values,
             steps, helpers, formats, keys2
@@ -281,13 +281,13 @@ def app(replicates=20):
 
             adv_col1, adv_col2 = st.columns(2)
 
-            edited_advanced_parms1 = app_editors(
+            edited_advanced_parms1 = mt.app_editors(
                 adv_col1, "Scenario 1", edited_parms1, advanced_ordered_keys,
                 advanced_list_keys, advanced_slide_keys, advanced_parameter_mapping,
                 min_values, max_values, steps, helpers, formats, keys1
             )
 
-            edited_advanced_parms2 = app_editors(
+            edited_advanced_parms2 = mt.app_editors(
                 adv_col2, "Scenario 2", edited_parms2, advanced_ordered_keys,
                 advanced_list_keys, advanced_slide_keys, advanced_parameter_mapping,
                 min_values, max_values, steps, helpers, formats, keys2

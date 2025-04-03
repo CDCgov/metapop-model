@@ -1,7 +1,6 @@
 baseline_parameters:
   n_groups: 3    # general, subpop1, subpop2
   desired_r0: 12.0
-  k: 10
   k_i: [10., 10., 10.]
   k_g1: 0.1
   k_g2: 0.01
