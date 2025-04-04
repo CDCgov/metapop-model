@@ -187,7 +187,14 @@ def get_infected(u, I_indices, groups, parms, t):
     Returns:
         np.array: An array of the number of infected individuals for each group.
     """
-    if t >= parms["symptomatic_isolation_day"]:
+    assert "symptomatic_isolation_start_day" in parms, "Key 'symptomatic_isolation_start_day' is missing in parms."
+    assert "symptomatic_isolation_duration_days" in parms, "Key 'symptomatic_isolation_duration_days' is missing in parms."
+
+    isolation_start_day = parms["symptomatic_isolation_start_day"]
+    isolation_duration_days = parms["symptomatic_isolation_duration_days"]
+
+    isolation_range_days = range(isolation_start_day, isolation_start_day + isolation_duration_days)
+    if t in isolation_range_days:
         # last I compartment
         i_max = max(I_indices)
 
@@ -257,11 +264,14 @@ def build_vax_schedule(parms):
     Returns:
         dict: dictionary with days and doses
     """
-    assert "vaccine_uptake_range" in parms, "vaccine_uptake_range must be provided in parms"
+    assert "vaccine_uptake_start_day" in parms, "vaccine_uptake_start_day must be provided in parms"
+    assert "vaccine_uptake_duration_days" in parms, "vaccine_uptake_duration_days must be provided in parms"
     assert "total_vaccine_uptake_doses" in parms, "total_vaccine_uptake_doses must be provided in parms"
 
     # Generate a sequence of days between the start and end of the vaccine_uptake_range
-    vaccine_uptake_days = list(range(parms["vaccine_uptake_range"][0], parms["vaccine_uptake_range"][1] + 1))
+    start_day = parms["vaccine_uptake_start_day"]
+    end_day = start_day + parms["vaccine_uptake_duration_days"]
+    vaccine_uptake_days = list(range(start_day, end_day + 1))
     doses_per_day = round(parms["total_vaccine_uptake_doses"] / len(vaccine_uptake_days))
 
     # Create the schedule dictionary

@@ -1,25 +1,12 @@
 library(tidyverse)
 library(ggplot2)
+source("scripts/analyzer.R")
 
-date <- ""
-suffix <- ""
-R0 <- 12
-
-# Function to create filename for experiment results
-create_filename <- function(base_name = "output/uptake/results", date = "", suffix = "", format=".csv") {
-  filename <- base_name
-  if (date != '') {
-    filename <- paste0(filename, "_", date)
-  }
-  if (suffix != '') {
-    filename <- paste0(filename, "_", suffix)
-  }
-  filename <- paste0(filename, format)
-  return(filename)
-}
+R0 <- 12 # not varied
 
 # Use the function to create the filename for results
-filename <- create_filename(date = date, suffix = suffix)
+filename <- create_filename("output/onepop/results")
+
 # read in the results
 results <- read_csv(filename)
 
@@ -29,11 +16,12 @@ plot_reps <- 20 # sims to plot in incidence curves
 plot_cols <- c("#20419a", "#cf4828", "#f78f47")
 
 # Get 20 simulations for plots
-vax_levs <- c("low", "medium", "optimistic")
-uptake_levs <- c(0, 500)
+pop_sizes <- c(5000) # read from config
+vax_levs <- c("low") # also: "medium", "optimistic"
+uptake_levs <- c(0, 250)
 filtered_results <- results |>
     filter(
-        replicate %in% 1:plot_reps
+        replicate %in% 1:plot_reps, initial_coverage_scenario %in% vax_levs
     )
 
 #### Cumulative and incidence plots ####
@@ -54,22 +42,15 @@ p <- filtered_results |>
     labs(x = "Days", y = "Cumulative Infections", col = "Group")
 
 ggsave(filename = paste0(
-    "output/uptake/cumulative_curves",
+    "output/one_pop/cumulative_curves",
     12, ".png"
 ), plot = p, width = 10, height = 8)
 
 #### Incidence plot ####
-incidence_results <- filtered_results |>
-    arrange(t) |>
-    group_by(replicate, group, initial_coverage_scenario, total_vaccine_uptake_doses) |>
-    mutate(Y_diff = Y - lag(Y, default = 0)) |>
-    select(
-        t, replicate, group, initial_coverage_scenario,
-        total_vaccine_uptake_doses, Y, Y_diff
-    ) |>
-    mutate(week = t %/% 7) |>
-    group_by(week, replicate, group, initial_coverage_scenario, total_vaccine_uptake_doses) |>
-    summarise(weekly_Y_diff = sum(Y_diff, na.rm = TRUE))
+incidence_results <- get_weekly_inc_from_cum(
+    filtered_results,
+    c("total_vaccine_uptake_doses", "initial_coverage_scenario")
+)
 
 
 p <- incidence_results |>
@@ -86,13 +67,13 @@ p <- incidence_results |>
     labs(x = "Week", y = "Weekly Incident Infections", col = "Group")
 
 ggsave(filename = paste0(
-    "output/uptake/incidence_curves",
+    "output/one_pop/incidence_curves",
     12, ".png"
 ), plot = p, width = 10, height = 8)
 
 
 #### Overeall final size plot
-for (i in c(12)) {
+for (i in c(R0)) {
     p <- results |>
         filter(
             t == 365,
@@ -110,33 +91,7 @@ for (i in c(12)) {
         )
 
     ggsave(filename = paste0(
-        "output/uptake/overall_final_size",
-        i, ".png"
-    ), plot = p, width = 10, height = 8)
-}
-
-
-#### Grouped outbreak size plots ####
-for (i in c(12)) {
-    p <- results |>
-        filter(
-            t == 365,
-            initial_coverage_scenario %in% vax_levs
-        ) |>
-        ggplot(aes(Y + 1, fill = factor(group))) +
-        geom_histogram(position = "identity", alpha = 0.5) +
-        scale_x_log10() +
-        facet_grid(total_vaccine_uptake_doses ~ initial_coverage_scenario,
-            labeller = label_both
-        ) +
-        scale_fill_manual(values = plot_cols) +
-        theme_minimal(base_size = 18) +
-        labs(
-            title = "R0=12", x = "Final Group Outbreak Size",
-            y = "Number of simulations", fill = "Group"
-        )
-    ggsave(filename = paste0(
-        "output/uptake/group_final_size_r0",
+        "output/one_pop/overall_final_size",
         i, ".png"
     ), plot = p, width = 10, height = 8)
 }
@@ -144,18 +99,13 @@ for (i in c(12)) {
 #### Percent of susceptible infected cumulative
 coverage_scenarios <- data.frame(
     initial_coverage_scenario = c("low", "medium", "optimistic"), # nolint
-    coverage_0 = c(0.95, 0.95, 0.95),
-    coverage_1 = c(0.80, 0.80, 0.80),
-    coverage_2 = c(0.80, 0.90, 0.95)
+    coverage_0 = c(0.8, 0.9, 0.95)
 )
-pop_sizes <- c(40000, 5000, 5000)
 
 filtered_categories <- filtered_results |>
     left_join(coverage_scenarios, by = "initial_coverage_scenario") |>
     mutate(sus_population = case_when(
-        group == 0 ~ (1 - coverage_0) * pop_sizes[1], # nolint
-        group == 1 ~ (1 - coverage_1) * pop_sizes[2], # nolint
-        group == 2 ~ (1 - coverage_2) * pop_sizes[3]
+        group == 0 ~ (1 - coverage_0) * pop_sizes[1] # nolint
     )) |> # nolint
     mutate(Y_prop_sus = Y / sus_population)
 
@@ -178,7 +128,7 @@ p <- filtered_categories |>
     labs(x = "Days", y = "Cumulative Infections", col = "Group")
 
 ggsave(filename = paste0(
-    "output/uptake/cumulative_sus_infected.png",
+    "output/one_pop/cumulative_sus_infected.png",
     12, ".png"
 ), plot = p, width = 10, height = 8)
 
@@ -187,24 +137,22 @@ ggsave(filename = paste0(
 outbreak_sizes <- c(50, 100)
 for (i in outbreak_sizes) {
     res_table <- results |>
-        filter(t == 365, Y >= i) |>
+        filter(t == 365) |>
+        mutate(outbreak = ifelse(Y >= i, 1, 0)) |>
         group_by(
-            group,
             initial_coverage_scenario,
             total_vaccine_uptake_doses
         ) |>
-        count() |>
-        mutate(n = round(n / reps, 2) * 100) |>
-        pivot_wider(names_from = group, values_from = n) |>
+        summarise(n = sum(outbreak)) |>
+        mutate(n = round(n / reps, 2)) |>
         select(
             InitialCoverage = initial_coverage_scenario,
             DailyDoses = total_vaccine_uptake_doses,
-            Sub1 = `1`, Sub2 = `2`,
-            General = `0`
+            `OutbreakProbability` = n
         )
 
     write_csv(
         res_table,
-        paste0("output/uptake/res_table_outbreak_size", i, ".csv")
+        paste0("output/one_pop/res_table_outbreak_size", i, ".csv")
     )
 }

@@ -10,11 +10,13 @@ baseline_parameters:
   infectious_duration: 9.0
   pop_sizes: [40000, 5000, 5000]    # population sizes
   I0: [0, 5, 0]     # initially infected
-  vaccine_uptake_days: [0] # subpop 2 vaccine uptake days
-  vaccine_updake_doses: [0] # constant, doses to subpop 2 each day
+  vaccine_uptake_start_day:  400
+  vaccine_uptake_duration_days: 30 # duration of vaccine uptake campaign
+  total_vaccine_uptake_doses: 0
   vaccinated_group: 2
   isolation_success: 0.0
-  symptomatic_isolation_day: 400
+  symptomatic_isolation_start_day: 400
+  symptomatic_isolation_duration_days: 100
   tf: 365        # total time modeled
   n_replicates: 1000
   seed: 123

@@ -13,12 +13,13 @@ baseline_parameters:
   iota: 0.0      # spontaneous infection rate
   pop_sizes: [40000, 5000, 5000]    # population sizes
   I0: [0, 5, 0]     # initially infected
-  vaccine_uptake_range: [0, 0]
+  vaccine_uptake_start_day: 0
+  vaccine_uptake_duration_days: 0
   total_vaccine_uptake_doses: 0 # number of doses
   vaccinated_group: 2
   isolation_success: 0.0
-  symptomatic_isolation_day: 100
-
+  symptomatic_isolation_start_day: 100
+  symptomatic_isolation_duration_days: 100
   tf: 365        # total time modeled
   n_replicates: 20
   seed: 123

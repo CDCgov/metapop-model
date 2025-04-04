@@ -1,9 +1,11 @@
 import streamlit as st
 import numpy as np
 import polars as pl
-import metapop as mt
 import altair as alt
 import copy
+from metapop.model import *
+from metapop.helper import *
+from metapop.app_helper import *
 
 ### Methods to create user inputs interfaces ###
 def app_editors(element, scenario_name, parms, ordered_keys, list_keys, slide_keys, show_parameter_mapping, min_values, max_values, steps, helpers, formats, element_keys):
@@ -81,7 +83,8 @@ def get_min_values():
     return dict(
             desired_r0=0.,
             pop_sizes=[15000, 100, 100],
-            vaccine_uptake_range=[0, 0],
+            vaccine_uptake_start_day=0,
+            vaccine_uptake_duration_days=0,
             total_vaccine_uptake_doses=0,
             I0=[0, 0, 0],
             initial_vaccine_coverage=[0., 0., 0.],
@@ -91,14 +94,16 @@ def get_min_values():
             k_g1 = 0.,
             k_21 = 0.,
             isolation_success = 0.,
-            symptomatic_isolation_day = 0,
+            symptomatic_isolation_start_day = 0,
+            symptomatic_isolation_duration_days = 0,
             )
 
 def get_max_values():
     return dict(
             desired_r0=20.0,
             pop_sizes=[100000, 15000, 15000],
-            vaccine_uptake_range=[400, 400],
+            vaccine_uptake_start_day=400,
+            vaccine_uptake_duration_days=100,
             total_vaccine_uptake_doses=1000,
             I0=[100, 100, 100],
             initial_vaccine_coverage=[1.00, 1.00, 1.00],
@@ -108,14 +113,16 @@ def get_max_values():
             k_g1 = 30.,
             k_21 = 30.,
             isolation_success = 1.,
-            symptomatic_isolation_day = 365,
+            symptomatic_isolation_start_day = 365,
+            symptomatic_isolation_duration_days = 365,
             )
 
 def get_steps():
     return dict(
             desired_r0=0.1,
             pop_sizes=100,
-            vaccine_uptake_range=1,
+            vaccine_uptake_start_day=1,
+            vaccine_uptake_duration_days=1,
             total_vaccine_uptake_doses=1,
             I0=1,
             initial_vaccine_coverage=0.01,
@@ -125,7 +132,8 @@ def get_steps():
             k_g1 = 0.01,
             k_21 = 0.01,
             isolation_success = 0.01,
-            symptomatic_isolation_day = 1,
+            symptomatic_isolation_start_day = 1,
+            symptomatic_isolation_duration_days = 10,
             )
 
 def get_helpers():
@@ -134,8 +142,8 @@ def get_helpers():
             pop_sizes=["Size of the large population (15,000 - 100,000)",
                        "Size of the small population 1 (0 - 15,000)",
                        "Size of the small population 2 (0 - 15,000)"],
-            vaccine_uptake_range=["Day vaccination starts",
-                                 "Day vaccination ends"],
+            vaccine_uptake_start_day="Day vaccination starts",
+            vaccine_uptake_duration_days="Duration of vaccination uptake",
             total_vaccine_uptake_doses="Total vaccine doses",
             I0=["Initial infections in large population",
                 "Initial infections in small population 1",
@@ -151,14 +159,16 @@ def get_helpers():
             k_g1 = "Average degree of small population 1 connecting to large population",
             k_21 = "Average degree between small populations",
             isolation_success = "Percentage of symptomatic cases isolated",
-            symptomatic_isolation_day = "Day symptomatic isolation starts",
+            symptomatic_isolation_start_day = "Day symptomatic isolation starts",
+            symptomatic_isolation_duration_days = "Duration of symptomatic isolation",
             )
 
 def get_formats():
     return  dict(
             desired_r0="%.1f",
             pop_sizes="%.0d",
-            vaccine_uptake_range="%.0d",
+            vaccine_uptake_start_day="%.0d",
+            vaccine_uptake_duration_days="%.0d",
             total_vaccine_uptake_doses="%.0d",
             I0="%.0d",
             initial_vaccine_coverage="%.2f",
@@ -168,16 +178,17 @@ def get_formats():
             k_g1 = "%.2f",
             k_21 = "%.2f",
             isolation_success = "%.2f",
-            symptomatic_isolation_day = "%.0d",
+            symptomatic_isolation_start_day = "%.0d",
+            symptomatic_isolation_duration_days = "%.0d",
             )
 
 
 def app(replicates=20):
     st.title("Metapopulation Model")
-    parms = mt.read_parameters()
+    parms = read_parameters()
 
-    show_parameter_mapping = mt.get_show_parameter_mapping()
-    advanced_parameter_mapping = mt.get_advanced_parameter_mapping()
+    show_parameter_mapping = get_show_parameter_mapping()
+    advanced_parameter_mapping = get_advanced_parameter_mapping()
 
     with st.sidebar:
         st.header(
@@ -194,7 +205,8 @@ def app(replicates=20):
         keys1 = dict(
             desired_r0="R0_1",
             pop_sizes=["pop_size_0_1", "pop_size_1_1", "pop_size_2_1"],
-            vaccine_uptake_range=["vaccine_uptake_days_0_1", "vaccine_uptake_days_1_1"],
+            vaccine_uptake_start_day="vaccine_uptake_days_0_1",
+            vaccine_uptake_duration_days="vaccine_uptake_duration_days_0_1",
             total_vaccine_uptake_doses="total_vaccine_uptake_doses_1",
             I0=["I0_0_1", "I0_1_1", "I0_2_1"],
             initial_vaccine_coverage=["initial_vaccine_coverage_0_1", "initial_vaccine_coverage_1_1", "initial_vaccine_coverage_2_1"],
@@ -204,12 +216,14 @@ def app(replicates=20):
             k_g1 = "k_g1_1",
             k_21 = "k_21_1",
             isolation_success = "isolation_success_1",
-            symptomatic_isolation_day = "symptomatic_isolation_day_1",
+            symptomatic_isolation_start_day = "symptomatic_isolation_start_day_1",
+            symptomatic_isolation_duration_days = "symptomatic_isolation_duration_days_1",
             )
         keys2 = dict(
             desired_r0="R0_2",
             pop_sizes=["pop_size_0_2", "pop_size_1_2", "pop_size_2_2"],
-            vaccine_uptake_range=["vaccine_uptake_days_0_2", "vaccine_uptake_days_1_2"],
+            vaccine_uptake_start_day="vaccine_uptake_days_0_2",
+            vaccine_uptake_duration_days="vaccine_uptake_duration_days_0_2",
             total_vaccine_uptake_doses="total_vaccine_uptake_doses_2",
             I0=["I0_0_2", "I0_1_2", "I0_2_2"],
             initial_vaccine_coverage=["initial_vaccine_coverage_0_2", "initial_vaccine_coverage_1_2", "initial_vaccine_coverage_2_2"],
@@ -219,7 +233,8 @@ def app(replicates=20):
             k_g1 = "k_g1_2",
             k_21 = "k_21_2",
             isolation_success = "isolation_success_2",
-            symptomatic_isolation_day = "symptomatic_isolation_day_2",
+            symptomatic_isolation_start_day = "symptomatic_isolation_start_day_2",
+            symptomatic_isolation_duration_days = "symptomatic_isolation_duration_days_2",
             )
         # order of parameters in the sidebar
         ordered_keys = [
@@ -228,15 +243,16 @@ def app(replicates=20):
                         'I0',
                         'initial_vaccine_coverage',
                         'total_vaccine_uptake_doses',
-                        'vaccine_uptake_range',
+                        'vaccine_uptake_start_day',
+                        'vaccine_uptake_duration_days',
                         'isolation_success',
-                        'symptomatic_isolation_day'
+                        'symptomatic_isolation_start_day',
+                        'symptomatic_isolation_duration_days',
                         ]
 
         list_parameter_keys = [
                               'pop_sizes',
                               'I0',
-                              'vaccine_uptake_range',
                               'initial_vaccine_coverage',
                               'vaccine_uptake_doses',
                               ]
@@ -279,20 +295,20 @@ def app(replicates=20):
     # get the selected outcome from the sidebar
     outcome_option = st.selectbox(
         "Metric",
-        mt.get_outcome_options(),
+        get_outcome_options(),
         index=0,  # by default display weekly incidence
         placeholder="Select an outcome to plot",
     )
 
     # Map the selected option to the outcome variable
-    outcome_mapping = mt.get_outcome_mapping()
+    outcome_mapping = get_outcome_mapping()
     outcome = outcome_mapping[outcome_option]
 
-    full_defaults = mt.get_default_full_parameters()
+    full_defaults = get_default_full_parameters()
 
     # get updated parameter dictionaries
-    updated_parms1 = mt.get_parms_from_table(full_defaults, value_col="Scenario 1")
-    updated_parms2 = mt.get_parms_from_table(full_defaults, value_col="Scenario 2")
+    updated_parms1 = get_parms_from_table(full_defaults, value_col="Scenario 1")
+    updated_parms2 = get_parms_from_table(full_defaults, value_col="Scenario 2")
 
     # get updated values from user through the sidebar
     for key, value in edited_parms1.items():
@@ -306,15 +322,15 @@ def app(replicates=20):
         updated_parms2[key] = value
 
     # correct types for single values
-    updated_parms1 = mt.correct_parameter_types(parms, updated_parms1)
-    updated_parms2 = mt.correct_parameter_types(parms, updated_parms2)
+    updated_parms1 = correct_parameter_types(parms, updated_parms1)
+    updated_parms2 = correct_parameter_types(parms, updated_parms2)
 
     scenario1 = [updated_parms1]
     scenario2 = [updated_parms2]
 
     # run the model with the updated parameters
-    results1 = mt.get_scenario_results(scenario1)
-    results2 = mt.get_scenario_results(scenario2)
+    results1 = get_scenario_results(scenario1)
+    results2 = get_scenario_results(scenario2)
 
     # extract groups
     groups = results1["group"].unique().to_list()
@@ -325,14 +341,14 @@ def app(replicates=20):
     results2 = results2.filter(pl.col("replicate").is_in(replicate_inds))
 
     # do some processing here to get daily incidence
-    results1 = mt.add_daily_incidence(results1, replicate_inds, groups)
-    results2 = mt.add_daily_incidence(results2, replicate_inds, groups)
+    results1 = add_daily_incidence(results1, replicate_inds, groups)
+    results2 = add_daily_incidence(results2, replicate_inds, groups)
 
     # create tables with interval results - weekly incidence, weekly cumulative incidence
     interval = 7
 
-    interval_results1 = mt.get_interval_results(results1, replicate_inds, groups, interval)
-    interval_results2 = mt.get_interval_results(results2, replicate_inds, groups, interval)
+    interval_results1 = get_interval_results(results1, replicate_inds, groups, interval)
+    interval_results2 = get_interval_results(results2, replicate_inds, groups, interval)
 
     # rename columns for the app
     app_column_mapping = {f"inc_{interval}": "Winc", "Y": "WCI"}
@@ -375,13 +391,13 @@ def app(replicates=20):
     labelExpr=f"datum.value == '0' ? '{group_labels[0]}' : datum.value == '1' ? '{group_labels[1]}' : '{group_labels[2]}'"
     detail="replicate:N"
 
-    chart1 = mt.create_chart(alt_results1, outcome_option,
+    chart1 = create_chart(alt_results1, outcome_option,
                           x, time_label,
                           y, outcome_option, yscale,
                           color_key, color_scale, domain,
                           labelExpr,
                           detail)
-    chart2 = mt.create_chart(alt_results2, outcome_option,
+    chart2 = create_chart(alt_results2, outcome_option,
                           x, time_label,
                           y, outcome_option, yscale,
                           color_key, color_scale, domain,

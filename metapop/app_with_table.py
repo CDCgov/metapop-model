@@ -2,16 +2,18 @@ import streamlit as st
 import polars as pl
 import numpy as np
 import altair as alt
-import metapop as mt
+from metapop.model import *
+from metapop.helper import *
+from metapop.app_helper import *
 
 
 # This method is currently deprecated, but does look prettier
 def app_with_parameter_table(replicates=20):
     st.title("Metapopulation Model")
-    parms = mt.read_parameters()
+    parms = read_parameters()
 
-    default_table = mt.get_default_show_parameters_table()
-    show_parameter_mapping = mt.get_show_parameter_mapping()
+    default_table = get_default_show_parameters_table()
+    show_parameter_mapping = get_show_parameter_mapping()
     # advanced_table = get_advanced_parameters_table()
     # advanced_parameter_mapping = get_advanced_parameter_mapping()
 
@@ -56,42 +58,42 @@ def app_with_parameter_table(replicates=20):
 
     outcome_option = st.selectbox(
         "Metric",
-        mt.get_outcome_options(),
+        get_outcome_options(),
         index=0,  # by default display weekly incidence
         placeholder="Select an outcome to plot",
     )
 
     # Map the selected option to the outcome variable
-    outcome_mapping = mt.get_outcome_mapping()
+    outcome_mapping = get_outcome_mapping()
     outcome = outcome_mapping[outcome_option]
 
-    full_defaults = mt.get_default_full_parameters()
+    full_defaults = get_default_full_parameters()
 
     # get updated parameter dictionaries
-    updated_parms1 = mt.get_parms_from_table(full_defaults, value_col="Scenario 1")
-    updated_parms2 = mt.get_parms_from_table(full_defaults, value_col="Scenario 2")
+    updated_parms1 = get_parms_from_table(full_defaults, value_col="Scenario 1")
+    updated_parms2 = get_parms_from_table(full_defaults, value_col="Scenario 2")
 
     # get updated values from user through the sidebar
-    updated_parms1 = mt.update_parms_from_table(updated_parms1, edited_table, show_parameter_mapping, value_col="Scenario 1")
-    updated_parms2 = mt.update_parms_from_table(updated_parms2, edited_table, show_parameter_mapping, value_col="Scenario 2")
+    updated_parms1 = update_parms_from_table(updated_parms1, edited_table, show_parameter_mapping, value_col="Scenario 1")
+    updated_parms2 = update_parms_from_table(updated_parms2, edited_table, show_parameter_mapping, value_col="Scenario 2")
 
     # correct types for single values
-    updated_parms1 = mt.correct_parameter_types(parms, updated_parms1)
-    updated_parms2 = mt.correct_parameter_types(parms, updated_parms2)
+    updated_parms1 = correct_parameter_types(parms, updated_parms1)
+    updated_parms2 = correct_parameter_types(parms, updated_parms2)
 
     # find all the values that should be arrays or lists
-    keys_in_list = mt.get_keys_in_list(parms, updated_parms1)
+    keys_in_list = get_keys_in_list(parms, updated_parms1)
 
     # find the original keys and repack the list values in each updated parameters dictionary
-    updated_parms1 = mt.repack_list_parameters(parms, updated_parms1, keys_in_list)
-    updated_parms2 = mt.repack_list_parameters(parms, updated_parms2, keys_in_list)
+    updated_parms1 = repack_list_parameters(parms, updated_parms1, keys_in_list)
+    updated_parms2 = repack_list_parameters(parms, updated_parms2, keys_in_list)
 
     scenario1 = [updated_parms1]
     scenario2 = [updated_parms2]
 
     # run the model with the updated parameters
-    results1 = mt.get_scenario_results(scenario1)
-    results2 = mt.get_scenario_results(scenario2)
+    results1 = get_scenario_results(scenario1)
+    results2 = get_scenario_results(scenario2)
 
     # extract groups
     groups = results1["group"].unique().to_list()
@@ -102,14 +104,14 @@ def app_with_parameter_table(replicates=20):
     results2 = results2.filter(pl.col("replicate").is_in(replicate_inds))
 
     # do some processing here to get daily incidence
-    results1 = mt.add_daily_incidence(results1, replicate_inds, groups)
-    results2 = mt.add_daily_incidence(results2, replicate_inds, groups)
+    results1 = add_daily_incidence(results1, replicate_inds, groups)
+    results2 = add_daily_incidence(results2, replicate_inds, groups)
 
     # create tables with interval results - weekly incidence, weekly cumulative incidence
     interval = 7
 
-    interval_results1 = mt.get_interval_results(results1, replicate_inds, groups, interval)
-    interval_results2 = mt.get_interval_results(results2, replicate_inds, groups, interval)
+    interval_results1 = get_interval_results(results1, replicate_inds, groups, interval)
+    interval_results2 = get_interval_results(results2, replicate_inds, groups, interval)
 
     # rename columns for the app
     app_column_mapping = {f"inc_{interval}": "Winc", "Y": "WCI"}
@@ -152,13 +154,13 @@ def app_with_parameter_table(replicates=20):
     labelExpr=f"datum.value == '0' ? '{group_labels[0]}' : datum.value == '1' ? '{group_labels[1]}' : '{group_labels[2]}'"
     detail="replicate:N"
 
-    chart1 = mt.create_chart(alt_results1, outcome_option,
+    chart1 = create_chart(alt_results1, outcome_option,
                           x, time_label,
                           y, outcome_option, yscale,
                           color_key, color_scale, domain,
                           labelExpr,
                           detail)
-    chart2 = mt.create_chart(alt_results2, outcome_option,
+    chart2 = create_chart(alt_results2, outcome_option,
                           x, time_label,
                           y, outcome_option, yscale,
                           color_key, color_scale, domain,

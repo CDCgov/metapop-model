@@ -4,8 +4,8 @@ import polars as pl
 import altair as alt
 import griddler
 import griddler.griddle
-import metapop as mt
-
+from metapop.model import *
+from metapop.helper import *
 
 ### Methods to simulate the model ###
 def simulate(parms):
@@ -20,16 +20,16 @@ def simulate(parms):
     """
 
     #### Set up rate params, convert duration periods to rates
-    parms["sigma"] = mt.time_to_rate(parms["latent_duration"])
-    parms["gamma"] = mt.time_to_rate(parms["infectious_duration"])
+    parms["sigma"] = time_to_rate(parms["latent_duration"])
+    parms["gamma"] = time_to_rate(parms["infectious_duration"])
     parms["sigma_scaled"] = parms["sigma"] * parms["n_e_compartments"]
     parms["gamma_scaled"] = parms["gamma"] * parms["n_i_compartments"]
 
     #### Set beta matrix based on desired R0 and connectivity scenario ###
-    parms["beta"] = mt.construct_beta(parms)
+    parms["beta"] = construct_beta(parms)
 
     #### Set up vaccine schedule for group 2
-    parms["vaccination_uptake_schedule"] = mt.build_vax_schedule(parms)
+    parms["vaccination_uptake_schedule"] = build_vax_schedule(parms)
 
     #### set up the model time steps
     steps = parms["tf"]
@@ -37,11 +37,11 @@ def simulate(parms):
 
     #### Initialize population
     groups = parms["n_groups"]
-    S, V, E1, E2, I1, I2, R, Y, X, u = mt.initialize_population(steps, groups, parms)
+    S, V, E1, E2, I1, I2, R, Y, X, u = initialize_population(steps, groups, parms)
 
     #### Run the model
-    model = mt.SEIRModel(parms)
-    S, V, E1, E2, I1, I2, R, Y, X, u = mt.run_model(model, u, t, steps, groups, S, V, E1, E2, I1, I2, R, Y, X)
+    model = SEIRModel(parms)
+    S, V, E1, E2, I1, I2, R, Y, X, u = run_model(model, u, t, steps, groups, S, V, E1, E2, I1, I2, R, Y, X)
 
     #### Flatten into a dataframe
     df = pl.DataFrame({
@@ -232,12 +232,13 @@ def get_show_parameter_mapping():
         I0_2="initial infections in small population 2",
         # vaccine_uptake = "Enable vaccine uptake",
         total_vaccine_uptake_doses="vaccine doses total",
-        vaccine_uptake_range_0="active vaccination start day",
-        vaccine_uptake_range_1="active vaccination end day",
+        vaccine_uptake_start_day="active vaccination start day",
+        vaccine_uptake_duration_days="active vaccination duration days",
         vaccinated_group = "vaccinated group",
         # symptomatic_isolation = "Enable symptomatic isolation",
         isolation_success = "Symptomatic isolation percentage",
-        symptomatic_isolation_day = "Symptomatic isolation start day",
+        symptomatic_isolation_start_day = "Symptomatic isolation start day",
+        symptomatic_isolation_duration_days = "Symptomatic isolation duration days",
         tf = "time steps",
         # n_replicates = "number of replicates",
         # seed = "random seed",

@@ -1,10 +1,9 @@
 import os
-from metapop import SEIRModel
-from metapop.helper import* # noqa: F405
 import yaml
 import numpy as np
 from numpy.testing import assert_allclose
-
+from metapop.model import *
+from metapop.helper import* # noqa: F405
 
 def test_get_percapita_contact_matrix():
     # Define the parameters
@@ -157,7 +156,8 @@ def test_calculate_foi():
 def test_active_vaccination():
     parms = {
         "n_groups": 3,
-        "vaccine_uptake_range": [10, 11],
+        "vaccine_uptake_start_day": 10,
+        "vaccine_uptake_duration_days": 1,
         "total_vaccine_uptake_doses": 100,
         "vaccinated_group": 2
     }
@@ -204,8 +204,8 @@ def test_get_infected():
 
     # Define parms
     parms = {
-        "symptomatic_isolation": False,
-        "symptomatic_isolation_day": 400
+        "symptomatic_isolation_start_day": 400,
+        "symptomatic_isolation_duration_days": 100,
     }
 
     # Call the get_infected function
@@ -217,8 +217,8 @@ def test_get_infected():
 
 def test_symptomatic_isolation():
     parms = {
-        "symptomatic_isolation": True,
-        "symptomatic_isolation_day": 10,
+        "symptomatic_isolation_start_day": 10,
+        "symptomatic_isolation_duration_days": 1,
         "isolation_success": 1.0
     }
 
@@ -253,6 +253,15 @@ def test_symptomatic_isolation():
     # Check the results
     expected_infected2 = np.array([100, 0])  # Should just be I1
     assert np.array_equal(infected2, expected_infected2), f"Expected {expected_infected2}, but got {infected2}"
+
+    # Next test that no longer happening after duration
+    t3 = 100
+
+    # Call the get_infected function
+    infected3 = get_infected(u, I_indices, groups, parms, t3)
+
+    # Check the results, we should now be back to pre-isolation values
+    assert np.array_equal(infected3, expected_infected), f"Expected {expected_infected}, but got {infected3}"
 
 
 
@@ -309,5 +318,5 @@ def test_run_model_once_with_config():
     assert X.shape ==  (steps, groups)
 
     # Check initial vax = end vax
-    if parms["vaccine_uptake"] is False:
+    if parms["total_vaccine_uptake_doses"] == 0:
         assert np.array_equal(V[0], V[-1]), "The starting V[0] should be the same as the ending V[0] when uptake is zero"

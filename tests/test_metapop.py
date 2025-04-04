@@ -1,8 +1,5 @@
-import os
-import pytest
-from metapop import SEIRModel  # Ensure this import path is correct
 import numpy as np
-import yaml
+from metapop.model import *
 
 def test_only_expose_susceptible():
     # Define the parameters
@@ -15,8 +12,9 @@ def test_only_expose_susceptible():
         "n_i_compartments": 2,
         "pop_sizes": [100, 100],
         "n_groups": 2,
-        "symptomatic_isolation": False,
-        "symptomatic_isolation_day": 400
+        "symptomatic_isolation_start_day": 400,
+        "symptomatic_isolation_duration_days": 100,
+        "isolation_success": 0.0
     }
 
     # Initial state for each group
@@ -39,21 +37,3 @@ def test_only_expose_susceptible():
     assert new_exposed[1] == 0 # No new exposures in this group bc no susceptibles
     assert len(new_exposed) == parms['n_groups']
     assert len(old_exposed) == parms['n_groups']
-
-@pytest.mark.skip # This looks like it's an outdated test, skipping for now, need to review and update as there are many more parameters to validate now
-def test_check_config():
-    testdir = os.path.dirname(__file__)
-    with open(os.path.join(testdir, "test_config.yaml"), "r") as file:
-        config = yaml.safe_load(file)
-
-    parms = config["baseline_parameters"]
-
-    n_groups = parms["n_groups"]
-
-    # Check that N and I0 are of length equal to n_groups
-    assert len(parms["pop_sizes"]) == n_groups, f"N should be of length {n_groups}"
-    assert len(parms["I0"]) == n_groups, f"I0 should be of length {n_groups}"
-
-    # Check that beta is a square n_groups x n_groups array
-    beta = np.array(parms["beta"])
-    assert beta.shape == (n_groups, n_groups), f"beta should be a {n_groups}x{n_groups} array"

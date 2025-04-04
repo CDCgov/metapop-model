@@ -6,15 +6,17 @@ baseline_parameters:
   k_g2: 0.0
   k_21: 0.0
   n_e_compartments: 2    # number of chained E compartments
-  latent_duration: 10.5    # 2 * 1/latent_duration
+  latent_duration: 10.5
   n_i_compartments: 2    # number of chained I compartments
-  infectious_duration: 9.0   # 2 * 1/infectious_duration
+  infectious_duration: 9.0
   pop_sizes: [5000]    # population sizes
   I0: [5]     # initially infected
-  vaccine_uptake_range:  [30, 60] # start and end of vaccine campaign
+  vaccine_uptake_start_day:  30
+  vaccine_uptake_duration_days: 30 # duration of vaccine uptake campaign
   vaccinated_group: 0
   isolation_success: 0.8
-  symptomatic_isolation_day: 0
+  symptomatic_isolation_start_day: 0
+  symptomatic_isolation_duration_days: 365
   tf: 365        # total time modeled
   n_replicates: 1000
   seed: 123
