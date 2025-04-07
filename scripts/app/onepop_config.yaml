@@ -21,6 +21,6 @@ baseline_parameters:
   symptomatic_isolation_start_day: 100
   symptomatic_isolation_duration_days: 100
   tf: 365        # total time modeled
-  n_replicates: 20
+  n_replicates: 200
   seed: 123
   initial_vaccine_coverage: [0.80]

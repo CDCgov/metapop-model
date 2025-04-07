@@ -8,7 +8,7 @@ from metapop.helper import *
 from metapop.app_helper import *
 
 
-def app(replicates=5):
+def app(replicates=50):
     st.title("Metapopulation Model")
     parms = read_parameters("scripts/app/onepop_config.yaml")
 
