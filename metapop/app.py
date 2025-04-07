@@ -260,7 +260,7 @@ def app(replicates=5):
     st.subheader("Outbreak summary statistics")
 
     threshold = st.selectbox(
-        label = "Outbreak threshold for population 2:",
+        label = "Outbreak threshold:",
         options=[50, 100, 200, 300, 500],
         index=2,  # Default selected option (index of the options list)
     )
@@ -279,17 +279,7 @@ def app(replicates=5):
      .group_by("Scenario", "replicate"
      ).agg(pl.col("Y").sum().alias("Total"))
 
-
-    outbreak_summary = (
-    combined_results.filter(pl.col("Total") >= threshold)
-        .group_by("Scenario")
-        .agg(pl.col("replicate")
-             .n_unique()
-             .alias("outbreaks"))
-    )
-
-    if outbreak_summary.is_empty():
-        outbreak_summary = pl.DataFrame({"Scenario": ["Scenario 1 (Baseline)", "Scenario 2"], "outbreaks": [0, 0]})
+    outbreak_summary = calculate_outbreak_summary(combined_results, threshold)
 
     columns = st.columns(len(outbreak_summary))
 

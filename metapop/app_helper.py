@@ -840,3 +840,31 @@ def create_chart(alt_results, outcome_option, x, xlabel, y, ylabel, yscale, colo
             detail=detail,
         ).properties(width=width, height=height)
     return chart
+
+
+### Methods to summarize data
+def calculate_outbreak_summary(combined_results, threshold):
+    """
+    Calculate the outbreak summary based on the given threshold.
+
+    Args:
+        combined_results (pl.DataFrame): The combined results DataFrame.
+        threshold (int): The threshold for filtering replicates.
+
+    Returns:
+        pl.DataFrame: A DataFrame containing the outbreak summary.
+    """
+    # Filter combined_results for replicates where Total >= threshold
+    filtered_results = combined_results.filter(pl.col("Total") >= threshold)
+
+    # Check if the filtered DataFrame is empty
+    if filtered_results.is_empty():
+        outbreak_summary = pl.DataFrame({"Scenario": ["Scenario 1 (Baseline)", "Scenario 2"], "outbreaks": [0, 0]})
+    else:
+        outbreak_summary = (
+            filtered_results
+            .group_by("Scenario")
+            .agg(pl.col("replicate").n_unique().alias("outbreaks"))
+        )
+
+    return outbreak_summary
