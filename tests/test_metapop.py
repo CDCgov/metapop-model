@@ -14,7 +14,10 @@ def test_only_expose_susceptible():
         "n_groups": 2,
         "symptomatic_isolation_start_day": 400,
         "symptomatic_isolation_duration_days": 100,
-        "isolation_success": 0.0
+        "pre_rash_isolation_start_day": 400,
+        "pre_rash_isolation_duration_days": 100,
+        "isolation_success": 0.0,
+        "pre_rash_isolation_success": 0.0
     }
 
     # Initial state for each group
