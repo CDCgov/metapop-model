@@ -9,7 +9,7 @@ from metapop.app_helper import *
 
 def app(replicates=5):
     st.title("Metapopulation Model")
-    parms = read_parameters("scripts/app_config.yaml")
+    parms = read_parameters("scripts/app/onepop_config.yaml")
 
     show_parameter_mapping = get_show_parameter_mapping()
     advanced_parameter_mapping = get_advanced_parameter_mapping()
@@ -275,28 +275,34 @@ def app(replicates=5):
         pl.col("t").cast(pl.Int64),
         pl.col("group").cast(pl.Int64),
         pl.col("Y").cast(pl.Int64),
-    )
+    ).filter(pl.col("t") == 365) \
+     .group_by("Scenario", "replicate"
+     ).agg(pl.col("Y").sum().alias("Total"))
+
 
     outbreak_summary = (
-    combined_results.filter((pl.col("Y") >= threshold) & (pl.col("group") == 2))
+    combined_results.filter(pl.col("Total") >= threshold)
         .group_by("Scenario")
         .agg(pl.col("replicate")
              .n_unique()
-             .alias("Number of outbreaks >= Y"))
+             .alias("outbreaks"))
     )
+
+    if outbreak_summary.is_empty():
+        outbreak_summary = pl.DataFrame({"Scenario": ["Scenario 1 (Baseline)", "Scenario 2"], "outbreaks": [0, 0]})
 
     columns = st.columns(len(outbreak_summary))
 
     for idx, row in enumerate(outbreak_summary.iter_rows(named=True)):
         scenario = row["Scenario"]
-        outbreaks = row["Number of outbreaks >= Y"]
+        outbreaks = row["outbreaks"]
         outbreak_prop = outbreaks / replicates
 
         # Use st.error for the first column, st.success for the rest
         if scenario == "Scenario 1 (Baseline)":
-            columns[0].error(f"{scenario}: Group 2 had >= {threshold} cases in {outbreaks}/{replicates} ({outbreak_prop}) simulations ")
+            columns[0].error(f"{scenario}: {outbreaks}/{replicates} ({outbreak_prop}) simulations had >= {threshold} cases total ")
         else:
-            columns[1].success(f"{scenario}: Group 2 had >= {threshold} cases in {outbreaks}/{replicates} ({outbreak_prop}) simulations ")
+            columns[1].success(f"{scenario}: {outbreaks}/{replicates} ({outbreak_prop}) simulations had >= {threshold} cases total ")
 
 
 if __name__ == "__main__":
