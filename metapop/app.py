@@ -286,7 +286,7 @@ def app(replicates=5):
     for idx, row in enumerate(outbreak_summary.iter_rows(named=True)):
         scenario = row["Scenario"]
         outbreaks = row["outbreaks"]
-        outbreak_prop = outbreaks / replicates
+        outbreak_prop = f"{(outbreaks / replicates) * 100:.2f}%"
 
         # Use st.error for the first column, st.success for the rest
         if scenario == "Scenario 1 (Baseline)":
