@@ -207,6 +207,8 @@ def test_get_infected():
     parms = {
         "symptomatic_isolation_start_day": 400,
         "symptomatic_isolation_duration_days": 100,
+        "pre_rash_isolation_start_day": 400,
+        "pre_rash_isolation_duration_days": 100
     }
 
     # Call the get_infected function
@@ -264,6 +266,7 @@ def test_symptomatic_isolation():
     # Check the results, we should now be back to pre-isolation values
     assert np.array_equal(infected3, expected_infected), f"Expected {expected_infected}, but got {infected3}"
 
+def test_pre_rash_isolation():
 
 
 def test_rate_to_frac():
