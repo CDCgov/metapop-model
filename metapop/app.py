@@ -1,3 +1,4 @@
+# flake8: noqa
 import streamlit as st
 import numpy as np
 import polars as pl
@@ -236,25 +237,49 @@ def app(replicates=5):
         x = "interval_t:Q"
         time_label = "Time (weeks)"
 
-    y = f"{outcome}:Q"
-    yscale = [min_y, max_y]
-    color_key = "group"
-    labelExpr=f"datum.value == '0' ? '{group_labels[0]}' : datum.value == '1' ? '{group_labels[1]}' : '{group_labels[2]}'"
-    detail="replicate:N"
+    # y = f"{outcome}:Q"
+    # yscale = [min_y, max_y]
+    # color_key = "group"
+    # labelExpr=f"datum.value == '0' ? '{group_labels[0]}' : datum.value == '1' ? '{group_labels[1]}' : '{group_labels[2]}'"
+    # detail="replicate:N"
 
-    chart1 = create_chart(alt_results1, outcome_option,
-                          x, time_label,
-                          y, outcome_option, yscale,
-                          color_key, color_scale, domain,
-                          labelExpr,
-                          detail)
-    chart2 = create_chart(alt_results2, outcome_option,
-                          x, time_label,
-                          y, outcome_option, yscale,
-                          color_key, color_scale, domain,
-                          labelExpr,
-                          detail)
-    st.altair_chart(chart1 | chart2, use_container_width=True)
+    # chart1 = create_chart(alt_results1, outcome_option,
+    #                       x, time_label,
+    #                       y, outcome_option, yscale,
+    #                       color_key, color_scale, domain,
+    #                       labelExpr,
+    #                       detail)
+    # chart2 = create_chart(alt_results2, outcome_option,
+    #                       x, time_label,
+    #                       y, outcome_option, yscale,
+    #                       color_key, color_scale, domain,
+    #                       labelExpr,
+    #                       detail)
+    # st.altair_chart(chart1 | chart2, use_container_width=True)
+    alt_results1 = alt_results1.with_columns(pl.lit("Scenario 1").alias("scenario"))
+    alt_results2 = alt_results2.with_columns(pl.lit("Scenario 2").alias("scenario"))
+    combined_alt_results = alt_results1.vstack(alt_results2)
+    chart = alt.Chart(combined_alt_results.to_pandas()).mark_line(opacity=0.5).encode(
+        x=alt.X("t", title="Time"),
+        y=alt.Y(outcome, title=outcome_option),
+        color=alt.Color(
+            "scenario",
+            title="Scenario",
+            scale=alt.Scale(
+                domain=["Scenario 1", "Scenario 2"],  # Scenarios
+                range=["#20419a", "#cf4828"]  # Corresponding colors (blue, red)
+            )
+        ),
+        detail = "replicate",
+        tooltip=["scenario", "t", outcome]
+    ).properties(
+        title="Outcome Comparison by Scenario",
+        width=800,
+        height=400
+    )
+
+    st.altair_chart(chart, use_container_width=True)
+
 
     # Summary stats based on outbreak sizes
     st.subheader("Outbreak summary statistics")
@@ -288,7 +313,7 @@ def app(replicates=5):
         outbreaks = row["outbreaks"]
         outbreak_prop = f"{(outbreaks / replicates) * 100:.2f}%"
 
-        # Use st.error for the first column, st.success for the rest
+        # Use st.error for the first column, st.success for the second
         if scenario == "Scenario 1 (Baseline)":
             columns[0].error(f"{scenario}: {outbreaks}/{replicates} ({outbreak_prop}) simulations had >= {threshold} cases total ")
         else:

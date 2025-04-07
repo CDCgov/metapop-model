@@ -857,14 +857,22 @@ def calculate_outbreak_summary(combined_results, threshold):
     # Filter combined_results for replicates where Total >= threshold
     filtered_results = combined_results.filter(pl.col("Total") >= threshold)
 
-    # Check if the filtered DataFrame is empty
-    if filtered_results.is_empty():
-        outbreak_summary = pl.DataFrame({"Scenario": ["Scenario 1 (Baseline)", "Scenario 2"], "outbreaks": [0, 0]})
-    else:
-        outbreak_summary = (
-            filtered_results
-            .group_by("Scenario")
-            .agg(pl.col("replicate").n_unique().alias("outbreaks"))
-        )
+    # Group by Scenario and count unique replicates
+    outbreak_summary = (
+        filtered_results
+        .group_by("Scenario")
+        .agg(pl.col("replicate").n_unique().alias("outbreaks"))
+    )
+
+    # Ensure both scenarios are present in the summary
+    scenarios = ["Scenario 1 (Baseline)", "Scenario 2"]
+    for scenario in scenarios:
+        if scenario not in outbreak_summary["Scenario"].to_list():
+            # Add missing scenario with outbreaks = 0
+            outbreak_summary = outbreak_summary.vstack(
+                pl.DataFrame({"Scenario": [scenario], "outbreaks": [0]}).with_columns(
+                    pl.col("outbreaks").cast(outbreak_summary.schema["outbreaks"])  # Match the type
+                )
+            )
 
     return outbreak_summary

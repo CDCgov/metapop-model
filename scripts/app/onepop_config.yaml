@@ -16,7 +16,7 @@ baseline_parameters:
   vaccine_uptake_start_day: 0
   vaccine_uptake_duration_days: 0
   total_vaccine_uptake_doses: 0 # number of doses
-  vaccinated_group: 2
+  vaccinated_group: 0
   isolation_success: 0.0
   symptomatic_isolation_start_day: 100
   symptomatic_isolation_duration_days: 100
