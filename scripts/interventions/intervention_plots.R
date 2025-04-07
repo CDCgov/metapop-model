@@ -20,7 +20,8 @@ filtered_results <- results |>
     filter(
         replicate %in% 1:plot_reps
     ) |>
-    mutate(symptomatic_isolation_start_day = factor(symptomatic_isolation_start_day, levels = isolation_days))
+    mutate(symptomatic_isolation_start_day = factor(symptomatic_isolation_start_day, levels = isolation_days),
+           pre_rash_isolation_start_day = factor(pre_rash_isolation_start_day, levels = isolation_days))
 
 #### Cumulative and incidence plots ####
 p <- filtered_results |>
@@ -32,7 +33,7 @@ p <- filtered_results |>
         ),
         alpha = 0.5
     ) +
-    facet_grid(symptomatic_isolation_start_day ~ total_vaccine_uptake_doses,
+    facet_grid(symptomatic_isolation_start_day ~ total_vaccine_uptake_doses + pre_rash_isolation_start_day,
         labeller = label_both
     ) +
     theme_minimal(base_size = 18) +
@@ -76,14 +77,14 @@ for (i in c(12)) {
             t == 365
         ) |>
         group_by(replicate, total_vaccine_uptake_doses,
-                 symptomatic_isolation_start_day) |>
+                 symptomatic_isolation_start_day, pre_rash_isolation_start_day) |>
         summarise(final_size = sum(Y)) |> # total sum across groups
         ggplot(aes(final_size)) +
         # scale_x_log10() +
         geom_histogram(bins = 50) +
         theme_minimal(base_size = 18) +
         labs(x = "Final Outbreak Size", y = "Number of Simulations") +
-        facet_grid(symptomatic_isolation_start_day ~ total_vaccine_uptake_doses,
+        facet_grid(symptomatic_isolation_start_day ~ total_vaccine_uptake_doses + pre_rash_isolation_start_day,
             labeller = label_both
         )
 
@@ -103,7 +104,7 @@ for (i in c(12)) {
         ggplot(aes(Y + 1, fill = factor(group))) +
         geom_histogram(position = "identity", alpha = 0.5) +
         scale_x_log10() +
-        facet_grid(symptomatic_isolation_start_day ~ total_vaccine_uptake_doses,
+        facet_grid(symptomatic_isolation_start_day ~ total_vaccine_uptake_doses + pre_rash_isolation_start_day,
             labeller = label_both
         ) +
         scale_fill_manual(values = plot_cols) +
@@ -141,7 +142,7 @@ p <- filtered_categories |>
         ),
         alpha = 0.5
     ) +
-    facet_grid(symptomatic_isolation_start_day ~ total_vaccine_uptake_doses,
+    facet_grid(symptomatic_isolation_start_day ~ total_vaccine_uptake_doses + pre_rash_isolation_start_day,
         labeller = label_both
     ) +
     theme_minimal(base_size = 18) +
@@ -163,7 +164,8 @@ for (i in outbreak_sizes) {
         group_by(
             group,
             total_vaccine_uptake_doses,
-            symptomatic_isolation_start_day
+            symptomatic_isolation_start_day,
+            pre_rash_isolation_start_day
         ) |>
         count() |>
         mutate(n = round(n / reps, 2) * 100) |>
@@ -171,6 +173,7 @@ for (i in outbreak_sizes) {
         select(
             TotalUptake = total_vaccine_uptake_doses,
             IsolationDay = symptomatic_isolation_start_day,
+            PreRashIsolationDay = pre_rash_isolation_start_day,
             Sub1 = `1`, Sub2 = `2`,
             General = `0`
         )
