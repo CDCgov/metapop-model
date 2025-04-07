@@ -259,14 +259,11 @@ def app(replicates=5):
     # Summary stats based on outbreak sizes
     st.subheader("Outbreak summary statistics")
 
-    threshold = st.number_input(
-        "Outbreak size of population 2 (Y):",
-        min_value=5,
-        max_value=300,
-        value=100,  # Default value
-        step=1
+    threshold = st.selectbox(
+        label = "Outbreak threshold for population 2:",
+        options=[50, 100, 200, 300, 500],
+        index=2,  # Default selected option (index of the options list)
     )
-
     results1 = results1.with_columns(
         pl.lit("Scenario 1 (Baseline)").alias("Scenario")
     )
