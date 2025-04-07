@@ -7,7 +7,7 @@ import altair as alt
 
 def app(replicates=5):
     st.title("Metapopulation Model")
-    parms = mt.read_parameters("scripts/app_simple_config.yaml")
+    parms = mt.read_parameters("scripts/app_config.yaml")
 
     show_parameter_mapping = mt.get_show_parameter_mapping()
     advanced_parameter_mapping = mt.get_advanced_parameter_mapping()
@@ -249,6 +249,51 @@ def app(replicates=5):
                           labelExpr,
                           detail)
     st.altair_chart(chart1 | chart2, use_container_width=True)
+
+    # Summary stats based on outbreak sizes
+    st.subheader("Outbreak summary statistics")
+
+    threshold = st.number_input(
+        "Outbreak size of population 2 (Y):",
+        min_value=5,
+        max_value=300,
+        value=100,  # Default value
+        step=1
+    )
+
+    results1 = results1.with_columns(
+        pl.lit("Scenario 1 (Baseline)").alias("Scenario")
+    )
+    results2 = results2.with_columns(
+        pl.lit("Scenario 2").alias("Scenario")
+    )
+
+    combined_results = results2.vstack(results1).with_columns(
+        pl.col("t").cast(pl.Int64),
+        pl.col("group").cast(pl.Int64),
+        pl.col("Y").cast(pl.Int64),
+    )
+
+    outbreak_summary = (
+    combined_results.filter((pl.col("Y") >= threshold) & (pl.col("group") == 2))
+        .group_by("Scenario")
+        .agg(pl.col("replicate")
+             .n_unique()
+             .alias("Number of outbreaks >= Y"))
+    )
+
+    columns = st.columns(len(outbreak_summary))
+
+    for idx, row in enumerate(outbreak_summary.iter_rows(named=True)):
+        scenario = row["Scenario"]
+        outbreaks = row["Number of outbreaks >= Y"]
+        outbreak_prop = outbreaks / replicates
+
+        # Use st.error for the first column, st.success for the rest
+        if scenario == "Scenario 1 (Baseline)":
+            columns[0].error(f"{scenario}: Group 2 had >= {threshold} cases in {outbreaks}/{replicates} ({outbreak_prop}) simulations ")
+        else:
+            columns[1].success(f"{scenario}: Group 2 had >= {threshold} cases in {outbreaks}/{replicates} ({outbreak_prop}) simulations ")
 
 
 if __name__ == "__main__":
