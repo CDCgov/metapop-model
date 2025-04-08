@@ -2,186 +2,9 @@ import streamlit as st
 import numpy as np
 import polars as pl
 import altair as alt
-import copy
 from metapop.model import *
 from metapop.helper import *
 from metapop.app_helper import *
-
-### Methods to create user inputs interfaces ###
-def app_editors(element, scenario_name, parms, ordered_keys, list_keys, slide_keys, show_parameter_mapping, min_values, max_values, steps, helpers, formats, element_keys):
-    """
-    Create the sidebar for editing parameters.
-
-    Args:
-        element: The Streamlit element to place the sidebar in.
-        scenario_name: The name of the scenario.
-        parms: The parameters to edit.
-        ordered_keys: The keys of the parameters to edit.
-        list_keys: The keys of the parameters that are lists.
-        slide_keys: The keys of the parameters that are sliders.
-        show_parameter_mapping: The mapping of parameter names to display names.
-        min_values: The minimum values for the parameters.
-        max_values: The maximum values for the parameters.
-        steps: The step sizes for the parameters.
-        helpers: The help text for the parameters.
-        formats: The formats for the parameters.
-        element_keys: The keys for the Streamlit elements.
-
-    Returns:
-        edited_parms: The edited parameters.
-
-    """
-    edited_parms = copy.deepcopy(parms)
-
-    with element:
-        st.subheader(scenario_name)
-
-        for key in ordered_keys:
-            if key not in list_keys:
-                if key in slide_keys:
-                    value = st.slider(show_parameter_mapping[key],
-                                      min_value=min_values[key], max_value=max_values[key],
-                                      value=parms[key],
-                                      step=steps[key],
-                                      help=helpers[key],
-                                      format=formats[key],
-                                      key=element_keys[key],
-                                      )
-                else:
-                    value = st.number_input(show_parameter_mapping[key],
-                                        min_value=min_values[key], max_value=max_values[key],
-                                        value=parms[key],
-                                        step=steps[key],
-                                        help=helpers[key],
-                                        format=formats[key],
-                                        key=element_keys[key])
-                edited_parms[key] = value
-            if key in list_keys:
-                for index in range(len(parms[key])):
-                    if key in slide_keys:
-                        value = st.slider(show_parameter_mapping[f"{key}_{index}"],
-                                            min_value=min_values[key][index], max_value=max_values[key][index],
-                                            value=parms[key][index],
-                                            step=steps[key],
-                                            help=helpers[key][index],
-                                            format=formats[key],
-                                            key=element_keys[key][index])
-                    else:
-                        value = st.number_input(show_parameter_mapping[f"{key}_{index}"],
-                                            min_value=min_values[key][index], max_value=max_values[key][index],
-                                            value=parms[key][index],
-                                            step=steps[key],
-                                            help=helpers[key][index],
-                                            format=formats[key],
-                                            key=element_keys[key][index])
-                    edited_parms[key][index] = value
-
-    return edited_parms
-
-
-def get_min_values():
-    return dict(
-            desired_r0=0.,
-            pop_sizes=[15000, 100, 100],
-            vaccine_uptake_start_day=0,
-            vaccine_uptake_duration_days=0,
-            total_vaccine_uptake_doses=0,
-            I0=[0, 0, 0],
-            initial_vaccine_coverage=[0., 0., 0.],
-            k_i=[0., 0., 0.],
-            latent_duration = 6.,
-            infectious_duration = 5.,
-            k_g1 = 0.,
-            k_21 = 0.,
-            isolation_success = 0.,
-            symptomatic_isolation_start_day = 0,
-            symptomatic_isolation_duration_days = 0,
-            )
-
-def get_max_values():
-    return dict(
-            desired_r0=20.0,
-            pop_sizes=[100000, 15000, 15000],
-            vaccine_uptake_start_day=400,
-            vaccine_uptake_duration_days=100,
-            total_vaccine_uptake_doses=1000,
-            I0=[100, 100, 100],
-            initial_vaccine_coverage=[1.00, 1.00, 1.00],
-            k_i=[30., 30., 30.],
-            latent_duration = 18.,
-            infectious_duration = 10.,
-            k_g1 = 30.,
-            k_21 = 30.,
-            isolation_success = 1.,
-            symptomatic_isolation_start_day = 365,
-            symptomatic_isolation_duration_days = 365,
-            )
-
-def get_steps():
-    return dict(
-            desired_r0=0.1,
-            pop_sizes=100,
-            vaccine_uptake_start_day=1,
-            vaccine_uptake_duration_days=1,
-            total_vaccine_uptake_doses=1,
-            I0=1,
-            initial_vaccine_coverage=0.01,
-            k_i = 0.1,
-            latent_duration = 0.1,
-            infectious_duration = 0.1,
-            k_g1 = 0.01,
-            k_21 = 0.01,
-            isolation_success = 0.01,
-            symptomatic_isolation_start_day = 1,
-            symptomatic_isolation_duration_days = 10,
-            )
-
-def get_helpers():
-    return dict(
-            desired_r0="Basic reproduction number (R0) can not be negative",
-            pop_sizes=["Size of the large population (15,000 - 100,000)",
-                       "Size of the small population 1 (0 - 15,000)",
-                       "Size of the small population 2 (0 - 15,000)"],
-            vaccine_uptake_start_day="Day vaccination starts",
-            vaccine_uptake_duration_days="Duration of vaccination uptake",
-            total_vaccine_uptake_doses="Total vaccine doses",
-            I0=["Initial infections in large population",
-                "Initial infections in small population 1",
-                "Initial infections in small population 2"],
-            initial_vaccine_coverage=["Baseline vaccination in large population",
-                                      "Baseline vaccination in small population 1",
-                                      "Baseline vaccination in small population 2"],
-            k_i=["Average degree for large population",
-                 "Average degree for small population 1",
-                 "Average degree for small population 2"],
-            latent_duration = "Latent period (days)",
-            infectious_duration = "Infectious period (days)",
-            k_g1 = "Average degree of small population 1 connecting to large population",
-            k_21 = "Average degree between small populations",
-            isolation_success = "Percentage of symptomatic cases isolated",
-            symptomatic_isolation_start_day = "Day symptomatic isolation starts",
-            symptomatic_isolation_duration_days = "Duration of symptomatic isolation",
-            )
-
-def get_formats():
-    return  dict(
-            desired_r0="%.1f",
-            pop_sizes="%.0d",
-            vaccine_uptake_start_day="%.0d",
-            vaccine_uptake_duration_days="%.0d",
-            total_vaccine_uptake_doses="%.0d",
-            I0="%.0d",
-            initial_vaccine_coverage="%.2f",
-            k_i="%.1f",
-            latent_duration = "%.1f",
-            infectious_duration = "%.1f",
-            k_g1 = "%.2f",
-            k_21 = "%.2f",
-            isolation_success = "%.2f",
-            symptomatic_isolation_start_day = "%.0d",
-            symptomatic_isolation_duration_days = "%.0d",
-            )
-
 
 def app(replicates=20):
     st.title("Metapopulation Model")
@@ -196,11 +19,11 @@ def app(replicates=20):
             help="Enter model parameters for each scenario. Hover over the ? for more information about each parameter.",
         )
 
-        min_values = mt.get_min_values()
-        max_values = mt.get_max_values()
-        steps = mt.get_step_values()
-        helpers = mt.get_helpers()
-        formats = mt.get_formats()
+        min_values = get_min_values()
+        max_values = get_max_values()
+        steps = get_step_values()
+        helpers = get_helpers()
+        formats = get_formats()
         # this can likely be done more programmatically but works for now
         keys1 = dict(
             desired_r0="R0_1",
@@ -261,13 +84,13 @@ def app(replicates=20):
         # number of scenarios
         col1, col2 = st.columns(2)
 
-        edited_parms1 = mt.app_editors(
+        edited_parms1 = app_editors(
             col1, "Scenario 1", parms, ordered_keys, list_parameter_keys,
             slide_keys, show_parameter_mapping, min_values, max_values,
             steps, helpers, formats, keys1
         )
 
-        edited_parms2 = mt.app_editors(
+        edited_parms2 = app_editors(
             col2, "Scenario 2", parms, ordered_keys, list_parameter_keys,
             slide_keys, show_parameter_mapping, min_values, max_values,
             steps, helpers, formats, keys2
@@ -281,13 +104,13 @@ def app(replicates=20):
 
             adv_col1, adv_col2 = st.columns(2)
 
-            edited_advanced_parms1 = mt.app_editors(
+            edited_advanced_parms1 = app_editors(
                 adv_col1, "Scenario 1", edited_parms1, advanced_ordered_keys,
                 advanced_list_keys, advanced_slide_keys, advanced_parameter_mapping,
                 min_values, max_values, steps, helpers, formats, keys1
             )
 
-            edited_advanced_parms2 = mt.app_editors(
+            edited_advanced_parms2 = app_editors(
                 adv_col2, "Scenario 2", edited_parms2, advanced_ordered_keys,
                 advanced_list_keys, advanced_slide_keys, advanced_parameter_mapping,
                 min_values, max_values, steps, helpers, formats, keys2
