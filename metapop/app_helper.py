@@ -187,9 +187,15 @@ def get_show_parameter_mapping():
         isolation_success = "Symptomatic isolation proportion",
         symptomatic_isolation_start_day = "Symptomatic isolation start day",
         symptomatic_isolation_duration_days = "Symptomatic isolation duration days",
+<<<<<<< HEAD
         pre_rash_isolation_success = "Pre-rash isolation proportion",
         pre_rash_isolation_start_day = "Pre-rash isolation start day",
         pre_rash_isolation_duration_days = "Pre-rash isolation duration days",
+=======
+        pre_rash_isolation_start_day = "Pre-rash isolation start day",
+        pre_rash_isolation_duration_days = "Pre-rash isolation duration days",
+        pre_rash_isolation_success = "Pre-rash isolation percentage",
+>>>>>>> 7a88c30 (Adding Isolation app functionality)
         tf = "time steps",
         # n_replicates = "number of replicates",
         # seed = "random seed",
