@@ -5,9 +5,70 @@ import polars as pl
 import altair as alt
 import griddler
 import griddler.griddle
-from metapop.model import *
-from metapop.helper import *
 import copy
+# define imports by order of increasing dependencies to avoid circular imports
+from .helper import *
+from .model import *
+
+# if you want to use methods from metapop in this file under __name__ == "__main__": you'll need to import them as:
+# from metapop.helper import *
+# from metapop.model import *
+### note: this is not recommended use within a file that is imported as a package module, but it can be useful for testing purposes
+
+
+### Methods to simulate the model ###
+def simulate(parms):
+    """
+    Simulate the SEIR model with the given parameters.
+
+    Args:
+        parms (dict): Dictionary of model parameters.
+
+    Returns:
+        pl.DataFrame: DataFrame containing the simulation results.
+    """
+
+    #### Set up rate params, convert duration periods to rates
+    parms["sigma"] = time_to_rate(parms["latent_duration"])
+    parms["gamma"] = time_to_rate(parms["infectious_duration"])
+    parms["sigma_scaled"] = parms["sigma"] * parms["n_e_compartments"]
+    parms["gamma_scaled"] = parms["gamma"] * parms["n_i_compartments"]
+
+    #### Set beta matrix based on desired R0 and connectivity scenario ###
+    parms["beta"] = construct_beta(parms)
+
+    #### Set up vaccine schedule for group 2
+    parms["vaccination_uptake_schedule"] = build_vax_schedule(parms)
+
+    #### set up the model time steps
+    steps = parms["tf"]
+    t = np.linspace(1, steps, steps)
+
+    #### Initialize population
+    groups = parms["n_groups"]
+    S, V, E1, E2, I1, I2, R, Y, X, u = initialize_population(steps, groups, parms)
+
+    #### Run the model
+    model = SEIRModel(parms)
+    S, V, E1, E2, I1, I2, R, Y, X, u = run_model(model, u, t, steps, groups, S, V, E1, E2, I1, I2, R, Y, X)
+
+    #### Flatten into a dataframe
+    df = pl.DataFrame({
+        't': np.repeat(t, groups),
+        'group': np.tile(np.arange(groups), steps),
+        'S': S.flatten(),
+        'V': V.flatten(),
+        'E1': E1.flatten(),
+        'E2': E2.flatten(),
+        'I1': I1.flatten(),
+        'I2': I2.flatten(),
+        'R': R.flatten(),
+        'Y': Y.flatten(),
+        'X': X.flatten(),
+    })
+
+    return df
+
 
 def get_scenario_results(parms):
     """

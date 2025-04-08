@@ -2,9 +2,16 @@ import streamlit as st
 import polars as pl
 import numpy as np
 import altair as alt
-from metapop.model import *
-from metapop.helper import *
-from metapop.app_helper import *
+# define imports by order of increasing dependencies to avoid circular imports
+from .helper import *
+from .model import *
+from .app_helper import *
+
+# if you want to use the methods from metapop in this file under __name__ == "__main__": you'll need to import them as:
+# from metapop.helper import *
+# from metapop.model import *
+# from metapop.app_helper import *
+### note: this is not recommended use within a file that is imported as a package modules, but it can be useful for testing
 
 
 # This method is currently deprecated, but does look prettier

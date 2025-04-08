@@ -3,9 +3,18 @@ import streamlit as st
 import numpy as np
 import polars as pl
 import altair as alt
-from metapop.model import *
-from metapop.helper import *
-from metapop.app_helper import *
+import copy
+# define imports by order of increasing dependencies to avoid circular imports
+from .helper import *
+from .model import *
+from .app_helper import *
+
+# if you want to use the methods from metapop in this file under __name__ == "__main__": you'll need to import them as:
+# from metapop.helper import *
+# from metapop.model import *
+# from metapop.app_helper import *
+### note: this is not recommended use within a file that is imported as a package module, but it can be useful for testing purposes
+
 
 
 def app(replicates=20):
@@ -326,6 +335,3 @@ def app(replicates=20):
             columns[1].info(f"{scenario}: {outbreaks}/{n_reps} ({outbreak_prop}) simulations had >= {threshold} cases total with an average {infections} infections and {hospitalizations} hospitalizations across all simulations.")
 
 
-
-if __name__ == "__main__":
-    app()
