@@ -17,6 +17,9 @@ baseline_parameters:
   isolation_success: 0.0
   symptomatic_isolation_start_day: 365
   symptomatic_isolation_duration_days: 0
+  pre_rash_isolation_start_day: 365
+  pre_rash_isolation_duration_days: 0
+  pre_rash_isolation_success: 0.0
   tf: 365        # total time modeled
   n_replicates: 20
   seed: 123

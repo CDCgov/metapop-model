@@ -194,7 +194,6 @@ def get_infected(u, I_indices, groups, parms, t):
    
     isolation_start_day = parms["symptomatic_isolation_start_day"]
     isolation_duration_days = parms["symptomatic_isolation_duration_days"]
-
     pre_rash_isolation_start_day = parms["pre_rash_isolation_start_day"]
     pre_rash_isolation_duration_days = parms["pre_rash_isolation_duration_days"]
 
