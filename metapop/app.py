@@ -169,12 +169,12 @@ def get_helpers():
             infectious_duration = "Infectious period (days)",
             k_g1 = "Average degree of small population 1 connecting to large population",
             k_21 = "Average degree between small populations",
-            isolation_success = "Percentage of symptomatic cases isolated",
+            isolation_success = "Proportion of symptomatic cases isolated",
             symptomatic_isolation_start_day = "Day symptomatic isolation starts",
             symptomatic_isolation_duration_days = "Duration of symptomatic isolation",
             pre_rash_isolation_start_day = "Day pre-rash isolation starts",
             pre_rash_isolation_duration_days = "Duration of pre-rash isolation",
-            pre_rash_isolation_success = "Percentage of pre-rash cases isolated",
+            pre_rash_isolation_success = "Proportion of pre-rash cases isolated",
             )
 
 def get_formats():
