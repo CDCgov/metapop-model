@@ -176,6 +176,10 @@ def app(replicates=50):
     results1 = get_scenario_results(scenario1)
     results2 = get_scenario_results(scenario2)
 
+    # fullresults for later
+    fullresults1 = results1
+    fullresults2 = results2
+
     # extract groups
     groups = results1["group"].unique().to_list()
 
@@ -256,7 +260,7 @@ def app(replicates=50):
     #                       labelExpr,
     #                       detail)
     # st.altair_chart(chart1 | chart2, use_container_width=True)
-    alt_results1 = alt_results1.with_columns(pl.lit("Scenario 1").alias("scenario"))
+    alt_results1 = alt_results1.with_columns(pl.lit("Scenario 1 (Baseline)").alias("scenario"))
     alt_results2 = alt_results2.with_columns(pl.lit("Scenario 2").alias("scenario"))
     combined_alt_results = alt_results1.vstack(alt_results2)
     chart = alt.Chart(combined_alt_results.to_pandas()).mark_line(opacity=0.5).encode(
@@ -266,8 +270,8 @@ def app(replicates=50):
             "scenario",
             title="Scenario",
             scale=alt.Scale(
-                domain=["Scenario 1", "Scenario 2"],  # Scenarios
-                range=["#20419a", "#cf4828"]  # Corresponding colors (blue, red)
+                domain=["Scenario 1 (Baseline)", "Scenario 2"],  # Scenarios
+                range=["#cf4828","#20419a"]  # Corresponding colors (blue, red)
             )
         ),
         detail = "replicate",
@@ -281,7 +285,7 @@ def app(replicates=50):
     st.altair_chart(chart, use_container_width=True)
 
 
-    # Summary stats based on outbreak sizes
+    ### Summary stats based on outbreak sizes
     st.subheader("Outbreak summary statistics")
 
     threshold = st.selectbox(
@@ -289,14 +293,14 @@ def app(replicates=50):
         options=[50, 100, 200, 300, 500],
         index=2,  # Default selected option (index of the options list)
     )
-    results1 = results1.with_columns(
+    fullresults1 = fullresults1.with_columns(
         pl.lit("Scenario 1 (Baseline)").alias("Scenario")
     )
-    results2 = results2.with_columns(
+    fullresults2 = fullresults2.with_columns(
         pl.lit("Scenario 2").alias("Scenario")
     )
 
-    combined_results = results2.vstack(results1).with_columns(
+    combined_results = fullresults2.vstack(fullresults1).with_columns(
         pl.col("t").cast(pl.Int64),
         pl.col("group").cast(pl.Int64),
         pl.col("Y").cast(pl.Int64),
@@ -308,16 +312,18 @@ def app(replicates=50):
 
     columns = st.columns(len(outbreak_summary))
 
+    n_reps = parms["n_replicates"]
+
     for idx, row in enumerate(outbreak_summary.iter_rows(named=True)):
         scenario = row["Scenario"]
         outbreaks = row["outbreaks"]
-        outbreak_prop = f"{(outbreaks / replicates) * 100:.2f}%"
+        outbreak_prop = f"{(outbreaks / n_reps) * 100:.2f}%"
 
         # Use st.error for the first column, st.success for the second
         if scenario == "Scenario 1 (Baseline)":
-            columns[0].error(f"{scenario}: {outbreaks}/{replicates} ({outbreak_prop}) simulations had >= {threshold} cases total ")
+            columns[0].error(f"{scenario}: {outbreaks}/{n_reps} ({outbreak_prop}) simulations had >= {threshold} cases total ")
         else:
-            columns[1].success(f"{scenario}: {outbreaks}/{replicates} ({outbreak_prop}) simulations had >= {threshold} cases total ")
+            columns[1].info(f"{scenario}: {outbreaks}/{n_reps} ({outbreak_prop}) simulations had >= {threshold} cases total ")
 
 
 if __name__ == "__main__":
