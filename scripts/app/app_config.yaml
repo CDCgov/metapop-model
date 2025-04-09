@@ -1,16 +1,13 @@
 baseline_parameters:
   n_groups: 3    # general, subpop1, subpop2
   desired_r0: 12.0
-  k: 10
   k_i: [10., 10., 10.]
   k_g1: 0.1
   k_g2: 0.01
-  connectivity_scenario: 1.0 # how much to multiply the raw inputs of beta_sub1_sub2
   n_e_compartments: 2    # number of chained E compartments
   latent_duration: 10.5
   n_i_compartments: 2    # number of chained I compartments
   infectious_duration: 9.0
-  iota: 0.0      # spontaneous infection rate
   pop_sizes: [40000, 5000, 5000]    # population sizes
   I0: [0, 5, 0]     # initially infected
   vaccine_uptake_start_day: 0
@@ -18,8 +15,8 @@ baseline_parameters:
   total_vaccine_uptake_doses: 0 # number of doses
   vaccinated_group: 2
   isolation_success: 0.0
-  symptomatic_isolation_start_day: 100
-  symptomatic_isolation_duration_days: 100
+  symptomatic_isolation_start_day: 365
+  symptomatic_isolation_duration_days: 0
   tf: 365        # total time modeled
   n_replicates: 20
   seed: 123

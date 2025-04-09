@@ -74,7 +74,7 @@ def test_construct_beta():
 
     # one_group setup
     parms = {
-        "k_i": 10.0,
+        "k_i": [10.0],
         "k_g1": 0,
         "k_g2": 0,
         "k_21": 0,
@@ -84,12 +84,13 @@ def test_construct_beta():
         "desired_r0": 2.0,
         "n_groups": 1
     }
+    parms["k_i"] = np.array(parms["k_i"])
     r0_base = get_r0_one_group(parms["k_i"], parms["gamma"])
     beta_factor = calculate_beta_factor(parms["desired_r0"], r0_base)
     beta_scaled = rescale_beta_matrix(parms["k_i"], beta_factor)
     expected_beta = construct_beta(parms)
     assert np.allclose(r0_base, 100.0), f"Expected beta / gamma = 100, but got {r0_base}"
-    assert isinstance(beta_scaled, float), f"Expected float, but got {type(beta_scaled)}"
+    assert isinstance(beta_scaled, np.ndarray), f"Expected np.ndarray, but got {type(beta_scaled)}"
     assert np.allclose(beta_scaled, expected_beta), f"Expected {expected_beta}, but got {beta_scaled}"
 
 

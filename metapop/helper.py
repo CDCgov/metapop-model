@@ -80,7 +80,6 @@ def rescale_beta_matrix(unscaled_beta, factor):
     Returns:
         np.array: The rescaled transmission rate matrix.
     """
-
     beta_scaled = unscaled_beta * factor
     return beta_scaled
 
@@ -113,7 +112,7 @@ def get_r0_one_group(k, gamma):
         float: R0, contacts per day / recovery rate
     """
 
-    X = (k / gamma)
+    X = (k[0] / gamma)
 
     return X
 
@@ -142,7 +141,8 @@ def construct_beta(parms):
         # skip per capita contact matrix building, get R0 directly
         r0_base = get_r0_one_group(parms["k_i"], parms["gamma"])
         beta_factor = calculate_beta_factor(parms["desired_r0"], r0_base)
-        beta_scaled = rescale_beta_matrix(parms["k_i"], beta_factor)
+        beta_scaled = rescale_beta_matrix(parms["k_i"][0], beta_factor)
+        #beta_scaled = beta_scaled.reshape(1, 1)  # Reshape to 1x1 matrix for consistency
     return beta_scaled
 
 def initialize_population(steps, groups, parms):

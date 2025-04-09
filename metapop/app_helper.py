@@ -1,4 +1,5 @@
 # This file contains helper functions for the metapop app.
+import streamlit as st
 import numpy as np
 import polars as pl
 import altair as alt
@@ -6,60 +7,7 @@ import griddler
 import griddler.griddle
 from metapop.model import *
 from metapop.helper import *
-
-### Methods to simulate the model ###
-def simulate(parms):
-    """
-    Simulate the SEIR model with the given parameters.
-
-    Args:
-        parms (dict): Dictionary of model parameters.
-
-    Returns:
-        pl.DataFrame: DataFrame containing the simulation results.
-    """
-
-    #### Set up rate params, convert duration periods to rates
-    parms["sigma"] = time_to_rate(parms["latent_duration"])
-    parms["gamma"] = time_to_rate(parms["infectious_duration"])
-    parms["sigma_scaled"] = parms["sigma"] * parms["n_e_compartments"]
-    parms["gamma_scaled"] = parms["gamma"] * parms["n_i_compartments"]
-
-    #### Set beta matrix based on desired R0 and connectivity scenario ###
-    parms["beta"] = construct_beta(parms)
-
-    #### Set up vaccine schedule for group 2
-    parms["vaccination_uptake_schedule"] = build_vax_schedule(parms)
-
-    #### set up the model time steps
-    steps = parms["tf"]
-    t = np.linspace(1, steps, steps)
-
-    #### Initialize population
-    groups = parms["n_groups"]
-    S, V, E1, E2, I1, I2, R, Y, X, u = initialize_population(steps, groups, parms)
-
-    #### Run the model
-    model = SEIRModel(parms)
-    S, V, E1, E2, I1, I2, R, Y, X, u = run_model(model, u, t, steps, groups, S, V, E1, E2, I1, I2, R, Y, X)
-
-    #### Flatten into a dataframe
-    df = pl.DataFrame({
-        't': np.repeat(t, groups),
-        'group': np.tile(np.arange(groups), steps),
-        'S': S.flatten(),
-        'V': V.flatten(),
-        'E1': E1.flatten(),
-        'E2': E2.flatten(),
-        'I1': I1.flatten(),
-        'I2': I2.flatten(),
-        'R': R.flatten(),
-        'Y': Y.flatten(),
-        'X': X.flatten(),
-    })
-
-    return df
-
+import copy
 
 def get_scenario_results(parms):
     """
@@ -76,7 +24,7 @@ def get_scenario_results(parms):
     results = results.with_columns(pl.col("group").cast(pl.Utf8))
     # select subset of values to return
     results = results.select([
-        "initial_coverage_scenario", "k_21", "t", "group",
+        "k_21", "t", "group",
         "S", "V", "E1", "E2", "I1", "I2", "R", "Y", "X", "replicate"
     ])
     # add a column for total infections
@@ -85,14 +33,14 @@ def get_scenario_results(parms):
 
 
 ### Methods to read in default parameters ###
-def read_parameters():
+def read_parameters(filepath="scripts/app/app_config.yaml"):
     """"
     Read parameters from a YAML file and return the first set of parameters.
 
     Returns:
         dict: Dictionary of parameters for the metapopulation model.
     """
-    parameter_sets = griddler.griddle.read("scripts/app_config.yaml")
+    parameter_sets = griddler.griddle.read(filepath)
     parms = parameter_sets[0]
     return parms
 
@@ -268,6 +216,7 @@ def get_advanced_parameter_mapping():
         # pop_sizes_0="size of large population",
         # pop_sizes_1="size of small population 1",
         # pop_sizes_2="size of small population 2",
+        # k_i = "average degree",
         k_i_0 = "average degree for large population",
         k_i_1 = "average degree for small population 1",
         k_i_2 = "average degree for small population 2",
@@ -377,6 +326,317 @@ def repack_list_parameters(parms, updated_parms, keys_in_list):
         del updated_parms[key]
 
     return updated_parms
+
+
+### Methods to create user inputs interfaces ###
+def app_editors(element, scenario_name, parms,
+                ordered_keys, list_keys, slider_keys,
+                show_parameter_mapping,
+                min_values, max_values, steps, helpers, formats, element_keys,
+                disabled=False):
+    """
+    Create the sidebar for editing parameters.
+
+    Args:
+        element (st container object): The Streamlit element to place the sidebar in.
+        scenario_name: The name of the scenario.
+        parms: The parameters to edit.
+        ordered_keys: The keys of the parameters to edit.
+        list_keys: The keys of the parameters that are lists.
+        slider_keys: The keys of the parameters that are sliders.
+        show_parameter_mapping: The mapping of parameter names to display names.
+        min_values: The minimum values for the parameters.
+        max_values: The maximum values for the parameters.
+        steps: The step sizes for the parameters.
+        helpers: The help text for the parameters.
+        formats: The formats for the parameters.
+        element_keys: The keys for the Streamlit elements.
+
+    Returns:
+        edited_parms: The edited parameters.
+
+    """
+    edited_parms = copy.deepcopy(parms)
+
+    with element:
+        st.subheader(scenario_name)
+
+        for key in ordered_keys:
+            if key not in list_keys:
+                if key in slider_keys:
+                    value = st.slider(show_parameter_mapping[key],
+                                      min_value=min_values[key], max_value=max_values[key],
+                                      value=parms[key],
+                                      step=steps[key],
+                                      help=helpers[key],
+                                      format=formats[key],
+                                      key=element_keys[key],
+                                      disabled=disabled
+                                      )
+                else:
+                    value = st.number_input(show_parameter_mapping[key],
+                                        min_value=min_values[key], max_value=max_values[key],
+                                        value=parms[key],
+                                        step=steps[key],
+                                        help=helpers[key],
+                                        format=formats[key],
+                                        key=element_keys[key],
+                                        disabled=disabled)
+                edited_parms[key] = value
+            if key in list_keys:
+                for index in range(len(parms[key])):
+                    if key in slider_keys:
+                        value = st.slider(show_parameter_mapping[f"{key}_{index}"],
+                                            min_value=min_values[key][index], max_value=max_values[key][index],
+                                            value=parms[key][index],
+                                            step=steps[key],
+                                            help=helpers[key][index],
+                                            format=formats[key],
+                                            key=element_keys[key][index],
+                                            disabled=disabled)
+                    else:
+                        value = st.number_input(show_parameter_mapping[f"{key}_{index}"],
+                                            min_value=min_values[key][index], max_value=max_values[key][index],
+                                            value=parms[key][index],
+                                            step=steps[key],
+                                            help=helpers[key][index],
+                                            format=formats[key],
+                                            key=element_keys[key][index],
+                                            disabled=disabled)
+                    edited_parms[key][index] = value
+
+    return edited_parms
+
+
+def get_min_values(parms=None):
+    """
+    Get the minimum values for the app parameters.
+
+    Args:
+        parms (dict): Optional parameters dictionary.
+
+    Returns:
+        dict: A dictionary of minimum values for the app parameters.
+    """
+    defaults = dict(
+            desired_r0=0.,
+            k_i = [0., 0., 0.],
+            k_g1 = 0.,
+            k_g2 = 0.,
+            k_21 = 0.,
+            pop_sizes=[15000, 100, 100],
+            latent_duration=6.,
+            infectious_duration=5.,
+            I0=[0, 0, 0],
+            initial_vaccine_coverage=[0., 0., 0.],
+            vaccine_uptake_start_day=0,
+            vaccine_uptake_duration_days=0,
+            total_vaccine_uptake_doses=0,
+            vaccinated_group=0,
+            isolation_success = 0.,
+            symptomatic_isolation_start_day = 0,
+            symptomatic_isolation_duration_days = 0,
+            tf=30,
+            )
+    # update with parms if provided
+    if parms is not None and isinstance(parms, dict):
+        defaults.update(parms)
+    return defaults
+
+
+
+
+def get_max_values(parms=None):
+    """
+    Get the maximum values for the app parameters.
+
+    Args:
+        parms (dict): Optional parameters dictionary.
+
+    Returns:
+        dict: A dictionary of maximum values for the app parameters.
+    """
+    defaults = dict(
+            desired_r0=30.,
+            k_i = [50., 50., 50.],
+            k_g1 = 50.,
+            k_g2 = 50.,
+            k_21 = 50.,
+            pop_sizes=[100_000, 15_000, 15_000],
+            latent_duration=18.,
+            infectious_duration=11.,
+            I0=[100, 100, 100],
+            initial_vaccine_coverage=[1., 1., 1.],
+            vaccine_uptake_start_day=365,
+            vaccine_uptake_duration_days=365,
+            total_vaccine_uptake_doses=1000,
+            vaccinated_group=2,
+            isolation_success = 0.75,
+            symptomatic_isolation_start_day = 365,
+            symptomatic_isolation_duration_days = 365,
+            tf=400,
+            )
+    # update with parms if provided
+    if parms is not None and isinstance(parms, dict):
+        defaults.update(parms)
+    return defaults
+
+
+
+def get_step_values(parms=None):
+    """
+    Get the step or increment values for the app parameters.
+
+    Args:
+        parms (dict): Optional parameters dictionary.
+
+    Returns:
+        dict: A dictionary of step or increment values for the app parameters.
+    """
+    defaults = dict(
+            desired_r0=0.1,
+            k_i = 0.1,
+            k_g1 = 0.01,
+            k_g2 = 0.01,
+            k_21 = 0.01,
+            pop_sizes=100,
+            latent_duration=0.1,
+            infectious_duration=0.1,
+            I0=1,
+            initial_vaccine_coverage=0.01,
+            vaccine_uptake_start_day=1,
+            vaccine_uptake_duration_days=1,
+            total_vaccine_uptake_doses=1,
+            vaccinated_group=1,
+            isolation_success = 0.01,
+            symptomatic_isolation_start_day = 1,
+            symptomatic_isolation_duration_days = 1,
+            tf=1,
+            )
+    # update with parms if provided
+    if parms is not None and isinstance(parms, dict):
+        defaults.update(parms)
+    return defaults
+
+def get_helpers(parms=None):
+    """
+    Get the help text for the app parameters.
+
+    Args:
+        parms (dict): Optional parameters dictionary.
+
+    Returns:
+        dict: A dictionary of help text for the app parameters.
+    """
+    defaults = dict(
+            desired_r0="Basic reproduction number R0. R0 cannot be negative",
+            k_i=["Average daily contacts for large population",
+                 "Average daily contacts for small population 1",
+                 "Average daily contacts for small population 2"],
+            k_g1 = "Average daily contact per person in small population 1 with people in the large population",
+            k_g2 = "Average daily contact per person in small population 2 with people in the large population",
+            k_21 = "Average daily contact between people in the small populations",
+            pop_sizes=["Size of the large population",
+                       "Size of the small population 1",
+                       "Size of the small population 2"],
+            latent_duration = "Latent period (days)",
+            infectious_duration = "Infectious period (days)",
+            I0=["Initial infections in large population",
+                "Initial infections in small population 1",
+                "Initial infections in small population 2"],
+            initial_vaccine_coverage=["Baseline vaccination coverage in large population",
+                                      "Baseline vaccination coverage in small population 1",
+                                      "Baseline vaccination coverage in small population 2"],
+            vaccine_uptake_start_day="Day vaccination starts",
+            vaccine_uptake_duration_days="Days vaccines are administered",
+            total_vaccine_uptake_doses="Total vaccine doses administered during the vaccination campaign",
+            vaccinated_group="Population receiving the vaccine",
+            isolation_success = "Percentage reduction in contacts due to symptomatic isolation",
+            symptomatic_isolation_start_day = "Day symptomatic isolation starts",
+            symptomatic_isolation_duration_days = "Day symptomatic isolation starts",
+            tf = "Number of time steps to simulate",
+            )
+    if parms is not None and isinstance(parms, dict):
+        # update with parms if provided
+        defaults.update(parms)
+    return defaults
+
+
+def get_formats(parms=None):
+    """
+    Get the formats for the app parameters.
+
+    Args:
+        parms (dict): Optional parameters dictionary.
+
+    Returns:
+        dict: A dictionary of formats for the app parameters.
+    """
+    defaults = dict(
+            desired_r0="%.1f",
+            k_i = "%.1f",
+            k_g1 = "%.2f",
+            k_g2 = "%.2f",
+            k_21 = "%.2f",
+            pop_sizes="%.0d",
+            latent_duration = "%.1f",
+            infectious_duration = "%.1f",
+            I0="%.0d",
+            initial_vaccine_coverage="%.2f",
+            vaccine_uptake_start_day="%.0d",
+            vaccine_uptake_duration_days="%.0d",
+            total_vaccine_uptake_doses="%.0d",
+            vaccinated_group="%.0d",
+            isolation_success = "%.2f",
+            symptomatic_isolation_start_day = "%.0d",
+            symptomatic_isolation_duration_days = "%.0d",
+            tf="%.0d",
+            )
+    if parms is not None and isinstance(parms, dict):
+        # update with parms if provided
+        defaults.update(parms)
+    return defaults
+
+
+def get_base_widget_idkeys(parms=None):
+    widget_idkeys = dict(
+        desired_r0="R0",
+        k_i=["k_i_0", "k_i_1", "k_i_2"],
+        k_g1 = "k_g1",
+        k_g2 = "k_g2",
+        k_21 = "k_21",
+        pop_sizes=["pop_size_0",
+                   "pop_size_1",
+                   "pop_size_2"],
+        latent_duration = "latent_duration",
+        infectious_duration = "infectious_duration",
+        I0=["I0_0", "I0_1", "I0_2"],
+        initial_vaccine_coverage=["initial_vaccine_coverage_0",
+                                  "initial_vaccine_coverage_1",
+                                  "initial_vaccine_coverage_2"],
+        vaccine_uptake_start_day="vaccine_uptake_start_day",
+        vaccine_uptake_duration_days="vaccine_uptake_duration_days",
+        total_vaccine_uptake_doses="total_vaccine_uptake_doses",
+        vaccinated_group = "vaccinated_group",
+        isolation_success = "isolation_success",
+        symptomatic_isolation_start_day = "symptomatic_isolation_start_day",
+        symptomatic_isolation_duration_days = "symptomatic_isolation_duration_days",
+        tf = "tf",
+        )
+    if parms is not None and isinstance(parms, dict):
+        # update with parms if provided
+        widget_idkeys.update(parms)
+    return widget_idkeys
+
+def get_widget_idkeys(widget_no):
+    widget_idkeys = get_base_widget_idkeys()
+    for key, value in widget_idkeys.items():
+        if isinstance(value, list):
+            widget_idkeys[key] = [f"{widget_idkeys[key][i]}_{widget_no}" for i in range(len(widget_idkeys[key]))]
+        else:
+            widget_idkeys[key] = f"{widget_idkeys[key]}_{widget_no}"
+
+    return widget_idkeys
 
 
 ### Methods to handle extraction of user inputs and updating parameter dictionaries to send for simulation ##
@@ -580,3 +840,39 @@ def create_chart(alt_results, outcome_option, x, xlabel, y, ylabel, yscale, colo
             detail=detail,
         ).properties(width=width, height=height)
     return chart
+
+
+### Methods to summarize data
+def calculate_outbreak_summary(combined_results, threshold):
+    """
+    Calculate the outbreak summary based on the given threshold.
+
+    Args:
+        combined_results (pl.DataFrame): The combined results DataFrame.
+        threshold (int): The threshold for filtering replicates.
+
+    Returns:
+        pl.DataFrame: A DataFrame containing the outbreak summary.
+    """
+    # Filter combined_results for replicates where Total >= threshold
+    filtered_results = combined_results.filter(pl.col("Total") >= threshold)
+
+    # Group by Scenario and count unique replicates
+    outbreak_summary = (
+        filtered_results
+        .group_by("Scenario")
+        .agg(pl.col("replicate").n_unique().alias("outbreaks"))
+    )
+
+    # Ensure both scenarios are present in the summary
+    scenarios = ["Scenario 1 (Baseline)", "Scenario 2"]
+    for scenario in scenarios:
+        if scenario not in outbreak_summary["Scenario"].to_list():
+            # Add missing scenario with outbreaks = 0
+            outbreak_summary = outbreak_summary.vstack(
+                pl.DataFrame({"Scenario": [scenario], "outbreaks": [0]}).with_columns(
+                    pl.col("outbreaks").cast(outbreak_summary.schema["outbreaks"])  # Match the type
+                )
+            )
+
+    return outbreak_summary
