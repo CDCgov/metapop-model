@@ -191,7 +191,7 @@ def get_infected(u, I_indices, groups, parms, t):
     assert "symptomatic_isolation_duration_days" in parms, "Key 'symptomatic_isolation_duration_days' is missing in parms."
     assert "pre_rash_isolation_start_day" in parms, "Key 'pre_rash_isolation_start_day' is missing in parms."
     assert "pre_rash_isolation_duration_days" in parms, "Key 'pre_rash_isolation_duration_days' is missing in parms."
-   
+
     isolation_start_day = parms["symptomatic_isolation_start_day"]
     isolation_duration_days = parms["symptomatic_isolation_duration_days"]
     pre_rash_isolation_start_day = parms["pre_rash_isolation_start_day"]
@@ -199,7 +199,7 @@ def get_infected(u, I_indices, groups, parms, t):
 
     isolation_range_days = range(isolation_start_day, isolation_start_day + isolation_duration_days)
     pre_rash_isolation_range_days = range(pre_rash_isolation_start_day, pre_rash_isolation_start_day + pre_rash_isolation_duration_days)
-    
+
     # last I compartment
     i_max = max(I_indices)
 
@@ -207,7 +207,7 @@ def get_infected(u, I_indices, groups, parms, t):
     if t in pre_rash_isolation_range_days:
         # Prerash infected = I1 infecteds
         pre_rash_infected = np.array([sum(u[group][i] * (1 - parms["pre_rash_isolation_success"]) for i in I_indices if i != i_max) for group in range(groups)])
-    
+
     else:
         pre_rash_infected = np.array([sum(u[group][i] for i in I_indices if i != i_max) for group in range(groups)])
 
@@ -219,7 +219,7 @@ def get_infected(u, I_indices, groups, parms, t):
 
     else:
         post_rash = np.array([(u[group][i_max]) for group in range(groups)])
-    
+
     infected = pre_rash_infected + post_rash
     return infected
 

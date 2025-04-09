@@ -144,7 +144,7 @@ def get_steps():
             symptomatic_isolation_duration_days = 10,
             pre_rash_isolation_start_day = 1,
             pre_rash_isolation_duration_days = 10,
-            pre_rash_isolation_success = 0.1, 
+            pre_rash_isolation_success = 0.1,
             )
 
 def get_helpers():
