@@ -9,7 +9,7 @@ readme = "README.md"
 python = "^3.10"
 pandas = "^2.2.3"
 numpy = "^2.2.0"
-griddler = {git = "https://github.com/CDCgov/pygriddler.git"}
+griddler = {git = "https://github.com/CDCgov/pygriddler.git", tag = "v0.2"}
 polars = "^1.17.1"
 altair = "^5.5.0"
 matplotlib = "^3.10.0"
