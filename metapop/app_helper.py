@@ -24,7 +24,7 @@ def get_scenario_results(parms):
     results = results.with_columns(pl.col("group").cast(pl.Utf8))
     # select subset of values to return
     results = results.select([
-        "initial_coverage_scenario", "k_21", "t", "group",
+        "k_21", "t", "group",
         "S", "V", "E1", "E2", "I1", "I2", "R", "Y", "X", "replicate"
     ])
     # add a column for total infections
@@ -330,7 +330,7 @@ def repack_list_parameters(parms, updated_parms, keys_in_list):
 
 ### Methods to create user inputs interfaces ###
 def app_editors(element, scenario_name, parms,
-                ordered_keys, list_keys, slide_keys,
+                ordered_keys, list_keys, slider_keys,
                 show_parameter_mapping,
                 min_values, max_values, steps, helpers, formats, element_keys,
                 disabled=False):
@@ -338,12 +338,12 @@ def app_editors(element, scenario_name, parms,
     Create the sidebar for editing parameters.
 
     Args:
-        element: The Streamlit element to place the sidebar in.
+        element (st container object): The Streamlit element to place the sidebar in.
         scenario_name: The name of the scenario.
         parms: The parameters to edit.
         ordered_keys: The keys of the parameters to edit.
         list_keys: The keys of the parameters that are lists.
-        slide_keys: The keys of the parameters that are sliders.
+        slider_keys: The keys of the parameters that are sliders.
         show_parameter_mapping: The mapping of parameter names to display names.
         min_values: The minimum values for the parameters.
         max_values: The maximum values for the parameters.
@@ -363,7 +363,7 @@ def app_editors(element, scenario_name, parms,
 
         for key in ordered_keys:
             if key not in list_keys:
-                if key in slide_keys:
+                if key in slider_keys:
                     value = st.slider(show_parameter_mapping[key],
                                       min_value=min_values[key], max_value=max_values[key],
                                       value=parms[key],
@@ -385,7 +385,7 @@ def app_editors(element, scenario_name, parms,
                 edited_parms[key] = value
             if key in list_keys:
                 for index in range(len(parms[key])):
-                    if key in slide_keys:
+                    if key in slider_keys:
                         value = st.slider(show_parameter_mapping[f"{key}_{index}"],
                                             min_value=min_values[key][index], max_value=max_values[key][index],
                                             value=parms[key][index],
@@ -508,7 +508,7 @@ def get_step_values(parms=None):
             vaccine_uptake_duration_days=1,
             total_vaccine_uptake_doses=1,
             vaccinated_group=1,
-            isolation_success = 0.75,
+            isolation_success = 0.01,
             symptomatic_isolation_start_day = 1,
             symptomatic_isolation_duration_days = 1,
             tf=1,
@@ -825,7 +825,7 @@ def create_chart(alt_results, outcome_option, x, xlabel, y, ylabel, yscale, colo
     chart = alt.Chart(
         alt_results,
         title=outcome_option
-        ).mark_line(opacity=0.5).encode(
+        ).mark_line(opacity=0.4).encode(
             x=alt.X(x, title=xlabel),
             y=alt.Y(y, title=ylabel).scale(domain=yscale),
             color=alt.Color(

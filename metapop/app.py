@@ -8,7 +8,7 @@ from metapop.helper import *
 from metapop.app_helper import *
 
 
-def app(replicates=50):
+def app(replicates=20):
     st.title("Metapopulation Model")
     parms = read_parameters("scripts/app/onepop_config.yaml")
 
@@ -26,11 +26,11 @@ def app(replicates=50):
         steps = get_step_values()
         helpers = get_helpers()
         formats = get_formats()
-        # this can likely be done more programmatically but works for now
-        keys0 = get_widget_idkeys(0)
-        keys1 = get_widget_idkeys(1)
-        keys2 = get_widget_idkeys(2)
+        keys0 = get_widget_idkeys(0) # keys for the shared parameters
+        keys1 = get_widget_idkeys(1) # keys for the parameters for scenario 1
+        keys2 = get_widget_idkeys(2) # keys for the parameters for scenario 2
 
+        # define parameters to be shared between scenarios that are shown in the sidebar by default
         shared_keys = [
             "pop_sizes",
             "I0",
@@ -41,7 +41,7 @@ def app(replicates=50):
             "I0",
             "initial_vaccine_coverage",
         ]
-        shared_slide_keys = [
+        shared_slider_keys = [
             'pop_sizes',
             'I0',
             'initial_vaccine_coverage']
@@ -53,10 +53,11 @@ def app(replicates=50):
 
         edited_parms = app_editors(
             col0, subheader, parms, shared_keys, shared_list_keys,
-            shared_slide_keys, show_parameter_mapping, min_values, max_values,
+            shared_slider_keys, show_parameter_mapping, min_values, max_values,
             steps, helpers, formats, keys0
         )
 
+        # parameters for each scenario separately
         # order of parameters in the sidebar
         ordered_keys = [
                         # 'desired_r0',
@@ -68,7 +69,7 @@ def app(replicates=50):
                         'vaccine_uptake_duration_days',
                         'isolation_success',
                         'symptomatic_isolation_start_day',
-                        'symptomatic_isolation_duration_days'
+                        'symptomatic_isolation_duration_days',
                         ]
 
         list_parameter_keys = [
@@ -78,7 +79,7 @@ def app(replicates=50):
                               # 'initial_vaccine_coverage',
                               ]
 
-        slide_keys = [
+        slider_keys = [
             'vaccine_uptake_start_day',
             'vaccine_uptake_duration_days'
             'total_vaccine_uptake_doses',
@@ -89,51 +90,53 @@ def app(replicates=50):
             #'pop_sizes',
             #'I0'
             ]
-        # number of scenarios
+
+        # make a section for each scenario
         col1, col2 = st.columns(2)
 
         # show the parameters for scenario 1 but do not allow editing
         edited_parms1 = app_editors(
-            col1, "Scenario 1", edited_parms, ordered_keys, list_parameter_keys,
-            slide_keys, show_parameter_mapping, min_values, max_values,
+            col1, "Scenario 1 (Baseline)", edited_parms, ordered_keys, list_parameter_keys,
+            slider_keys, show_parameter_mapping, min_values, max_values,
             steps, helpers, formats, keys1, disabled=True
         )
 
         edited_parms2 = app_editors(
             col2, "Scenario 2", edited_parms, ordered_keys, list_parameter_keys,
-            slide_keys, show_parameter_mapping, min_values, max_values,
+            slider_keys, show_parameter_mapping, min_values, max_values,
             steps, helpers, formats, keys2
         )
 
         with st.expander("Advanced options"):
             # try to place two sliders side by side
             advanced_ordered_keys = [
-                # "desired_r0",
+                "desired_r0",
                 "latent_duration",
                 "infectious_duration",
-                "k_g1",
-                "k_g2",
-                "k_21",
                 "k_i",
                 ]
+            # show additional advanced parameters if there are multiple population groups
+            if parms['n_groups'] > 1:
+                advanced_ordered_keys = advanced_ordered_keys + ["k_g1", "k_g2", "k_21"]
+
             advanced_list_keys = [
                 "k_i"
                 ]
-            advanced_slide_keys = ["latent_duration", "infectious_duration"]
+            advanced_slider_keys = ["latent_duration", "infectious_duration"]
 
             adv_col1, adv_col2 = st.columns(2)
 
             # show the parameters for scenario 1 but do not allow editing
             edited_advanced_parms1 = app_editors(
-                adv_col1, "Scenario 1", edited_parms1, advanced_ordered_keys,
-                advanced_list_keys, advanced_slide_keys, advanced_parameter_mapping,
+                adv_col1, "Scenario 1 (Baseline)", edited_parms1, advanced_ordered_keys,
+                advanced_list_keys, advanced_slider_keys, advanced_parameter_mapping,
                 min_values, max_values, steps, helpers, formats, keys1,
                 disabled=True
             )
 
             edited_advanced_parms2 = app_editors(
                 adv_col2, "Scenario 2", edited_parms2, advanced_ordered_keys,
-                advanced_list_keys, advanced_slide_keys, advanced_parameter_mapping,
+                advanced_list_keys, advanced_slider_keys, advanced_parameter_mapping,
                 min_values, max_values, steps, helpers, formats, keys2
             )
     # get the selected outcome from the sidebar
@@ -148,26 +151,8 @@ def app(replicates=50):
     outcome_mapping = get_outcome_mapping()
     outcome = outcome_mapping[outcome_option]
 
-    full_defaults = get_default_full_parameters()
-
-    # get updated parameter dictionaries
-    updated_parms1 = get_parms_from_table(full_defaults, value_col="Scenario 1")
-    updated_parms2 = get_parms_from_table(full_defaults, value_col="Scenario 2")
-
-    # get updated values from user through the sidebar
-    for key, value in edited_parms1.items():
-        updated_parms1[key] = value
-    for key, value in edited_parms2.items():
-        updated_parms2[key] = value
-
-    for key, value in edited_advanced_parms1.items():
-        updated_parms1[key] = value
-    for key, value in edited_advanced_parms2.items():
-        updated_parms2[key] = value
-
-    # correct types for single values
-    updated_parms1 = correct_parameter_types(parms, updated_parms1)
-    updated_parms2 = correct_parameter_types(parms, updated_parms2)
+    updated_parms1 = edited_advanced_parms1.copy()
+    updated_parms2 = edited_advanced_parms2.copy()
 
     scenario1 = [updated_parms1]
     scenario2 = [updated_parms2]
@@ -263,8 +248,8 @@ def app(replicates=50):
     alt_results1 = alt_results1.with_columns(pl.lit("Scenario 1 (Baseline)").alias("scenario"))
     alt_results2 = alt_results2.with_columns(pl.lit("Scenario 2").alias("scenario"))
     combined_alt_results = alt_results1.vstack(alt_results2)
-    chart = alt.Chart(combined_alt_results.to_pandas()).mark_line(opacity=0.5).encode(
-        x=alt.X("t", title="Time"),
+    chart = alt.Chart(combined_alt_results.to_pandas()).mark_line(opacity=0.4).encode(
+        x=alt.X(x, title=time_label),
         y=alt.Y(outcome, title=outcome_option),
         color=alt.Color(
             "scenario",

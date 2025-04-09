@@ -6,7 +6,7 @@ from metapop.model import *
 from metapop.helper import *
 from metapop.app_helper import *
 
-def app(replicates=20):
+def advanced_app(replicates=20):
     st.title("Metapopulation Model")
     parms = read_parameters()
 
@@ -24,41 +24,9 @@ def app(replicates=20):
         steps = get_step_values()
         helpers = get_helpers()
         formats = get_formats()
-        # this can likely be done more programmatically but works for now
-        keys1 = dict(
-            desired_r0="R0_1",
-            pop_sizes=["pop_size_0_1", "pop_size_1_1", "pop_size_2_1"],
-            vaccine_uptake_start_day="vaccine_uptake_days_0_1",
-            vaccine_uptake_duration_days="vaccine_uptake_duration_days_0_1",
-            total_vaccine_uptake_doses="total_vaccine_uptake_doses_1",
-            I0=["I0_0_1", "I0_1_1", "I0_2_1"],
-            initial_vaccine_coverage=["initial_vaccine_coverage_0_1", "initial_vaccine_coverage_1_1", "initial_vaccine_coverage_2_1"],
-            k_i=["k_i_0_1", "k_i_1_1", "k_i_2_1"],
-            latent_duration = "latent_duration_1",
-            infectious_duration = "infectious_duration_1",
-            k_g1 = "k_g1_1",
-            k_21 = "k_21_1",
-            isolation_success = "isolation_success_1",
-            symptomatic_isolation_start_day = "symptomatic_isolation_start_day_1",
-            symptomatic_isolation_duration_days = "symptomatic_isolation_duration_days_1",
-            )
-        keys2 = dict(
-            desired_r0="R0_2",
-            pop_sizes=["pop_size_0_2", "pop_size_1_2", "pop_size_2_2"],
-            vaccine_uptake_start_day="vaccine_uptake_days_0_2",
-            vaccine_uptake_duration_days="vaccine_uptake_duration_days_0_2",
-            total_vaccine_uptake_doses="total_vaccine_uptake_doses_2",
-            I0=["I0_0_2", "I0_1_2", "I0_2_2"],
-            initial_vaccine_coverage=["initial_vaccine_coverage_0_2", "initial_vaccine_coverage_1_2", "initial_vaccine_coverage_2_2"],
-            k_i=["k_i_0_2", "k_i_1_2", "k_i_2_2"],
-            latent_duration = "latent_duration_2",
-            infectious_duration= "infectious_duration_2",
-            k_g1 = "k_g1_2",
-            k_21 = "k_21_2",
-            isolation_success = "isolation_success_2",
-            symptomatic_isolation_start_day = "symptomatic_isolation_start_day_2",
-            symptomatic_isolation_duration_days = "symptomatic_isolation_duration_days_2",
-            )
+        keys1 = get_widget_idkeys(1)
+        keys2 = get_widget_idkeys(2)
+
         # order of parameters in the sidebar
         ordered_keys = [
                         # 'desired_r0',
@@ -127,26 +95,8 @@ def app(replicates=20):
     outcome_mapping = get_outcome_mapping()
     outcome = outcome_mapping[outcome_option]
 
-    full_defaults = get_default_full_parameters()
-
-    # get updated parameter dictionaries
-    updated_parms1 = get_parms_from_table(full_defaults, value_col="Scenario 1")
-    updated_parms2 = get_parms_from_table(full_defaults, value_col="Scenario 2")
-
-    # get updated values from user through the sidebar
-    for key, value in edited_parms1.items():
-        updated_parms1[key] = value
-    for key, value in edited_parms2.items():
-        updated_parms2[key] = value
-
-    for key, value in edited_advanced_parms1.items():
-        updated_parms1[key] = value
-    for key, value in edited_advanced_parms2.items():
-        updated_parms2[key] = value
-
-    # correct types for single values
-    updated_parms1 = correct_parameter_types(parms, updated_parms1)
-    updated_parms2 = correct_parameter_types(parms, updated_parms2)
+    updated_parms1 = edited_advanced_parms1.copy()
+    updated_parms2 = edited_advanced_parms2.copy()
 
     scenario1 = [updated_parms1]
     scenario2 = [updated_parms2]
@@ -230,4 +180,4 @@ def app(replicates=20):
 
 
 if __name__ == "__main__":
-    app()
+    advanced_app()
