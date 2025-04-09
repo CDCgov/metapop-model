@@ -1,21 +1,52 @@
+# This file is part of the metapop package. It contains the streamlit app with
+# a table interface for users
 import streamlit as st
 import polars as pl
 import numpy as np
 import altair as alt
-# define imports by order of increasing dependencies to avoid circular imports
-from .helper import *
-from .model import *
-from .app_helper import *
+# import what's needed from other metapop modules
+from .app_helper import (
+    get_scenario_results,
+    read_parameters,
+    get_default_full_parameters,
+    get_default_show_parameters_table,
+    get_show_parameter_mapping,
+    get_outcome_options,
+    get_outcome_mapping,
+    get_parms_from_table,
+    update_parms_from_table,
+    correct_parameter_types,
+    get_keys_in_list,
+    repack_list_parameters,
+    add_daily_incidence,
+    get_interval_results,
+    create_chart,
+)
 
-# if you want to use the methods from metapop in this file under __name__ == "__main__": you'll need to import them as:
-# from metapop.helper import *
-# from metapop.model import *
-# from metapop.app_helper import *
+# if you want to use the methods from metapop in this file under
+# if __name__ == "__main__": you'll need to import them as:
+# from metapop.app_helper import (
+#     get_scenario_results,
+#     read_parameters,
+#     get_default_full_parameters,
+#     get_default_show_parameters_table,
+#     get_show_parameter_mapping,
+#     get_outcome_options,
+#     get_outcome_mapping,
+#     get_parms_from_table,
+#     correct_parameter_types,
+#     add_daily_incidence,
+#     get_interval_results,
+#     create_chart,
+# )
 ### note: this is not recommended use within a file that is imported as a package modules, but it can be useful for testing
 
+__all__ = [
+    "app_with_table",
+]
 
 # This method is currently deprecated, but does look prettier
-def app_with_parameter_table(replicates=20):
+def app_with_table(replicates=20):
     st.title("Measles Outbreak Simulator")
     st.text("This interactive tool illustrates the impact of vaccination and isolation on the probability and size of measles outbreaks following introduction of measles into different connected communities.")
 
@@ -176,7 +207,3 @@ def app_with_parameter_table(replicates=20):
                           labelExpr,
                           detail)
     st.altair_chart(chart1 | chart2, use_container_width=True)
-
-
-if __name__ == "__main__":
-    app_with_parameter_table()

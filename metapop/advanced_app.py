@@ -2,9 +2,31 @@ import streamlit as st
 import numpy as np
 import polars as pl
 import altair as alt
-from metapop.model import *
-from metapop.helper import *
-from metapop.app_helper import *
+# from metapop.model import *
+# from metapop.helper import *
+# from metapop.app_helper import *
+
+# import what's needed from other metapop modules
+from .app_helper import (
+    get_scenario_results,
+    read_parameters,
+    get_show_parameter_mapping,
+    get_advanced_parameter_mapping,
+    get_outcome_options,
+    get_outcome_mapping,
+    app_editors,
+    get_min_values,
+    get_max_values,
+    get_step_values,
+    get_helpers,
+    get_formats,
+    get_widget_idkeys,
+    add_daily_incidence,
+    get_interval_results,
+    create_chart,
+    calculate_outbreak_summary
+)
+
 
 def advanced_app(replicates=20):
     st.title("Measles Outbreak Simulator")
@@ -181,5 +203,5 @@ def advanced_app(replicates=20):
     st.altair_chart(chart1 | chart2, use_container_width=True)
 
 
-if __name__ == "__main__":
-    advanced_app()
+# if __name__ == "__main__":
+#     advanced_app()

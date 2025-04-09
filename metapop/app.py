@@ -1,20 +1,52 @@
-# flake8: noqa
+# This file is part of the metapop package. It contains the Streamlit app for
+# the metapopulation model
 import streamlit as st
 import numpy as np
 import polars as pl
 import altair as alt
 import copy
-# define imports by order of increasing dependencies to avoid circular imports
-from .helper import *
-from .model import *
-from .app_helper import *
+# import what's needed from other metapop modules
+from .app_helper import (
+    get_scenario_results,
+    read_parameters,
+    get_show_parameter_mapping,
+    get_advanced_parameter_mapping,
+    get_outcome_options,
+    get_outcome_mapping,
+    app_editors,
+    get_min_values,
+    get_max_values,
+    get_step_values,
+    get_helpers,
+    get_formats,
+    get_widget_idkeys,
+    add_daily_incidence,
+    get_interval_results,
+    create_chart,
+    calculate_outbreak_summary
+)
 
-# if you want to use the methods from metapop in this file under __name__ == "__main__": you'll need to import them as:
-# from metapop.helper import *
-# from metapop.model import *
-# from metapop.app_helper import *
+# if you want to use the methods from metapop in this file under
+# if __name__ == "__main__": you'll need to import them as:
+# from metapop.app_helper import (
+#     get_scenario_results,
+#     read_parameters,
+#     get_default_full_parameters,
+#     get_show_parameter_mapping,
+#     get_advanced_parameter_mapping,
+#     get_outcome_options,
+#     get_outcome_mapping,
+#     get_parms_from_table,
+#     correct_parameter_types,
+#     add_daily_incidence,
+#     get_interval_results,
+#     create_chart,
+# )
 ### note: this is not recommended use within a file that is imported as a package module, but it can be useful for testing purposes
 
+__all__ = [
+    "app",
+]
 
 
 def app(replicates=20):
