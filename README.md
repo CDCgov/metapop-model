@@ -24,7 +24,7 @@
 * For example, if we wanted 6 groups, you could specify   `n_groups: 6`  and then change `N: [100, 200, 300, 400, 500, 600]` (i.e., a list of 6 population sizes), same for `I0: [1, 0, 0, 0, 0, 0]`, and then the beta_matrix would have to be a matrix 6x6. In the future, it would be good to have funcitonality to read beta matrix from a csv.
 
 ## Local app
-You can run the app locally using Streamlit with `streamlit run metapop/launch_app.py`
+You can run the app locally using Streamlit with `streamlit run metapop/launch_app.py`. To run the advanced app with 3 connected populations, use `streamlit run metapop/launch_app.py -- --app_version advanced_app`.
 
 
 ## Project Admin
