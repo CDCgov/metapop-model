@@ -297,7 +297,7 @@ def app(replicates=20):
      ).agg(pl.col("Y").sum().alias("Total"))
 
     outbreak_summary = calculate_outbreak_summary(combined_results, threshold)
-    
+
     hospitalization_summary = get_hospitalizations(combined_results, parms["IHR"])
 
     columns = st.columns(len(outbreak_summary)+ len(hospitalization_summary))
