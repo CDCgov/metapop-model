@@ -187,9 +187,9 @@ def get_show_parameter_mapping():
         isolation_success = "Symptomatic isolation proportion",
         symptomatic_isolation_start_day = "Symptomatic isolation start day",
         symptomatic_isolation_duration_days = "Symptomatic isolation duration days",
+        pre_rash_isolation_success = "Pre-rash isolation proportion",
         pre_rash_isolation_start_day = "Pre-rash isolation start day",
         pre_rash_isolation_duration_days = "Pre-rash isolation duration days",
-        pre_rash_isolation_success = "Pre-rash isolation proportion",
         tf = "time steps",
         # n_replicates = "number of replicates",
         # seed = "random seed",
@@ -439,6 +439,9 @@ def get_min_values(parms=None):
             isolation_success = 0.,
             symptomatic_isolation_start_day = 0,
             symptomatic_isolation_duration_days = 0,
+            pre_rash_isolation_success = 0.,
+            pre_rash_isolation_start_day = 0,
+            pre_rash_isolation_duration_days = 0,
             tf=30,
             )
     # update with parms if provided
@@ -477,6 +480,9 @@ def get_max_values(parms=None):
             isolation_success = 0.75,
             symptomatic_isolation_start_day = 365,
             symptomatic_isolation_duration_days = 365,
+            pre_rash_isolation_success = 1.,
+            pre_rash_isolation_start_day = 365,
+            pre_rash_isolation_duration_days = 365,
             tf=400,
             )
     # update with parms if provided
@@ -506,15 +512,18 @@ def get_step_values(parms=None):
             latent_duration=0.1,
             infectious_duration=0.1,
             I0=1,
-            initial_vaccine_coverage=0.01,
-            vaccine_uptake_start_day=1,
-            vaccine_uptake_duration_days=1,
-            total_vaccine_uptake_doses=1,
-            vaccinated_group=1,
+            initial_vaccine_coverage = 0.01,
+            vaccine_uptake_start_day = 1,
+            vaccine_uptake_duration_days = 1,
+            total_vaccine_uptake_doses = 1,
+            vaccinated_group = 1,
             isolation_success = 0.01,
             symptomatic_isolation_start_day = 1,
             symptomatic_isolation_duration_days = 1,
-            tf=1,
+            pre_rash_isolation_success = 0.01,
+            pre_rash_isolation_start_day = 1,
+            pre_rash_isolation_duration_days = 1,
+            tf = 1,
             )
     # update with parms if provided
     if parms is not None and isinstance(parms, dict):
@@ -554,9 +563,12 @@ def get_helpers(parms=None):
             vaccine_uptake_duration_days="Days vaccines are administered",
             total_vaccine_uptake_doses="Total vaccine doses administered during the vaccination campaign",
             vaccinated_group="Population receiving the vaccine",
-            isolation_success = "Percentage reduction in contacts due to symptomatic isolation",
+            isolation_success = "Proportion reduction in contacts due to symptomatic isolation",
             symptomatic_isolation_start_day = "Day symptomatic isolation starts",
-            symptomatic_isolation_duration_days = "Day symptomatic isolation starts",
+            symptomatic_isolation_duration_days = "Duration of symptomatic isolation",
+            pre_rash_isolation_success = "Proportion reduction in contacts due to pre-rash isolation",
+            pre_rash_isolation_start_day = "Day pre-rash isolation starts",
+            pre_rash_isolation_duration_days = "Duration of pre-rash isolation",
             tf = "Number of time steps to simulate",
             )
     if parms is not None and isinstance(parms, dict):
@@ -593,6 +605,9 @@ def get_formats(parms=None):
             isolation_success = "%.2f",
             symptomatic_isolation_start_day = "%.0d",
             symptomatic_isolation_duration_days = "%.0d",
+            pre_rash_isolation_success = "%.2f",
+            pre_rash_isolation_start_day = "%.0d",
+            pre_rash_isolation_duration_days = "%.0d",
             tf="%.0d",
             )
     if parms is not None and isinstance(parms, dict):
@@ -624,6 +639,9 @@ def get_base_widget_idkeys(parms=None):
         isolation_success = "isolation_success",
         symptomatic_isolation_start_day = "symptomatic_isolation_start_day",
         symptomatic_isolation_duration_days = "symptomatic_isolation_duration_days",
+        pre_rash_isolation_success = "pre_rash_isolation_success",
+        pre_rash_isolation_start_day = "pre_rash_isolation_start_day",
+        pre_rash_isolation_duration_days = "pre_rash_isolation_duration_days",
         tf = "tf",
         )
     if parms is not None and isinstance(parms, dict):
