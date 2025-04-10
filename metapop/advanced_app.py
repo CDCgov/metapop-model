@@ -2,10 +2,6 @@ import streamlit as st
 import numpy as np
 import polars as pl
 import altair as alt
-# from metapop.model import *
-# from metapop.helper import *
-# from metapop.app_helper import *
-
 # import what's needed from other metapop modules
 from .app_helper import (
     get_scenario_results,
@@ -26,6 +22,9 @@ from .app_helper import (
     create_chart
 )
 
+__all__ = [
+    "advanced_app",
+]
 
 def advanced_app(replicates=20):
     st.title("Measles Outbreak Simulator")
