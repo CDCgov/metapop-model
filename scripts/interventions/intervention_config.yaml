@@ -15,12 +15,15 @@ baseline_parameters:
   vaccine_uptake_start_day:  30
   vaccine_uptake_duration_days: 30 # duration of vaccine uptake campaign
   symptomatic_isolation_duration_days: 365
-  vaccinated_group: 2
   isolation_success: 0.80
+  pre_rash_isolation_success: 0.80
+  pre_rash_isolation_duration_days: 365
+  vaccinated_group: 2
   tf: 365        # total time modeled
   n_replicates: 1000
   seed: 123
 
 grid_parameters:
   symptomatic_isolation_start_day: [0, 400]
+  pre_rash_isolation_start_day: [0, 400]
   total_vaccine_uptake_doses: [0, 500] # constant, to be divided out among the days

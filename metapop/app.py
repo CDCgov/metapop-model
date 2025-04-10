@@ -70,6 +70,9 @@ def app(replicates=20):
                         'isolation_success',
                         'symptomatic_isolation_start_day',
                         'symptomatic_isolation_duration_days',
+                        'pre_rash_isolation_success',
+                        'pre_rash_isolation_start_day',
+                        'pre_rash_isolation_duration_days',
                         ]
 
         list_parameter_keys = [

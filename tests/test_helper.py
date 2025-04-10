@@ -207,6 +207,8 @@ def test_get_infected():
     parms = {
         "symptomatic_isolation_start_day": 400,
         "symptomatic_isolation_duration_days": 100,
+        "pre_rash_isolation_start_day": 400,
+        "pre_rash_isolation_duration_days": 100
     }
 
     # Call the get_infected function
@@ -220,7 +222,9 @@ def test_symptomatic_isolation():
     parms = {
         "symptomatic_isolation_start_day": 10,
         "symptomatic_isolation_duration_days": 1,
-        "isolation_success": 1.0
+        "isolation_success": 1.0,
+        "pre_rash_isolation_start_day": 400,
+        "pre_rash_isolation_duration_days": 100
     }
 
     # Initial state for each group: Group 2 has no E or I individuals yet
@@ -253,6 +257,107 @@ def test_symptomatic_isolation():
 
     # Check the results
     expected_infected2 = np.array([100, 0])  # Should just be I1
+    assert np.array_equal(infected2, expected_infected2), f"Expected {expected_infected2}, but got {infected2}"
+
+    # Next test that no longer happening after duration
+    t3 = 100
+
+    # Call the get_infected function
+    infected3 = get_infected(u, I_indices, groups, parms, t3)
+
+    # Check the results, we should now be back to pre-isolation values
+    assert np.array_equal(infected3, expected_infected), f"Expected {expected_infected}, but got {infected3}"
+
+def test_pre_rash_isolation():
+    parms = {
+        "symptomatic_isolation_start_day": 400,
+        "symptomatic_isolation_duration_days": 100,
+        "pre_rash_isolation_start_day": 10,
+        "pre_rash_isolation_duration_days": 1,
+        "pre_rash_isolation_success": 1.0
+    }
+
+    # Initial state for each group: Group 2 has no E or I individuals yet
+    u = [
+        [1000, 0, 0, 0, 100, 100, 0, 0, 0],  # Group 0: S, V, E1, E2, I1, I2, R, Y, X
+        [600, 0, 0, 0, 0, 0, 0, 0, 0]     # Group 2: S, V, E1, E2, I1, I2, R, Y, X
+    ]
+
+    # Define the indices of the I compartments
+    I_indices = [4, 5]
+
+    # Define the number of groups
+    groups = 2
+
+    # First test that no isolation happens before isolation day
+    t = 1
+
+    # Call the get_infected function
+    infected = get_infected(u, I_indices, groups, parms, t)
+
+    # Check the results
+    expected_infected = np.array([200, 0])  # Sum of I1 and I2 for each group
+    assert np.array_equal(infected, expected_infected), f"Expected {expected_infected}, but got {infected}"
+
+    # Next test that isolation happens on isolation day
+    t2 = 10
+
+    # Call the get_infected function
+    infected2 = get_infected(u, I_indices, groups, parms, t2)
+
+    # Check the results
+    expected_infected2 = np.array([100, 0])  # Should just be I2
+    assert np.array_equal(infected2, expected_infected2), f"Expected {expected_infected2}, but got {infected2}"
+
+    # Next test that no longer happening after duration
+    t3 = 100
+
+    # Call the get_infected function
+    infected3 = get_infected(u, I_indices, groups, parms, t3)
+
+    # Check the results, we should now be back to pre-isolation values
+    assert np.array_equal(infected3, expected_infected), f"Expected {expected_infected}, but got {infected3}"
+
+def test_pre_post_isolation():
+    parms = {
+        "symptomatic_isolation_start_day": 10,
+        "symptomatic_isolation_duration_days": 1,
+        "isolation_success": 1.0,
+        "pre_rash_isolation_start_day": 10,
+        "pre_rash_isolation_duration_days": 1,
+        "pre_rash_isolation_success": 1.0
+    }
+
+    # Initial state for each group: Group 2 has no E or I individuals yet
+    u = [
+        [1000, 0, 0, 0, 100, 100, 0, 0, 0],  # Group 0: S, V, E1, E2, I1, I2, R, Y, X
+        [600, 0, 0, 0, 0, 0, 0, 0, 0]     # Group 2: S, V, E1, E2, I1, I2, R, Y, X
+    ]
+
+    # Define the indices of the I compartments
+    I_indices = [4, 5]
+
+    # Define the number of groups
+    groups = 2
+
+    # First test that no isolation happens before isolation day
+    t = 1
+
+    # Call the get_infected function
+    infected = get_infected(u, I_indices, groups, parms, t)
+
+    # Check the results
+    expected_infected = np.array([200, 0])  # Sum of I1 and I2 for each group
+    assert np.array_equal(infected, expected_infected), f"Expected {expected_infected}, but got {infected}"
+
+    # Next test that isolation happens on isolation day
+    t2 = 10
+
+    # Call the get_infected function
+    infected2 = get_infected(u, I_indices, groups, parms, t2)
+
+    # Check the results
+    expected_infected2 = np.array([0, 0])  # Should just be no infections
     assert np.array_equal(infected2, expected_infected2), f"Expected {expected_infected2}, but got {infected2}"
 
     # Next test that no longer happening after duration
