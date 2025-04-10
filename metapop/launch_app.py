@@ -4,8 +4,8 @@ if __name__ == "__main__":
 
     # define the app version to launch for users
     # app_version = "advanced_app"
-    # app_version = "one_pop_app"
-    app_version = "app_with_table"
+    app_version = "one_pop_app"
+    # app_version = "app_with_table"
 
     if app_version == "advanced_app":
         import metapop.advanced_app as app
