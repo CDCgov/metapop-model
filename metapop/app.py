@@ -297,6 +297,8 @@ def app(replicates=20):
      ).agg(pl.col("Y").sum().alias("Total"))
 
     outbreak_summary = calculate_outbreak_summary(combined_results, threshold)
+    
+    hospitalization_summary = get_hospitalizations(combined_results, parms["IHR"])
 
     hospitalization_summary = get_hospitalizations(combined_results, parms["IHR"])
 
@@ -322,9 +324,9 @@ def app(replicates=20):
 
         # Use st.error for the first column, st.success for the second
         if scenario == "Scenario 1 (Baseline)":
-            columns[0].error(f"{scenario}: simulations had an average {hospitalizations} hospitalizations ")
+            columns[2].error(f"{scenario}: simulations had an average {hospitalizations} hospitalizations ")
         else:
-            columns[1].info(f"{scenario}: simulations had an average {hospitalizations} hospitalizations ")
+            columns[3].info(f"{scenario}: simulations had an average {hospitalizations} hospitalizations ")
 
 
 if __name__ == "__main__":
