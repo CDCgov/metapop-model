@@ -306,7 +306,7 @@ def test_pre_rash_isolation():
     infected2 = get_infected(u, I_indices, groups, parms, t2)
 
     # Check the results
-    expected_infected2 = np.array([100, 0])  # Should just be I1
+    expected_infected2 = np.array([100, 0])  # Should just be I2
     assert np.array_equal(infected2, expected_infected2), f"Expected {expected_infected2}, but got {infected2}"
 
     # Next test that no longer happening after duration
@@ -357,7 +357,7 @@ def test_pre_post_isolation():
     infected2 = get_infected(u, I_indices, groups, parms, t2)
 
     # Check the results
-    expected_infected2 = np.array([0, 0])  # Should just be I1
+    expected_infected2 = np.array([0, 0])  # Should just be no infections
     assert np.array_equal(infected2, expected_infected2), f"Expected {expected_infected2}, but got {infected2}"
 
     # Next test that no longer happening after duration
