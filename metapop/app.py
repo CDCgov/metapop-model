@@ -297,8 +297,10 @@ def app(replicates=20):
      ).agg(pl.col("Y").sum().alias("Total"))
 
     outbreak_summary = calculate_outbreak_summary(combined_results, threshold)
+    
+    hospitalization_summary = get_hospitalizations(combined_results, parms["IHR"])
 
-    columns = st.columns(len(outbreak_summary))
+    columns = st.columns(len(outbreak_summary)+ len(hospitalization_summary))
 
     n_reps = parms["n_replicates"]
 
@@ -312,6 +314,17 @@ def app(replicates=20):
             columns[0].error(f"{scenario}: {outbreaks}/{n_reps} ({outbreak_prop}) simulations had >= {threshold} cases total ")
         else:
             columns[1].info(f"{scenario}: {outbreaks}/{n_reps} ({outbreak_prop}) simulations had >= {threshold} cases total ")
+
+
+    for idx, row in enumerate(hospitalization_summary.iter_rows(named=True)):
+        scenario = row["Scenario"]
+        hospitalizations = row["hospitalizations"]
+
+        # Use st.error for the first column, st.success for the second
+        if scenario == "Scenario 1 (Baseline)":
+            columns[2].error(f"{scenario}: simulations had an average {hospitalizations} hospitalizations ")
+        else:
+            columns[3].info(f"{scenario}: simulations had an average {hospitalizations} hospitalizations ")
 
 
 if __name__ == "__main__":

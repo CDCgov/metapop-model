@@ -21,6 +21,7 @@ baseline_parameters:
   pre_rash_isolation_success: 0.0
   pre_rash_isolation_start_day: 0
   pre_rash_isolation_duration_days: 365
+  IHR: 0.25 # Infection Hospitalization Rate
   tf: 365        # total time modeled
   n_replicates: 200
   seed: 123

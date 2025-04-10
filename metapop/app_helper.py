@@ -897,3 +897,29 @@ def calculate_outbreak_summary(combined_results, threshold):
             )
 
     return outbreak_summary
+
+def get_hospitalizations(combined_results, IHR):
+    """
+    Calculate the hospitalization summary based on the given IHR.
+
+    Args:
+        combined_results (pl.DataFrame): The combined results DataFrame.
+        IHR (float): The infection hospitalization rate.
+
+    Returns:
+        pl.DataFrame: A DataFrame containing the hospitalization summary.
+    """
+#so we already have the total infections in Total, and then replicates and scenarios 
+    combined_results = combined_results.with_columns(
+        pl.Series(
+            name = "hospitalizations",
+            values = np.random.binomial(combined_results["Total"].to_numpy(), IHR)))
+    
+    # Group by Scenario and get mean hospitalizations
+    hospitalization_summary = (
+        combined_results
+        .group_by("Scenario")
+        .mean()
+    )
+    
+    return hospitalization_summary
