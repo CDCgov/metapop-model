@@ -336,26 +336,3 @@ def vaccinate_groups(groups, u, t, vaccination_uptake_schedule, parms):
         new_vaccinated[vaccinated_group] = S_doses
 
     return new_vaccinated
-
-### not really circular since we're using the model object's seirmodel function here but still moving to another file for organization
-# def run_model(model, u, t, steps, groups, S, V, E1, E2, I1, I2, R, Y, X):
-#     """
-#     Update the population arrays based on the SEIR model.
-
-#     Args:
-#         model: The SEIR model instance.
-#         u: The initial state.
-#         t: The time array.
-#         steps: The number of time steps.
-#         groups: The number of groups.
-#         S, V, E1, E2, I1, I2, R, Y, X: The population arrays to be updated. Y is a infection counter (counted when they become infectious I1). X is vaccine uptake counter.
-
-#     Returns:
-#         S, V, E1, E2, I1, I2, R, Y, X, u
-#     """
-#     for j in range(1, steps):
-#         u = model.seirmodel(u, t[j])
-#         for group in range(groups):
-#             S[j, group], V[j, group], E1[j, group], E2[j, group], I1[j, group], I2[j, group], R[j, group], Y[j, group], X[j, group] = u[group]
-
-#     return S, V, E1, E2, I1, I2, R, Y, X, u

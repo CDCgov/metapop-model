@@ -1,4 +1,4 @@
-# Sandbox for a stochastic SEIR model in python
+# A stochastic SEIR metapopulation model in python
 
 ⚠️ This is a work in progress
 
@@ -6,11 +6,13 @@
 
 * Stochastic SEIRV model
 * Flexible numbers of groups (e.g., age classes or connected populations) that is changeable using the config
+* Intervention strategies common for measles: pre-introduction vaccination, reactive vaccination, isolation of infectious populations
 * Basic example of how to do a calibration
+* An interactive widget built in streamlit
 
 ## Getting started
 
-* Enable poetry with `poetry install` and then start a poetry environment by activating the virtual environment: `source $(poetry env info --path)/bin/activate`
+* Enable [poetry](https://python-poetry.org/) with `poetry install` and then start a poetry environment by activating the virtual environment: `source $(poetry env info --path)/bin/activate`
 * Run the example with `python scripts/simulate.py`, this will produce output in output folder.  Plots for this can be made with `python scripts/make_plots.py`
 * Run basic calibration in `run_abc.py`, note that `make_plots.qmd` created and saved a fake dataset to use in `run_abc.csv` (included in repo to make it easier to get started here), also the calibration is for a value of beta matrix (with a uniform prior from 0.1, 0.5), can easily change code to calibrate another parameter
 * Make plots and visualizations with `make_plots.qmd`
