@@ -23,8 +23,7 @@ from .app_helper import (
     get_widget_idkeys,
     add_daily_incidence,
     get_interval_results,
-    create_chart,
-    calculate_outbreak_summary
+    create_chart
 )
 
 
@@ -201,7 +200,3 @@ def advanced_app(replicates=20):
                           labelExpr,
                           detail)
     st.altair_chart(chart1 | chart2, use_container_width=True)
-
-
-# if __name__ == "__main__":
-#     advanced_app()

@@ -4,7 +4,6 @@ import streamlit as st
 import numpy as np
 import polars as pl
 import altair as alt
-import copy
 # import what's needed from other metapop modules
 from .app_helper import (
     get_scenario_results,
@@ -22,8 +21,8 @@ from .app_helper import (
     get_widget_idkeys,
     add_daily_incidence,
     get_interval_results,
-    create_chart,
-    calculate_outbreak_summary
+    calculate_outbreak_summary,
+    get_hospitalizations,
 )
 
 # if you want to use the methods from metapop in this file under
@@ -233,27 +232,27 @@ def app(replicates=20):
     interval_results1 = interval_results1.rename(app_column_mapping)
     interval_results2 = interval_results2.rename(app_column_mapping)
 
-    # set up the color scale
-    domain = [str(i) for i in range(len(groups))]
-    group_labels = ["General population", "Small population 1", "Small population 2"]
+    # # set up the color scale
+    # domain = [str(i) for i in range(len(groups))]
+    # group_labels = ["General population", "Small population 1", "Small population 2"]
 
-    # plot with Altair
-    if len(groups) == 3:
-        color_scale = alt.Scale(
-            domain=[str(i) for i in range(len(results1["group"].unique()))],
-            range = [
-                "#20419a", # blue
-                "#cf4828", # red
-                "#f78f47", # orange
-            ]
-        )
-    elif len(groups) == 1:
-        color_scale = alt.Scale(
-            domain=[str(i) for i in range(len(results1["group"].unique()))],
-            range = [
-                "#068482", # green
-            ]
-        )
+    # # plot with Altair
+    # if len(groups) == 3:
+    #     color_scale = alt.Scale(
+    #         domain=[str(i) for i in range(len(results1["group"].unique()))],
+    #         range = [
+    #             "#20419a", # blue
+    #             "#cf4828", # red
+    #             "#f78f47", # orange
+    #         ]
+    #     )
+    # elif len(groups) == 1:
+    #     color_scale = alt.Scale(
+    #         domain=[str(i) for i in range(len(results1["group"].unique()))],
+    #         range = [
+    #             "#068482", # green
+    #         ]
+    #     )
     if outcome not in ["I", "Y", "inc", "Winc", "WCI"]:
         print("outcome not available yet, defaulting to Cumulative Daily Incidence")
         outcome = "Y"
@@ -261,13 +260,13 @@ def app(replicates=20):
     if outcome_option in ['Daily Infections', 'Daily Incidence', 'Cumulative Daily Incidence']:
         alt_results1 = results1
         alt_results2 = results2
-        min_y, max_y = 0, max(results1[outcome].max(), results2[outcome].max())
+        # min_y, max_y = 0, max(results1[outcome].max(), results2[outcome].max())
         x = "t:Q"
         time_label = "Time (days)"
     elif outcome_option in ['Weekly Incidence', 'Weekly Cumulative Incidence']:
         alt_results1 = interval_results1
         alt_results2 = interval_results2
-        min_y, max_y = 0, max(interval_results1[outcome].max(), interval_results2[outcome].max())
+        # min_y, max_y = 0, max(interval_results1[outcome].max(), interval_results2[outcome].max())
         x = "interval_t:Q"
         time_label = "Time (weeks)"
 

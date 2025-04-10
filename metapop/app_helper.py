@@ -40,6 +40,8 @@ __all__ = [
     "get_interval_cumulative_incidence",
     "get_interval_results",
     "create_chart",
+    "calculate_outbreak_summary",
+    "get_hospitalizations",
 ]
 
 ### Methods to simulate the model for the app ###
