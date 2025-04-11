@@ -367,6 +367,8 @@ def repack_list_parameters(parms, updated_parms, keys_in_list):
     return updated_parms
 
 
+
+
 ### Methods to create user inputs interfaces ###
 def app_editors(element, scenario_name, parms,
                 ordered_keys, list_keys, slider_keys,
@@ -445,6 +447,45 @@ def app_editors(element, scenario_name, parms,
                     edited_parms[key][index] = value
 
     return edited_parms
+
+
+def get_widget_types(widget_types=None):
+    """
+    Get the types of widgets for the app parameters.
+
+    Args:
+        widget_types (dict): Optional widget types dictionary.
+
+    Returns:
+        dict: A dictionary of widget types for the app parameters.
+    """
+    defaults = dict(
+            desired_r0="slider",
+            k_i = "slider",
+            k_g1 = "number_input",
+            k_g2 = "number_input",
+            k_21 = "number_input",
+            pop_sizes="slider",
+            latent_duration="slider",
+            infectious_duration="slider",
+            I0="slider",
+            initial_vaccine_coverage = "slider",
+            vaccine_uptake_start_day="slider",
+            vaccine_uptake_duration_days="slider",
+            total_vaccine_uptake_doses="number_input",
+            vaccinated_group="number_input",
+            isolation_success = "slider",
+            symptomatic_isolation_start_day = "number_input",
+            symptomatic_isolation_duration_days = "number_input",
+            pre_rash_isolation_success = "slider",
+            pre_rash_isolation_start_day = "number_input",
+            pre_rash_isolation_duration_days = "number_input",
+            tf="number_input"
+    )
+    if widget_types is not None and isinstance(widget_types, dict):
+        # update with parms if provided
+        defaults.update(widget_types)
+    return defaults
 
 
 def get_min_values(parms=None):
