@@ -300,8 +300,6 @@ def app(replicates=20):
     
     hospitalization_summary = get_hospitalizations(combined_results, parms["IHR"])
 
-    hospitalization_summary = get_hospitalizations(combined_results, parms["IHR"])
-
     columns = st.columns(len(outbreak_summary))
 
     n_reps = parms["n_replicates"]
