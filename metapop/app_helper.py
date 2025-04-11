@@ -927,7 +927,12 @@ def get_hospitalizations(combined_results, IHR):
     # Ensure the order of scenarios
     scenario_order = ["Scenario 1 (Baseline)", "Scenario 2"]
     hospitalization_summary = hospitalization_summary.with_columns(
-        pl.col("Scenario").cast(pl.Categorical).set_sorted(order=scenario_order)
-    ).sort("Scenario")
+        pl.when(pl.col("Scenario") == scenario_order[0])
+        .then(0)
+        .when(pl.col("Scenario") == scenario_order[1])
+        .then(1)
+        .otherwise(2)
+        .alias("_sort_order")
+    ).sort("_sort_order").drop("_sort_order")
 
     return hospitalization_summary
