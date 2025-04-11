@@ -907,7 +907,6 @@ def calculate_outbreak_summary(combined_results, threshold):
                     pl.col("outbreaks").cast(outbreak_summary.schema["outbreaks"])  # Match the type
                 )
             )
-
     return outbreak_summary
 
 def get_hospitalizations(combined_results, IHR):
@@ -921,10 +920,10 @@ def get_hospitalizations(combined_results, IHR):
     Returns:
         pl.DataFrame: A DataFrame containing the hospitalization summary.
     """
-#so we already have the total infections in Total, and then replicates and scenarios 
+    # Calculate hospitalizations
     combined_results = combined_results.with_columns(
         pl.Series(
-            name = "hospitalizations",
+            name = "Hospitalizations",
             values = np.random.binomial(combined_results["Total"].to_numpy(), IHR)))
     
     # Group by Scenario and get mean hospitalizations
@@ -932,6 +931,15 @@ def get_hospitalizations(combined_results, IHR):
         combined_results
         .group_by("Scenario")
         .mean()
+        .with_columns([pl.col("Hospitalizations").cast(pl.Int64), pl.col("Total").cast(pl.Int64)])
+        .drop("replicate")
+        .rename({"Total": "Total Infections"})
     )
     
+    # Ensure the order of scenarios
+    scenario_order = ["Scenario 1 (Baseline)", "Scenario 2"]
+    hospitalization_summary = hospitalization_summary.with_columns(
+        pl.col("Scenario").cast(pl.Categorical).set_sorted(order=scenario_order)
+    ).sort("Scenario")
+
     return hospitalization_summary

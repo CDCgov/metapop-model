@@ -316,16 +316,7 @@ def app(replicates=20):
             columns[1].info(f"{scenario}: {outbreaks}/{n_reps} ({outbreak_prop}) simulations had >= {threshold} cases total ")
 
 
-    for idx, row in enumerate(hospitalization_summary.iter_rows(named=True)):
-        scenario = row["Scenario"]
-        hospitalizations = row["hospitalizations"]
-
-        # Use st.error for the first column, st.success for the second
-        if scenario == "Scenario 1 (Baseline)":
-            columns[0].error(f"{scenario}: simulations had an average {hospitalizations} hospitalizations ")
-        else:
-            columns[1].info(f"{scenario}: simulations had an average {hospitalizations} hospitalizations ")
-
+    st.dataframe(hospitalization_summary)
 
 if __name__ == "__main__":
     app()
