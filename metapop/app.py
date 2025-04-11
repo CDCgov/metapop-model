@@ -300,7 +300,7 @@ def app(replicates=20):
 
     hospitalization_summary = get_hospitalizations(combined_results, parms["IHR"])
 
-    columns = st.columns(len(outbreak_summary)+ len(hospitalization_summary))
+    columns = st.columns(len(outbreak_summary))
 
     n_reps = parms["n_replicates"]
 
@@ -322,9 +322,9 @@ def app(replicates=20):
 
         # Use st.error for the first column, st.success for the second
         if scenario == "Scenario 1 (Baseline)":
-            columns[2].error(f"{scenario}: simulations had an average {hospitalizations} hospitalizations ")
+            columns[0].error(f"{scenario}: simulations had an average {hospitalizations} hospitalizations ")
         else:
-            columns[3].info(f"{scenario}: simulations had an average {hospitalizations} hospitalizations ")
+            columns[1].info(f"{scenario}: simulations had an average {hospitalizations} hospitalizations ")
 
 
 if __name__ == "__main__":
