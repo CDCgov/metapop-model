@@ -2,7 +2,7 @@ import os
 import polars.selectors as cs
 import griddler
 import griddler.griddle
-from metapop.model import *
+from metapop import simulate
 
 if __name__ == "__main__":
     # setup output directory
