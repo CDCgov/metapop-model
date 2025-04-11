@@ -9,7 +9,8 @@ from metapop.app_helper import *
 
 
 def app(replicates=20):
-    st.title("Metapopulation Model")
+    st.title("Measles Outbreak Simulator")
+    st.text("This interactive tool illustrates the impact of vaccination and isolation on the probability and size of measles outbreaks following introduction of measles into a community.")
     parms = read_parameters("scripts/app/onepop_config.yaml")
 
     show_parameter_mapping = get_show_parameter_mapping()

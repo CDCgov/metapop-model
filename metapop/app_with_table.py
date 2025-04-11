@@ -9,7 +9,9 @@ from metapop.app_helper import *
 
 # This method is currently deprecated, but does look prettier
 def app_with_parameter_table(replicates=20):
-    st.title("Metapopulation Model")
+    st.title("Measles Outbreak Simulator")
+    st.text("This interactive tool illustrates the impact of vaccination and isolation on the probability and size of measles outbreaks following introduction of measles into different connected communities.")
+
     parms = read_parameters()
 
     default_table = get_default_show_parameters_table()
