@@ -187,21 +187,9 @@ def get_show_parameter_mapping():
         isolation_success = "Symptomatic isolation proportion",
         symptomatic_isolation_start_day = "Symptomatic isolation start day",
         symptomatic_isolation_duration_days = "Symptomatic isolation duration days",
-<<<<<<< HEAD
-<<<<<<< HEAD
         pre_rash_isolation_success = "Pre-rash isolation proportion",
         pre_rash_isolation_start_day = "Pre-rash isolation start day",
         pre_rash_isolation_duration_days = "Pre-rash isolation duration days",
-=======
-        pre_rash_isolation_start_day = "Pre-rash isolation start day",
-        pre_rash_isolation_duration_days = "Pre-rash isolation duration days",
-        pre_rash_isolation_success = "Pre-rash isolation percentage",
->>>>>>> 7a88c30 (Adding Isolation app functionality)
-=======
-        pre_rash_isolation_success = "Pre-rash isolation proportion",
-        pre_rash_isolation_start_day = "Pre-rash isolation start day",
-        pre_rash_isolation_duration_days = "Pre-rash isolation duration days",
->>>>>>> 45afc52 (updating sliders)
         tf = "time steps",
         # n_replicates = "number of replicates",
         # seed = "random seed",
@@ -925,7 +913,7 @@ def get_hospitalizations(combined_results, IHR):
         pl.Series(
             name = "Hospitalizations",
             values = np.random.binomial(combined_results["Total"].to_numpy(), IHR)))
-    
+
     # Group by Scenario and get mean hospitalizations
     hospitalization_summary = (
         combined_results
@@ -935,7 +923,7 @@ def get_hospitalizations(combined_results, IHR):
         .drop("replicate")
         .rename({"Total": "Total Infections"})
     )
-    
+
     # Ensure the order of scenarios
     scenario_order = ["Scenario 1 (Baseline)", "Scenario 2"]
     hospitalization_summary = hospitalization_summary.with_columns(
