@@ -299,11 +299,11 @@ def app(replicates=20):
     outbreak_summary = calculate_outbreak_summary(combined_results, threshold)
 
     hospitalization_summary = get_hospitalizations(combined_results, parms["IHR"])
-    
+
     # Merge hospitalization_summary and outbreak_summary by the "Scenario" column
     merged_summary = outbreak_summary.join(
-        hospitalization_summary, 
-        on="Scenario", 
+        hospitalization_summary,
+        on="Scenario",
         how="inner"  # Use "inner" to keep only matching rows
     )
 
@@ -322,7 +322,7 @@ def app(replicates=20):
         if scenario == "Scenario 1 (Baseline)":
             columns[0].error(f"{scenario}: {outbreaks}/{n_reps} ({outbreak_prop}) simulations had >= {threshold} cases total with an average {infections} infections and {hospitalizations} hospitalizations across all simulations.")
         else:
-            columns[1].info(f"{scenario}: {outbreaks}/{n_reps} ({outbreak_prop}) simulations had >= {threshold} cases total with an average {infections} infections and {hospitalizations} hospitalizations across all simulations.") 
+            columns[1].info(f"{scenario}: {outbreaks}/{n_reps} ({outbreak_prop}) simulations had >= {threshold} cases total with an average {infections} infections and {hospitalizations} hospitalizations across all simulations.")
 
 
 
