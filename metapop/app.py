@@ -298,20 +298,32 @@ def app(replicates=20):
 
     outbreak_summary = calculate_outbreak_summary(combined_results, threshold)
 
-    columns = st.columns(len(outbreak_summary))
+    hospitalization_summary = get_hospitalizations(combined_results, parms["IHR"])
+
+    # Merge hospitalization_summary and outbreak_summary by the "Scenario" column
+    merged_summary = outbreak_summary.join(
+        hospitalization_summary,
+        on="Scenario",
+        how="inner"  # Use "inner" to keep only matching rows
+    )
+
+    columns = st.columns(len(merged_summary))
 
     n_reps = parms["n_replicates"]
 
-    for idx, row in enumerate(outbreak_summary.iter_rows(named=True)):
+    for idx, row in enumerate(merged_summary.iter_rows(named=True)):
         scenario = row["Scenario"]
         outbreaks = row["outbreaks"]
         outbreak_prop = f"{(outbreaks / n_reps) * 100:.2f}%"
+        hospitalizations = row["Hospitalizations"]
+        infections = row["Total Infections"]
 
         # Use st.error for the first column, st.success for the second
         if scenario == "Scenario 1 (Baseline)":
-            columns[0].error(f"{scenario}: {outbreaks}/{n_reps} ({outbreak_prop}) simulations had >= {threshold} cases total ")
+            columns[0].error(f"{scenario}: {outbreaks}/{n_reps} ({outbreak_prop}) simulations had >= {threshold} cases total with an average {infections} infections and {hospitalizations} hospitalizations across all simulations.")
         else:
-            columns[1].info(f"{scenario}: {outbreaks}/{n_reps} ({outbreak_prop}) simulations had >= {threshold} cases total ")
+            columns[1].info(f"{scenario}: {outbreaks}/{n_reps} ({outbreak_prop}) simulations had >= {threshold} cases total with an average {infections} infections and {hospitalizations} hospitalizations across all simulations.")
+
 
 
 if __name__ == "__main__":
