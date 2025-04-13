@@ -77,20 +77,18 @@ def app(replicates=20):
         keys2 = get_widget_idkeys(2) # keys for the parameters for scenario 2
 
         # define parameters to be shared between scenarios that are shown in the sidebar by default
+        # order of shared parameters in the sidebar
         shared_keys = [
             "pop_sizes",
             "I0",
             "initial_vaccine_coverage",
         ]
+        # shared parameters that are lists
         shared_list_keys = [
             "pop_sizes",
             "I0",
             "initial_vaccine_coverage",
         ]
-        shared_slider_keys = [
-            'pop_sizes',
-            'I0',
-            'initial_vaccine_coverage']
 
         col0 = st.columns(1)
         col0 = col0[0]
@@ -99,19 +97,13 @@ def app(replicates=20):
 
         edited_parms = app_editors(
             col0, subheader, parms, shared_keys, shared_list_keys,
-            # shared_slider_keys, widget_types,
-            show_parameter_mapping,
-            widget_types,
+            show_parameter_mapping, widget_types,
             min_values, max_values, steps, helpers, formats, keys0
         )
 
         # parameters for each scenario separately
         # order of parameters in the sidebar
         ordered_keys = [
-                        # 'desired_r0',
-                        # 'pop_sizes',
-                        # 'I0',
-                        # 'initial_vaccine_coverage',
                         'total_vaccine_uptake_doses',
                         'vaccine_uptake_start_day',
                         'vaccine_uptake_duration_days',
@@ -122,25 +114,8 @@ def app(replicates=20):
                         'pre_rash_isolation_start_day',
                         'pre_rash_isolation_duration_days',
                         ]
-
-        list_parameter_keys = [
-                              #'pop_sizes',
-                              #'I0',
-                              #'vaccine_uptake_start_day',
-                              # 'initial_vaccine_coverage',
-                              ]
-
-        slider_keys = [
-            'vaccine_uptake_start_day',
-            'vaccine_uptake_duration_days'
-            'total_vaccine_uptake_doses',
-            'isolation_success',
-            'symptomatic_isolation_start_day',
-            'symptomatic_isolation_duration_days',
-            #'desired_r0',
-            #'pop_sizes',
-            #'I0'
-            ]
+        # parameters that are lists or arrays
+        list_parameter_keys = []
 
         # make a section for each scenario
         col1, col2 = st.columns(2)
@@ -148,23 +123,19 @@ def app(replicates=20):
         # show the parameters for scenario 1 but do not allow editing
         edited_parms1 = app_editors(
             col1, "Scenario 1 (Baseline)", edited_parms, ordered_keys, list_parameter_keys,
-            # slider_keys, widget_types,
-            show_parameter_mapping,
-            widget_types,
+            show_parameter_mapping, widget_types,
             min_values, max_values, steps, helpers, formats, keys1, disabled=True
         )
 
         edited_parms2 = app_editors(
             col2, "Scenario 2", edited_parms, ordered_keys, list_parameter_keys,
-            # slider_keys, widget_types,
-            show_parameter_mapping,
-            widget_types,
+            show_parameter_mapping, widget_types,
             min_values, max_values,
             steps, helpers, formats, keys2
         )
 
         with st.expander("Advanced options"):
-            # try to place two sliders side by side
+            # order of advanced parameters in the sidebar
             advanced_ordered_keys = [
                 "desired_r0",
                 "latent_duration",
@@ -175,30 +146,25 @@ def app(replicates=20):
             if parms['n_groups'] > 1:
                 advanced_ordered_keys = advanced_ordered_keys + ["k_g1", "k_g2", "k_21"]
 
+            # advanced parameters that are lists or arrays
             advanced_list_keys = [
                 "k_i"
                 ]
-            advanced_slider_keys = ["latent_duration", "infectious_duration"]
 
+            # place two sliders side by side
             adv_col1, adv_col2 = st.columns(2)
 
             # show the parameters for scenario 1 but do not allow editing
             edited_advanced_parms1 = app_editors(
                 adv_col1, "Scenario 1 (Baseline)", edited_parms1, advanced_ordered_keys,
-                advanced_list_keys,
-                # advanced_slider_keys, widget_types,
-                advanced_parameter_mapping,
-                widget_types,
+                advanced_list_keys, advanced_parameter_mapping, widget_types,
                 min_values, max_values, steps, helpers, formats, keys1,
                 disabled=True
             )
 
             edited_advanced_parms2 = app_editors(
                 adv_col2, "Scenario 2", edited_parms2, advanced_ordered_keys,
-                advanced_list_keys,
-                # advanced_slider_keys, widget_types,
-                advanced_parameter_mapping,
-                widget_types,
+                advanced_list_keys, advanced_parameter_mapping, widget_types,
                 min_values, max_values, steps, helpers, formats, keys2
             )
     # get the selected outcome from the sidebar

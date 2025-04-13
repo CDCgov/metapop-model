@@ -371,8 +371,7 @@ def repack_list_parameters(parms, updated_parms, keys_in_list):
 
 ### Methods to create user inputs interfaces ###
 def app_editors(element, scenario_name, parms,
-                ordered_keys, list_keys,
-                show_parameter_mapping,
+                ordered_keys, list_keys, show_parameter_mapping,
                 widget_types, min_values, max_values, steps, helpers,
                 formats, element_keys, disabled=False):
     """
@@ -380,20 +379,19 @@ def app_editors(element, scenario_name, parms,
 
     Args:
         element (st container object): The Streamlit element to place the sidebar in.
-        scenario_name (str): The name of the scenario.
-        parms (dict): The parameters to edit.
-        ordered_keys (list): An ordered list of the parameters to edit.
-        list_keys (list): The keys of the parameters that are lists.
-        slider_keys (list): The keys of the parameters that are sliders.
-        widget_types (dict): The types of widgets for the parameters.
+        scenario_name           (str): The name of the scenario.
+        parms                  (dict): The parameters to edit.
+        ordered_keys           (list): An ordered list of the parameters to edit.
+        list_keys              (list): The keys of the parameters that are lists.
+        widget_types           (dict): The types of widgets for the parameters.
         show_parameter_mapping (dict): The mapping of parameter names to display names.
-        min_values (dict): The minimum values for the parameters.
-        max_values (dict): The maximum values for the parameters.
-        steps (dict): The step sizes for the parameters.
-        helpers (dict): The help text for the parameters.
-        formats (dict): The formats for the parameters.
-        element_keys (dict): The keys for the Streamlit elements.
-        disabled (bool): Whether the widgets should be disabled. Defaults to False.
+        min_values             (dict): The minimum values for the parameters.
+        max_values             (dict): The maximum values for the parameters.
+        steps                  (dict): The step sizes for the parameters.
+        helpers                (dict): The help text for the parameters.
+        formats                (dict): The formats for the parameters.
+        element_keys           (dict): The keys for the Streamlit elements.
+        disabled               (bool): Whether the widgets should be disabled. Defaults to False.
 
     Returns:
         edited_parms: The edited parameters.
