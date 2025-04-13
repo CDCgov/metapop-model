@@ -1,11 +1,54 @@
 # flake8: noqa
+# This file is part of the metapop package. It contains the Streamlit app for
+# the metapopulation model
 import streamlit as st
 import numpy as np
 import polars as pl
 import altair as alt
-from metapop.model import *
-from metapop.helper import *
-from metapop.app_helper import *
+# import what's needed from other metapop modules
+from .app_helper import (
+    get_scenario_results,
+    read_parameters,
+    get_show_parameter_mapping,
+    get_advanced_parameter_mapping,
+    get_outcome_options,
+    get_outcome_mapping,
+    app_editors,
+    get_min_values,
+    get_max_values,
+    get_step_values,
+    get_helpers,
+    get_formats,
+    get_widget_idkeys,
+    add_daily_incidence,
+    get_interval_results,
+    calculate_outbreak_summary,
+    get_hospitalizations,
+)
+
+# if you want to use the methods from metapop in this file under
+# if __name__ == "__main__": you'll need to import them as:
+# from metapop.app_helper import (
+#     get_scenario_results,
+#     read_parameters,
+#     get_default_full_parameters,
+#     get_show_parameter_mapping,
+#     get_advanced_parameter_mapping,
+#     get_outcome_options,
+#     get_outcome_mapping,
+#     get_parms_from_table,
+#     correct_parameter_types,
+#     add_daily_incidence,
+#     get_interval_results,
+#     create_chart,
+#     calculate_outbreak_summary,
+#     get_hospitalizations,
+# )
+### note: this is not recommended use within a file that is imported as a package module, but it can be useful for testing purposes
+
+__all__ = [
+    "app",
+]
 
 
 def app(replicates=20):
@@ -192,27 +235,27 @@ def app(replicates=20):
     interval_results1 = interval_results1.rename(app_column_mapping)
     interval_results2 = interval_results2.rename(app_column_mapping)
 
-    # set up the color scale
-    domain = [str(i) for i in range(len(groups))]
-    group_labels = ["General population", "Small population 1", "Small population 2"]
+    # # set up the color scale
+    # domain = [str(i) for i in range(len(groups))]
+    # group_labels = ["General population", "Small population 1", "Small population 2"]
 
-    # plot with Altair
-    if len(groups) == 3:
-        color_scale = alt.Scale(
-            domain=[str(i) for i in range(len(results1["group"].unique()))],
-            range = [
-                "#20419a", # blue
-                "#cf4828", # red
-                "#f78f47", # orange
-            ]
-        )
-    elif len(groups) == 1:
-        color_scale = alt.Scale(
-            domain=[str(i) for i in range(len(results1["group"].unique()))],
-            range = [
-                "#068482", # green
-            ]
-        )
+    # # plot with Altair
+    # if len(groups) == 3:
+    #     color_scale = alt.Scale(
+    #         domain=[str(i) for i in range(len(results1["group"].unique()))],
+    #         range = [
+    #             "#20419a", # blue
+    #             "#cf4828", # red
+    #             "#f78f47", # orange
+    #         ]
+    #     )
+    # elif len(groups) == 1:
+    #     color_scale = alt.Scale(
+    #         domain=[str(i) for i in range(len(results1["group"].unique()))],
+    #         range = [
+    #             "#068482", # green
+    #         ]
+    #     )
     if outcome not in ["I", "Y", "inc", "Winc", "WCI"]:
         print("outcome not available yet, defaulting to Cumulative Daily Incidence")
         outcome = "Y"
@@ -220,13 +263,13 @@ def app(replicates=20):
     if outcome_option in ['Daily Infections', 'Daily Incidence', 'Cumulative Daily Incidence']:
         alt_results1 = results1
         alt_results2 = results2
-        min_y, max_y = 0, max(results1[outcome].max(), results2[outcome].max())
+        # min_y, max_y = 0, max(results1[outcome].max(), results2[outcome].max())
         x = "t:Q"
         time_label = "Time (days)"
     elif outcome_option in ['Weekly Incidence', 'Weekly Cumulative Incidence']:
         alt_results1 = interval_results1
         alt_results2 = interval_results2
-        min_y, max_y = 0, max(interval_results1[outcome].max(), interval_results2[outcome].max())
+        # min_y, max_y = 0, max(interval_results1[outcome].max(), interval_results2[outcome].max())
         x = "interval_t:Q"
         time_label = "Time (weeks)"
 
@@ -324,8 +367,3 @@ def app(replicates=20):
             columns[0].error(f"{scenario}: {outbreaks}/{n_reps} ({outbreak_prop}) simulations had >= {threshold} cases total with an average {infections} infections and {hospitalizations} hospitalizations across all simulations.")
         else:
             columns[1].info(f"{scenario}: {outbreaks}/{n_reps} ({outbreak_prop}) simulations had >= {threshold} cases total with an average {infections} infections and {hospitalizations} hospitalizations across all simulations.")
-
-
-
-if __name__ == "__main__":
-    app()

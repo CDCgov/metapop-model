@@ -1,6 +1,22 @@
 import numpy as np
 import numpy.linalg as la
 
+__all__ = [
+    "get_percapita_contact_matrix",
+    "get_r0",
+    "rescale_beta_matrix",
+    "calculate_beta_factor",
+    "get_r0_one_group",
+    "construct_beta",
+    "initialize_population",
+    "get_infected",
+    "calculate_foi",
+    "rate_to_frac",
+    "time_to_rate",
+    "build_vax_schedule",
+    "vaccinate_groups",
+]
+
 def get_percapita_contact_matrix(parms):
     """
     Calculate the per capita contact matrix based on the total contacts, average per capita degrees per population, and the population sizes for a 3-group population.
@@ -111,7 +127,6 @@ def get_r0_one_group(k, gamma):
     Returns:
         float: R0, contacts per day / recovery rate
     """
-
     X = (k[0] / gamma)
 
     return X
@@ -139,6 +154,7 @@ def construct_beta(parms):
     else:
         assert parms['n_groups'] == 1, "Setups only designed for one or three groups currently."
         # skip per capita contact matrix building, get R0 directly
+
         r0_base = get_r0_one_group(parms["k_i"], parms["gamma"])
         beta_factor = calculate_beta_factor(parms["desired_r0"], r0_base)
         beta_scaled = rescale_beta_matrix(parms["k_i"][0], beta_factor)
@@ -320,25 +336,3 @@ def vaccinate_groups(groups, u, t, vaccination_uptake_schedule, parms):
         new_vaccinated[vaccinated_group] = S_doses
 
     return new_vaccinated
-
-def run_model(model, u, t, steps, groups, S, V, E1, E2, I1, I2, R, Y, X):
-    """
-    Update the population arrays based on the SEIR model.
-
-    Args:
-        model: The SEIR model instance.
-        u: The initial state.
-        t: The time array.
-        steps: The number of time steps.
-        groups: The number of groups.
-        S, V, E1, E2, I1, I2, R, Y, X: The population arrays to be updated. Y is a infection counter (counted when they become infectious I1). X is vaccine uptake counter.
-
-    Returns:
-        S, V, E1, E2, I1, I2, R, Y, X, u
-    """
-    for j in range(1, steps):
-        u = model.seirmodel(u, t[j])
-        for group in range(groups):
-            S[j, group], V[j, group], E1[j, group], E2[j, group], I1[j, group], I2[j, group], R[j, group], Y[j, group], X[j, group] = u[group]
-
-    return S, V, E1, E2, I1, I2, R, Y, X, u

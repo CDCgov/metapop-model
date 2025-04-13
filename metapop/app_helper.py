@@ -5,10 +5,46 @@ import polars as pl
 import altair as alt
 import griddler
 import griddler.griddle
-from metapop.model import *
-from metapop.helper import *
 import copy
+# import what's needed from other metapop modules
+from .sim import simulate
 
+# if you want to use methods from metapop in this file under
+# if __name__ == "__main__": you'll need to import them as:
+# from metapop.sim import simulate
+### note: this is not recommended use within a file that is imported as a package module, but it can be useful for testing purposes
+
+__all__ = [
+    "get_scenario_results",
+    "read_parameters",
+    "get_default_full_parameters",
+    "get_default_show_parameters_table",
+    "get_advanced_parameters_table",
+    "get_show_parameter_mapping",
+    "get_advanced_parameter_mapping",
+    "get_outcome_options",
+    "get_outcome_mapping",
+    "get_list_keys",
+    "get_keys_in_list",
+    "repack_list_parameters",
+    "app_editors",
+    "get_min_values",
+    "get_max_values",
+    "get_step_values",
+    "get_helpers",
+    "get_formats",
+    "get_parms_from_table",
+    "update_parms_from_table",
+    "correct_parameter_types",
+    "add_daily_incidence",
+    "get_interval_cumulative_incidence",
+    "get_interval_results",
+    "create_chart",
+    "calculate_outbreak_summary",
+    "get_hospitalizations",
+]
+
+### Methods to simulate the model for the app ###
 def get_scenario_results(parms):
     """
     Run simulations for a grid set of parameters and return the combined results Dataframe.

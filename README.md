@@ -1,4 +1,4 @@
-# Sandbox for a stochastic SEIR model in python
+# A stochastic SEIR metapopulation model in python
 
 ⚠️ This is a work in progress
 
@@ -6,30 +6,33 @@
 
 * Stochastic SEIRV model
 * Flexible numbers of groups (e.g., age classes or connected populations) that is changeable using the config
-* Basic example of how to do a calibration
+* Intervention strategies common for measles: pre-introduction vaccination, active vaccination, and isolation of infectious populations
+* An interactive widget built in streamlit
 
 ## Getting started
 
-* Enable poetry with `poetry install` and then start a poetry environment by activating the virtual environment: `source $(poetry env info --path)/bin/activate`
-* Run the example with `python scripts/simulate.py`, this will produce output in output folder.  Plots for this can be made with `python scripts/make_plots.py`
-* Run basic calibration in `run_abc.py`, note that `make_plots.qmd` created and saved a fake dataset to use in `run_abc.csv` (included in repo to make it easier to get started here), also the calibration is for a value of beta matrix (with a uniform prior from 0.1, 0.5), can easily change code to calibrate another parameter
-* Make plots and visualizations with `make_plots.qmd`
-* Data for `scripts/make_plots.py` are in Sharepoint > Crosscutting > response data folder > ABM inputs
+* Enable [poetry](https://python-poetry.org/) with `poetry install` and then start a poetry environment by activating the virtual environment: `source $(poetry env info --path)/bin/activate`
+* Run the example in `scripts/connectivity` exploring the impact of changing connectivity patterns and initial vaccine coverage with `python scripts/connectivity/simulate.py`. This will produce output in the `output` folder. Visualization and summary statistic tables for these results can be made with `Rscript scripts/connectivity/make_plots.R`.
+* We also provide examples exploring other features in the model. The subfolder `scripts/interventions` contains an example exploring the impact of active vaccination and isolation in 3 connection populations. The subfolder `scripts/onepop` contains an example exploring these interventions in a single population.
 
-## Running with flexible number of compartments
 
-* Instead of two groups (e.g., age classes), you can easily change the number of groups by changing the config file (`scripts/config.yaml`)
-* For example, if we wanted 6 groups, you could specify   `n_groups: 6`  and then change `N: [100, 200, 300, 400, 500, 600]` (i.e., a list of 6 population sizes), same for `I0: [1, 0, 0, 0, 0, 0]`, and then the beta_matrix would have to be a matrix 6x6. In the future, it would be good to have funcitonality to read beta matrix from a csv.
+## Running with a flexible number of compartments
+
+* The `metapop` package can currently support the modeling of infectious disease transmission in 1 or 3 groups. Groups represent populations with different epidemiologically relevant characteristics such as age classes or connected populations. To model a single population or 3 connected populations, you can change the number of groups by modifying the config file (`scripts/config.yaml`).
+* For example, if we wanted 3 groups, we could specify `n_groups: 3` and then modify other parameters defining conditions for the populations: `popsizes: [300, 200, 100]` for population sizes, `I0: [0, 5, 2]` to specify the number of initial infected people in each population, `k_i: [10, 15, 10]` for the average degree per person in each population, etc. The parameters `k_g1`, `k_g2`, `k_21` define connectivity rates between groups: `k_ij` is the number of contacts the average person in group j makes with others in group i. These parameters define the contact matrix between populations (constructed through the method `get_per_capita_contact_matrix`).
+* Similarly for a single population, we can build the model by setting `n_groups: 1`, `popsizes: [5000]` for the population size, `I0: 5`, `k_i: [10]`, etc. In this case, the contact matrix is equivalent to `k_i`.
+* As a work in progress, we are working to add functionality that will allow users to give a contact matrix of their choice and model a flexible number of groups that mapped to the contact matrix.
+
 
 ## Local app
-You can run the app locally using Streamlit with `streamlit run metapop/app.py`
+You can run the app locally using Streamlit with `streamlit run metapop/launch_app.py`. To run the advanced app with 3 connected populations, use `streamlit run metapop/launch_app.py -- --app_version advanced_app`.
 
 
 ## Project Admin
 
-Paige Miller, yub1@cdc.gov (CDC/IOD/ORR/CFA)
-Theresa Sheets, utg8@cdc.gov (CDC/IOD/ORR/CFA)
-Dina Mistry, uqx8@cdc.gov (CDC/IOD/ORR/CFA)
+* Paige Miller, yub1@cdc.gov (CDC/IOD/ORR/CFA)
+* Theresa Sheets, utg8@cdc.gov (CDC/IOD/ORR/CFA)
+* Dina Mistry, uqx8@cdc.gov (CDC/IOD/ORR/CFA)
 
 ## General Disclaimer
 This repository was created for use by CDC programs to collaborate on public health related projects in support of the [CDC mission](https://www.cdc.gov/about/organization/mission.htm).  GitHub is not hosted by the CDC, but is a third party website used by CDC and its partners to share information and collaborate on software. CDC use of GitHub does not imply an endorsement of any one particular service, product, or enterprise.

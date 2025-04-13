@@ -2,8 +2,10 @@ import os
 import yaml
 import numpy as np
 from numpy.testing import assert_allclose
+from metapop.helper import *
 from metapop.model import *
-from metapop.helper import* # noqa: F405
+from metapop.sim import * # noqa: F405
+
 
 def test_get_percapita_contact_matrix():
     # Define the parameters
