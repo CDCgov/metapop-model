@@ -371,11 +371,10 @@ def repack_list_parameters(parms, updated_parms, keys_in_list):
 
 ### Methods to create user inputs interfaces ###
 def app_editors(element, scenario_name, parms,
-                ordered_keys, list_keys, slider_keys,
-                widget_types,
+                ordered_keys, list_keys,
                 show_parameter_mapping,
-                min_values, max_values, steps, helpers, formats, element_keys,
-                disabled=False):
+                widget_types, min_values, max_values, steps, helpers,
+                formats, element_keys, disabled=False):
     """
     Create the sidebar for editing parameters.
 

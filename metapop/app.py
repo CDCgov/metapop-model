@@ -99,7 +99,9 @@ def app(replicates=20):
 
         edited_parms = app_editors(
             col0, subheader, parms, shared_keys, shared_list_keys,
-            shared_slider_keys, widget_types, show_parameter_mapping,
+            # shared_slider_keys, widget_types,
+            show_parameter_mapping,
+            widget_types,
             min_values, max_values, steps, helpers, formats, keys0
         )
 
@@ -146,13 +148,18 @@ def app(replicates=20):
         # show the parameters for scenario 1 but do not allow editing
         edited_parms1 = app_editors(
             col1, "Scenario 1 (Baseline)", edited_parms, ordered_keys, list_parameter_keys,
-            slider_keys, widget_types, show_parameter_mapping,
+            # slider_keys, widget_types,
+            show_parameter_mapping,
+            widget_types,
             min_values, max_values, steps, helpers, formats, keys1, disabled=True
         )
 
         edited_parms2 = app_editors(
             col2, "Scenario 2", edited_parms, ordered_keys, list_parameter_keys,
-            slider_keys, widget_types, show_parameter_mapping, min_values, max_values,
+            # slider_keys, widget_types,
+            show_parameter_mapping,
+            widget_types,
+            min_values, max_values,
             steps, helpers, formats, keys2
         )
 
@@ -178,14 +185,20 @@ def app(replicates=20):
             # show the parameters for scenario 1 but do not allow editing
             edited_advanced_parms1 = app_editors(
                 adv_col1, "Scenario 1 (Baseline)", edited_parms1, advanced_ordered_keys,
-                advanced_list_keys, advanced_slider_keys, widget_types, advanced_parameter_mapping,
+                advanced_list_keys,
+                # advanced_slider_keys, widget_types,
+                advanced_parameter_mapping,
+                widget_types,
                 min_values, max_values, steps, helpers, formats, keys1,
                 disabled=True
             )
 
             edited_advanced_parms2 = app_editors(
                 adv_col2, "Scenario 2", edited_parms2, advanced_ordered_keys,
-                advanced_list_keys, advanced_slider_keys, widget_types, advanced_parameter_mapping,
+                advanced_list_keys,
+                # advanced_slider_keys, widget_types,
+                advanced_parameter_mapping,
+                widget_types,
                 min_values, max_values, steps, helpers, formats, keys2
             )
     # get the selected outcome from the sidebar

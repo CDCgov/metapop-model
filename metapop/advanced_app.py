@@ -72,19 +72,25 @@ def advanced_app(replicates=20):
                               'vaccine_uptake_doses',
                               ]
 
-        slide_keys = ['desired_r0','pop_sizes', 'I0']
+        # slide_keys = ['desired_r0','pop_sizes', 'I0']
         # number of scenarios
         col1, col2 = st.columns(2)
 
         edited_parms1 = app_editors(
             col1, "Scenario 1", parms, ordered_keys, list_parameter_keys,
-            slide_keys, widget_types, show_parameter_mapping, min_values, max_values,
+            # slide_keys, widget_types,
+            show_parameter_mapping,
+            widget_types,
+            min_values, max_values,
             steps, helpers, formats, keys1
         )
 
         edited_parms2 = app_editors(
             col2, "Scenario 2", parms, ordered_keys, list_parameter_keys,
-            slide_keys, widget_types, show_parameter_mapping, min_values, max_values,
+            # slide_keys, widget_types,
+            show_parameter_mapping,
+            widget_types,
+            min_values, max_values,
             steps, helpers, formats, keys2
         )
 
@@ -92,19 +98,25 @@ def advanced_app(replicates=20):
             # try to place two sliders side by side
             advanced_ordered_keys = ["desired_r0", "latent_duration", "infectious_duration", "k_g1", "k_21", "k_i"]
             advanced_list_keys = ["k_i"]
-            advanced_slide_keys = ["latent_duration", "infectious_duration"]
+            # advanced_slide_keys = ["latent_duration", "infectious_duration"]
 
             adv_col1, adv_col2 = st.columns(2)
 
             edited_advanced_parms1 = app_editors(
                 adv_col1, "Scenario 1", edited_parms1, advanced_ordered_keys,
-                advanced_list_keys, advanced_slide_keys, widget_types, advanced_parameter_mapping,
+                advanced_list_keys,
+                # advanced_slide_keys, widget_types,
+                advanced_parameter_mapping,
+                widget_types,
                 min_values, max_values, steps, helpers, formats, keys1
             )
 
             edited_advanced_parms2 = app_editors(
                 adv_col2, "Scenario 2", edited_parms2, advanced_ordered_keys,
-                advanced_list_keys, advanced_slide_keys, widget_types,advanced_parameter_mapping,
+                advanced_list_keys,
+                # advanced_slide_keys, widget_types,
+                advanced_parameter_mapping,
+                widget_types,
                 min_values, max_values, steps, helpers, formats, keys2
             )
     # get the selected outcome from the sidebar
