@@ -14,13 +14,13 @@ baseline_parameters:
   vaccine_uptake_duration_days: 0
   total_vaccine_uptake_doses: 0 # number of doses
   vaccinated_group: 2
-  isolation_success: 0.0
+  isolation_success: 0.75 # informed by 2017 Minnesota study
   symptomatic_isolation_start_day: 365
   symptomatic_isolation_duration_days: 365
   pre_rash_isolation_success: 0.0
   pre_rash_isolation_start_day: 365
   pre_rash_isolation_duration_days: 0
-  pre_rash_isolation_success: 0.0
+  pre_rash_isolation_success: 0.10 # not informed by data
   IHR: 0.2 # Infection Hospitalization Rate
   tf: 365        # total time modeled
   n_replicates: 20

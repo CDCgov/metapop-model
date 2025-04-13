@@ -424,6 +424,17 @@ def app_editors(element, scenario_name, parms,
                                         format=formats[key],
                                         key=element_keys[key],
                                         disabled=disabled)
+                elif widget_types[key] == 'toggle':
+                    value = st.toggle(show_parameter_mapping[key],
+                                      value=[True if parms[key] > 0 else False],
+                                      help=helpers[key],
+                                      key=element_keys[key],
+                                      disabled=disabled)
+                    # if toggle is turned on, set value to the original value for the model
+                    if value is True:
+                        value = parms[key]
+                    if value is False:
+                        value = 0
                 else:
                     pass
                 edited_parms[key] = value
@@ -449,6 +460,17 @@ def app_editors(element, scenario_name, parms,
                                             format=formats[key],
                                             key=element_keys[key][index],
                                             disabled=disabled)
+                    elif widget_types[key] == 'toggle':
+                        value = st.toggle(show_parameter_mapping[f"{key}_{index}"],
+                                          value=[True if parms[key][index] > 0 else False],
+                                          help=helpers[key][index],
+                                          key=element_keys[key][index],
+                                          disabled=disabled)
+                        # if toggle is turned on, set value to the original value for the model
+                        if value is True:
+                            value = parms[key][index]
+                        if value is False:
+                            value = 0
                     else:
                         pass
                     edited_parms[key][index] = value
@@ -481,10 +503,10 @@ def get_widget_types(widget_types=None):
             vaccine_uptake_duration_days="slider",
             total_vaccine_uptake_doses="slider",
             vaccinated_group="number_input",
-            isolation_success = "slider",
+            isolation_success = "toggle",
             symptomatic_isolation_start_day = "slider",
             symptomatic_isolation_duration_days = "slider",
-            pre_rash_isolation_success = "slider",
+            pre_rash_isolation_success = "toggle",
             pre_rash_isolation_start_day = "slider",
             pre_rash_isolation_duration_days = "slider",
             tf="number_input"
