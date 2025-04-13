@@ -1,3 +1,4 @@
+# flake8: noqa
 # This file is part of the metapop package. It contains the Streamlit app for
 # the metapopulation model
 import streamlit as st
@@ -40,6 +41,8 @@ from .app_helper import (
 #     add_daily_incidence,
 #     get_interval_results,
 #     create_chart,
+#     calculate_outbreak_summary,
+#     get_hospitalizations,
 # )
 ### note: this is not recommended use within a file that is imported as a package module, but it can be useful for testing purposes
 
