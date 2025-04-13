@@ -372,6 +372,7 @@ def repack_list_parameters(parms, updated_parms, keys_in_list):
 ### Methods to create user inputs interfaces ###
 def app_editors(element, scenario_name, parms,
                 ordered_keys, list_keys, slider_keys,
+                widget_types,
                 show_parameter_mapping,
                 min_values, max_values, steps, helpers, formats, element_keys,
                 disabled=False):
@@ -404,7 +405,8 @@ def app_editors(element, scenario_name, parms,
 
         for key in ordered_keys:
             if key not in list_keys:
-                if key in slider_keys:
+                # if key in slider_keys:
+                if widget_types[key] == 'slider':
                     value = st.slider(show_parameter_mapping[key],
                                       min_value=min_values[key], max_value=max_values[key],
                                       value=parms[key],
@@ -414,7 +416,7 @@ def app_editors(element, scenario_name, parms,
                                       key=element_keys[key],
                                       disabled=disabled
                                       )
-                else:
+                elif widget_types[key] == 'number_input':
                     value = st.number_input(show_parameter_mapping[key],
                                         min_value=min_values[key], max_value=max_values[key],
                                         value=parms[key],
@@ -423,10 +425,13 @@ def app_editors(element, scenario_name, parms,
                                         format=formats[key],
                                         key=element_keys[key],
                                         disabled=disabled)
+                else:
+                    pass
                 edited_parms[key] = value
             if key in list_keys:
                 for index in range(len(parms[key])):
-                    if key in slider_keys:
+                    # if key in slider_keys:
+                    if widget_types[key] == 'slider':
                         value = st.slider(show_parameter_mapping[f"{key}_{index}"],
                                             min_value=min_values[key][index], max_value=max_values[key][index],
                                             value=parms[key][index],
@@ -435,7 +440,8 @@ def app_editors(element, scenario_name, parms,
                                             format=formats[key],
                                             key=element_keys[key][index],
                                             disabled=disabled)
-                    else:
+                    # else:
+                    elif widget_types[key] == 'number_input':
                         value = st.number_input(show_parameter_mapping[f"{key}_{index}"],
                                             min_value=min_values[key][index], max_value=max_values[key][index],
                                             value=parms[key][index],
@@ -444,6 +450,8 @@ def app_editors(element, scenario_name, parms,
                                             format=formats[key],
                                             key=element_keys[key][index],
                                             disabled=disabled)
+                    else:
+                        pass
                     edited_parms[key][index] = value
 
     return edited_parms
@@ -472,14 +480,14 @@ def get_widget_types(widget_types=None):
             initial_vaccine_coverage = "slider",
             vaccine_uptake_start_day="slider",
             vaccine_uptake_duration_days="slider",
-            total_vaccine_uptake_doses="number_input",
+            total_vaccine_uptake_doses="slider",
             vaccinated_group="number_input",
             isolation_success = "slider",
-            symptomatic_isolation_start_day = "number_input",
-            symptomatic_isolation_duration_days = "number_input",
+            symptomatic_isolation_start_day = "slider",
+            symptomatic_isolation_duration_days = "slider",
             pre_rash_isolation_success = "slider",
-            pre_rash_isolation_start_day = "number_input",
-            pre_rash_isolation_duration_days = "number_input",
+            pre_rash_isolation_start_day = "slider",
+            pre_rash_isolation_duration_days = "slider",
             tf="number_input"
     )
     if widget_types is not None and isinstance(widget_types, dict):
