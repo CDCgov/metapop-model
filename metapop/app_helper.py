@@ -381,18 +381,20 @@ def app_editors(element, scenario_name, parms,
 
     Args:
         element (st container object): The Streamlit element to place the sidebar in.
-        scenario_name: The name of the scenario.
-        parms: The parameters to edit.
-        ordered_keys: The keys of the parameters to edit.
-        list_keys: The keys of the parameters that are lists.
-        slider_keys: The keys of the parameters that are sliders.
-        show_parameter_mapping: The mapping of parameter names to display names.
-        min_values: The minimum values for the parameters.
-        max_values: The maximum values for the parameters.
-        steps: The step sizes for the parameters.
-        helpers: The help text for the parameters.
-        formats: The formats for the parameters.
-        element_keys: The keys for the Streamlit elements.
+        scenario_name (str): The name of the scenario.
+        parms (dict): The parameters to edit.
+        ordered_keys (list): An ordered list of the parameters to edit.
+        list_keys (list): The keys of the parameters that are lists.
+        slider_keys (list): The keys of the parameters that are sliders.
+        widget_types (dict): The types of widgets for the parameters.
+        show_parameter_mapping (dict): The mapping of parameter names to display names.
+        min_values (dict): The minimum values for the parameters.
+        max_values (dict): The maximum values for the parameters.
+        steps (dict): The step sizes for the parameters.
+        helpers (dict): The help text for the parameters.
+        formats (dict): The formats for the parameters.
+        element_keys (dict): The keys for the Streamlit elements.
+        disabled (bool): Whether the widgets should be disabled. Defaults to False.
 
     Returns:
         edited_parms: The edited parameters.
@@ -459,7 +461,7 @@ def app_editors(element, scenario_name, parms,
 
 def get_widget_types(widget_types=None):
     """
-    Get the types of widgets for the app parameters.
+    Get the types of widgets for each of the app parameters.
 
     Args:
         widget_types (dict): Optional widget types dictionary.

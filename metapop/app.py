@@ -66,7 +66,7 @@ def app(replicates=20):
             help="Enter model parameters for each scenario. Hover over the ? for more information about each parameter.",
         )
 
-        widget_types = get_widget_types()
+        widget_types = get_widget_types() # defines the type of widget for each parameter
         min_values = get_min_values()
         max_values = get_max_values()
         steps = get_step_values()
