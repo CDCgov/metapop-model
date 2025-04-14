@@ -54,6 +54,24 @@ def test_get_r0():
     r0 = get_r0(beta_matrix, gamma, pop_sizes)
     assert np.isclose(r0, expected_r0), f"Expected {expected_r0}, but got {r0}"
 
+def test_get_r0_one_group():
+    parms = dict(
+        k_i = np.array([10.0]),
+        infectious_duration = 9.0,
+        desired_r0 = 2.0,
+        n_groups = 1,
+    )
+    parms["gamma"] = time_to_rate(parms["infectious_duration"])
+    r0_base = get_r0_one_group(parms["k_i"], parms["gamma"])
+    beta_factor = calculate_beta_factor(parms["desired_r0"], r0_base)
+    beta_scaled = rescale_beta_matrix(parms["k_i"][0], beta_factor)
+    expected_r0 = parms['desired_r0']
+
+    r0 = get_r0_one_group([beta_scaled], parms["gamma"])
+    assert np.isclose(r0, expected_r0), f"Expected {expected_r0}, but got {r0}"
+
+
+
 
 def test_construct_beta():
     parms = {
