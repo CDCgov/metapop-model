@@ -70,6 +70,7 @@ def test_get_list_keys():
 
 
 def test_get_min_values():
+    """Test the get_min_values function."""
     min_values = get_min_values()
     assert isinstance(min_values, dict), "Expected parameters to be a dictionary"
     expected_I0 = [0, 0, 0]
@@ -89,6 +90,7 @@ def test_get_min_values():
 
 
 def test_get_max_values():
+    """Test the get_max_values function."""
     max_values = get_max_values()
     assert isinstance(max_values, dict), "Expected parameters to be a dictionary"
     expected_I0 = [100, 100, 100]
@@ -105,3 +107,20 @@ def test_get_max_values():
         f"Expected max pop_sizes to be {parms['pop_sizes']}, but got {max_values['pop_sizes']}"
     assert max_values["isolation_success"] == parms["isolation_success"], \
         f"Expected max isolation_success to be {parms['isolation_success']}, but got {max_values['isolation_success']}"
+
+
+def test_get_step_values():
+    """Test the get_step_values function."""
+    step_values = get_step_values()
+    assert isinstance(step_values, dict), "Expected parameters to be a dictionary"
+    expected_I0 = 1
+    assert step_values["I0"] == expected_I0, f"Expected step I0 values to be {expected_I0}, but got {step_values['I0']}"
+
+    # assert that when you provide a dictionary, the returned step values are updated
+    parms = dict(
+        pop_sizes = 50,
+    )
+    step_values = get_step_values(parms)
+    assert isinstance(step_values, dict), "Expected parameters to be a dictionary"
+    assert step_values["pop_sizes"] == parms["pop_sizes"], \
+        f"Expected step pop_sizes to be {parms['pop_sizes']}, but got {step_values['pop_sizes']}"
