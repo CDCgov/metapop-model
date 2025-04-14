@@ -1,5 +1,17 @@
 from metapop.app_helper import *
 
+
+def test_get_scenario_results():
+    assert 1 == 1, "Test not implemented yet"
+
+
+
+
+
+
+
+
+
 def test_get_list_keys():
     parms = dict(
         pop_sizes=[100, 200, 300],
