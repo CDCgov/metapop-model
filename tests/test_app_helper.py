@@ -124,3 +124,37 @@ def test_get_step_values():
     assert isinstance(step_values, dict), "Expected parameters to be a dictionary"
     assert step_values["pop_sizes"] == parms["pop_sizes"], \
         f"Expected step pop_sizes to be {parms['pop_sizes']}, but got {step_values['pop_sizes']}"
+
+
+def test_get_helpers():
+    """Test the get_helpers function."""
+    helpers = get_helpers()
+    assert isinstance(helpers, dict), "Expected helpers to be a dictionary"
+    expected_r0 = "Basic reproduction number R0. R0 cannot be negative"
+    assert helpers["desired_r0"] == expected_r0, f"Expected R0 helper to be {expected_r0}, but got {helpers['desired_r0']}"
+
+    # assert that when you provide a dictionary, the returned helpers are updated
+    parms = dict(
+        latent_duration = "Latent duration in days."
+    )
+    helpers = get_helpers(parms)
+    assert isinstance(helpers, dict), "Expected helpers to be a dictionary"
+    assert helpers["latent_duration"] == parms["latent_duration"], \
+        f"Expected latent_duration helper to be {parms['latent_duration']}, but got {helpers['latent_duration']}"
+
+
+def test_get_formats():
+    """Test the get_formats function."""
+    formats = get_formats()
+    assert isinstance(formats, dict), "Expected formats to be a dictionary"
+    expected_R0 = "%.1f"
+    assert formats["desired_r0"] == expected_R0, f"Expected R0 string format to be {expected_R0}, but got {formats['desired_r0']}"
+
+    # assert that when you provide a dictionary, the returned formats are updated
+    parms = dict(
+        latent_duration = "%.2f",
+    )
+    formats = get_formats(parms)
+    assert isinstance(formats, dict), "Expected formats to be a dictionary"
+    assert formats["latent_duration"] == parms["latent_duration"], \
+        f"Expected latent_duration string format to be {parms['latent_duration']}, but got {formats['latent_duration']}"
