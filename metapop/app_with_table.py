@@ -175,7 +175,7 @@ def app_with_table(replicates=20):
         print("outcome not available yet, defaulting to Y")
         outcome = "Y"
 
-    if outcome_option in ['Daily Infections', 'Daily Incidence', 'Cumulative Daily Incidence']:
+    if outcome_option in ['Daily Infections', 'Daily Incidence', 'Daily Cumulative Incidence']:
         alt_results1 = results1
         alt_results2 = results2
         min_y, max_y = 0, max(results1[outcome].max(), results2[outcome].max())
