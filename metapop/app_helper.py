@@ -33,6 +33,8 @@ __all__ = [
     "get_step_values",
     "get_helpers",
     "get_formats",
+    "get_base_widget_idkeys",
+    "get_widget_idkeys",
     "get_parms_from_table",
     "update_parms_from_table",
     "correct_parameter_types",
