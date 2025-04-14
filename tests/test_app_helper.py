@@ -58,7 +58,6 @@ def test_get_outcome_mapping():
         f"Expected keys {expected_keys} to be in mapping, but got {list(outcome_mapping.keys())}"
 
 
-
 def test_get_list_keys():
     parms = dict(
         pop_sizes=[100, 200, 300],
@@ -68,3 +67,41 @@ def test_get_list_keys():
     list_keys = get_list_keys(parms)
 
     assert list_keys == ['pop_sizes'], f"Expected ['pop_sizes'], but got {list_keys}"
+
+
+def test_get_min_values():
+    min_values = get_min_values()
+    assert isinstance(min_values, dict), "Expected parameters to be a dictionary"
+    expected_I0 = [0, 0, 0]
+    assert min_values["I0"] == expected_I0, f"Expected min I0 values to be {expected_I0}, but got {min_values['I0']}"
+
+    # assert that when you provide a dictionary, the returned minimum values are updated
+    parms = dict(
+        pop_sizes = [10000, 50, 80],
+        latent_duration = 5.,
+    )
+    min_values = get_min_values(parms)
+    assert isinstance(min_values, dict), "Expected parameters to be a dictionary"
+    assert min_values["pop_sizes"] == parms["pop_sizes"], \
+        f"Expected min pop_sizes to be {parms['pop_sizes']}, but got {min_values['pop_sizes']}"
+    assert min_values["latent_duration"] == parms["latent_duration"], \
+        f"Expected min latent_duration to be {parms['latent_duration']}, but got {min_values['latent_duration']}"
+
+
+def test_get_max_values():
+    max_values = get_max_values()
+    assert isinstance(max_values, dict), "Expected parameters to be a dictionary"
+    expected_I0 = [100, 100, 100]
+    assert max_values["I0"] == expected_I0, f"Expected max I0 values to be {expected_I0}, but got {max_values['I0']}"
+
+    # assert that when you provide a dictionary, the returned maximum values are updated
+    parms = dict(
+        pop_sizes = [50_000, 5_000, 8_000],
+        isolation_success = 0.85,
+    )
+    max_values = get_max_values(parms)
+    assert isinstance(max_values, dict), "Expected parameters to be a dictionary"
+    assert max_values["pop_sizes"] == parms["pop_sizes"], \
+        f"Expected max pop_sizes to be {parms['pop_sizes']}, but got {max_values['pop_sizes']}"
+    assert max_values["isolation_success"] == parms["isolation_success"], \
+        f"Expected max isolation_success to be {parms['isolation_success']}, but got {max_values['isolation_success']}"
