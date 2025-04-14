@@ -54,6 +54,7 @@ def test_get_r0():
     r0 = get_r0(beta_matrix, gamma, pop_sizes)
     assert np.isclose(r0, expected_r0), f"Expected {expected_r0}, but got {r0}"
 
+
 def test_get_r0_one_group():
     parms = dict(
         k_i = np.array([10.0]),
@@ -69,8 +70,6 @@ def test_get_r0_one_group():
 
     r0 = get_r0_one_group([beta_scaled], parms["gamma"])
     assert np.isclose(r0, expected_r0), f"Expected {expected_r0}, but got {r0}"
-
-
 
 
 def test_construct_beta():
