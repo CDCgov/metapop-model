@@ -41,6 +41,7 @@ def test_get_percapita_contact_matrix():
     ])
     assert np.array_equal(percapita_contacts, expected_percapita_contacts), f"Expected {expected_percapita_contacts}, but got {percapita_contacts} when using different degree for each subgroup"
 
+
 def test_get_r0():
     # keeling and rohani example
     beta_matrix = np.array([
@@ -52,6 +53,7 @@ def test_get_r0():
     expected_r0 = 2.001331855134916
     r0 = get_r0(beta_matrix, gamma, pop_sizes)
     assert np.isclose(r0, expected_r0), f"Expected {expected_r0}, but got {r0}"
+
 
 def test_construct_beta():
     parms = {
@@ -142,6 +144,7 @@ def test_calculate_foi_0():
     expected_foi = 0
     assert np.isclose(foi, expected_foi), f"Expected {expected_foi}, but got {foi}"
 
+
 def test_calculate_foi():
     # Define the parameters
     beta = np.array([[0.1, 0.2], [0.3, 0.4]])
@@ -155,6 +158,7 @@ def test_calculate_foi():
     # Check the result
     expected_foi = np.dot(beta[target_group], I_g / pop_sizes)
     assert np.isclose(foi, expected_foi), f"Expected {expected_foi}, but got {foi}"
+
 
 def test_active_vaccination():
     parms = {
@@ -188,7 +192,6 @@ def test_active_vaccination():
     assert uptake[parms["vaccinated_group"]] == u[parms['vaccinated_group']][0], "Group 2 uptake is size of Susceptible population"
 
 
-
 def test_get_infected():
     # Define the initial state
     u = [
@@ -219,6 +222,7 @@ def test_get_infected():
     # Check the results
     expected_infected = np.array([3, 7])  # Sum of I1 and I2 for each group
     assert np.array_equal(infected, expected_infected), f"Expected {expected_infected}, but got {infected}"
+
 
 def test_symptomatic_isolation():
     parms = {
@@ -270,6 +274,7 @@ def test_symptomatic_isolation():
     # Check the results, we should now be back to pre-isolation values
     assert np.array_equal(infected3, expected_infected), f"Expected {expected_infected}, but got {infected3}"
 
+
 def test_pre_rash_isolation():
     parms = {
         "symptomatic_isolation_start_day": 400,
@@ -319,6 +324,7 @@ def test_pre_rash_isolation():
 
     # Check the results, we should now be back to pre-isolation values
     assert np.array_equal(infected3, expected_infected), f"Expected {expected_infected}, but got {infected3}"
+
 
 def test_pre_post_isolation():
     parms = {
@@ -372,7 +378,6 @@ def test_pre_post_isolation():
     assert np.array_equal(infected3, expected_infected), f"Expected {expected_infected}, but got {infected3}"
 
 
-
 def test_rate_to_frac():
     # Define the rate
     rate = 0.0 # never happens
@@ -383,6 +388,7 @@ def test_rate_to_frac():
     # Check the result
     expected_frac = 0
     assert np.isclose(frac, expected_frac), f"Expected {expected_frac}, but got {frac}"
+
 
 def test_run_model_once_with_config():
     # Define the parameters
