@@ -33,6 +33,8 @@ __all__ = [
     "get_step_values",
     "get_helpers",
     "get_formats",
+    "get_base_widget_idkeys",
+    "get_widget_idkeys",
     "get_parms_from_table",
     "update_parms_from_table",
     "correct_parameter_types",
@@ -274,7 +276,7 @@ def get_outcome_options():
     return (
             # "Weekly Infections",
             "Weekly Incidence", "Weekly Cumulative Incidence",
-            "Daily Infections", "Daily Incidence", "Cumulative Daily Incidence",
+            "Daily Infections", "Daily Incidence", "Daily Cumulative Incidence",
     )
 
 
@@ -289,7 +291,7 @@ def get_outcome_mapping():
     return {
         "Daily Infections": "I",
         "Daily Incidence": "inc",
-        "Cumulative Daily Incidence": "Y",
+        "Daily Cumulative Incidence": "Y",
         # "Weekly Infections": "WI",
         "Weekly Incidence": "Winc",
         "Weekly Cumulative Incidence": "WCI",

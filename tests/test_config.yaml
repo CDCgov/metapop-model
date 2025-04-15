@@ -2,7 +2,7 @@ baseline_parameters:
   n_groups: 3    # general, subpop1, subpop2
   desired_r0: 12.0
   k: 10
-  k_i: [10, 10, 10]
+  k_i: [10., 10., 10.]
   k_g1: 0.1
   k_g2: 0.01
   n_e_compartments: 2    # number of chained E compartments
@@ -14,14 +14,16 @@ baseline_parameters:
   vaccine_uptake_start_day: 0
   vaccine_uptake_duration_days: 0
   total_vaccine_uptake_doses: 0
+  vaccinated_group: 2
   symptomatic_isolation_start_day: 400
   symptomatic_isolation_duration_days: 100
   isolation_success: 0.0
   pre_rash_isolation_start_day: 400
   pre_rash_isolation_duration_days: 100
   pre_rash_isolation_success: 0.0
+  IHR: 0.2
   tf: 365        # total time modeled
-  n_replicates: 1000
+  n_replicates: 2
   seed: 123
   k_21: 0.01
   initial_vaccine_coverage: [0.95, 0.80, 0.80]
