@@ -11,6 +11,7 @@ from .app_helper import (
     get_outcome_options,
     get_outcome_mapping,
     app_editors,
+    get_widget_types,
     get_min_values,
     get_max_values,
     get_step_values,
@@ -41,6 +42,7 @@ def advanced_app(replicates=20):
             help="Enter model parameters for each scenario. Hover over the ? for more information about each parameter.",
         )
 
+        widget_types = get_widget_types() # defines the type of widget for each parameter
         min_values = get_min_values()
         max_values = get_max_values()
         steps = get_step_values()
@@ -51,7 +53,6 @@ def advanced_app(replicates=20):
 
         # order of parameters in the sidebar
         ordered_keys = [
-                        # 'desired_r0',
                         'pop_sizes',
                         'I0',
                         'initial_vaccine_coverage',
@@ -63,6 +64,7 @@ def advanced_app(replicates=20):
                         'symptomatic_isolation_duration_days',
                         ]
 
+        # list of parameters that are lists or arrays
         list_parameter_keys = [
                               'pop_sizes',
                               'I0',
@@ -70,39 +72,37 @@ def advanced_app(replicates=20):
                               'vaccine_uptake_doses',
                               ]
 
-        slide_keys = ['desired_r0','pop_sizes', 'I0']
         # number of scenarios
         col1, col2 = st.columns(2)
 
         edited_parms1 = app_editors(
             col1, "Scenario 1", parms, ordered_keys, list_parameter_keys,
-            slide_keys, show_parameter_mapping, min_values, max_values,
-            steps, helpers, formats, keys1
+            show_parameter_mapping, widget_types,
+            min_values, max_values, steps, helpers, formats, keys1
         )
 
         edited_parms2 = app_editors(
             col2, "Scenario 2", parms, ordered_keys, list_parameter_keys,
-            slide_keys, show_parameter_mapping, min_values, max_values,
-            steps, helpers, formats, keys2
+            show_parameter_mapping, widget_types,
+            min_values, max_values, steps, helpers, formats, keys2
         )
 
         with st.expander("Advanced options"):
             # try to place two sliders side by side
             advanced_ordered_keys = ["desired_r0", "latent_duration", "infectious_duration", "k_g1", "k_21", "k_i"]
             advanced_list_keys = ["k_i"]
-            advanced_slide_keys = ["latent_duration", "infectious_duration"]
 
             adv_col1, adv_col2 = st.columns(2)
 
             edited_advanced_parms1 = app_editors(
                 adv_col1, "Scenario 1", edited_parms1, advanced_ordered_keys,
-                advanced_list_keys, advanced_slide_keys, advanced_parameter_mapping,
+                advanced_list_keys, advanced_parameter_mapping, widget_types,
                 min_values, max_values, steps, helpers, formats, keys1
             )
 
             edited_advanced_parms2 = app_editors(
                 adv_col2, "Scenario 2", edited_parms2, advanced_ordered_keys,
-                advanced_list_keys, advanced_slide_keys, advanced_parameter_mapping,
+                advanced_list_keys, advanced_parameter_mapping, widget_types,
                 min_values, max_values, steps, helpers, formats, keys2
             )
     # get the selected outcome from the sidebar

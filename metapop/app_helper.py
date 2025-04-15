@@ -196,42 +196,40 @@ def get_show_parameter_mapping():
     show_mapping = dict(
         # n_groups = "number of groups",
         # desired_r0="R0",
-        # k = "average degree",
-        # k_i_0 = "average degree per person in large population",
-        # k_i_1 = "average degree per person in small population 1",
-        # k_i_2 = "average degree per person in small population 2",
-        # k_g1 = "average degree of small population 1 connecting to large population",
-        # k_g2 = "average degree of small population 2 connecting to large population",
-        # k_21 = "average degree between small populations",
-        # connectivity_scenario = "connectivity scenario",
-        # n_e_compartments = "number of exposed compartments",
-        # latent_duration = "latent period",
-        # n_i_compartments = "number of infectious compartments",
-        # infectious_duration = "infectious period",
-        pop_sizes_0 = "size of large population",
-        pop_sizes_1 = "size of small population 1",
-        pop_sizes_2 = "size of small population 2",
-        I0_0="initial infections in large population",
-        I0_1="initial infections in small population 1",
-        I0_2="initial infections in small population 2",
+        # k = "Average degree",
+        # k_i_0 = "Average degree per person in large population",
+        # k_i_1 = "Average degree per person in small population 1",
+        # k_i_2 = "Average degree per person in small population 2",
+        # k_g1 = "Average degree of small population 1 connecting to large population",
+        # k_g2 = "Average degree of small population 2 connecting to large population",
+        # k_21 = "Connectivity between smaller populations",        # n_e_compartments = "Number of exposed compartments",
+        # latent_duration = "Latent period (days)",
+        # n_i_compartments = "Number of infectious compartments",
+        # infectious_duration = "Infectious period (days)",
+        pop_sizes_0 = "Size of large population",
+        pop_sizes_1 = "Size of small population 1",
+        pop_sizes_2 = "Size of small population 2",
+        I0_0="Initial infections in large population",
+        I0_1="Initial infections in small population 1",
+        I0_2="Initial infections in small population 2",
         # vaccine_uptake = "Enable vaccine uptake",
-        total_vaccine_uptake_doses="vaccine doses total",
-        vaccine_uptake_start_day="active vaccination start day",
-        vaccine_uptake_duration_days="active vaccination duration days",
-        vaccinated_group = "vaccinated group",
+        total_vaccine_uptake_doses="Vaccine doses total",
+        vaccine_uptake_start_day="Active vaccination start day",
+        vaccine_uptake_duration_days="Active vaccination duration days",
+        vaccinated_group = "Vaccinated group",
         # symptomatic_isolation = "Enable symptomatic isolation",
-        isolation_success = "Symptomatic isolation proportion",
+        isolation_success = "Symptomatic individuals isolating",
         symptomatic_isolation_start_day = "Symptomatic isolation start day",
         symptomatic_isolation_duration_days = "Symptomatic isolation duration days",
-        pre_rash_isolation_success = "Pre-rash isolation proportion",
+        pre_rash_isolation_success = "Pre-rash individuals isolating",
         pre_rash_isolation_start_day = "Pre-rash isolation start day",
         pre_rash_isolation_duration_days = "Pre-rash isolation duration days",
-        tf = "time steps",
-        # n_replicates = "number of replicates",
-        # seed = "random seed",
-        initial_vaccine_coverage_0 = "baseline vaccination in large population",
-        initial_vaccine_coverage_1 = "baseline vaccination in small population 1",
-        initial_vaccine_coverage_2 = "baseline vaccination in small population 2",
+        tf = "Time steps",
+        # n_replicates = "Number of replicates",
+        # seed = "Random seed",
+        initial_vaccine_coverage_0 = "Baseline vaccination in large population",
+        initial_vaccine_coverage_1 = "Baseline vaccination in small population 1",
+        initial_vaccine_coverage_2 = "Baseline vaccination in small population 2",
     )
     return show_mapping
 
@@ -246,26 +244,22 @@ def get_advanced_parameter_mapping():
     # Define the mapping of advanced parameter names to display names
     advanced_mapping = dict(
         desired_r0="R0",
-        n_groups="number of groups",
-        infectious_duration="infectious period",
-        latent_duration="latent period",
-        # n_e_compartments="number of exposed compartments",
-        # n_i_compartments="number of infectious compartments",
-        # tf="number of time steps",
-        # pop_sizes_0="size of large population",
-        # pop_sizes_1="size of small population 1",
-        # pop_sizes_2="size of small population 2",
-        # k_i = "average degree",
-        k_i_0 = "average degree for large population",
-        k_i_1 = "average degree for small population 1",
-        k_i_2 = "average degree for small population 2",
-        k_g1 = "average degree of small population 1 connecting to large population",
-        k_g2 = "average degree of small population 2 connecting to large population",
-        k_21 = "connectivity between smaller populations",
-        # vaccine_uptake="vaccine uptake",
-        # vaccine_uptake_doses="vaccine doses",
-        # isolation_percentage="isolation percentage",
-        # isolation_effectiveness="isolation effectiveness",
+        n_groups="Number of groups",
+        infectious_duration="Infectious period (days)",
+        latent_duration="Latent period (days)",
+        # n_e_compartments="Number of exposed compartments",
+        # n_i_compartments="Number of infectious compartments",
+        # tf="Number of time steps",
+        # pop_sizes_0="Size of large population",
+        # pop_sizes_1="Size of small population 1",
+        # pop_sizes_2="Size of small population 2",
+        # k_i = "Average degree",
+        k_i_0 = "Average degree for large population",
+        k_i_1 = "Average degree for small population 1",
+        k_i_2 = "Average degree for small population 2",
+        k_g1 = "Average degree of small population 1 connecting to large population",
+        k_g2 = "Average degree of small population 2 connecting to large population",
+        k_21 = "Connectivity between smaller populations",
     )
     return advanced_mapping
 
@@ -367,29 +361,31 @@ def repack_list_parameters(parms, updated_parms, keys_in_list):
     return updated_parms
 
 
+
+
 ### Methods to create user inputs interfaces ###
 def app_editors(element, scenario_name, parms,
-                ordered_keys, list_keys, slider_keys,
-                show_parameter_mapping,
-                min_values, max_values, steps, helpers, formats, element_keys,
-                disabled=False):
+                ordered_keys, list_keys, show_parameter_mapping,
+                widget_types, min_values, max_values, steps, helpers,
+                formats, element_keys, disabled=False):
     """
     Create the sidebar for editing parameters.
 
     Args:
         element (st container object): The Streamlit element to place the sidebar in.
-        scenario_name: The name of the scenario.
-        parms: The parameters to edit.
-        ordered_keys: The keys of the parameters to edit.
-        list_keys: The keys of the parameters that are lists.
-        slider_keys: The keys of the parameters that are sliders.
-        show_parameter_mapping: The mapping of parameter names to display names.
-        min_values: The minimum values for the parameters.
-        max_values: The maximum values for the parameters.
-        steps: The step sizes for the parameters.
-        helpers: The help text for the parameters.
-        formats: The formats for the parameters.
-        element_keys: The keys for the Streamlit elements.
+        scenario_name           (str): The name of the scenario.
+        parms                  (dict): The parameters to edit.
+        ordered_keys           (list): An ordered list of the parameters to edit.
+        list_keys              (list): The keys of the parameters that are lists.
+        widget_types           (dict): The types of widgets for the parameters.
+        show_parameter_mapping (dict): The mapping of parameter names to display names.
+        min_values             (dict): The minimum values for the parameters.
+        max_values             (dict): The maximum values for the parameters.
+        steps                  (dict): The step sizes for the parameters.
+        helpers                (dict): The help text for the parameters.
+        formats                (dict): The formats for the parameters.
+        element_keys           (dict): The keys for the Streamlit elements.
+        disabled               (bool): Whether the widgets should be disabled. Defaults to False.
 
     Returns:
         edited_parms: The edited parameters.
@@ -402,7 +398,8 @@ def app_editors(element, scenario_name, parms,
 
         for key in ordered_keys:
             if key not in list_keys:
-                if key in slider_keys:
+                # if key in slider_keys:
+                if widget_types[key] == 'slider':
                     value = st.slider(show_parameter_mapping[key],
                                       min_value=min_values[key], max_value=max_values[key],
                                       value=parms[key],
@@ -412,7 +409,7 @@ def app_editors(element, scenario_name, parms,
                                       key=element_keys[key],
                                       disabled=disabled
                                       )
-                else:
+                elif widget_types[key] == 'number_input':
                     value = st.number_input(show_parameter_mapping[key],
                                         min_value=min_values[key], max_value=max_values[key],
                                         value=parms[key],
@@ -421,10 +418,24 @@ def app_editors(element, scenario_name, parms,
                                         format=formats[key],
                                         key=element_keys[key],
                                         disabled=disabled)
+                elif widget_types[key] == 'toggle':
+                    value = st.toggle(show_parameter_mapping[key],
+                                      value=[True if parms[key] > 0 else False],
+                                      help=helpers[key],
+                                      key=element_keys[key],
+                                      disabled=disabled)
+                    # if toggle is turned on, set value to the original value for the model
+                    if value is True:
+                        value = parms[key]
+                    if value is False:
+                        value = 0
+                else:
+                    pass
                 edited_parms[key] = value
             if key in list_keys:
                 for index in range(len(parms[key])):
-                    if key in slider_keys:
+                    # if key in slider_keys:
+                    if widget_types[key] == 'slider':
                         value = st.slider(show_parameter_mapping[f"{key}_{index}"],
                                             min_value=min_values[key][index], max_value=max_values[key][index],
                                             value=parms[key][index],
@@ -433,7 +444,8 @@ def app_editors(element, scenario_name, parms,
                                             format=formats[key],
                                             key=element_keys[key][index],
                                             disabled=disabled)
-                    else:
+                    # else:
+                    elif widget_types[key] == 'number_input':
                         value = st.number_input(show_parameter_mapping[f"{key}_{index}"],
                                             min_value=min_values[key][index], max_value=max_values[key][index],
                                             value=parms[key][index],
@@ -442,9 +454,61 @@ def app_editors(element, scenario_name, parms,
                                             format=formats[key],
                                             key=element_keys[key][index],
                                             disabled=disabled)
+                    elif widget_types[key] == 'toggle':
+                        value = st.toggle(show_parameter_mapping[f"{key}_{index}"],
+                                          value=[True if parms[key][index] > 0 else False],
+                                          help=helpers[key][index],
+                                          key=element_keys[key][index],
+                                          disabled=disabled)
+                        # if toggle is turned on, set value to the original value for the model
+                        if value is True:
+                            value = parms[key][index]
+                        if value is False:
+                            value = 0
+                    else:
+                        pass
                     edited_parms[key][index] = value
 
     return edited_parms
+
+
+def get_widget_types(widget_types=None):
+    """
+    Get the types of widgets for each of the app parameters.
+
+    Args:
+        widget_types (dict): Optional widget types dictionary.
+
+    Returns:
+        dict: A dictionary of widget types for the app parameters.
+    """
+    defaults = dict(
+            desired_r0="slider",
+            k_i = "slider",
+            k_g1 = "number_input",
+            k_g2 = "number_input",
+            k_21 = "number_input",
+            pop_sizes="slider",
+            latent_duration="slider",
+            infectious_duration="slider",
+            I0="slider",
+            initial_vaccine_coverage = "slider",
+            vaccine_uptake_start_day="slider",
+            vaccine_uptake_duration_days="slider",
+            total_vaccine_uptake_doses="slider",
+            vaccinated_group="number_input",
+            isolation_success = "toggle",
+            symptomatic_isolation_start_day = "slider",
+            symptomatic_isolation_duration_days = "slider",
+            pre_rash_isolation_success = "toggle",
+            pre_rash_isolation_start_day = "slider",
+            pre_rash_isolation_duration_days = "slider",
+            tf="number_input"
+    )
+    if widget_types is not None and isinstance(widget_types, dict):
+        # update with parms if provided
+        defaults.update(widget_types)
+    return defaults
 
 
 def get_min_values(parms=None):
@@ -599,10 +663,12 @@ def get_helpers(parms=None):
             vaccine_uptake_duration_days="Days vaccines are administered",
             total_vaccine_uptake_doses="Total vaccine doses administered during the vaccination campaign",
             vaccinated_group="Population receiving the vaccine",
-            isolation_success = "Proportion reduction in contacts due to symptomatic isolation",
+            # isolation_success = "Proportion reduction in contacts due to symptomatic isolation",
+            isolation_success = "If turned on, 75% of symptomatic individuals isolate",
             symptomatic_isolation_start_day = "Day symptomatic isolation starts",
             symptomatic_isolation_duration_days = "Duration of symptomatic isolation",
-            pre_rash_isolation_success = "Proportion reduction in contacts due to pre-rash isolation",
+            # pre_rash_isolation_success = "Proportion reduction in contacts due to pre-rash isolation",
+            pre_rash_isolation_success = "If turned on, 10% of pre-rash infectious individuals isolate",
             pre_rash_isolation_start_day = "Day pre-rash isolation starts",
             pre_rash_isolation_duration_days = "Duration of pre-rash isolation",
             tf = "Number of time steps to simulate",
