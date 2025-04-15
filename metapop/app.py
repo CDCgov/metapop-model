@@ -54,16 +54,25 @@ __all__ = [
 
 def app(replicates=20):
     st.title("Measles Outbreak Simulator")
-    st.text("This interactive tool illustrates the impact of vaccination and isolation on the probability and size of measles outbreaks following introduction of measles into a community.")
+    st.text("This interactive tool illustrates the impact of " \
+    "vaccination, isolation, and stay-at-home measures on the probability "
+    "and size of measles outbreaks over 365 days following introduction of measles into " \
+    "a community, by comparing two scenarios (unmitigated), " \
+    "with no mitigation strategies implemented, and mitigated," \
+    " which has mitigation strategies implemented).")
     parms = read_parameters("scripts/app/onepop_config.yaml")
 
+    scenario_names = ["Unmitigated", "Mitigated"]
     show_parameter_mapping = get_show_parameter_mapping()
     advanced_parameter_mapping = get_advanced_parameter_mapping()
 
     with st.sidebar:
         st.header(
-            "Scenario parameters",
-            help="Enter model parameters for each scenario. Hover over the ? for more information about each parameter.",
+            "Model Inputs",
+            help="Enter the population size, overall vaccine coverage, and number of people " \
+            "initially infected with measles in a community. " \
+            "This tool is meant to demonstrate the dynamics following initial introductions " \
+            "of cases into a community. Hover over the ? for more information about each parameter.",
         )
 
         widget_types = get_widget_types() # defines the type of widget for each parameter
@@ -74,21 +83,25 @@ def app(replicates=20):
         formats = get_formats()
         keys0 = get_widget_idkeys(0) # keys for the shared parameters
         keys1 = get_widget_idkeys(1) # keys for the parameters for scenario 1
-        keys2 = get_widget_idkeys(2) # keys for the parameters for scenario 2
+        keys2 = get_widget_idkeys(2) # keys for the parameters for Mitigated
 
         # define parameters to be shared between scenarios that are shown in the sidebar by default
         # order of shared parameters in the sidebar
         shared_keys = [
-            "pop_sizes",
             "I0",
+            "pop_sizes",
             "initial_vaccine_coverage",
         ]
         # shared parameters that are lists
         shared_list_keys = [
-            "pop_sizes",
             "I0",
+            "pop_sizes",
             "initial_vaccine_coverage",
         ]
+        shared_slider_keys = [
+            'I0',
+            'pop_sizes',
+            'initial_vaccine_coverage']
 
         col0 = st.columns(1)
         col0 = col0[0]
@@ -118,24 +131,35 @@ def app(replicates=20):
         list_parameter_keys = []
 
         # make a section for each scenario
+        st.header(
+            "Mitigation strategies",
+            help="Choose strategies to implement for the 'mitigation' scenario. " \
+            "Interventions can be applied independently or in combination with each other. " \
+            "The results are compared to an 'unmitigated' scenario which does not have any vaccine " \
+            "uptake, isolation, or stay at home incorporated.",
+        )
         col1, col2 = st.columns(2)
 
         # show the parameters for scenario 1 but do not allow editing
         edited_parms1 = app_editors(
-            col1, "Scenario 1 (Baseline)", edited_parms, ordered_keys, list_parameter_keys,
+            col1, scenario_names[0], edited_parms, ordered_keys, list_parameter_keys,
             show_parameter_mapping, widget_types,
             min_values, max_values, steps, helpers, formats, keys1, disabled=True
         )
 
         edited_parms2 = app_editors(
-            col2, "Scenario 2", edited_parms, ordered_keys, list_parameter_keys,
+            col2, scenario_names[1], edited_parms, ordered_keys, list_parameter_keys,
             show_parameter_mapping, widget_types,
             min_values, max_values,
             steps, helpers, formats, keys2
         )
 
         with st.expander("Advanced options"):
-            # order of advanced parameters in the sidebar
+            st.text("These options allow changes to parameter assumptions including "
+            "measles natural history parameters as well as parameters governing "
+            "intervention efficacy.")
+
+            # try to place two sliders side by side
             advanced_ordered_keys = [
                 "desired_r0",
                 "latent_duration",
@@ -156,17 +180,34 @@ def app(replicates=20):
 
             # show the parameters for scenario 1 but do not allow editing
             edited_advanced_parms1 = app_editors(
-                adv_col1, "Scenario 1 (Baseline)", edited_parms1, advanced_ordered_keys,
+                adv_col1, scenario_names[0], edited_parms1, advanced_ordered_keys,
                 advanced_list_keys, advanced_parameter_mapping, widget_types,
                 min_values, max_values, steps, helpers, formats, keys1,
                 disabled=True
             )
 
             edited_advanced_parms2 = app_editors(
-                adv_col2, "Scenario 2", edited_parms2, advanced_ordered_keys,
+                adv_col2, scenario_names[1], edited_parms2, advanced_ordered_keys,
                 advanced_list_keys, advanced_parameter_mapping, widget_types,
                 min_values, max_values, steps, helpers, formats, keys2
             )
+
+    #### Intervention scenarios:
+    # instead of expander, can use st.radio:
+    with st.expander("Show mitigation strategy info.", expanded=False):
+        columns = st.columns(2)
+
+        columns[0].error("Unmitigated:\n"
+                        " - Vaccine doses administered: 0\n"
+                        " - % of infectious individuals isolating before rash onset: 0\n"
+                        " - % of infectious individuals isolating after rash onset: 0")
+
+        columns[1].info("Mitigated:\n"
+                        f" - Vaccine doses administered: {edited_parms2['total_vaccine_uptake_doses']} between day {edited_parms2['vaccine_uptake_start_day']} and day {edited_parms2['vaccine_uptake_start_day'] + edited_parms2['vaccine_uptake_duration_days']}\n"
+                        f" - % of infectious individuals isolating before rash onset: {edited_parms2['pre_rash_isolation_success']*100} between day {edited_parms2['pre_rash_isolation_start_day']} and day {edited_parms2['pre_rash_isolation_start_day'] + edited_parms2['pre_rash_isolation_duration_days']}\n"
+                        f" - % of infectious individuals isolating after rash onset: {edited_parms2['isolation_success']*100} between day {edited_parms2['symptomatic_isolation_start_day']} and day {edited_parms2['symptomatic_isolation_start_day'] + edited_parms2['symptomatic_isolation_duration_days']}\n")
+
+    #### Plot Options:
     # get the selected outcome from the sidebar
     outcome_option = st.selectbox(
         "Metric",
@@ -253,28 +294,8 @@ def app(replicates=20):
         # min_y, max_y = 0, max(interval_results1[outcome].max(), interval_results2[outcome].max())
         x = "interval_t:Q"
         time_label = "Time (weeks)"
-
-    # y = f"{outcome}:Q"
-    # yscale = [min_y, max_y]
-    # color_key = "group"
-    # labelExpr=f"datum.value == '0' ? '{group_labels[0]}' : datum.value == '1' ? '{group_labels[1]}' : '{group_labels[2]}'"
-    # detail="replicate:N"
-
-    # chart1 = create_chart(alt_results1, outcome_option,
-    #                       x, time_label,
-    #                       y, outcome_option, yscale,
-    #                       color_key, color_scale, domain,
-    #                       labelExpr,
-    #                       detail)
-    # chart2 = create_chart(alt_results2, outcome_option,
-    #                       x, time_label,
-    #                       y, outcome_option, yscale,
-    #                       color_key, color_scale, domain,
-    #                       labelExpr,
-    #                       detail)
-    # st.altair_chart(chart1 | chart2, use_container_width=True)
-    alt_results1 = alt_results1.with_columns(pl.lit("Scenario 1 (Baseline)").alias("scenario"))
-    alt_results2 = alt_results2.with_columns(pl.lit("Scenario 2").alias("scenario"))
+    alt_results1 = alt_results1.with_columns(pl.lit(scenario_names[0]).alias("scenario"))
+    alt_results2 = alt_results2.with_columns(pl.lit(scenario_names[1]).alias("scenario"))
     combined_alt_results = alt_results1.vstack(alt_results2)
     chart = alt.Chart(combined_alt_results.to_pandas()).mark_line(opacity=0.4).encode(
         x=alt.X(x, title=time_label),
@@ -283,7 +304,7 @@ def app(replicates=20):
             "scenario",
             title="Scenario",
             scale=alt.Scale(
-                domain=["Scenario 1 (Baseline)", "Scenario 2"],  # Scenarios
+                domain=[scenario_names[0], scenario_names[1]],  # Scenarios
                 range=["#cf4828","#20419a"]  # Corresponding colors (blue, red)
             )
         ),
@@ -298,19 +319,19 @@ def app(replicates=20):
     st.altair_chart(chart, use_container_width=True)
 
 
-    ### Summary stats based on outbreak sizes
+    ### Outbreak Summary Stats
     st.subheader("Outbreak summary statistics")
+    fullresults1 = fullresults1.with_columns(
+        pl.lit(scenario_names[0]).alias("Scenario")
+    )
+    fullresults2 = fullresults2.with_columns(
+        pl.lit(scenario_names[1]).alias("Scenario")
+    )
 
     threshold = st.selectbox(
         label = "Outbreak threshold:",
         options=[50, 100, 200, 300, 500],
         index=2,  # Default selected option (index of the options list)
-    )
-    fullresults1 = fullresults1.with_columns(
-        pl.lit("Scenario 1 (Baseline)").alias("Scenario")
-    )
-    fullresults2 = fullresults2.with_columns(
-        pl.lit("Scenario 2").alias("Scenario")
     )
 
     combined_results = fullresults2.vstack(fullresults1).with_columns(
@@ -322,7 +343,6 @@ def app(replicates=20):
      ).agg(pl.col("Y").sum().alias("Total"))
 
     outbreak_summary = calculate_outbreak_summary(combined_results, threshold)
-
     hospitalization_summary = get_hospitalizations(combined_results, parms["IHR"])
 
     # Merge hospitalization_summary and outbreak_summary by the "Scenario" column
@@ -332,19 +352,20 @@ def app(replicates=20):
         how="inner"  # Use "inner" to keep only matching rows
     )
 
-    columns = st.columns(len(merged_summary))
+    transposed = merged_summary.select([
+        pl.col("outbreaks").alias(f"Number of outbreaks with more than > {threshold} infections"),
+        pl.col("Total Infections").alias("Average Outbreak Size"),
+        pl.col("Hospitalizations").alias("Average Number of Hospitalizations")
+    ]).transpose(include_header=True)
 
-    n_reps = parms["n_replicates"]
+    transposed = transposed.rename({"column": "Metric", "column_0": scenario_names[0], "column_1": scenario_names[1]})
+    transposed = transposed.with_columns(
+        (
+            (pl.col(scenario_names[0]) - pl.col(scenario_names[1])) / pl.col(scenario_names[0])
+        ).alias("Relative Difference")
+    )
 
-    for idx, row in enumerate(merged_summary.iter_rows(named=True)):
-        scenario = row["Scenario"]
-        outbreaks = row["outbreaks"]
-        outbreak_prop = f"{(outbreaks / n_reps) * 100:.2f}%"
-        hospitalizations = row["Hospitalizations"]
-        infections = row["Total Infections"]
+    st.dataframe(transposed)
 
-        # Use st.error for the first column, st.success for the second
-        if scenario == "Scenario 1 (Baseline)":
-            columns[0].error(f"{scenario}: {outbreaks}/{n_reps} ({outbreak_prop}) simulations had >= {threshold} cases total with an average {infections} infections and {hospitalizations} hospitalizations across all simulations.")
-        else:
-            columns[1].info(f"{scenario}: {outbreaks}/{n_reps} ({outbreak_prop}) simulations had >= {threshold} cases total with an average {infections} infections and {hospitalizations} hospitalizations across all simulations.")
+if __name__ == "__main__":
+    app()

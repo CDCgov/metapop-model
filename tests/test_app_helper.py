@@ -93,7 +93,7 @@ def test_get_max_values():
     """Test the get_max_values function."""
     max_values = get_max_values()
     assert isinstance(max_values, dict), "Expected parameters to be a dictionary"
-    expected_I0 = [100, 100, 100]
+    expected_I0 = [10, 10, 10]
     assert max_values["I0"] == expected_I0, f"Expected max I0 values to be {expected_I0}, but got {max_values['I0']}"
 
     # assert that when you provide a dictionary, the returned maximum values are updated

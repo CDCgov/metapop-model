@@ -12,7 +12,7 @@ baseline_parameters:
   pop_sizes: [5000]    # population sizes
   I0: [5]     # initially infected
   vaccine_uptake_start_day: 0
-  vaccine_uptake_duration_days: 7
+  vaccine_uptake_duration_days: 21
   total_vaccine_uptake_doses: 0 # number of doses
   vaccinated_group: 0
   isolation_success: 0.75 # informed by 2017 Minnesota study

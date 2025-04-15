@@ -109,8 +109,8 @@ def get_default_full_parameters():
     defaults = pl.DataFrame(
         {
             "Parameter": keys,
-            "Scenario 1": values,
-            "Scenario 2": values,
+            "Unmitigated": values,
+            "Mitigated": values,
         },
         strict=False
     )
@@ -132,7 +132,7 @@ def get_default_show_parameters_table():
     show_defaults = full_defaults.filter(pl.col("Parameter").is_in(show_parameter_mapping.keys()))
 
     # replace specific values with integers
-    for key in ['Scenario 1', 'Scenario 2']:
+    for key in ['Unmitigated', 'Mitigated']:
         show_defaults = show_defaults.with_columns(
             pl.when(pl.col(key).str.to_lowercase() == "true")
             .then(1)
@@ -143,8 +143,8 @@ def get_default_show_parameters_table():
         )
 
     # cast to float
-    show_defaults = show_defaults.with_columns(pl.col("Scenario 1").cast(pl.Float64))
-    show_defaults = show_defaults.with_columns(pl.col("Scenario 2").cast(pl.Float64))
+    show_defaults = show_defaults.with_columns(pl.col("Unmitigated").cast(pl.Float64))
+    show_defaults = show_defaults.with_columns(pl.col("Mitigated").cast(pl.Float64))
 
     # renaming keys with longer names
     show_defaults = show_defaults.with_columns(
@@ -164,7 +164,7 @@ def get_advanced_parameters_table():
     )
 
     # replace specific values with integers
-    for key in ['Scenario 1', 'Scenario 2']:
+    for key in ['Unmitigated', 'Mitigated']:
         advanced_defaults = advanced_defaults.with_columns(
             pl.when(pl.col(key).str.to_lowercase() == "true")
             .then(1)
@@ -175,8 +175,8 @@ def get_advanced_parameters_table():
         )
 
     # cast to float
-    advanced_defaults = advanced_defaults.with_columns(pl.col("Scenario 1").cast(pl.Float64))
-    advanced_defaults = advanced_defaults.with_columns(pl.col("Scenario 2").cast(pl.Float64))
+    advanced_defaults = advanced_defaults.with_columns(pl.col("Unmitigated").cast(pl.Float64))
+    advanced_defaults = advanced_defaults.with_columns(pl.col("Mitigated").cast(pl.Float64))
 
     # renaming keys with longer names
     advanced_defaults = advanced_defaults.with_columns(
@@ -573,7 +573,7 @@ def get_max_values(parms=None):
             pop_sizes=[100_000, 15_000, 15_000],
             latent_duration=18.,
             infectious_duration=11.,
-            I0=[100, 100, 100],
+            I0=[10, 10, 10],
             initial_vaccine_coverage=[1., 1., 1.],
             vaccine_uptake_start_day=365,
             vaccine_uptake_duration_days=365,
@@ -779,7 +779,7 @@ def get_parms_from_table(table, value_col="Scenario 1"):
   # get parameter dictionary from a table
     parms = dict()
     # expect the table to have the following columns
-    # Parameter, Scenario 1, Scenario 2
+    # Parameter, Unmitigated, Mitigated
     for key, value in zip(table["Parameter"].to_list(), table[value_col].to_list()):
         parms[key] = value
     return parms
@@ -990,7 +990,7 @@ def calculate_outbreak_summary(combined_results, threshold):
     )
 
     # Ensure both scenarios are present in the summary
-    scenarios = ["Scenario 1 (Baseline)", "Scenario 2"]
+    scenarios = ["Unmitigated", "Mitigated"]
     for scenario in scenarios:
         if scenario not in outbreak_summary["Scenario"].to_list():
             # Add missing scenario with outbreaks = 0
@@ -1029,7 +1029,7 @@ def get_hospitalizations(combined_results, IHR):
     )
 
     # Ensure the order of scenarios
-    scenario_order = ["Scenario 1 (Baseline)", "Scenario 2"]
+    scenario_order = ["Unmitigated", "Mitigated"]
     hospitalization_summary = hospitalization_summary.with_columns(
         pl.when(pl.col("Scenario") == scenario_order[0])
         .then(0)
