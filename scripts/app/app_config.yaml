@@ -12,7 +12,7 @@ baseline_parameters:
   I0: [0, 5, 0]     # initially infected
   vaccine_uptake_start_day: 0
   vaccine_uptake_duration_days: 0
-  total_vaccine_uptake_doses: 0 # number of doses
+  total_vaccine_uptake_doses: 0.0 # number of doses
   vaccinated_group: 2
   isolation_success: 0.75 # informed by 2017 Minnesota study
   symptomatic_isolation_start_day: 365

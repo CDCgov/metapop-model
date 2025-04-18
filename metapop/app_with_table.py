@@ -53,7 +53,7 @@ def app_with_table(replicates=20):
     parms = read_parameters()
 
     default_table = get_default_show_parameters_table()
-    show_parameter_mapping = get_show_parameter_mapping()
+    show_parameter_mapping = get_show_parameter_mapping(parms)
     # advanced_table = get_advanced_parameters_table()
     # advanced_parameter_mapping = get_advanced_parameter_mapping()
 
@@ -78,13 +78,13 @@ def app_with_table(replicates=20):
             col1, col2 = st.columns(2)
 
             with col1:
-                st.subheader("Unmitigated")
+                st.subheader("No Interventions")
                 n_groups_slider1 = st.slider("Number of groups", min_value=1, max_value=3, # noqa
                                             value=parms["n_groups"],
                                             step=1, help="At most 3 groups can be modeled",
                                             key="n_groups_slider1")
             with col2:
-                st.subheader("Mitigated")
+                st.subheader("Interventions")
                 n_groups_slider2 = st.slider("Number of groups", min_value=1, max_value=3, # noqa
                                             value=parms["n_groups"],
                                             step=1, help="At most 3 groups can be modeled",
@@ -110,12 +110,12 @@ def app_with_table(replicates=20):
     full_defaults = get_default_full_parameters()
 
     # get updated parameter dictionaries
-    updated_parms1 = get_parms_from_table(full_defaults, value_col="Unmitigated")
-    updated_parms2 = get_parms_from_table(full_defaults, value_col="Mitigated")
+    updated_parms1 = get_parms_from_table(full_defaults, value_col="No Interventions")
+    updated_parms2 = get_parms_from_table(full_defaults, value_col="Interventions")
 
     # get updated values from user through the sidebar
-    updated_parms1 = update_parms_from_table(updated_parms1, edited_table, show_parameter_mapping, value_col="Unmitigated")
-    updated_parms2 = update_parms_from_table(updated_parms2, edited_table, show_parameter_mapping, value_col="Mitigated")
+    updated_parms1 = update_parms_from_table(updated_parms1, edited_table, show_parameter_mapping, value_col="No Interventions")
+    updated_parms2 = update_parms_from_table(updated_parms2, edited_table, show_parameter_mapping, value_col="Interventions")
 
     # correct types for single values
     updated_parms1 = correct_parameter_types(parms, updated_parms1)

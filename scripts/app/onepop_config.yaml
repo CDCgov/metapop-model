@@ -9,11 +9,12 @@ baseline_parameters:
   latent_duration: 10.5
   n_i_compartments: 2    # number of chained I compartments
   infectious_duration: 9.0
-  pop_sizes: [5000]    # population sizes
+  pop_sizes: [15000]    # population sizes
   I0: [5]     # initially infected
   vaccine_uptake_start_day: 0
   vaccine_uptake_duration_days: 21
-  total_vaccine_uptake_doses: 0 # number of doses
+  use_prop_vaccine_uptake: true      # if true for the app,
+  total_vaccine_uptake_doses: 20.0   # then prop unvax that get vax, else absolute number of doses
   vaccinated_group: 0
   isolation_success: 0.75 # informed by 2017 Minnesota study
   symptomatic_isolation_start_day: 0

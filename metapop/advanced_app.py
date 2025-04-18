@@ -76,13 +76,13 @@ def advanced_app(replicates=20):
         col1, col2 = st.columns(2)
 
         edited_parms1 = app_editors(
-            col1, "Scenario 1", parms, ordered_keys, list_parameter_keys,
+            col1, "No Interventions", parms, ordered_keys, list_parameter_keys,
             show_parameter_mapping, widget_types,
             min_values, max_values, steps, helpers, formats, keys1
         )
 
         edited_parms2 = app_editors(
-            col2, "Scenario 2", parms, ordered_keys, list_parameter_keys,
+            col2, "Interventions", parms, ordered_keys, list_parameter_keys,
             show_parameter_mapping, widget_types,
             min_values, max_values, steps, helpers, formats, keys2
         )
@@ -95,13 +95,13 @@ def advanced_app(replicates=20):
             adv_col1, adv_col2 = st.columns(2)
 
             edited_advanced_parms1 = app_editors(
-                adv_col1, "Scenario 1", edited_parms1, advanced_ordered_keys,
+                adv_col1, "No Interventions", edited_parms1, advanced_ordered_keys,
                 advanced_list_keys, advanced_parameter_mapping, widget_types,
                 min_values, max_values, steps, helpers, formats, keys1
             )
 
             edited_advanced_parms2 = app_editors(
-                adv_col2, "Scenario 2", edited_parms2, advanced_ordered_keys,
+                adv_col2, "Interventions", edited_parms2, advanced_ordered_keys,
                 advanced_list_keys, advanced_parameter_mapping, widget_types,
                 min_values, max_values, steps, helpers, formats, keys2
             )

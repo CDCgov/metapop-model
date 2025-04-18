@@ -44,6 +44,8 @@ __all__ = [
     "create_chart",
     "calculate_outbreak_summary",
     "get_hospitalizations",
+    "set_parms_to_zero",
+    "rescale_prop_vax",
 ]
 
 ### Methods to simulate the model for the app ###
@@ -109,8 +111,8 @@ def get_default_full_parameters():
     defaults = pl.DataFrame(
         {
             "Parameter": keys,
-            "Unmitigated": values,
-            "Mitigated": values,
+            "No Interventions": values,
+            "Interventions": values,
         },
         strict=False
     )
@@ -132,7 +134,7 @@ def get_default_show_parameters_table():
     show_defaults = full_defaults.filter(pl.col("Parameter").is_in(show_parameter_mapping.keys()))
 
     # replace specific values with integers
-    for key in ['Unmitigated', 'Mitigated']:
+    for key in ['No Interventions', 'Interventions']:
         show_defaults = show_defaults.with_columns(
             pl.when(pl.col(key).str.to_lowercase() == "true")
             .then(1)
@@ -143,8 +145,8 @@ def get_default_show_parameters_table():
         )
 
     # cast to float
-    show_defaults = show_defaults.with_columns(pl.col("Unmitigated").cast(pl.Float64))
-    show_defaults = show_defaults.with_columns(pl.col("Mitigated").cast(pl.Float64))
+    show_defaults = show_defaults.with_columns(pl.col("No Interventions").cast(pl.Float64))
+    show_defaults = show_defaults.with_columns(pl.col("Interventions").cast(pl.Float64))
 
     # renaming keys with longer names
     show_defaults = show_defaults.with_columns(
@@ -164,7 +166,7 @@ def get_advanced_parameters_table():
     )
 
     # replace specific values with integers
-    for key in ['Unmitigated', 'Mitigated']:
+    for key in ['No Interventions', 'Interventions']:
         advanced_defaults = advanced_defaults.with_columns(
             pl.when(pl.col(key).str.to_lowercase() == "true")
             .then(1)
@@ -175,8 +177,8 @@ def get_advanced_parameters_table():
         )
 
     # cast to float
-    advanced_defaults = advanced_defaults.with_columns(pl.col("Unmitigated").cast(pl.Float64))
-    advanced_defaults = advanced_defaults.with_columns(pl.col("Mitigated").cast(pl.Float64))
+    advanced_defaults = advanced_defaults.with_columns(pl.col("No Interventions").cast(pl.Float64))
+    advanced_defaults = advanced_defaults.with_columns(pl.col("Interventions").cast(pl.Float64))
 
     # renaming keys with longer names
     advanced_defaults = advanced_defaults.with_columns(
@@ -184,10 +186,8 @@ def get_advanced_parameters_table():
                   values=[advanced_parameter_mapping.get(key) for key in advanced_defaults["Parameter"].to_list()]))
     return advanced_defaults
 
-
-
 ### Methods to handle how parameters are displayed in the app ###
-def get_show_parameter_mapping():
+def get_show_parameter_mapping(parms=None):
     """
     Get a mapping of parameter names to their display names.
 
@@ -215,7 +215,7 @@ def get_show_parameter_mapping():
         I0_1="Initial infections in small population 1",
         I0_2="Initial infections in small population 2",
         # vaccine_uptake = "Enable vaccine uptake",
-        total_vaccine_uptake_doses="Vaccine doses total",
+        total_vaccine_uptake_doses="% unvaccinated individuals that get vaccinated",
         vaccine_uptake_start_day="Active vaccination start day",
         vaccine_uptake_duration_days="Active vaccination duration days",
         vaccinated_group = "Vaccinated group",
@@ -223,7 +223,7 @@ def get_show_parameter_mapping():
         isolation_success = "Symptomatic individuals isolating",
         symptomatic_isolation_start_day = "Symptomatic isolation start day",
         symptomatic_isolation_duration_days = "Symptomatic isolation duration days",
-        pre_rash_isolation_success = "Pre-rash individuals isolating",
+        pre_rash_isolation_success = "Stay-at-home",
         pre_rash_isolation_start_day = "Pre-rash isolation start day",
         pre_rash_isolation_duration_days = "Pre-rash isolation duration days",
         tf = "Time steps",
@@ -233,6 +233,13 @@ def get_show_parameter_mapping():
         initial_vaccine_coverage_1 = "Baseline vaccination in small population 1",
         initial_vaccine_coverage_2 = "Baseline vaccination in small population 2",
     )
+
+    if parms is not None and isinstance(parms, dict):
+        if(parms["n_groups"] == 1):
+            show_mapping["pop_sizes_0"] = "Population Size"
+            show_mapping["I0_0"] = "Initial infections"
+            show_mapping["initial_vaccine_coverage_0"] = "Baseline vaccination"
+
     return show_mapping
 
 
@@ -363,7 +370,21 @@ def repack_list_parameters(parms, updated_parms, keys_in_list):
     return updated_parms
 
 
+### Set given parameters to zero ###
+def set_parms_to_zero(parms, parms_to_set):
+    edited_parms = copy.deepcopy(parms)
 
+    for key in parms_to_set:
+            edited_parms[key] = 0.0
+
+    return edited_parms
+
+def rescale_prop_vax(edited_parms):
+    pop_sizes = np.array(edited_parms["pop_sizes"])
+    initial_vaccine_coverage = np.array(edited_parms["initial_vaccine_coverage"])
+    prop_vaccine_uptake_doses = edited_parms["total_vaccine_uptake_doses"] / 100.0
+    edited_parms["total_vaccine_uptake_doses"] = int((pop_sizes - pop_sizes * initial_vaccine_coverage - edited_parms["I0"]) * prop_vaccine_uptake_doses)
+    return edited_parms
 
 ### Methods to create user inputs interfaces ###
 def app_editors(element, scenario_name, parms,
@@ -422,7 +443,7 @@ def app_editors(element, scenario_name, parms,
                                         disabled=disabled)
                 elif widget_types[key] == 'toggle':
                     value = st.toggle(show_parameter_mapping[key],
-                                      value=[True if parms[key] > 0 else False],
+                                      value=False,
                                       help=helpers[key],
                                       key=element_keys[key],
                                       disabled=disabled)
@@ -470,7 +491,6 @@ def app_editors(element, scenario_name, parms,
                     else:
                         pass
                     edited_parms[key][index] = value
-
     return edited_parms
 
 
@@ -490,11 +510,11 @@ def get_widget_types(widget_types=None):
             k_g1 = "number_input",
             k_g2 = "number_input",
             k_21 = "number_input",
-            pop_sizes="slider",
+            pop_sizes="number_input",
             latent_duration="slider",
             infectious_duration="slider",
-            I0="slider",
-            initial_vaccine_coverage = "slider",
+            I0="number_input",
+            initial_vaccine_coverage = "number_input",
             vaccine_uptake_start_day="slider",
             vaccine_uptake_duration_days="slider",
             total_vaccine_uptake_doses="slider",
@@ -536,7 +556,7 @@ def get_min_values(parms=None):
             initial_vaccine_coverage=[0., 0., 0.],
             vaccine_uptake_start_day=0,
             vaccine_uptake_duration_days=0,
-            total_vaccine_uptake_doses=0,
+            total_vaccine_uptake_doses=0.0,
             vaccinated_group=0,
             isolation_success = 0.,
             symptomatic_isolation_start_day = 0,
@@ -577,7 +597,7 @@ def get_max_values(parms=None):
             initial_vaccine_coverage=[1., 1., 1.],
             vaccine_uptake_start_day=365,
             vaccine_uptake_duration_days=365,
-            total_vaccine_uptake_doses=1000,
+            total_vaccine_uptake_doses=100.0,
             vaccinated_group=2,
             isolation_success = 0.75,
             symptomatic_isolation_start_day = 365,
@@ -616,8 +636,8 @@ def get_step_values(parms=None):
             I0=1,
             initial_vaccine_coverage = 0.01,
             vaccine_uptake_start_day = 1,
-            vaccine_uptake_duration_days = 1,
-            total_vaccine_uptake_doses = 1,
+            vaccine_uptake_duration_days = 7,
+            total_vaccine_uptake_doses = 5.0,
             vaccinated_group = 1,
             isolation_success = 0.01,
             symptomatic_isolation_start_day = 1,
@@ -663,14 +683,12 @@ def get_helpers(parms=None):
                                       "Baseline vaccination coverage in small population 2"],
             vaccine_uptake_start_day="Day vaccination starts",
             vaccine_uptake_duration_days="Days vaccines are administered",
-            total_vaccine_uptake_doses="Total vaccine doses administered during the vaccination campaign",
+            total_vaccine_uptake_doses="Percent of unvaccinated individuals that get vaccinated",
             vaccinated_group="Population receiving the vaccine",
-            # isolation_success = "Proportion reduction in contacts due to symptomatic isolation",
             isolation_success = "If turned on, 75% of symptomatic individuals isolate",
             symptomatic_isolation_start_day = "Day symptomatic isolation starts",
             symptomatic_isolation_duration_days = "Duration of symptomatic isolation",
-            # pre_rash_isolation_success = "Proportion reduction in contacts due to pre-rash isolation",
-            pre_rash_isolation_success = "If turned on, 10% of pre-rash infectious individuals isolate",
+            pre_rash_isolation_success = "If turned on, 10% of individuals stay at home after being exposed",
             pre_rash_isolation_start_day = "Day pre-rash isolation starts",
             pre_rash_isolation_duration_days = "Duration of pre-rash isolation",
             tf = "Number of time steps to simulate",
@@ -704,7 +722,7 @@ def get_formats(parms=None):
             initial_vaccine_coverage="%.2f",
             vaccine_uptake_start_day="%.0d",
             vaccine_uptake_duration_days="%.0d",
-            total_vaccine_uptake_doses="%.0d",
+            total_vaccine_uptake_doses="%.1f",
             vaccinated_group="%.0d",
             isolation_success = "%.2f",
             symptomatic_isolation_start_day = "%.0d",
@@ -779,7 +797,7 @@ def get_parms_from_table(table, value_col="Scenario 1"):
   # get parameter dictionary from a table
     parms = dict()
     # expect the table to have the following columns
-    # Parameter, Unmitigated, Mitigated
+    # Parameter, No Interventions, Interventions
     for key, value in zip(table["Parameter"].to_list(), table[value_col].to_list()):
         parms[key] = value
     return parms
@@ -990,7 +1008,7 @@ def calculate_outbreak_summary(combined_results, threshold):
     )
 
     # Ensure both scenarios are present in the summary
-    scenarios = ["Unmitigated", "Mitigated"]
+    scenarios = ["No Interventions", "Interventions"]
     for scenario in scenarios:
         if scenario not in outbreak_summary["Scenario"].to_list():
             # Add missing scenario with outbreaks = 0
@@ -1029,7 +1047,7 @@ def get_hospitalizations(combined_results, IHR):
     )
 
     # Ensure the order of scenarios
-    scenario_order = ["Unmitigated", "Mitigated"]
+    scenario_order = ["No Interventions", "Interventions"]
     hospitalization_summary = hospitalization_summary.with_columns(
         pl.when(pl.col("Scenario") == scenario_order[0])
         .then(0)

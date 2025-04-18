@@ -14,6 +14,8 @@ from .app_helper import (
     get_outcome_options,
     get_outcome_mapping,
     app_editors,
+    set_parms_to_zero,
+    rescale_prop_vax,
     get_widget_types,
     get_min_values,
     get_max_values,
@@ -53,17 +55,17 @@ __all__ = [
 
 
 def app(replicates=20):
+    st.set_page_config(layout="wide")
     st.title("Measles Outbreak Simulator")
     st.text("This interactive tool illustrates the impact of " \
     "vaccination, isolation, and stay-at-home measures on the probability "
     "and size of measles outbreaks over 365 days following introduction of measles into " \
-    "a community, by comparing two scenarios (unmitigated), " \
-    "with no mitigation strategies implemented, and mitigated," \
-    " which has mitigation strategies implemented).")
+    "a community, by comparing scenarios with and without interventions.")
     parms = read_parameters("scripts/app/onepop_config.yaml")
 
-    scenario_names = ["Unmitigated", "Mitigated"]
-    show_parameter_mapping = get_show_parameter_mapping()
+    scenario_names = ["No Interventions", "Interventions"]
+    show_parameter_mapping = get_show_parameter_mapping(parms)
+
     advanced_parameter_mapping = get_advanced_parameter_mapping()
 
     with st.sidebar:
@@ -83,7 +85,7 @@ def app(replicates=20):
         formats = get_formats()
         keys0 = get_widget_idkeys(0) # keys for the shared parameters
         keys1 = get_widget_idkeys(1) # keys for the parameters for scenario 1
-        keys2 = get_widget_idkeys(2) # keys for the parameters for Mitigated
+        keys2 = get_widget_idkeys(2) # keys for the parameters for Interventions
 
         # define parameters to be shared between scenarios that are shown in the sidebar by default
         # order of shared parameters in the sidebar
@@ -98,10 +100,6 @@ def app(replicates=20):
             "pop_sizes",
             "initial_vaccine_coverage",
         ]
-        shared_slider_keys = [
-            'I0',
-            'pop_sizes',
-            'initial_vaccine_coverage']
 
         col0 = st.columns(1)
         col0 = col0[0]
@@ -114,95 +112,88 @@ def app(replicates=20):
             min_values, max_values, steps, helpers, formats, keys0
         )
 
-        # parameters for each scenario separately
+        # Set parameters for each scenario separately
         # order of parameters in the sidebar
         ordered_keys = [
                         'total_vaccine_uptake_doses',
                         'vaccine_uptake_start_day',
                         'vaccine_uptake_duration_days',
-                        'isolation_success',
-                        'symptomatic_isolation_start_day',
-                        'symptomatic_isolation_duration_days',
                         'pre_rash_isolation_success',
-                        'pre_rash_isolation_start_day',
-                        'pre_rash_isolation_duration_days',
+                        'isolation_success',
                         ]
         # parameters that are lists or arrays
         list_parameter_keys = []
 
-        # make a section for each scenario
+        # Scenario parameters
+        # parameters for scenario 1 are not shown
         st.header(
-            "Mitigation strategies",
-            help="Choose strategies to implement for the 'mitigation' scenario. " \
+            "Interventions scenario",
+            help="Choose strategies to implement for the 'intervention' scenario. " \
             "Interventions can be applied independently or in combination with each other. " \
             "The results are compared to an 'unmitigated' scenario which does not have any vaccine " \
             "uptake, isolation, or stay at home incorporated.",
         )
-        col1, col2 = st.columns(2)
 
-        # show the parameters for scenario 1 but do not allow editing
-        edited_parms1 = app_editors(
-            col1, scenario_names[0], edited_parms, ordered_keys, list_parameter_keys,
-            show_parameter_mapping, widget_types,
-            min_values, max_values, steps, helpers, formats, keys1, disabled=True
-        )
+        # For the no intervention scenario, intervention parameters are set to 0
+        edited_parms1 = set_parms_to_zero(edited_parms, ["pre_rash_isolation_success", "isolation_success"])
 
+        # For the intervention scenario, user defines values
         edited_parms2 = app_editors(
-            col2, scenario_names[1], edited_parms, ordered_keys, list_parameter_keys,
+            st.container(), "", edited_parms, ordered_keys, list_parameter_keys,
             show_parameter_mapping, widget_types,
             min_values, max_values,
             steps, helpers, formats, keys2
         )
+
+        # if total uptake doses is a proportion, scale to a number of doses
+        if(parms["use_prop_vaccine_uptake"]):
+            edited_parms2 = rescale_prop_vax(edited_parms2)
+
 
         with st.expander("Advanced options"):
             st.text("These options allow changes to parameter assumptions including "
             "measles natural history parameters as well as parameters governing "
             "intervention efficacy.")
 
-            # try to place two sliders side by side
             advanced_ordered_keys = [
                 "desired_r0",
                 "latent_duration",
                 "infectious_duration",
-                "k_i",
                 ]
+
             # show additional advanced parameters if there are multiple population groups
             if parms['n_groups'] > 1:
-                advanced_ordered_keys = advanced_ordered_keys + ["k_g1", "k_g2", "k_21"]
+                advanced_ordered_keys = advanced_ordered_keys + ["k_i_0", "k_g1", "k_g2", "k_21"]
 
             # advanced parameters that are lists or arrays
             advanced_list_keys = [
                 "k_i"
                 ]
 
-            # place two sliders side by side
-            adv_col1, adv_col2 = st.columns(2)
-
-            # show the parameters for scenario 1 but do not allow editing
-            edited_advanced_parms1 = app_editors(
-                adv_col1, scenario_names[0], edited_parms1, advanced_ordered_keys,
+            # set the parameters for scenario 2
+            edited_advanced_parms2 = app_editors(
+                st.container(), "", edited_parms2, advanced_ordered_keys,
                 advanced_list_keys, advanced_parameter_mapping, widget_types,
                 min_values, max_values, steps, helpers, formats, keys1,
-                disabled=True
+                disabled=False
             )
 
-            edited_advanced_parms2 = app_editors(
-                adv_col2, scenario_names[1], edited_parms2, advanced_ordered_keys,
-                advanced_list_keys, advanced_parameter_mapping, widget_types,
-                min_values, max_values, steps, helpers, formats, keys2
-            )
+            # shared advanced parameters to scenario 1
+            edited_advanced_parms1 = edited_parms1
+            for key in advanced_ordered_keys:
+                edited_advanced_parms1[key] = edited_advanced_parms2[key]
 
     #### Intervention scenarios:
     # instead of expander, can use st.radio:
-    with st.expander("Show mitigation strategy info.", expanded=False):
+    with st.expander("Show intervention strategy info.", expanded=False):
         columns = st.columns(2)
 
-        columns[0].error("Unmitigated:\n"
+        columns[0].error("No Interventions:\n"
                         " - Vaccine doses administered: 0\n"
                         " - % of infectious individuals isolating before rash onset: 0\n"
                         " - % of infectious individuals isolating after rash onset: 0")
 
-        columns[1].info("Mitigated:\n"
+        columns[1].info("Interventions:\n"
                         f" - Vaccine doses administered: {edited_parms2['total_vaccine_uptake_doses']} between day {edited_parms2['vaccine_uptake_start_day']} and day {edited_parms2['vaccine_uptake_start_day'] + edited_parms2['vaccine_uptake_duration_days']}\n"
                         f" - % of infectious individuals isolating before rash onset: {edited_parms2['pre_rash_isolation_success']*100} between day {edited_parms2['pre_rash_isolation_start_day']} and day {edited_parms2['pre_rash_isolation_start_day'] + edited_parms2['pre_rash_isolation_duration_days']}\n"
                         f" - % of infectious individuals isolating after rash onset: {edited_parms2['isolation_success']*100} between day {edited_parms2['symptomatic_isolation_start_day']} and day {edited_parms2['symptomatic_isolation_start_day'] + edited_parms2['symptomatic_isolation_duration_days']}\n")
@@ -294,9 +285,20 @@ def app(replicates=20):
         # min_y, max_y = 0, max(interval_results1[outcome].max(), interval_results2[outcome].max())
         x = "interval_t:Q"
         time_label = "Time (weeks)"
+
+
     alt_results1 = alt_results1.with_columns(pl.lit(scenario_names[0]).alias("scenario"))
     alt_results2 = alt_results2.with_columns(pl.lit(scenario_names[1]).alias("scenario"))
     combined_alt_results = alt_results1.vstack(alt_results2)
+
+    title = (
+        f"Outcome Comparison by Scenario: Reactive Vaccination "
+        f"({edited_parms2['total_vaccine_uptake_doses']} doses), "
+        f"{int(edited_parms2['pre_rash_isolation_success'] * 100)}% isolation, "
+        f"{int(edited_parms2['isolation_success'] * 100)}% stay-at-home"
+    )
+
+
     chart = alt.Chart(combined_alt_results.to_pandas()).mark_line(opacity=0.4).encode(
         x=alt.X(x, title=time_label),
         y=alt.Y(outcome, title=outcome_option),
@@ -311,7 +313,7 @@ def app(replicates=20):
         detail = "replicate",
         tooltip=["scenario", "t", outcome]
     ).properties(
-        title="Outcome Comparison by Scenario",
+        title=title,
         width=800,
         height=400
     )
@@ -328,11 +330,15 @@ def app(replicates=20):
         pl.lit(scenario_names[1]).alias("Scenario")
     )
 
-    threshold = st.selectbox(
-        label = "Outbreak threshold:",
-        options=[50, 100, 200, 300, 500],
-        index=2,  # Default selected option (index of the options list)
+    threshold_percent = st.slider(
+        label = "Outbreak threshold (% of population that gets infected):",
+        min_value=1,
+        max_value=10,
+        step=1,
+        help = "Sum the number of simulations that have more than this percentage of the population infected.",
     )
+
+    threshold = np.sum(edited_parms2["pop_sizes"]) * threshold_percent / 100.0
 
     combined_results = fullresults2.vstack(fullresults1).with_columns(
         pl.col("t").cast(pl.Int64),

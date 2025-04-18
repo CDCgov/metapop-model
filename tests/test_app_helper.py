@@ -1,7 +1,7 @@
 import os
+import numpy as np
 import yaml
 from metapop.app_helper import *
-
 
 # read in the test config file
 testdir = os.path.dirname(__file__)
@@ -184,3 +184,28 @@ def test_get_widget_idkeys():
     assert isinstance(widget_idkeys, dict), "Expected widget idkeys to be a dictionary"
     expected_r0 = "R0_5"
     assert widget_idkeys["desired_r0"] == expected_r0, f"Expected R0 idkey to be {expected_r0}, but got {widget_idkeys['desired_r0']}"
+
+
+def test_rescale_prop_vax():
+    """Test the rescale_prop_vax function."""
+    # Input parameters
+    parms = {
+        "pop_sizes": 100,  # Population sizes for 3 groups
+        "initial_vaccine_coverage": 0.89,  # Initial vaccine coverage for each group
+        "I0": 1,  # Initial infections for each group
+        "total_vaccine_uptake_doses": 0.5,  # Proportional vaccine uptake in percentage
+    }
+
+    # Expected result
+    expected_total_doses = int(
+        np.sum(
+            (np.array(parms["pop_sizes"]) - np.array(parms["pop_sizes"]) * np.array(parms["initial_vaccine_coverage"]) - np.array(parms["I0"]))
+            * (parms["total_vaccine_uptake_doses"] / 100.0)
+        )
+    )
+
+    # Call the function
+    rescaled_parms = rescale_prop_vax(parms)
+
+    assert rescaled_parms["total_vaccine_uptake_doses"] == expected_total_doses, \
+        f"Expected total vaccine uptake doses to be {expected_total_doses}, but got {rescaled_parms['total_vaccine_uptake_doses']}"
