@@ -1,6 +1,7 @@
 # flake8: noqa
 # This file is part of the metapop package. It contains the Streamlit app for
 # the metapopulation model
+import pandas as pd
 import streamlit as st
 import numpy as np
 import polars as pl
@@ -25,9 +26,10 @@ from .app_helper import (
     get_widget_idkeys,
     add_daily_incidence,
     get_interval_results,
-    calculate_outbreak_summary,
     get_hospitalizations,
+    get_median_trajectory,
 )
+from .helper import build_vax_schedule
 
 # if you want to use the methods from metapop in this file under
 # if __name__ == "__main__": you'll need to import them as:
@@ -185,6 +187,13 @@ def app(replicates=20):
 
     #### Intervention scenarios:
     # instead of expander, can use st.radio:
+    if(edited_parms2["total_vaccine_uptake_doses"] == 0
+        and edited_parms2["pre_rash_isolation_success"] == 0
+        and edited_parms2["isolation_success"] == 0
+        ): interventions = "Off"
+    else: interventions = "On"
+
+
     with st.expander("Show intervention strategy info.", expanded=False):
         columns = st.columns(2)
 
@@ -192,11 +201,11 @@ def app(replicates=20):
                         " - Vaccine doses administered: 0\n"
                         " - % of infectious individuals isolating before rash onset: 0\n"
                         " - % of infectious individuals isolating after rash onset: 0")
-
-        columns[1].info("Interventions:\n"
-                        f" - Vaccine doses administered: {edited_parms2['total_vaccine_uptake_doses']} between day {edited_parms2['vaccine_uptake_start_day']} and day {edited_parms2['vaccine_uptake_start_day'] + edited_parms2['vaccine_uptake_duration_days']}\n"
-                        f" - % of infectious individuals isolating before rash onset: {edited_parms2['pre_rash_isolation_success']*100} between day {edited_parms2['pre_rash_isolation_start_day']} and day {edited_parms2['pre_rash_isolation_start_day'] + edited_parms2['pre_rash_isolation_duration_days']}\n"
-                        f" - % of infectious individuals isolating after rash onset: {edited_parms2['isolation_success']*100} between day {edited_parms2['symptomatic_isolation_start_day']} and day {edited_parms2['symptomatic_isolation_start_day'] + edited_parms2['symptomatic_isolation_duration_days']}\n")
+        if(interventions == "On"):
+            columns[1].info("Interventions:\n"
+                            f" - Vaccine doses administered: {edited_parms2['total_vaccine_uptake_doses']} between day {edited_parms2['vaccine_uptake_start_day']} and day {edited_parms2['vaccine_uptake_start_day'] + edited_parms2['vaccine_uptake_duration_days']}\n"
+                            f" - % of infectious individuals isolating before rash onset: {edited_parms2['pre_rash_isolation_success']*100} between day {edited_parms2['pre_rash_isolation_start_day']} and day {edited_parms2['pre_rash_isolation_start_day'] + edited_parms2['pre_rash_isolation_duration_days']}\n"
+                            f" - % of infectious individuals isolating after rash onset: {edited_parms2['isolation_success']*100} between day {edited_parms2['symptomatic_isolation_start_day']} and day {edited_parms2['symptomatic_isolation_start_day'] + edited_parms2['symptomatic_isolation_duration_days']}\n")
 
     #### Plot Options:
     # get the selected outcome from the sidebar
@@ -228,47 +237,24 @@ def app(replicates=20):
     # extract groups
     groups = results1["group"].unique().to_list()
 
-    # filter for a sample of replicates
-    replicate_inds = np.random.choice(results1["replicate"].unique().to_numpy(), replicates, replace=False)
-    results1 = results1.filter(pl.col("replicate").is_in(replicate_inds))
-    results2 = results2.filter(pl.col("replicate").is_in(replicate_inds))
-
     # do some processing here to get daily incidence
-    results1 = add_daily_incidence(results1, replicate_inds, groups)
-    results2 = add_daily_incidence(results2, replicate_inds, groups)
+    results1 = add_daily_incidence(results1, groups)
+    results2 = add_daily_incidence(results2, groups)
 
     # create tables with interval results - weekly incidence, weekly cumulative incidence
     interval = 7
 
-    interval_results1 = get_interval_results(results1, replicate_inds, groups, interval)
-    interval_results2 = get_interval_results(results2, replicate_inds, groups, interval)
+    interval_results1 = get_interval_results(results1, groups, interval)
+    interval_results2 = get_interval_results(results2, groups, interval)
 
     # rename columns for the app
     app_column_mapping = {f"inc_{interval}": "Winc", "Y": "WCI"}
     interval_results1 = interval_results1.rename(app_column_mapping)
     interval_results2 = interval_results2.rename(app_column_mapping)
 
-    # # set up the color scale
-    # domain = [str(i) for i in range(len(groups))]
-    # group_labels = ["General population", "Small population 1", "Small population 2"]
+    # vax schedule for plotting
+    sched = build_vax_schedule(edited_parms2)
 
-    # # plot with Altair
-    # if len(groups) == 3:
-    #     color_scale = alt.Scale(
-    #         domain=[str(i) for i in range(len(results1["group"].unique()))],
-    #         range = [
-    #             "#20419a", # blue
-    #             "#cf4828", # red
-    #             "#f78f47", # orange
-    #         ]
-    #     )
-    # elif len(groups) == 1:
-    #     color_scale = alt.Scale(
-    #         domain=[str(i) for i in range(len(results1["group"].unique()))],
-    #         range = [
-    #             "#068482", # green
-    #         ]
-    #     )
     if outcome not in ["I", "Y", "inc", "Winc", "WCI"]:
         print("outcome not available yet, defaulting to Cumulative Daily Incidence")
         outcome = "Y"
@@ -279,27 +265,42 @@ def app(replicates=20):
         # min_y, max_y = 0, max(results1[outcome].max(), results2[outcome].max())
         x = "t:Q"
         time_label = "Time (days)"
+        vax_start = min(sched.keys())
+        vax_end = max(sched.keys())
     elif outcome_option in ['Weekly Incidence', 'Weekly Cumulative Incidence']:
         alt_results1 = interval_results1
         alt_results2 = interval_results2
         # min_y, max_y = 0, max(interval_results1[outcome].max(), interval_results2[outcome].max())
         x = "interval_t:Q"
         time_label = "Time (weeks)"
+        vax_start = min(sched.keys()) / interval
+        vax_end = max(sched.keys()) / interval
 
+    # get median line for each scenario (based on ALL sims, not just smaller sample)
+    ave_results1 = get_median_trajectory(alt_results1).with_columns(pl.lit(scenario_names[0]).alias("scenario"))
+    ave_results2 = get_median_trajectory(alt_results2).with_columns(pl.lit(scenario_names[1]).alias("scenario"))
+    combined_ave_results = ave_results1.vstack(ave_results2)
 
+    # Get smaller subset of results for plotting
     alt_results1 = alt_results1.with_columns(pl.lit(scenario_names[0]).alias("scenario"))
     alt_results2 = alt_results2.with_columns(pl.lit(scenario_names[1]).alias("scenario"))
-    combined_alt_results = alt_results1.vstack(alt_results2)
+    replicate_inds = np.random.choice(results1["replicate"].unique().to_numpy(), replicates, replace=False)
+    combined_alt_results = alt_results1.vstack(alt_results2).filter(pl.col("replicate").is_in(replicate_inds))
 
-    title = (
-        f"Outcome Comparison by Scenario: Reactive Vaccination "
-        f"({edited_parms2['total_vaccine_uptake_doses']} doses), "
-        f"{int(edited_parms2['pre_rash_isolation_success'] * 100)}% isolation, "
-        f"{int(edited_parms2['isolation_success'] * 100)}% stay-at-home"
-    )
+    # create chart title, depending on whether interventions are on/off
+    if(interventions == "On"):
+        title = (
+            f"Outcome Comparison by Scenario: Reactive Vaccination "
+            f"({edited_parms2['total_vaccine_uptake_doses']} doses), "
+            f"{int(edited_parms2['pre_rash_isolation_success'] * 100)}% isolation, "
+            f"{int(edited_parms2['isolation_success'] * 100)}% stay-at-home"
+        )
+    else:
+        combined_alt_results = alt_results1
+        combined_ave_results = ave_results1
+        title = (f"No Intervention Scenario")
 
-
-    chart = alt.Chart(combined_alt_results.to_pandas()).mark_line(opacity=0.4).encode(
+    chart = alt.Chart(combined_alt_results.to_pandas()).mark_line(opacity=0.5, strokeWidth=0.75).encode(
         x=alt.X(x, title=time_label),
         y=alt.Y(outcome, title=outcome_option),
         color=alt.Color(
@@ -318,6 +319,55 @@ def app(replicates=20):
         height=400
     )
 
+    # If vaccines administered > 0, add vax schedule to plot
+    if(edited_parms2["total_vaccine_uptake_doses"] > 0):
+        vax = alt.Chart(pd.DataFrame({
+            "x_start": [vax_start],  # Start of the box
+            "x_end": [vax_end]       # End of the box
+        })).mark_rect(
+            opacity=0.1,
+            color="grey"
+        ).encode(
+            x=alt.X("x_start:Q", title=time_label),
+            x2="x_end:Q"  # End position of the box
+        )
+
+        chart = chart + vax
+
+    ave_line = alt.Chart(combined_ave_results).mark_line(opacity=1.0, strokeWidth=3.0).encode(
+        x=alt.X(x, title=time_label),
+        y=alt.Y(outcome, title=outcome_option),
+        color=alt.Color(
+            "scenario",
+            title="Scenario",
+            scale=alt.Scale(
+                domain=[scenario_names[0], scenario_names[1]],  # Scenarios
+                range=["#cf4828", "#20419a"]  # Corresponding colors (red, blue)
+            )
+        ),
+        tooltip=["scenario", "t", outcome]
+    )
+
+    chart = chart + ave_line
+
+    if (interventions == "Off"):
+        # Create a text annotation
+        annotation = alt.Chart(pd.DataFrame({"text": ["Use at least one intervention to compare scenarios"]})).mark_text(
+            align="center",
+            baseline="top",
+            color = "grey",
+            fontSize=18
+        ).encode(
+            text="text:N",
+            y=alt.value(10)
+        )
+
+        # Add the annotation to the chart
+        chart = chart + annotation
+    else:
+        chart = chart
+
+    chart = chart.properties(padding = {"top": 10, "bottom": 30, "left": 30, "right": 40})
     st.altair_chart(chart, use_container_width=True)
 
 
@@ -330,16 +380,6 @@ def app(replicates=20):
         pl.lit(scenario_names[1]).alias("Scenario")
     )
 
-    threshold_percent = st.slider(
-        label = "Outbreak threshold (% of population that gets infected):",
-        min_value=1,
-        max_value=10,
-        step=1,
-        help = "Sum the number of simulations that have more than this percentage of the population infected.",
-    )
-
-    threshold = np.sum(edited_parms2["pop_sizes"]) * threshold_percent / 100.0
-
     combined_results = fullresults2.vstack(fullresults1).with_columns(
         pl.col("t").cast(pl.Int64),
         pl.col("group").cast(pl.Int64),
@@ -348,18 +388,9 @@ def app(replicates=20):
      .group_by("Scenario", "replicate"
      ).agg(pl.col("Y").sum().alias("Total"))
 
-    outbreak_summary = calculate_outbreak_summary(combined_results, threshold)
     hospitalization_summary = get_hospitalizations(combined_results, parms["IHR"])
 
-    # Merge hospitalization_summary and outbreak_summary by the "Scenario" column
-    merged_summary = outbreak_summary.join(
-        hospitalization_summary,
-        on="Scenario",
-        how="inner"  # Use "inner" to keep only matching rows
-    )
-
-    transposed = merged_summary.select([
-        pl.col("outbreaks").alias(f"Number of outbreaks with more than > {threshold} infections"),
+    transposed = hospitalization_summary.select([
         pl.col("Total Infections").alias("Average Outbreak Size"),
         pl.col("Hospitalizations").alias("Average Number of Hospitalizations")
     ]).transpose(include_header=True)
@@ -370,6 +401,9 @@ def app(replicates=20):
             (pl.col(scenario_names[0]) - pl.col(scenario_names[1])) / pl.col(scenario_names[0])
         ).alias("Relative Difference")
     )
+
+    if(interventions == "Off"):
+        transposed = transposed.select("Metric", scenario_names[0])
 
     st.dataframe(transposed)
 

@@ -46,6 +46,7 @@ __all__ = [
     "get_hospitalizations",
     "set_parms_to_zero",
     "rescale_prop_vax",
+    "get_median_trajectory",
 ]
 
 ### Methods to simulate the model for the app ###
@@ -256,6 +257,8 @@ def get_advanced_parameter_mapping():
         n_groups="Number of groups",
         infectious_duration="Infectious period (days)",
         latent_duration="Latent period (days)",
+        pre_rash_isolation_success = "Daily proportion of infectious individuals who stay-at-home following exposure prior to rash onset",
+        isolation_success = "Daily proportion of infectious individuals who isolate after rash onset",
         # n_e_compartments="Number of exposed compartments",
         # n_i_compartments="Number of infectious compartments",
         # tf="Number of time steps",
@@ -850,13 +853,12 @@ def correct_parameter_types(original_parms, parms_from_table):
 
 
 ### Methods to calculate different metrics from simulation results ###
-def add_daily_incidence(results, replicate_inds, groups):
+def add_daily_incidence(results, groups):
     """
     Add daily incidence to the results DataFrame."
 
     Args:
         results (pl.DataFrame): The results DataFrame.
-        replicate_inds  (list): List of replicate indices.
         groups          (list): List of group indices.
 
     Returns:
@@ -864,9 +866,10 @@ def add_daily_incidence(results, replicate_inds, groups):
     """
     # add a column for daily incidence
     results = results.with_columns(pl.lit(None).alias("inc"))
+    unique_replicates = results.select("replicate").unique().to_series().to_list()
     updated_rows = []
 
-    for replicate in replicate_inds:
+    for replicate in unique_replicates:
         tempdf = results.filter(pl.col("replicate") == replicate)
         for group in groups:
             group_data = tempdf.filter(pl.col("group") == group)
@@ -879,13 +882,12 @@ def add_daily_incidence(results, replicate_inds, groups):
     return results
 
 
-def get_interval_cumulative_incidence(results, replicate_inds, groups, interval=7):
+def get_interval_cumulative_incidence(results, groups, interval=7):
     """"
     Calculate cumulative incidence over specified intervals.
 
     Args:
         results (pl.DataFrame): The results DataFrame.
-        replicate_inds  (list): List of replicate indices.
         groups          (list): List of group indices.
         interval         (int): The interval in days.
 
@@ -901,7 +903,8 @@ def get_interval_cumulative_incidence(results, replicate_inds, groups, interval=
     interval_results = interval_results.filter(pl.col("t").is_in(time_points))
 
     # tile the interval time points for each group and replicate
-    repeated_interval_points = np.tile(interval_points, len(groups) * len(replicate_inds))
+    unique_replicates = results.select("replicate").unique().to_series().to_list()
+    repeated_interval_points = np.tile(interval_points, len(groups) * len(unique_replicates))
     # add the interval time points to the interval results table
     interval_results = interval_results.with_columns(pl.Series(name="interval_t", values=repeated_interval_points))
 
@@ -909,13 +912,12 @@ def get_interval_cumulative_incidence(results, replicate_inds, groups, interval=
     return interval_results
 
 
-def get_interval_results(results, replicate_inds, groups, interval=7):
+def get_interval_results(results, groups, interval=7):
     """"
     Calculate interval results for cumulative incidence.
 
     Args:
         results (pl.DataFrame): The results DataFrame.
-        replicate_inds  (list): List of replicate indices.
         groups          (list): List of group indices.
         interval         (int): The interval in days
 
@@ -924,10 +926,13 @@ def get_interval_results(results, replicate_inds, groups, interval=7):
     """
     # get a table with results, in particular cumulative incidence at each interval time point
     # in this table, Y is the cumulative incidence
-    interval_results = get_interval_cumulative_incidence(results, replicate_inds, groups, interval)
+
+    interval_results = get_interval_cumulative_incidence(results, groups, interval)
     # now process this table to get the interval incidence
+    unique_replicates = results.select("replicate").unique().to_series().to_list()
+
     updated_rows = []
-    for replicate in replicate_inds:
+    for replicate in unique_replicates:
         tempdf = interval_results.filter(pl.col("replicate") == replicate)
         for group in groups:
             group_data = tempdf.filter(pl.col("group") == group)
@@ -1058,3 +1063,23 @@ def get_hospitalizations(combined_results, IHR):
     ).sort("_sort_order").drop("_sort_order")
 
     return hospitalization_summary
+
+def get_median_trajectory(results):
+
+    # data at the end of simulation
+    max_t = results.select(pl.col("t").max()).item()  # Get the maximum value of t
+    filtered_results = results.filter(pl.col("t") == max_t)
+    median_R = filtered_results.select(pl.col("R").median()).item()  # Get the median value of R
+
+    # get replicate closest to the median value of R
+    closest_replicate = (
+        filtered_results
+        .with_columns((pl.col("R") - median_R).abs().alias("distance"))  # Calculate the absolute difference
+        .sort("distance")  # Sort by the distance
+        .select("replicate")  # Select the replicate column
+        .head(1)  # Get the first (closest) replicate
+        .item()
+    )
+
+    median_trajectory = results.filter(pl.col("replicate") == closest_replicate)
+    return median_trajectory

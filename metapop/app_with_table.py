@@ -138,20 +138,15 @@ def app_with_table(replicates=20):
     # extract groups
     groups = results1["group"].unique().to_list()
 
-    # filter for a sample of replicates
-    replicate_inds = np.random.choice(results1["replicate"].unique().to_numpy(), replicates, replace=False)
-    results1 = results1.filter(pl.col("replicate").is_in(replicate_inds))
-    results2 = results2.filter(pl.col("replicate").is_in(replicate_inds))
-
     # do some processing here to get daily incidence
-    results1 = add_daily_incidence(results1, replicate_inds, groups)
-    results2 = add_daily_incidence(results2, replicate_inds, groups)
+    results1 = add_daily_incidence(results1, groups)
+    results2 = add_daily_incidence(results2, groups)
 
     # create tables with interval results - weekly incidence, weekly cumulative incidence
     interval = 7
 
-    interval_results1 = get_interval_results(results1, replicate_inds, groups, interval)
-    interval_results2 = get_interval_results(results2, replicate_inds, groups, interval)
+    interval_results1 = get_interval_results(results1, groups, interval)
+    interval_results2 = get_interval_results(results2, groups, interval)
 
     # rename columns for the app
     app_column_mapping = {f"inc_{interval}": "Winc", "Y": "WCI"}
@@ -187,6 +182,12 @@ def app_with_table(replicates=20):
         min_y, max_y = 0, max(interval_results1[outcome].max(), interval_results2[outcome].max())
         x = "interval_t:Q"
         time_label = "Time (weeks)"
+
+    # for altair, plot only a subset
+    replicate_inds = np.random.choice(results1["replicate"].unique().to_numpy(), replicates, replace=False)
+    alt_results1 = alt_results1.filter(pl.col("replicate").is_in(replicate_inds))
+    alt_results2 = alt_results2.filter(pl.col("replicate").is_in(replicate_inds))
+
 
     y = f"{outcome}:Q"
     yscale = [min_y, max_y]
