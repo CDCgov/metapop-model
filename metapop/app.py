@@ -143,6 +143,12 @@ def app(replicates=20):
         # add a section in the sidebar panel to reset the app
         col_reset = st.columns(1)[0]
 
+        # add a section for the reset button - define it here so that it is always at the top of the sidebar panel
+        col_reset = st.columns(1)[0]
+
+        # add a section for the shared parameters in the sidebar panel
+        col0 = st.columns(1)[0]
+
         # define parameters to be shared between scenarios that are shown in the sidebar by default
         # order of shared parameters in the sidebar
         shared_keys = [
@@ -249,6 +255,8 @@ def app(replicates=20):
         col_intervention_text = st.columns(1)[0]
 
         col_intervention_npi = st.columns(1)[0]
+
+        col_intervention = st.columns(1)[0]
 
         # For the intervention scenario, user defines values
         edited_parms2 = app_editors(
