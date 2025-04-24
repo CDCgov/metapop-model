@@ -2,6 +2,7 @@
 # implementation
 import numpy as np
 from enum import Enum
+
 # import what's needed from other metapop modules
 from .helper import (
     get_infected,
@@ -33,12 +34,13 @@ class Ind(Enum):
     Y = 7
     X = 8
 
+
 class SEIRModel:
     def __init__(self, parms):
         self.parms = parms
 
         # convert some lists to arrays
-        self.parms['k_i'] = np.array(parms['k_i'])
+        self.parms["k_i"] = np.array(parms["k_i"])
 
         # define internal model variables
         self.groups = parms["n_groups"]
@@ -54,13 +56,19 @@ class SEIRModel:
             S = current_susceptibles[target_group]
 
             # Get new Infections, for beta: rows are to, columns are from
-            foi =  calculate_foi(self.parms["beta"], I_g, self.parms["pop_sizes"], target_group)
+            foi = calculate_foi(
+                self.parms["beta"], I_g, self.parms["pop_sizes"], target_group
+            )
             new_e_frac = rate_to_frac(foi)
-            new_exposed.append(np.random.binomial(S, new_e_frac))  # Ensure S is non-negative
+            new_exposed.append(
+                np.random.binomial(S, new_e_frac)
+            )  # Ensure S is non-negative
 
             # Get within E chain movement (E1 -> E2)
             e1_to_e2_frac = rate_to_frac(self.parms["sigma_scaled"])
-            old_exposed.append(np.random.binomial(u[target_group][Ind.E1.value], e1_to_e2_frac))
+            old_exposed.append(
+                np.random.binomial(u[target_group][Ind.E1.value], e1_to_e2_frac)
+            )
 
         return [new_exposed, old_exposed]
 
@@ -69,7 +77,9 @@ class SEIRModel:
 
         if self.parms["total_vaccine_uptake_doses"] > 0:
             vaccination_uptake_schedule = self.parms["vaccination_uptake_schedule"]
-            new_vaccinated = vaccinate_groups(self.groups, u, t, vaccination_uptake_schedule, self.parms)
+            new_vaccinated = vaccinate_groups(
+                self.groups, u, t, vaccination_uptake_schedule, self.parms
+            )
         else:
             for group in range(self.groups):
                 new_vaccinated.append(0)
@@ -81,16 +91,22 @@ class SEIRModel:
         old_infectious = []
         for group in range(self.groups):
             new_i_frac = rate_to_frac(self.parms["sigma_scaled"])
-            new_infectious.append(np.random.binomial(u[group][Ind.E2.value], new_i_frac))
+            new_infectious.append(
+                np.random.binomial(u[group][Ind.E2.value], new_i_frac)
+            )
             i1_to_i2_frac = rate_to_frac(self.parms["gamma_scaled"])
-            old_infectious.append(np.random.binomial(u[group][Ind.I1.value], i1_to_i2_frac))
+            old_infectious.append(
+                np.random.binomial(u[group][Ind.I1.value], i1_to_i2_frac)
+            )
         return [new_infectious, old_infectious]
 
     def recovery(self, u, t):
         new_recoveries = []
         for group in range(self.groups):
             new_r_frac = rate_to_frac(self.parms["gamma_scaled"])
-            new_recoveries.append(np.random.binomial(u[group][Ind.I2.value], new_r_frac))
+            new_recoveries.append(
+                np.random.binomial(u[group][Ind.I2.value], new_r_frac)
+            )
         return new_recoveries
 
     def get_updated_susceptibles(self, u, new_vaccinated):
@@ -107,7 +123,6 @@ class SEIRModel:
             S = u[target_group][Ind.S.value] - new_vaccinated[target_group]
             updated_susceptibles.append(S)
         return updated_susceptibles
-
 
     def seirmodel(self, u, t):
         new_u = []
@@ -127,6 +142,8 @@ class SEIRModel:
             new_R = R + new_recoveries[group]
             new_Y = Y + new_infectious[group]
             new_X = X + new_vaccinated[group]
-            new_u.append([new_S, new_V, new_E1, new_E2, new_I1, new_I2, new_R, new_Y, new_X])
+            new_u.append(
+                [new_S, new_V, new_E1, new_E2, new_I1, new_I2, new_R, new_Y, new_X]
+            )
 
         return new_u

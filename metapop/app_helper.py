@@ -6,6 +6,7 @@ import altair as alt
 import griddler
 import griddler.griddle
 import copy
+
 # import what's needed from other metapop modules
 from .sim import simulate
 
@@ -49,6 +50,7 @@ __all__ = [
     "get_median_trajectory",
 ]
 
+
 ### Methods to simulate the model for the app ###
 def get_scenario_results(parms):
     """
@@ -64,10 +66,23 @@ def get_scenario_results(parms):
     # cast group to string
     results = results.with_columns(pl.col("group").cast(pl.Utf8))
     # select subset of values to return
-    results = results.select([
-        "k_21", "t", "group",
-        "S", "V", "E1", "E2", "I1", "I2", "R", "Y", "X", "replicate"
-    ])
+    results = results.select(
+        [
+            "k_21",
+            "t",
+            "group",
+            "S",
+            "V",
+            "E1",
+            "E2",
+            "I1",
+            "I2",
+            "R",
+            "Y",
+            "X",
+            "replicate",
+        ]
+    )
     # add a column for total infections
     results = results.with_columns((pl.col("I1") + pl.col("I2")).alias("I"))
     return results
@@ -75,7 +90,7 @@ def get_scenario_results(parms):
 
 ### Methods to read in default parameters ###
 def read_parameters(filepath="scripts/app/app_config.yaml"):
-    """"
+    """ "
     Read parameters from a YAML file and return the first set of parameters.
 
     Returns:
@@ -102,7 +117,7 @@ def get_default_full_parameters():
     list_keys = get_list_keys(parms)
     for key in list_keys:
         for i, value in enumerate(parms[key]):
-            parms['{}_{}'.format(key, i)] = value
+            parms["{}_{}".format(key, i)] = value
 
         del parms[key]
 
@@ -115,13 +130,13 @@ def get_default_full_parameters():
             "No Interventions": values,
             "Interventions": values,
         },
-        strict=False
+        strict=False,
     )
     return defaults
 
 
 def get_default_show_parameters_table():
-    """"
+    """ "
     Get a Dataframe of the default simulation parameters that users always see
     in the app sidebar. This Dataframe contains default values for two
     scenarios that can be updated by the user through other methods.
@@ -132,10 +147,12 @@ def get_default_show_parameters_table():
 
     full_defaults = get_default_full_parameters()
     show_parameter_mapping = get_show_parameter_mapping()
-    show_defaults = full_defaults.filter(pl.col("Parameter").is_in(show_parameter_mapping.keys()))
+    show_defaults = full_defaults.filter(
+        pl.col("Parameter").is_in(show_parameter_mapping.keys())
+    )
 
     # replace specific values with integers
-    for key in ['No Interventions', 'Interventions']:
+    for key in ["No Interventions", "Interventions"]:
         show_defaults = show_defaults.with_columns(
             pl.when(pl.col(key).str.to_lowercase() == "true")
             .then(1)
@@ -146,13 +163,21 @@ def get_default_show_parameters_table():
         )
 
     # cast to float
-    show_defaults = show_defaults.with_columns(pl.col("No Interventions").cast(pl.Float64))
+    show_defaults = show_defaults.with_columns(
+        pl.col("No Interventions").cast(pl.Float64)
+    )
     show_defaults = show_defaults.with_columns(pl.col("Interventions").cast(pl.Float64))
 
     # renaming keys with longer names
     show_defaults = show_defaults.with_columns(
-        pl.Series(name="Parameter",
-                  values=[show_parameter_mapping.get(key) for key in show_defaults["Parameter"].to_list()]))
+        pl.Series(
+            name="Parameter",
+            values=[
+                show_parameter_mapping.get(key)
+                for key in show_defaults["Parameter"].to_list()
+            ],
+        )
+    )
 
     return show_defaults
 
@@ -167,7 +192,7 @@ def get_advanced_parameters_table():
     )
 
     # replace specific values with integers
-    for key in ['No Interventions', 'Interventions']:
+    for key in ["No Interventions", "Interventions"]:
         advanced_defaults = advanced_defaults.with_columns(
             pl.when(pl.col(key).str.to_lowercase() == "true")
             .then(1)
@@ -178,14 +203,25 @@ def get_advanced_parameters_table():
         )
 
     # cast to float
-    advanced_defaults = advanced_defaults.with_columns(pl.col("No Interventions").cast(pl.Float64))
-    advanced_defaults = advanced_defaults.with_columns(pl.col("Interventions").cast(pl.Float64))
+    advanced_defaults = advanced_defaults.with_columns(
+        pl.col("No Interventions").cast(pl.Float64)
+    )
+    advanced_defaults = advanced_defaults.with_columns(
+        pl.col("Interventions").cast(pl.Float64)
+    )
 
     # renaming keys with longer names
     advanced_defaults = advanced_defaults.with_columns(
-        pl.Series(name="Parameter",
-                  values=[advanced_parameter_mapping.get(key) for key in advanced_defaults["Parameter"].to_list()]))
+        pl.Series(
+            name="Parameter",
+            values=[
+                advanced_parameter_mapping.get(key)
+                for key in advanced_defaults["Parameter"].to_list()
+            ],
+        )
+    )
     return advanced_defaults
+
 
 ### Methods to handle how parameters are displayed in the app ###
 def get_show_parameter_mapping(parms=None):
@@ -209,9 +245,9 @@ def get_show_parameter_mapping(parms=None):
         # latent_duration = "Latent period (days)",
         # n_i_compartments = "Number of infectious compartments",
         # infectious_duration = "Infectious period (days)",
-        pop_sizes_0 = "Size of large population",
-        pop_sizes_1 = "Size of small population 1",
-        pop_sizes_2 = "Size of small population 2",
+        pop_sizes_0="Size of large population",
+        pop_sizes_1="Size of small population 1",
+        pop_sizes_2="Size of small population 2",
         I0_0="Initial infections in large population",
         I0_1="Initial infections in small population 1",
         I0_2="Initial infections in small population 2",
@@ -219,24 +255,24 @@ def get_show_parameter_mapping(parms=None):
         total_vaccine_uptake_doses="% unvaccinated individuals that get vaccinated",
         vaccine_uptake_start_day="Active vaccination start day",
         vaccine_uptake_duration_days="Active vaccination duration days",
-        vaccinated_group = "Vaccinated group",
+        vaccinated_group="Vaccinated group",
         # symptomatic_isolation = "Enable symptomatic isolation",
-        isolation_success = "Symptomatic individuals isolating",
-        symptomatic_isolation_start_day = "Symptomatic isolation start day",
-        symptomatic_isolation_duration_days = "Symptomatic isolation duration days",
-        pre_rash_isolation_success = "Stay-at-home",
-        pre_rash_isolation_start_day = "Pre-rash isolation start day",
-        pre_rash_isolation_duration_days = "Pre-rash isolation duration days",
-        tf = "Time steps",
+        isolation_success="Symptomatic individuals isolating",
+        symptomatic_isolation_start_day="Symptomatic isolation start day",
+        symptomatic_isolation_duration_days="Symptomatic isolation duration days",
+        pre_rash_isolation_success="Stay-at-home",
+        pre_rash_isolation_start_day="Pre-rash isolation start day",
+        pre_rash_isolation_duration_days="Pre-rash isolation duration days",
+        tf="Time steps",
         # n_replicates = "Number of replicates",
         # seed = "Random seed",
-        initial_vaccine_coverage_0 = "Baseline vaccination in large population",
-        initial_vaccine_coverage_1 = "Baseline vaccination in small population 1",
-        initial_vaccine_coverage_2 = "Baseline vaccination in small population 2",
+        initial_vaccine_coverage_0="Baseline vaccination in large population",
+        initial_vaccine_coverage_1="Baseline vaccination in small population 1",
+        initial_vaccine_coverage_2="Baseline vaccination in small population 2",
     )
 
     if parms is not None and isinstance(parms, dict):
-        if(parms["n_groups"] == 1):
+        if parms["n_groups"] == 1:
             show_mapping["pop_sizes_0"] = "Population Size"
             show_mapping["I0_0"] = "Initial infections"
             show_mapping["initial_vaccine_coverage_0"] = "Baseline vaccination"
@@ -257,8 +293,8 @@ def get_advanced_parameter_mapping():
         n_groups="Number of groups",
         infectious_duration="Infectious period (days)",
         latent_duration="Latent period (days)",
-        pre_rash_isolation_success = "Daily proportion of infectious individuals who stay-at-home following exposure prior to rash onset",
-        isolation_success = "Daily proportion of infectious individuals who isolate after rash onset",
+        pre_rash_isolation_success="Daily proportion of infectious individuals who stay-at-home following exposure prior to rash onset",
+        isolation_success="Daily proportion of infectious individuals who isolate after rash onset",
         # n_e_compartments="Number of exposed compartments",
         # n_i_compartments="Number of infectious compartments",
         # tf="Number of time steps",
@@ -266,12 +302,12 @@ def get_advanced_parameter_mapping():
         # pop_sizes_1="Size of small population 1",
         # pop_sizes_2="Size of small population 2",
         # k_i = "Average degree",
-        k_i_0 = "Average degree for large population",
-        k_i_1 = "Average degree for small population 1",
-        k_i_2 = "Average degree for small population 2",
-        k_g1 = "Average degree of small population 1 connecting to large population",
-        k_g2 = "Average degree of small population 2 connecting to large population",
-        k_21 = "Connectivity between smaller populations",
+        k_i_0="Average degree for large population",
+        k_i_1="Average degree for small population 1",
+        k_i_2="Average degree for small population 2",
+        k_g1="Average degree of small population 1 connecting to large population",
+        k_g2="Average degree of small population 2 connecting to large population",
+        k_21="Connectivity between smaller populations",
     )
     return advanced_mapping
 
@@ -284,9 +320,12 @@ def get_outcome_options():
         tuple: A tuple containing the available outcome options.
     """
     return (
-            # "Weekly Infections",
-            "Weekly Incidence", "Weekly Cumulative Incidence",
-            "Daily Infections", "Daily Incidence", "Daily Cumulative Incidence",
+        # "Weekly Infections",
+        "Weekly Incidence",
+        "Weekly Cumulative Incidence",
+        "Daily Infections",
+        "Daily Incidence",
+        "Daily Cumulative Incidence",
     )
 
 
@@ -335,7 +374,11 @@ def get_keys_in_list(parms, updated_parms):
         list: The keys of the parameters that are in the list keys of the updated parameters.
     """
     list_keys = get_list_keys(parms)
-    keys_in_list = [key for key in updated_parms.keys() if any(key.startswith(list_key) for list_key in list_keys)]
+    keys_in_list = [
+        key
+        for key in updated_parms.keys()
+        if any(key.startswith(list_key) for list_key in list_keys)
+    ]
     keys_in_list = [key for key in sorted(keys_in_list)]
     return keys_in_list
 
@@ -358,10 +401,16 @@ def repack_list_parameters(parms, updated_parms, keys_in_list):
 
         if list_key not in updated_parms:
             updated_parms[list_key] = []
-        if isinstance(parms[list_key][0], int) and not isinstance(parms[list_key][0], bool):
+        if isinstance(parms[list_key][0], int) and not isinstance(
+            parms[list_key][0], bool
+        ):
             updated_parms[list_key].append(int(updated_parms[key]))
         elif isinstance(parms[list_key][0], bool):
-            updated_parms[list_key].append(True if updated_parms[key] in [True, 'TRUE', 'True', 'true', '1'] else False)
+            updated_parms[list_key].append(
+                True
+                if updated_parms[key] in [True, "TRUE", "True", "true", "1"]
+                else False
+            )
         elif isinstance(parms[list_key][0], float):
             updated_parms[list_key].append(float(updated_parms[key]))
         elif isinstance(parms[list_key][0], str):
@@ -378,22 +427,39 @@ def set_parms_to_zero(parms, parms_to_set):
     edited_parms = copy.deepcopy(parms)
 
     for key in parms_to_set:
-            edited_parms[key] = 0.0
+        edited_parms[key] = 0.0
 
     return edited_parms
+
 
 def rescale_prop_vax(edited_parms):
     pop_sizes = np.array(edited_parms["pop_sizes"])
     initial_vaccine_coverage = np.array(edited_parms["initial_vaccine_coverage"])
     prop_vaccine_uptake_doses = edited_parms["total_vaccine_uptake_doses"] / 100.0
-    edited_parms["total_vaccine_uptake_doses"] = int((pop_sizes - pop_sizes * initial_vaccine_coverage - edited_parms["I0"]) * prop_vaccine_uptake_doses)
+    edited_parms["total_vaccine_uptake_doses"] = int(
+        (pop_sizes - pop_sizes * initial_vaccine_coverage - edited_parms["I0"])
+        * prop_vaccine_uptake_doses
+    )
     return edited_parms
 
+
 ### Methods to create user inputs interfaces ###
-def app_editors(element, scenario_name, parms,
-                ordered_keys, list_keys, show_parameter_mapping,
-                widget_types, min_values, max_values, steps, helpers,
-                formats, element_keys, disabled=False):
+def app_editors(
+    element,
+    scenario_name,
+    parms,
+    ordered_keys,
+    list_keys,
+    show_parameter_mapping,
+    widget_types,
+    min_values,
+    max_values,
+    steps,
+    helpers,
+    formats,
+    element_keys,
+    disabled=False,
+):
     """
     Create the sidebar for editing parameters.
 
@@ -425,31 +491,38 @@ def app_editors(element, scenario_name, parms,
         for key in ordered_keys:
             if key not in list_keys:
                 # if key in slider_keys:
-                if widget_types[key] == 'slider':
-                    value = st.slider(show_parameter_mapping[key],
-                                      min_value=min_values[key], max_value=max_values[key],
-                                      value=parms[key],
-                                      step=steps[key],
-                                      help=helpers[key],
-                                      format=formats[key],
-                                      key=element_keys[key],
-                                      disabled=disabled
-                                      )
-                elif widget_types[key] == 'number_input':
-                    value = st.number_input(show_parameter_mapping[key],
-                                        min_value=min_values[key], max_value=max_values[key],
-                                        value=parms[key],
-                                        step=steps[key],
-                                        help=helpers[key],
-                                        format=formats[key],
-                                        key=element_keys[key],
-                                        disabled=disabled)
-                elif widget_types[key] == 'toggle':
-                    value = st.toggle(show_parameter_mapping[key],
-                                      value=False,
-                                      help=helpers[key],
-                                      key=element_keys[key],
-                                      disabled=disabled)
+                if widget_types[key] == "slider":
+                    value = st.slider(
+                        show_parameter_mapping[key],
+                        min_value=min_values[key],
+                        max_value=max_values[key],
+                        value=parms[key],
+                        step=steps[key],
+                        help=helpers[key],
+                        format=formats[key],
+                        key=element_keys[key],
+                        disabled=disabled,
+                    )
+                elif widget_types[key] == "number_input":
+                    value = st.number_input(
+                        show_parameter_mapping[key],
+                        min_value=min_values[key],
+                        max_value=max_values[key],
+                        value=parms[key],
+                        step=steps[key],
+                        help=helpers[key],
+                        format=formats[key],
+                        key=element_keys[key],
+                        disabled=disabled,
+                    )
+                elif widget_types[key] == "toggle":
+                    value = st.toggle(
+                        show_parameter_mapping[key],
+                        value=False,
+                        help=helpers[key],
+                        key=element_keys[key],
+                        disabled=disabled,
+                    )
                     # if toggle is turned on, set value to the original value for the model
                     if value is True:
                         value = parms[key]
@@ -461,31 +534,39 @@ def app_editors(element, scenario_name, parms,
             if key in list_keys:
                 for index in range(len(parms[key])):
                     # if key in slider_keys:
-                    if widget_types[key] == 'slider':
-                        value = st.slider(show_parameter_mapping[f"{key}_{index}"],
-                                            min_value=min_values[key][index], max_value=max_values[key][index],
-                                            value=parms[key][index],
-                                            step=steps[key],
-                                            help=helpers[key][index],
-                                            format=formats[key],
-                                            key=element_keys[key][index],
-                                            disabled=disabled)
+                    if widget_types[key] == "slider":
+                        value = st.slider(
+                            show_parameter_mapping[f"{key}_{index}"],
+                            min_value=min_values[key][index],
+                            max_value=max_values[key][index],
+                            value=parms[key][index],
+                            step=steps[key],
+                            help=helpers[key][index],
+                            format=formats[key],
+                            key=element_keys[key][index],
+                            disabled=disabled,
+                        )
                     # else:
-                    elif widget_types[key] == 'number_input':
-                        value = st.number_input(show_parameter_mapping[f"{key}_{index}"],
-                                            min_value=min_values[key][index], max_value=max_values[key][index],
-                                            value=parms[key][index],
-                                            step=steps[key],
-                                            help=helpers[key][index],
-                                            format=formats[key],
-                                            key=element_keys[key][index],
-                                            disabled=disabled)
-                    elif widget_types[key] == 'toggle':
-                        value = st.toggle(show_parameter_mapping[f"{key}_{index}"],
-                                          value=[True if parms[key][index] > 0 else False],
-                                          help=helpers[key][index],
-                                          key=element_keys[key][index],
-                                          disabled=disabled)
+                    elif widget_types[key] == "number_input":
+                        value = st.number_input(
+                            show_parameter_mapping[f"{key}_{index}"],
+                            min_value=min_values[key][index],
+                            max_value=max_values[key][index],
+                            value=parms[key][index],
+                            step=steps[key],
+                            help=helpers[key][index],
+                            format=formats[key],
+                            key=element_keys[key][index],
+                            disabled=disabled,
+                        )
+                    elif widget_types[key] == "toggle":
+                        value = st.toggle(
+                            show_parameter_mapping[f"{key}_{index}"],
+                            value=[True if parms[key][index] > 0 else False],
+                            help=helpers[key][index],
+                            key=element_keys[key][index],
+                            disabled=disabled,
+                        )
                         # if toggle is turned on, set value to the original value for the model
                         if value is True:
                             value = parms[key][index]
@@ -508,27 +589,27 @@ def get_widget_types(widget_types=None):
         dict: A dictionary of widget types for the app parameters.
     """
     defaults = dict(
-            desired_r0="slider",
-            k_i = "slider",
-            k_g1 = "number_input",
-            k_g2 = "number_input",
-            k_21 = "number_input",
-            pop_sizes="number_input",
-            latent_duration="slider",
-            infectious_duration="slider",
-            I0="number_input",
-            initial_vaccine_coverage = "number_input",
-            vaccine_uptake_start_day="slider",
-            vaccine_uptake_duration_days="slider",
-            total_vaccine_uptake_doses="slider",
-            vaccinated_group="number_input",
-            isolation_success = "toggle",
-            symptomatic_isolation_start_day = "slider",
-            symptomatic_isolation_duration_days = "slider",
-            pre_rash_isolation_success = "toggle",
-            pre_rash_isolation_start_day = "slider",
-            pre_rash_isolation_duration_days = "slider",
-            tf="number_input"
+        desired_r0="slider",
+        k_i="slider",
+        k_g1="number_input",
+        k_g2="number_input",
+        k_21="number_input",
+        pop_sizes="number_input",
+        latent_duration="slider",
+        infectious_duration="slider",
+        I0="number_input",
+        initial_vaccine_coverage="number_input",
+        vaccine_uptake_start_day="slider",
+        vaccine_uptake_duration_days="slider",
+        total_vaccine_uptake_doses="slider",
+        vaccinated_group="number_input",
+        isolation_success="toggle",
+        symptomatic_isolation_start_day="slider",
+        symptomatic_isolation_duration_days="slider",
+        pre_rash_isolation_success="toggle",
+        pre_rash_isolation_start_day="slider",
+        pre_rash_isolation_duration_days="slider",
+        tf="number_input",
     )
     if widget_types is not None and isinstance(widget_types, dict):
         # update with parms if provided
@@ -547,34 +628,32 @@ def get_min_values(parms=None):
         dict: A dictionary of minimum values for the app parameters.
     """
     defaults = dict(
-            desired_r0=0.,
-            k_i = [0., 0., 0.],
-            k_g1 = 0.,
-            k_g2 = 0.,
-            k_21 = 0.,
-            pop_sizes=[15000, 100, 100],
-            latent_duration=6.,
-            infectious_duration=5.,
-            I0=[0, 0, 0],
-            initial_vaccine_coverage=[0., 0., 0.],
-            vaccine_uptake_start_day=0,
-            vaccine_uptake_duration_days=0,
-            total_vaccine_uptake_doses=0.0,
-            vaccinated_group=0,
-            isolation_success = 0.,
-            symptomatic_isolation_start_day = 0,
-            symptomatic_isolation_duration_days = 0,
-            pre_rash_isolation_success = 0.,
-            pre_rash_isolation_start_day = 0,
-            pre_rash_isolation_duration_days = 0,
-            tf=30,
-            )
+        desired_r0=0.0,
+        k_i=[0.0, 0.0, 0.0],
+        k_g1=0.0,
+        k_g2=0.0,
+        k_21=0.0,
+        pop_sizes=[15000, 100, 100],
+        latent_duration=6.0,
+        infectious_duration=5.0,
+        I0=[0, 0, 0],
+        initial_vaccine_coverage=[0.0, 0.0, 0.0],
+        vaccine_uptake_start_day=0,
+        vaccine_uptake_duration_days=0,
+        total_vaccine_uptake_doses=0.0,
+        vaccinated_group=0,
+        isolation_success=0.0,
+        symptomatic_isolation_start_day=0,
+        symptomatic_isolation_duration_days=0,
+        pre_rash_isolation_success=0.0,
+        pre_rash_isolation_start_day=0,
+        pre_rash_isolation_duration_days=0,
+        tf=30,
+    )
     # update with parms if provided
     if parms is not None and isinstance(parms, dict):
         defaults.update(parms)
     return defaults
-
-
 
 
 def get_max_values(parms=None):
@@ -588,33 +667,32 @@ def get_max_values(parms=None):
         dict: A dictionary of maximum values for the app parameters.
     """
     defaults = dict(
-            desired_r0=30.,
-            k_i = [50., 50., 50.],
-            k_g1 = 50.,
-            k_g2 = 50.,
-            k_21 = 50.,
-            pop_sizes=[100_000, 15_000, 15_000],
-            latent_duration=18.,
-            infectious_duration=11.,
-            I0=[10, 10, 10],
-            initial_vaccine_coverage=[1., 1., 1.],
-            vaccine_uptake_start_day=365,
-            vaccine_uptake_duration_days=365,
-            total_vaccine_uptake_doses=100.0,
-            vaccinated_group=2,
-            isolation_success = 0.75,
-            symptomatic_isolation_start_day = 365,
-            symptomatic_isolation_duration_days = 365,
-            pre_rash_isolation_success = 1.,
-            pre_rash_isolation_start_day = 365,
-            pre_rash_isolation_duration_days = 365,
-            tf=400,
-            )
+        desired_r0=30.0,
+        k_i=[50.0, 50.0, 50.0],
+        k_g1=50.0,
+        k_g2=50.0,
+        k_21=50.0,
+        pop_sizes=[100_000, 15_000, 15_000],
+        latent_duration=18.0,
+        infectious_duration=11.0,
+        I0=[10, 10, 10],
+        initial_vaccine_coverage=[1.0, 1.0, 1.0],
+        vaccine_uptake_start_day=365,
+        vaccine_uptake_duration_days=365,
+        total_vaccine_uptake_doses=100.0,
+        vaccinated_group=2,
+        isolation_success=0.75,
+        symptomatic_isolation_start_day=365,
+        symptomatic_isolation_duration_days=365,
+        pre_rash_isolation_success=1.0,
+        pre_rash_isolation_start_day=365,
+        pre_rash_isolation_duration_days=365,
+        tf=400,
+    )
     # update with parms if provided
     if parms is not None and isinstance(parms, dict):
         defaults.update(parms)
     return defaults
-
 
 
 def get_step_values(parms=None):
@@ -628,32 +706,33 @@ def get_step_values(parms=None):
         dict: A dictionary of step or increment values for the app parameters.
     """
     defaults = dict(
-            desired_r0=0.1,
-            k_i = 0.1,
-            k_g1 = 0.01,
-            k_g2 = 0.01,
-            k_21 = 0.01,
-            pop_sizes=100,
-            latent_duration=0.1,
-            infectious_duration=0.1,
-            I0=1,
-            initial_vaccine_coverage = 0.01,
-            vaccine_uptake_start_day = 1,
-            vaccine_uptake_duration_days = 7,
-            total_vaccine_uptake_doses = 5.0,
-            vaccinated_group = 1,
-            isolation_success = 0.01,
-            symptomatic_isolation_start_day = 1,
-            symptomatic_isolation_duration_days = 1,
-            pre_rash_isolation_success = 0.01,
-            pre_rash_isolation_start_day = 1,
-            pre_rash_isolation_duration_days = 1,
-            tf = 1,
-            )
+        desired_r0=0.1,
+        k_i=0.1,
+        k_g1=0.01,
+        k_g2=0.01,
+        k_21=0.01,
+        pop_sizes=100,
+        latent_duration=0.1,
+        infectious_duration=0.1,
+        I0=1,
+        initial_vaccine_coverage=0.01,
+        vaccine_uptake_start_day=1,
+        vaccine_uptake_duration_days=7,
+        total_vaccine_uptake_doses=5.0,
+        vaccinated_group=1,
+        isolation_success=0.01,
+        symptomatic_isolation_start_day=1,
+        symptomatic_isolation_duration_days=1,
+        pre_rash_isolation_success=0.01,
+        pre_rash_isolation_start_day=1,
+        pre_rash_isolation_duration_days=1,
+        tf=1,
+    )
     # update with parms if provided
     if parms is not None and isinstance(parms, dict):
         defaults.update(parms)
     return defaults
+
 
 def get_helpers(parms=None):
     """
@@ -666,36 +745,44 @@ def get_helpers(parms=None):
         dict: A dictionary of help text for the app parameters.
     """
     defaults = dict(
-            desired_r0="Basic reproduction number R0. R0 cannot be negative",
-            k_i=["Average daily contacts for large population",
-                 "Average daily contacts for small population 1",
-                 "Average daily contacts for small population 2"],
-            k_g1 = "Average daily contact per person in small population 1 with people in the large population",
-            k_g2 = "Average daily contact per person in small population 2 with people in the large population",
-            k_21 = "Average daily contact between people in the small populations",
-            pop_sizes=["Size of the large population",
-                       "Size of the small population 1",
-                       "Size of the small population 2"],
-            latent_duration = "Latent period (days)",
-            infectious_duration = "Infectious period (days)",
-            I0=["Initial infections in large population",
-                "Initial infections in small population 1",
-                "Initial infections in small population 2"],
-            initial_vaccine_coverage=["Baseline vaccination coverage in large population",
-                                      "Baseline vaccination coverage in small population 1",
-                                      "Baseline vaccination coverage in small population 2"],
-            vaccine_uptake_start_day="Day vaccination starts",
-            vaccine_uptake_duration_days="Days vaccines are administered",
-            total_vaccine_uptake_doses="Percent of unvaccinated individuals that get vaccinated",
-            vaccinated_group="Population receiving the vaccine",
-            isolation_success = "If turned on, 75% of symptomatic individuals isolate",
-            symptomatic_isolation_start_day = "Day symptomatic isolation starts",
-            symptomatic_isolation_duration_days = "Duration of symptomatic isolation",
-            pre_rash_isolation_success = "If turned on, 10% of individuals stay at home after being exposed",
-            pre_rash_isolation_start_day = "Day pre-rash isolation starts",
-            pre_rash_isolation_duration_days = "Duration of pre-rash isolation",
-            tf = "Number of time steps to simulate",
-            )
+        desired_r0="Basic reproduction number R0. R0 cannot be negative",
+        k_i=[
+            "Average daily contacts for large population",
+            "Average daily contacts for small population 1",
+            "Average daily contacts for small population 2",
+        ],
+        k_g1="Average daily contact per person in small population 1 with people in the large population",
+        k_g2="Average daily contact per person in small population 2 with people in the large population",
+        k_21="Average daily contact between people in the small populations",
+        pop_sizes=[
+            "Size of the large population",
+            "Size of the small population 1",
+            "Size of the small population 2",
+        ],
+        latent_duration="Latent period (days)",
+        infectious_duration="Infectious period (days)",
+        I0=[
+            "Initial infections in large population",
+            "Initial infections in small population 1",
+            "Initial infections in small population 2",
+        ],
+        initial_vaccine_coverage=[
+            "Baseline vaccination coverage in large population",
+            "Baseline vaccination coverage in small population 1",
+            "Baseline vaccination coverage in small population 2",
+        ],
+        vaccine_uptake_start_day="Day vaccination starts",
+        vaccine_uptake_duration_days="Days vaccines are administered",
+        total_vaccine_uptake_doses="Percent of unvaccinated individuals that get vaccinated",
+        vaccinated_group="Population receiving the vaccine",
+        isolation_success="If turned on, 75% of symptomatic individuals isolate",
+        symptomatic_isolation_start_day="Day symptomatic isolation starts",
+        symptomatic_isolation_duration_days="Duration of symptomatic isolation",
+        pre_rash_isolation_success="If turned on, 10% of individuals stay at home after being exposed",
+        pre_rash_isolation_start_day="Day pre-rash isolation starts",
+        pre_rash_isolation_duration_days="Duration of pre-rash isolation",
+        tf="Number of time steps to simulate",
+    )
     if parms is not None and isinstance(parms, dict):
         # update with parms if provided
         defaults.update(parms)
@@ -713,28 +800,28 @@ def get_formats(parms=None):
         dict: A dictionary of formats for the app parameters.
     """
     defaults = dict(
-            desired_r0="%.1f",
-            k_i = "%.1f",
-            k_g1 = "%.2f",
-            k_g2 = "%.2f",
-            k_21 = "%.2f",
-            pop_sizes="%.0d",
-            latent_duration = "%.1f",
-            infectious_duration = "%.1f",
-            I0="%.0d",
-            initial_vaccine_coverage="%.2f",
-            vaccine_uptake_start_day="%.0d",
-            vaccine_uptake_duration_days="%.0d",
-            total_vaccine_uptake_doses="%.1f",
-            vaccinated_group="%.0d",
-            isolation_success = "%.2f",
-            symptomatic_isolation_start_day = "%.0d",
-            symptomatic_isolation_duration_days = "%.0d",
-            pre_rash_isolation_success = "%.2f",
-            pre_rash_isolation_start_day = "%.0d",
-            pre_rash_isolation_duration_days = "%.0d",
-            tf="%.0d",
-            )
+        desired_r0="%.1f",
+        k_i="%.1f",
+        k_g1="%.2f",
+        k_g2="%.2f",
+        k_21="%.2f",
+        pop_sizes="%.0d",
+        latent_duration="%.1f",
+        infectious_duration="%.1f",
+        I0="%.0d",
+        initial_vaccine_coverage="%.2f",
+        vaccine_uptake_start_day="%.0d",
+        vaccine_uptake_duration_days="%.0d",
+        total_vaccine_uptake_doses="%.1f",
+        vaccinated_group="%.0d",
+        isolation_success="%.2f",
+        symptomatic_isolation_start_day="%.0d",
+        symptomatic_isolation_duration_days="%.0d",
+        pre_rash_isolation_success="%.2f",
+        pre_rash_isolation_start_day="%.0d",
+        pre_rash_isolation_duration_days="%.0d",
+        tf="%.0d",
+    )
     if parms is not None and isinstance(parms, dict):
         # update with parms if provided
         defaults.update(parms)
@@ -745,40 +832,44 @@ def get_base_widget_idkeys(parms=None):
     widget_idkeys = dict(
         desired_r0="R0",
         k_i=["k_i_0", "k_i_1", "k_i_2"],
-        k_g1 = "k_g1",
-        k_g2 = "k_g2",
-        k_21 = "k_21",
-        pop_sizes=["pop_size_0",
-                   "pop_size_1",
-                   "pop_size_2"],
-        latent_duration = "latent_duration",
-        infectious_duration = "infectious_duration",
+        k_g1="k_g1",
+        k_g2="k_g2",
+        k_21="k_21",
+        pop_sizes=["pop_size_0", "pop_size_1", "pop_size_2"],
+        latent_duration="latent_duration",
+        infectious_duration="infectious_duration",
         I0=["I0_0", "I0_1", "I0_2"],
-        initial_vaccine_coverage=["initial_vaccine_coverage_0",
-                                  "initial_vaccine_coverage_1",
-                                  "initial_vaccine_coverage_2"],
+        initial_vaccine_coverage=[
+            "initial_vaccine_coverage_0",
+            "initial_vaccine_coverage_1",
+            "initial_vaccine_coverage_2",
+        ],
         vaccine_uptake_start_day="vaccine_uptake_start_day",
         vaccine_uptake_duration_days="vaccine_uptake_duration_days",
         total_vaccine_uptake_doses="total_vaccine_uptake_doses",
-        vaccinated_group = "vaccinated_group",
-        isolation_success = "isolation_success",
-        symptomatic_isolation_start_day = "symptomatic_isolation_start_day",
-        symptomatic_isolation_duration_days = "symptomatic_isolation_duration_days",
-        pre_rash_isolation_success = "pre_rash_isolation_success",
-        pre_rash_isolation_start_day = "pre_rash_isolation_start_day",
-        pre_rash_isolation_duration_days = "pre_rash_isolation_duration_days",
-        tf = "tf",
-        )
+        vaccinated_group="vaccinated_group",
+        isolation_success="isolation_success",
+        symptomatic_isolation_start_day="symptomatic_isolation_start_day",
+        symptomatic_isolation_duration_days="symptomatic_isolation_duration_days",
+        pre_rash_isolation_success="pre_rash_isolation_success",
+        pre_rash_isolation_start_day="pre_rash_isolation_start_day",
+        pre_rash_isolation_duration_days="pre_rash_isolation_duration_days",
+        tf="tf",
+    )
     if parms is not None and isinstance(parms, dict):
         # update with parms if provided
         widget_idkeys.update(parms)
     return widget_idkeys
 
+
 def get_widget_idkeys(widget_no):
     widget_idkeys = get_base_widget_idkeys()
     for key, value in widget_idkeys.items():
         if isinstance(value, list):
-            widget_idkeys[key] = [f"{widget_idkeys[key][i]}_{widget_no}" for i in range(len(widget_idkeys[key]))]
+            widget_idkeys[key] = [
+                f"{widget_idkeys[key][i]}_{widget_no}"
+                for i in range(len(widget_idkeys[key]))
+            ]
         else:
             widget_idkeys[key] = f"{widget_idkeys[key]}_{widget_no}"
 
@@ -797,7 +888,7 @@ def get_parms_from_table(table, value_col="Scenario 1"):
     Returns:
         dict: A dictionary containing the parameters.
     """
-  # get parameter dictionary from a table
+    # get parameter dictionary from a table
     parms = dict()
     # expect the table to have the following columns
     # Parameter, No Interventions, Interventions
@@ -841,7 +932,7 @@ def correct_parameter_types(original_parms, parms_from_table):
         if isinstance(value, int) and not isinstance(value, bool):
             parms_from_table[key] = int(parms_from_table[key])
         elif isinstance(value, bool):
-            if parms_from_table[key] in [True, 'TRUE', 'True', 'true', '1']:
+            if parms_from_table[key] in [True, "TRUE", "True", "true", "1"]:
                 parms_from_table[key] = True
             else:
                 parms_from_table[key] = False
@@ -883,7 +974,7 @@ def add_daily_incidence(results, groups):
 
 
 def get_interval_cumulative_incidence(results, groups, interval=7):
-    """"
+    """ "
     Calculate cumulative incidence over specified intervals.
 
     Args:
@@ -904,16 +995,20 @@ def get_interval_cumulative_incidence(results, groups, interval=7):
 
     # tile the interval time points for each group and replicate
     unique_replicates = results.select("replicate").unique().to_series().to_list()
-    repeated_interval_points = np.tile(interval_points, len(groups) * len(unique_replicates))
+    repeated_interval_points = np.tile(
+        interval_points, len(groups) * len(unique_replicates)
+    )
     # add the interval time points to the interval results table
-    interval_results = interval_results.with_columns(pl.Series(name="interval_t", values=repeated_interval_points))
+    interval_results = interval_results.with_columns(
+        pl.Series(name="interval_t", values=repeated_interval_points)
+    )
 
     # now Y is the cumulative incidence at each time point and interval_t is the interval time point
     return interval_results
 
 
 def get_interval_results(results, groups, interval=7):
-    """"
+    """ "
     Calculate interval results for cumulative incidence.
 
     Args:
@@ -947,7 +1042,22 @@ def get_interval_results(results, groups, interval=7):
 
 
 ### Methods to create charts for the app ###
-def create_chart(alt_results, outcome_option, x, xlabel, y, ylabel, yscale, color_key, color_scale, domain, labelExpr, detail, width=300, height=300):
+def create_chart(
+    alt_results,
+    outcome_option,
+    x,
+    xlabel,
+    y,
+    ylabel,
+    yscale,
+    color_key,
+    color_scale,
+    domain,
+    labelExpr,
+    detail,
+    width=300,
+    height=300,
+):
     """
     Create a chart using Altair.
 
@@ -970,10 +1080,10 @@ def create_chart(alt_results, outcome_option, x, xlabel, y, ylabel, yscale, colo
     Returns:
             alt.Chart: The Altair chart object.
     """
-    chart = alt.Chart(
-        alt_results,
-        title=outcome_option
-        ).mark_line(opacity=0.4).encode(
+    chart = (
+        alt.Chart(alt_results, title=outcome_option)
+        .mark_line(opacity=0.4)
+        .encode(
             x=alt.X(x, title=xlabel),
             y=alt.Y(y, title=ylabel).scale(domain=yscale),
             color=alt.Color(
@@ -986,7 +1096,9 @@ def create_chart(alt_results, outcome_option, x, xlabel, y, ylabel, yscale, colo
                 ),
             ),
             detail=detail,
-        ).properties(width=width, height=height)
+        )
+        .properties(width=width, height=height)
+    )
     return chart
 
 
@@ -1006,10 +1118,8 @@ def calculate_outbreak_summary(combined_results, threshold):
     filtered_results = combined_results.filter(pl.col("Total") >= threshold)
 
     # Group by Scenario and count unique replicates
-    outbreak_summary = (
-        filtered_results
-        .group_by("Scenario")
-        .agg(pl.col("replicate").n_unique().alias("outbreaks"))
+    outbreak_summary = filtered_results.group_by("Scenario").agg(
+        pl.col("replicate").n_unique().alias("outbreaks")
     )
 
     # Ensure both scenarios are present in the summary
@@ -1019,10 +1129,13 @@ def calculate_outbreak_summary(combined_results, threshold):
             # Add missing scenario with outbreaks = 0
             outbreak_summary = outbreak_summary.vstack(
                 pl.DataFrame({"Scenario": [scenario], "outbreaks": [0]}).with_columns(
-                    pl.col("outbreaks").cast(outbreak_summary.schema["outbreaks"])  # Match the type
+                    pl.col("outbreaks").cast(
+                        outbreak_summary.schema["outbreaks"]
+                    )  # Match the type
                 )
             )
     return outbreak_summary
+
 
 def get_hospitalizations(combined_results, IHR):
     """
@@ -1038,43 +1151,53 @@ def get_hospitalizations(combined_results, IHR):
     # Calculate hospitalizations
     combined_results = combined_results.with_columns(
         pl.Series(
-            name = "Hospitalizations",
-            values = np.random.binomial(combined_results["Total"].to_numpy(), IHR)))
+            name="Hospitalizations",
+            values=np.random.binomial(combined_results["Total"].to_numpy(), IHR),
+        )
+    )
 
     # Group by Scenario and get mean hospitalizations
     hospitalization_summary = (
-        combined_results
-        .group_by("Scenario")
+        combined_results.group_by("Scenario")
         .mean()
-        .with_columns([pl.col("Hospitalizations").cast(pl.Int64), pl.col("Total").cast(pl.Int64)])
+        .with_columns(
+            [pl.col("Hospitalizations").cast(pl.Int64), pl.col("Total").cast(pl.Int64)]
+        )
         .drop("replicate")
         .rename({"Total": "Total Infections"})
     )
 
     # Ensure the order of scenarios
     scenario_order = ["No Interventions", "Interventions"]
-    hospitalization_summary = hospitalization_summary.with_columns(
-        pl.when(pl.col("Scenario") == scenario_order[0])
-        .then(0)
-        .when(pl.col("Scenario") == scenario_order[1])
-        .then(1)
-        .otherwise(2)
-        .alias("_sort_order")
-    ).sort("_sort_order").drop("_sort_order")
+    hospitalization_summary = (
+        hospitalization_summary.with_columns(
+            pl.when(pl.col("Scenario") == scenario_order[0])
+            .then(0)
+            .when(pl.col("Scenario") == scenario_order[1])
+            .then(1)
+            .otherwise(2)
+            .alias("_sort_order")
+        )
+        .sort("_sort_order")
+        .drop("_sort_order")
+    )
 
     return hospitalization_summary
 
-def get_median_trajectory(results):
 
+def get_median_trajectory(results):
     # data at the end of simulation
     max_t = results.select(pl.col("t").max()).item()  # Get the maximum value of t
     filtered_results = results.filter(pl.col("t") == max_t)
-    median_R = filtered_results.select(pl.col("R").median()).item()  # Get the median value of R
+    median_R = filtered_results.select(
+        pl.col("R").median()
+    ).item()  # Get the median value of R
 
     # get replicate closest to the median value of R
     closest_replicate = (
-        filtered_results
-        .with_columns((pl.col("R") - median_R).abs().alias("distance"))  # Calculate the absolute difference
+        filtered_results.with_columns(
+            (pl.col("R") - median_R).abs().alias("distance")
+        )  # Calculate the absolute difference
         .sort("distance")  # Sort by the distance
         .select("replicate")  # Select the replicate column
         .head(1)  # Get the first (closest) replicate

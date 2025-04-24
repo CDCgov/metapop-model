@@ -17,6 +17,7 @@ __all__ = [
     "vaccinate_groups",
 ]
 
+
 def get_percapita_contact_matrix(parms):
     """
     Calculate the per capita contact matrix based on the total contacts, average per capita degrees per population, and the population sizes for a 3-group population.
@@ -34,8 +35,12 @@ def get_percapita_contact_matrix(parms):
     Returns:
         np.array: The per capita contact matrix.
     """
-    assert parms['n_groups'] == 3, "The number of groups (n_groups) must be 3 to use this function."
-    assert parms["pop_sizes"][0] == np.max(parms["pop_sizes"]), "The first population must be the largest to represent the population."
+    assert (
+        parms["n_groups"] == 3
+    ), "The number of groups (n_groups) must be 3 to use this function."
+    assert parms["pop_sizes"][0] == np.max(
+        parms["pop_sizes"]
+    ), "The first population must be the largest to represent the population."
 
     k_i = parms["k_i"]
     k_g1 = parms["k_g1"]
@@ -45,9 +50,13 @@ def get_percapita_contact_matrix(parms):
 
     edges_per_group = pop_sizes * k_i
 
-    contacts = np.array([[0,                  k_g1 * pop_sizes[1], k_g2 * pop_sizes[2]],
-                        [k_g1 * pop_sizes[1],       0,            k_21 * pop_sizes[1]],
-                        [k_g2 * pop_sizes[2],k_21 * pop_sizes[1],                  0]])
+    contacts = np.array(
+        [
+            [0, k_g1 * pop_sizes[1], k_g2 * pop_sizes[2]],
+            [k_g1 * pop_sizes[1], 0, k_21 * pop_sizes[1]],
+            [k_g2 * pop_sizes[2], k_21 * pop_sizes[1], 0],
+        ]
+    )
     colsums = np.sum(contacts, axis=0)
 
     edges_to_assign = edges_per_group - colsums
@@ -56,11 +65,16 @@ def get_percapita_contact_matrix(parms):
     percapita_contacts = contacts / pop_sizes
 
     # this should go into a python test
-    assert np.allclose(np.sum(percapita_contacts, axis=0), k_i), f"The columns of the per capita contact matrix must sum to the per capita degrees k_i. The percapita contact matrix is \n{percapita_contacts} and the sum of the columns is {np.sum(percapita_contacts, axis=0)}."
+    assert np.allclose(
+        np.sum(percapita_contacts, axis=0), k_i
+    ), f"The columns of the per capita contact matrix must sum to the per capita degrees k_i. The percapita contact matrix is \n{percapita_contacts} and the sum of the columns is {np.sum(percapita_contacts, axis=0)}."
 
-    assert np.all(percapita_contacts >= 0), "The per capita contact matrix must have non-negative values."
+    assert np.all(
+        percapita_contacts >= 0
+    ), "The per capita contact matrix must have non-negative values."
 
     return percapita_contacts
+
 
 def get_r0(beta_matrix, gamma, pop_sizes):
     """
@@ -85,6 +99,7 @@ def get_r0(beta_matrix, gamma, pop_sizes):
 
     return spectral_radius
 
+
 def rescale_beta_matrix(unscaled_beta, factor):
     """
     Rescale the beta matrix by a given factor.
@@ -98,6 +113,7 @@ def rescale_beta_matrix(unscaled_beta, factor):
     """
     beta_scaled = unscaled_beta * factor
     return beta_scaled
+
 
 def calculate_beta_factor(r0_desired, current_r0):
     """
@@ -114,6 +130,7 @@ def calculate_beta_factor(r0_desired, current_r0):
     factor = r0_desired / current_r0
     return factor
 
+
 def get_r0_one_group(k, gamma):
     """
     Calculate the basic reproduction number (R0) number when there's only one group.
@@ -127,9 +144,10 @@ def get_r0_one_group(k, gamma):
     Returns:
         float: R0, contacts per day / recovery rate
     """
-    X = (k[0] / gamma)
+    X = k[0] / gamma
 
     return X
+
 
 def construct_beta(parms):
     """
@@ -146,20 +164,23 @@ def construct_beta(parms):
     Returns:
         np.array: The scaled beta matrix.
     """
-    if parms['n_groups'] == 3:
+    if parms["n_groups"] == 3:
         beta_unscaled = get_percapita_contact_matrix(parms)
         r0_base = get_r0(beta_unscaled, parms["gamma"], parms["pop_sizes"])
         beta_factor = calculate_beta_factor(parms["desired_r0"], r0_base)
         beta_scaled = rescale_beta_matrix(beta_unscaled, beta_factor)
     else:
-        assert parms['n_groups'] == 1, "Setups only designed for one or three groups currently."
+        assert (
+            parms["n_groups"] == 1
+        ), "Setups only designed for one or three groups currently."
         # skip per capita contact matrix building, get R0 directly
 
         r0_base = get_r0_one_group(parms["k_i"], parms["gamma"])
         beta_factor = calculate_beta_factor(parms["desired_r0"], r0_base)
         beta_scaled = rescale_beta_matrix(parms["k_i"][0], beta_factor)
-        #beta_scaled = beta_scaled.reshape(1, 1)  # Reshape to 1x1 matrix for consistency
+        # beta_scaled = beta_scaled.reshape(1, 1)  # Reshape to 1x1 matrix for consistency
     return beta_scaled
+
 
 def initialize_population(steps, groups, parms):
     """
@@ -181,15 +202,36 @@ def initialize_population(steps, groups, parms):
     u = []
 
     for group in range(groups):
-        u_i = [0, int(parms["pop_sizes"][group] * parms["initial_vaccine_coverage"][group]), 0, 0, parms["I0"][group], 0, 0, 0, 0]
+        u_i = [
+            0,
+            int(parms["pop_sizes"][group] * parms["initial_vaccine_coverage"][group]),
+            0,
+            0,
+            parms["I0"][group],
+            0,
+            0,
+            0,
+            0,
+        ]
         u_i[0] = int(parms["pop_sizes"][group] - np.sum(u_i))
         u.append(u_i)
 
     # first time step is initial state
     for group in range(groups):
-        S[0, group], V[0, group], E1[0, group], E2[0, group], I1[0, group], I2[0, group], R[0, group], Y[0, group], X[0, group]= u[group]
+        (
+            S[0, group],
+            V[0, group],
+            E1[0, group],
+            E2[0, group],
+            I1[0, group],
+            I2[0, group],
+            R[0, group],
+            Y[0, group],
+            X[0, group],
+        ) = u[group]
 
     return S, V, E1, E2, I1, I2, R, Y, X, u
+
 
 def get_infected(u, I_indices, groups, parms, t):
     """
@@ -203,18 +245,31 @@ def get_infected(u, I_indices, groups, parms, t):
     Returns:
         np.array: An array of the number of infected individuals for each group.
     """
-    assert "symptomatic_isolation_start_day" in parms, "Key 'symptomatic_isolation_start_day' is missing in parms."
-    assert "symptomatic_isolation_duration_days" in parms, "Key 'symptomatic_isolation_duration_days' is missing in parms."
-    assert "pre_rash_isolation_start_day" in parms, "Key 'pre_rash_isolation_start_day' is missing in parms."
-    assert "pre_rash_isolation_duration_days" in parms, "Key 'pre_rash_isolation_duration_days' is missing in parms."
+    assert (
+        "symptomatic_isolation_start_day" in parms
+    ), "Key 'symptomatic_isolation_start_day' is missing in parms."
+    assert (
+        "symptomatic_isolation_duration_days" in parms
+    ), "Key 'symptomatic_isolation_duration_days' is missing in parms."
+    assert (
+        "pre_rash_isolation_start_day" in parms
+    ), "Key 'pre_rash_isolation_start_day' is missing in parms."
+    assert (
+        "pre_rash_isolation_duration_days" in parms
+    ), "Key 'pre_rash_isolation_duration_days' is missing in parms."
 
     isolation_start_day = parms["symptomatic_isolation_start_day"]
     isolation_duration_days = parms["symptomatic_isolation_duration_days"]
     pre_rash_isolation_start_day = parms["pre_rash_isolation_start_day"]
     pre_rash_isolation_duration_days = parms["pre_rash_isolation_duration_days"]
 
-    isolation_range_days = range(isolation_start_day, isolation_start_day + isolation_duration_days)
-    pre_rash_isolation_range_days = range(pre_rash_isolation_start_day, pre_rash_isolation_start_day + pre_rash_isolation_duration_days)
+    isolation_range_days = range(
+        isolation_start_day, isolation_start_day + isolation_duration_days
+    )
+    pre_rash_isolation_range_days = range(
+        pre_rash_isolation_start_day,
+        pre_rash_isolation_start_day + pre_rash_isolation_duration_days,
+    )
 
     # last I compartment
     i_max = max(I_indices)
@@ -222,22 +277,41 @@ def get_infected(u, I_indices, groups, parms, t):
     # Handling pre_rash_isolation
     if t in pre_rash_isolation_range_days:
         # Prerash infected = I1 infecteds
-        pre_rash_infected = np.array([sum(u[group][i] * (1 - parms["pre_rash_isolation_success"]) for i in I_indices if i != i_max) for group in range(groups)])
+        pre_rash_infected = np.array(
+            [
+                sum(
+                    u[group][i] * (1 - parms["pre_rash_isolation_success"])
+                    for i in I_indices
+                    if i != i_max
+                )
+                for group in range(groups)
+            ]
+        )
 
     else:
-        pre_rash_infected = np.array([sum(u[group][i] for i in I_indices if i != i_max) for group in range(groups)])
+        pre_rash_infected = np.array(
+            [
+                sum(u[group][i] for i in I_indices if i != i_max)
+                for group in range(groups)
+            ]
+        )
 
     # Handling isolation
     if t in isolation_range_days:
-
         # Postrash infected that are not isolating
-        post_rash = np.array([(u[group][i_max] * (1 - parms["isolation_success"])) for group in range(groups)])
+        post_rash = np.array(
+            [
+                (u[group][i_max] * (1 - parms["isolation_success"]))
+                for group in range(groups)
+            ]
+        )
 
     else:
         post_rash = np.array([(u[group][i_max]) for group in range(groups)])
 
     infected = pre_rash_infected + post_rash
     return infected
+
 
 def calculate_foi(beta, I_g, pop_sizes, target_group):
     """
@@ -259,6 +333,7 @@ def calculate_foi(beta, I_g, pop_sizes, target_group):
         foi += I_g[j] * beta_value / pop_sizes[target_group]
     return foi
 
+
 def rate_to_frac(rate):
     """
     Calculate the fraction of transitions based on the rate
@@ -271,6 +346,7 @@ def rate_to_frac(rate):
     """
     return 1.0 - np.exp(-rate)
 
+
 def time_to_rate(duration):
     """
     Calculate the rate parameters of transitions based on the length of time in compartment
@@ -281,7 +357,8 @@ def time_to_rate(duration):
     Returns:
         float: The rate parameter
     """
-    return 1.0/duration
+    return 1.0 / duration
+
 
 def build_vax_schedule(parms):
     """
@@ -292,19 +369,28 @@ def build_vax_schedule(parms):
     Returns:
         dict: dictionary with days and doses
     """
-    assert "vaccine_uptake_start_day" in parms, "vaccine_uptake_start_day must be provided in parms"
-    assert "vaccine_uptake_duration_days" in parms, "vaccine_uptake_duration_days must be provided in parms"
-    assert "total_vaccine_uptake_doses" in parms, "total_vaccine_uptake_doses must be provided in parms"
+    assert (
+        "vaccine_uptake_start_day" in parms
+    ), "vaccine_uptake_start_day must be provided in parms"
+    assert (
+        "vaccine_uptake_duration_days" in parms
+    ), "vaccine_uptake_duration_days must be provided in parms"
+    assert (
+        "total_vaccine_uptake_doses" in parms
+    ), "total_vaccine_uptake_doses must be provided in parms"
 
     # Generate a sequence of days between the start and end of the vaccine_uptake_range
     start_day = parms["vaccine_uptake_start_day"]
     end_day = start_day + parms["vaccine_uptake_duration_days"]
     vaccine_uptake_days = list(range(start_day, end_day + 1))
-    doses_per_day = round(parms["total_vaccine_uptake_doses"] / len(vaccine_uptake_days))
+    doses_per_day = round(
+        parms["total_vaccine_uptake_doses"] / len(vaccine_uptake_days)
+    )
 
     # Create the schedule dictionary
     schedule = {day: doses_per_day for day in vaccine_uptake_days}
-    return(schedule)
+    return schedule
+
 
 def vaccinate_groups(groups, u, t, vaccination_uptake_schedule, parms):
     """
@@ -323,12 +409,14 @@ def vaccinate_groups(groups, u, t, vaccination_uptake_schedule, parms):
     vaccinated_group = parms["vaccinated_group"]
 
     if t in vaccination_uptake_schedule:
-        S, V, E1, E2, I1, I2, R, Y, X = u[vaccinated_group] # get group 2
+        S, V, E1, E2, I1, I2, R, Y, X = u[vaccinated_group]  # get group 2
         vaccine_eligible = S + E1 + E2
         doses = vaccination_uptake_schedule[t]
         # Calculate the proportion of doses to assign to S, E1, and E2
         if vaccine_eligible > 0:
-            S_doses = int(doses * S / vaccine_eligible)  # proportion of doses going to S
+            S_doses = int(
+                doses * S / vaccine_eligible
+            )  # proportion of doses going to S
             S_doses = min(S_doses, S)  # Ensure S_doses does not exceed S
         else:
             S_doses = 0

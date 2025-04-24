@@ -12,5 +12,24 @@ if __name__ == "__main__":
 
     parameter_sets = griddler.griddle.read("scripts/connectivity/config.yaml")
     results_all = griddler.run_squash(griddler.replicated(simulate), parameter_sets)
-    results = results_all.select(cs.by_name(['initial_coverage_scenario', 'k_21', 't', 'group', 'S', 'V', 'E1', 'E2', 'I1', 'I2', 'R', 'Y', 'X', 'replicate']))
+    results = results_all.select(
+        cs.by_name(
+            [
+                "initial_coverage_scenario",
+                "k_21",
+                "t",
+                "group",
+                "S",
+                "V",
+                "E1",
+                "E2",
+                "I1",
+                "I2",
+                "R",
+                "Y",
+                "X",
+                "replicate",
+            ]
+        )
+    )
     results.write_csv("output/connectivity/results.csv")

@@ -37,8 +37,9 @@ def test_get_outcome_options():
         "Weekly Incidence",
         "Weekly Cumulative Incidence",
     )
-    assert all(value in options for value in expected_values), \
-        f"Expected values {expected_values} to be in options, but got {options}"
+    assert all(
+        value in options for value in expected_values
+    ), f"Expected values {expected_values} to be in options, but got {options}"
 
 
 def test_get_outcome_mapping():
@@ -54,8 +55,9 @@ def test_get_outcome_mapping():
         "Weekly Incidence",
         "Weekly Cumulative Incidence",
     ]
-    assert all(key in outcome_mapping for key in expected_keys), \
-        f"Expected keys {expected_keys} to be in mapping, but got {list(outcome_mapping.keys())}"
+    assert all(
+        key in outcome_mapping for key in expected_keys
+    ), f"Expected keys {expected_keys} to be in mapping, but got {list(outcome_mapping.keys())}"
 
 
 def test_get_list_keys():
@@ -66,7 +68,7 @@ def test_get_list_keys():
 
     list_keys = get_list_keys(parms)
 
-    assert list_keys == ['pop_sizes'], f"Expected ['pop_sizes'], but got {list_keys}"
+    assert list_keys == ["pop_sizes"], f"Expected ['pop_sizes'], but got {list_keys}"
 
 
 def test_get_min_values():
@@ -74,19 +76,23 @@ def test_get_min_values():
     min_values = get_min_values()
     assert isinstance(min_values, dict), "Expected parameters to be a dictionary"
     expected_I0 = [0, 0, 0]
-    assert min_values["I0"] == expected_I0, f"Expected min I0 values to be {expected_I0}, but got {min_values['I0']}"
+    assert (
+        min_values["I0"] == expected_I0
+    ), f"Expected min I0 values to be {expected_I0}, but got {min_values['I0']}"
 
     # assert that when you provide a dictionary, the returned minimum values are updated
     parms = dict(
-        pop_sizes = [10000, 50, 80],
-        latent_duration = 5.,
+        pop_sizes=[10000, 50, 80],
+        latent_duration=5.0,
     )
     min_values = get_min_values(parms)
     assert isinstance(min_values, dict), "Expected parameters to be a dictionary"
-    assert min_values["pop_sizes"] == parms["pop_sizes"], \
-        f"Expected min pop_sizes to be {parms['pop_sizes']}, but got {min_values['pop_sizes']}"
-    assert min_values["latent_duration"] == parms["latent_duration"], \
-        f"Expected min latent_duration to be {parms['latent_duration']}, but got {min_values['latent_duration']}"
+    assert (
+        min_values["pop_sizes"] == parms["pop_sizes"]
+    ), f"Expected min pop_sizes to be {parms['pop_sizes']}, but got {min_values['pop_sizes']}"
+    assert (
+        min_values["latent_duration"] == parms["latent_duration"]
+    ), f"Expected min latent_duration to be {parms['latent_duration']}, but got {min_values['latent_duration']}"
 
 
 def test_get_max_values():
@@ -94,19 +100,23 @@ def test_get_max_values():
     max_values = get_max_values()
     assert isinstance(max_values, dict), "Expected parameters to be a dictionary"
     expected_I0 = [10, 10, 10]
-    assert max_values["I0"] == expected_I0, f"Expected max I0 values to be {expected_I0}, but got {max_values['I0']}"
+    assert (
+        max_values["I0"] == expected_I0
+    ), f"Expected max I0 values to be {expected_I0}, but got {max_values['I0']}"
 
     # assert that when you provide a dictionary, the returned maximum values are updated
     parms = dict(
-        pop_sizes = [50_000, 5_000, 8_000],
-        isolation_success = 0.85,
+        pop_sizes=[50_000, 5_000, 8_000],
+        isolation_success=0.85,
     )
     max_values = get_max_values(parms)
     assert isinstance(max_values, dict), "Expected parameters to be a dictionary"
-    assert max_values["pop_sizes"] == parms["pop_sizes"], \
-        f"Expected max pop_sizes to be {parms['pop_sizes']}, but got {max_values['pop_sizes']}"
-    assert max_values["isolation_success"] == parms["isolation_success"], \
-        f"Expected max isolation_success to be {parms['isolation_success']}, but got {max_values['isolation_success']}"
+    assert (
+        max_values["pop_sizes"] == parms["pop_sizes"]
+    ), f"Expected max pop_sizes to be {parms['pop_sizes']}, but got {max_values['pop_sizes']}"
+    assert (
+        max_values["isolation_success"] == parms["isolation_success"]
+    ), f"Expected max isolation_success to be {parms['isolation_success']}, but got {max_values['isolation_success']}"
 
 
 def test_get_step_values():
@@ -114,16 +124,19 @@ def test_get_step_values():
     step_values = get_step_values()
     assert isinstance(step_values, dict), "Expected parameters to be a dictionary"
     expected_I0 = 1
-    assert step_values["I0"] == expected_I0, f"Expected step I0 values to be {expected_I0}, but got {step_values['I0']}"
+    assert (
+        step_values["I0"] == expected_I0
+    ), f"Expected step I0 values to be {expected_I0}, but got {step_values['I0']}"
 
     # assert that when you provide a dictionary, the returned step values are updated
     parms = dict(
-        pop_sizes = 50,
+        pop_sizes=50,
     )
     step_values = get_step_values(parms)
     assert isinstance(step_values, dict), "Expected parameters to be a dictionary"
-    assert step_values["pop_sizes"] == parms["pop_sizes"], \
-        f"Expected step pop_sizes to be {parms['pop_sizes']}, but got {step_values['pop_sizes']}"
+    assert (
+        step_values["pop_sizes"] == parms["pop_sizes"]
+    ), f"Expected step pop_sizes to be {parms['pop_sizes']}, but got {step_values['pop_sizes']}"
 
 
 def test_get_helpers():
@@ -131,16 +144,17 @@ def test_get_helpers():
     helpers = get_helpers()
     assert isinstance(helpers, dict), "Expected helpers to be a dictionary"
     expected_r0 = "Basic reproduction number R0. R0 cannot be negative"
-    assert helpers["desired_r0"] == expected_r0, f"Expected R0 helper to be {expected_r0}, but got {helpers['desired_r0']}"
+    assert (
+        helpers["desired_r0"] == expected_r0
+    ), f"Expected R0 helper to be {expected_r0}, but got {helpers['desired_r0']}"
 
     # assert that when you provide a dictionary, the returned helpers are updated
-    parms = dict(
-        latent_duration = "Latent duration in days."
-    )
+    parms = dict(latent_duration="Latent duration in days.")
     helpers = get_helpers(parms)
     assert isinstance(helpers, dict), "Expected helpers to be a dictionary"
-    assert helpers["latent_duration"] == parms["latent_duration"], \
-        f"Expected latent_duration helper to be {parms['latent_duration']}, but got {helpers['latent_duration']}"
+    assert (
+        helpers["latent_duration"] == parms["latent_duration"]
+    ), f"Expected latent_duration helper to be {parms['latent_duration']}, but got {helpers['latent_duration']}"
 
 
 def test_get_formats():
@@ -148,16 +162,19 @@ def test_get_formats():
     formats = get_formats()
     assert isinstance(formats, dict), "Expected formats to be a dictionary"
     expected_R0 = "%.1f"
-    assert formats["desired_r0"] == expected_R0, f"Expected R0 string format to be {expected_R0}, but got {formats['desired_r0']}"
+    assert (
+        formats["desired_r0"] == expected_R0
+    ), f"Expected R0 string format to be {expected_R0}, but got {formats['desired_r0']}"
 
     # assert that when you provide a dictionary, the returned formats are updated
     parms = dict(
-        latent_duration = "%.2f",
+        latent_duration="%.2f",
     )
     formats = get_formats(parms)
     assert isinstance(formats, dict), "Expected formats to be a dictionary"
-    assert formats["latent_duration"] == parms["latent_duration"], \
-        f"Expected latent_duration string format to be {parms['latent_duration']}, but got {formats['latent_duration']}"
+    assert (
+        formats["latent_duration"] == parms["latent_duration"]
+    ), f"Expected latent_duration string format to be {parms['latent_duration']}, but got {formats['latent_duration']}"
 
 
 def test_get_base_widget_idkeys():
@@ -165,16 +182,19 @@ def test_get_base_widget_idkeys():
     base_keys = get_base_widget_idkeys()
     assert isinstance(base_keys, dict), "Expected base keys to be a dictionary"
     expected_k_i = ["k_i_0", "k_i_1", "k_i_2"]
-    assert base_keys["k_i"] == expected_k_i, f"Expected k_i keys to be {expected_k_i}, but got {base_keys['k_i']}"
+    assert (
+        base_keys["k_i"] == expected_k_i
+    ), f"Expected k_i keys to be {expected_k_i}, but got {base_keys['k_i']}"
 
     # assert that when you provide a dictionary, the returned base keys are updated
     parms = dict(
-        k_i = ["k_i_0", "k_i_1", "k_i_2", "k_i_3", "k_i_4", "k_i_5"],
+        k_i=["k_i_0", "k_i_1", "k_i_2", "k_i_3", "k_i_4", "k_i_5"],
     )
     base_keys = get_base_widget_idkeys(parms)
     assert isinstance(base_keys, dict), "Expected base keys to be a dictionary"
-    assert base_keys["k_i"] == parms["k_i"], \
-        f"Expected k_i keys to be {parms['k_i']}, but got {base_keys['k_i']}"
+    assert (
+        base_keys["k_i"] == parms["k_i"]
+    ), f"Expected k_i keys to be {parms['k_i']}, but got {base_keys['k_i']}"
 
 
 def test_get_widget_idkeys():
@@ -183,7 +203,9 @@ def test_get_widget_idkeys():
     widget_idkeys = get_widget_idkeys(5)
     assert isinstance(widget_idkeys, dict), "Expected widget idkeys to be a dictionary"
     expected_r0 = "R0_5"
-    assert widget_idkeys["desired_r0"] == expected_r0, f"Expected R0 idkey to be {expected_r0}, but got {widget_idkeys['desired_r0']}"
+    assert (
+        widget_idkeys["desired_r0"] == expected_r0
+    ), f"Expected R0 idkey to be {expected_r0}, but got {widget_idkeys['desired_r0']}"
 
 
 def test_rescale_prop_vax():
@@ -199,7 +221,12 @@ def test_rescale_prop_vax():
     # Expected result
     expected_total_doses = int(
         np.sum(
-            (np.array(parms["pop_sizes"]) - np.array(parms["pop_sizes"]) * np.array(parms["initial_vaccine_coverage"]) - np.array(parms["I0"]))
+            (
+                np.array(parms["pop_sizes"])
+                - np.array(parms["pop_sizes"])
+                * np.array(parms["initial_vaccine_coverage"])
+                - np.array(parms["I0"])
+            )
             * (parms["total_vaccine_uptake_doses"] / 100.0)
         )
     )
@@ -207,5 +234,6 @@ def test_rescale_prop_vax():
     # Call the function
     rescaled_parms = rescale_prop_vax(parms)
 
-    assert rescaled_parms["total_vaccine_uptake_doses"] == expected_total_doses, \
-        f"Expected total vaccine uptake doses to be {expected_total_doses}, but got {rescaled_parms['total_vaccine_uptake_doses']}"
+    assert (
+        rescaled_parms["total_vaccine_uptake_doses"] == expected_total_doses
+    ), f"Expected total vaccine uptake doses to be {expected_total_doses}, but got {rescaled_parms['total_vaccine_uptake_doses']}"

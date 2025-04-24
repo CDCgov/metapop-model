@@ -2,6 +2,7 @@
 import numpy as np
 import polars as pl
 from .model import SEIRModel
+
 # import what's needed from other metapop modules
 from .helper import (
     construct_beta,
@@ -44,9 +45,20 @@ def run_model(model, u, t, steps, groups, S, V, E1, E2, I1, I2, R, Y, X):
     for j in range(1, steps):
         u = model.seirmodel(u, t[j])
         for group in range(groups):
-            S[j, group], V[j, group], E1[j, group], E2[j, group], I1[j, group], I2[j, group], R[j, group], Y[j, group], X[j, group] = u[group]
+            (
+                S[j, group],
+                V[j, group],
+                E1[j, group],
+                E2[j, group],
+                I1[j, group],
+                I2[j, group],
+                R[j, group],
+                Y[j, group],
+                X[j, group],
+            ) = u[group]
 
     return S, V, E1, E2, I1, I2, R, Y, X, u
+
 
 def simulate(parms):
     #### Set up rate params
@@ -71,21 +83,25 @@ def simulate(parms):
 
     #### Run the model
     model = SEIRModel(parms)
-    S, V, E1, E2, I1, I2, R, Y, X, u = run_model(model, u, t, steps, groups, S, V, E1, E2, I1, I2, R, Y, X)
+    S, V, E1, E2, I1, I2, R, Y, X, u = run_model(
+        model, u, t, steps, groups, S, V, E1, E2, I1, I2, R, Y, X
+    )
 
     #### Flatten into a dataframe
-    df = pl.DataFrame({
-        't': np.repeat(t, groups),
-        'group': np.tile(np.arange(groups), steps),
-        'S': S.flatten(),
-        'V': V.flatten(),
-        'E1': E1.flatten(),
-        'E2': E2.flatten(),
-        'I1': I1.flatten(),
-        'I2': I2.flatten(),
-        'R': R.flatten(),
-        'Y': Y.flatten(),
-        'X': X.flatten(),
-    })
+    df = pl.DataFrame(
+        {
+            "t": np.repeat(t, groups),
+            "group": np.tile(np.arange(groups), steps),
+            "S": S.flatten(),
+            "V": V.flatten(),
+            "E1": E1.flatten(),
+            "E2": E2.flatten(),
+            "I1": I1.flatten(),
+            "I2": I2.flatten(),
+            "R": R.flatten(),
+            "Y": Y.flatten(),
+            "X": X.flatten(),
+        }
+    )
 
     return df

@@ -14,7 +14,7 @@ def test_app():
     except Exception as e:
         print(f"Error occurred while running app: {e}")
         raise RuntimeError("An error occurred while running the app.") from e
-    st.stop() # stop the app
+    st.stop()  # stop the app
 
 
 def test_advanced_app():
@@ -45,6 +45,7 @@ def test_app_with_table():
         print(f"Error occurred while running app_with_table: {e}")
         raise RuntimeError("An error occurred while running the app with table.") from e
     st.stop()  # stop the app
+
 
 if __name__ == "__main__":
     # Run the tests

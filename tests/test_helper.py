@@ -4,7 +4,7 @@ import numpy as np
 from numpy.testing import assert_allclose
 from metapop.helper import *
 from metapop.model import *
-from metapop.sim import * # noqa: F405
+from metapop.sim import *  # noqa: F405
 
 
 def test_get_percapita_contact_matrix():
@@ -15,39 +15,36 @@ def test_get_percapita_contact_matrix():
         "k_g2": 2,
         "k_21": 2,
         "n_groups": 3,
-        "pop_sizes": [1000, 100, 100]
+        "pop_sizes": [1000, 100, 100],
     }
 
     # Call the get_percapita_contact_matrix function
     percapita_contacts = get_percapita_contact_matrix(parms)
 
     # Check the result
-    expected_percapita_contacts = np.array([
-        [9.7, 1., 2.],
-        [0.1, 7., 2.],
-        [0.2, 2., 6.]
-    ])
-    assert np.array_equal(percapita_contacts, expected_percapita_contacts), f"Expected {expected_percapita_contacts}, but got {percapita_contacts} when using equal degree for all subgroups"
+    expected_percapita_contacts = np.array(
+        [[9.7, 1.0, 2.0], [0.1, 7.0, 2.0], [0.2, 2.0, 6.0]]
+    )
+    assert np.array_equal(
+        percapita_contacts, expected_percapita_contacts
+    ), f"Expected {expected_percapita_contacts}, but got {percapita_contacts} when using equal degree for all subgroups"
 
     # A scenario where the degree is different for each subgroup
     parms["k_i"] = np.array([10, 20, 15])
 
     percapita_contacts = get_percapita_contact_matrix(parms)
 
-    expected_percapita_contacts = np.array([
-        [9.7, 1., 2.],
-        [0.1, 17., 2.],
-        [0.2, 2., 11.]
-    ])
-    assert np.array_equal(percapita_contacts, expected_percapita_contacts), f"Expected {expected_percapita_contacts}, but got {percapita_contacts} when using different degree for each subgroup"
+    expected_percapita_contacts = np.array(
+        [[9.7, 1.0, 2.0], [0.1, 17.0, 2.0], [0.2, 2.0, 11.0]]
+    )
+    assert np.array_equal(
+        percapita_contacts, expected_percapita_contacts
+    ), f"Expected {expected_percapita_contacts}, but got {percapita_contacts} when using different degree for each subgroup"
 
 
 def test_get_r0():
     # keeling and rohani example
-    beta_matrix = np.array([
-        [10.0, 0.1],
-        [ 0.1, 1.0]
-    ])
+    beta_matrix = np.array([[10.0, 0.1], [0.1, 1.0]])
     gamma = 1.0
     pop_sizes = np.array([20, 80])
     expected_r0 = 2.001331855134916
@@ -57,16 +54,16 @@ def test_get_r0():
 
 def test_get_r0_one_group():
     parms = dict(
-        k_i = np.array([10.0]),
-        infectious_duration = 9.0,
-        desired_r0 = 2.0,
-        n_groups = 1,
+        k_i=np.array([10.0]),
+        infectious_duration=9.0,
+        desired_r0=2.0,
+        n_groups=1,
     )
     parms["gamma"] = time_to_rate(parms["infectious_duration"])
     r0_base = get_r0_one_group(parms["k_i"], parms["gamma"])
     beta_factor = calculate_beta_factor(parms["desired_r0"], r0_base)
     beta_scaled = rescale_beta_matrix(parms["k_i"][0], beta_factor)
-    expected_r0 = parms['desired_r0']
+    expected_r0 = parms["desired_r0"]
 
     r0 = get_r0_one_group([beta_scaled], parms["gamma"])
     assert np.isclose(r0, expected_r0), f"Expected {expected_r0}, but got {r0}"
@@ -83,15 +80,20 @@ def test_construct_beta():
         "n_i_compartments": 2,
         "desired_r0": 2.0,
         "n_groups": 3,
-        "connectivity_scenario": 1.0
+        "connectivity_scenario": 1.0,
     }
     beta_unscaled = get_percapita_contact_matrix(parms)
     r0_base = get_r0(beta_unscaled, parms["gamma"], parms["pop_sizes"])
     beta_factor = calculate_beta_factor(parms["desired_r0"], r0_base)
     beta_scaled = rescale_beta_matrix(beta_unscaled, beta_factor)
     expected_beta = construct_beta(parms)
-    assert beta_scaled.shape == (3, 3), f"Expected shape (3, 3), but got {beta_scaled.shape}"
-    assert np.allclose(beta_scaled, expected_beta), f"Expected {expected_beta}, but got {beta_scaled}"
+    assert beta_scaled.shape == (
+        3,
+        3,
+    ), f"Expected shape (3, 3), but got {beta_scaled.shape}"
+    assert np.allclose(
+        beta_scaled, expected_beta
+    ), f"Expected {expected_beta}, but got {beta_scaled}"
 
     # one_group setup
     parms = {
@@ -103,23 +105,29 @@ def test_construct_beta():
         "pop_sizes": np.array([1000]),
         "n_i_compartments": 2,
         "desired_r0": 2.0,
-        "n_groups": 1
+        "n_groups": 1,
     }
     parms["k_i"] = np.array(parms["k_i"])
     r0_base = get_r0_one_group(parms["k_i"], parms["gamma"])
     beta_factor = calculate_beta_factor(parms["desired_r0"], r0_base)
     beta_scaled = rescale_beta_matrix(parms["k_i"], beta_factor)
     expected_beta = construct_beta(parms)
-    assert np.allclose(r0_base, 100.0), f"Expected beta / gamma = 100, but got {r0_base}"
-    assert isinstance(beta_scaled, np.ndarray), f"Expected np.ndarray, but got {type(beta_scaled)}"
-    assert np.allclose(beta_scaled, expected_beta), f"Expected {expected_beta}, but got {beta_scaled}"
+    assert np.allclose(
+        r0_base, 100.0
+    ), f"Expected beta / gamma = 100, but got {r0_base}"
+    assert isinstance(
+        beta_scaled, np.ndarray
+    ), f"Expected np.ndarray, but got {type(beta_scaled)}"
+    assert np.allclose(
+        beta_scaled, expected_beta
+    ), f"Expected {expected_beta}, but got {beta_scaled}"
 
 
 def test_pop_initialization():
     parms = {
         "pop_sizes": [1000, 2000],
         "initial_vaccine_coverage": [0.0, 0.95],
-        "I0": [10, 2]
+        "I0": [10, 2],
     }
     steps = 3
     groups = 2
@@ -132,7 +140,12 @@ def test_pop_initialization():
 
     # initial vaccination
     assert V[0][0] == 0
-    assert_allclose(V[0][1], parms["pop_sizes"][1] * parms["initial_vaccine_coverage"][1], rtol=1e-2, atol=1e-8)
+    assert_allclose(
+        V[0][1],
+        parms["pop_sizes"][1] * parms["initial_vaccine_coverage"][1],
+        rtol=1e-2,
+        atol=1e-8,
+    )
 
     # initial infections
     assert I1[0][0] == parms["I0"][0]
@@ -140,11 +153,15 @@ def test_pop_initialization():
 
     # initial state vector is correct
     assert len(u) == groups
-    assert len(u[0]) == 9 # S V E1 E2 I1 I2 R Y X
+    assert len(u[0]) == 9  # S V E1 E2 I1 I2 R Y X
     assert u[0][0] == S[0][0]
 
-    assert sum(u[0]) == parms["pop_sizes"][0], f"Sum of u[0] ({sum(u[0])}) does not equal pop_sizes[0] ({parms['pop_sizes'][0]})"
-    assert sum(u[1]) == parms["pop_sizes"][1], f"Sum of u[1] ({sum(u[1])}) does not equal pop_sizes[1] ({parms['pop_sizes'][1]})"
+    assert (
+        sum(u[0]) == parms["pop_sizes"][0]
+    ), f"Sum of u[0] ({sum(u[0])}) does not equal pop_sizes[0] ({parms['pop_sizes'][0]})"
+    assert (
+        sum(u[1]) == parms["pop_sizes"][1]
+    ), f"Sum of u[1] ({sum(u[1])}) does not equal pop_sizes[1] ({parms['pop_sizes'][1]})"
 
 
 def test_calculate_foi_0():
@@ -183,37 +200,55 @@ def test_active_vaccination():
         "vaccine_uptake_start_day": 10,
         "vaccine_uptake_duration_days": 1,
         "total_vaccine_uptake_doses": 100,
-        "vaccinated_group": 2
+        "vaccinated_group": 2,
     }
 
     # Initial state for each group: Group 2 has no E or I individuals yet
     u = [
         [1000, 0, 100, 50, 0, 0, 0, 0, 0],  # Group 0: S, V, E1, E2, I1, I2, R, Y, X
-        [700, 0, 60, 40, 0, 0, 0, 0, 0],    # Group 1: S, V, E1, E2, I1, I2, R, Y, X
-        [600, 0, 0, 0, 0, 0, 0, 0, 0]     # Group 2: S, V, E1, E2, I1, I2, R, Y, X
+        [700, 0, 60, 40, 0, 0, 0, 0, 0],  # Group 1: S, V, E1, E2, I1, I2, R, Y, X
+        [600, 0, 0, 0, 0, 0, 0, 0, 0],  # Group 2: S, V, E1, E2, I1, I2, R, Y, X
     ]
 
     vaccination_uptake_schedule = build_vax_schedule(parms)
 
     # Assertions to check the expected results: in group 2, 100% of eligible are susceptible
-    assert np.array_equal(vaccinate_groups(parms["n_groups"], u, 5, vaccination_uptake_schedule, parms), [0, 0, 0])
-    assert np.array_equal(vaccinate_groups(parms["n_groups"], u, 10, vaccination_uptake_schedule, parms), [0, 0, 50])
-    assert np.array_equal(vaccinate_groups(parms["n_groups"], u, 11, vaccination_uptake_schedule, parms), [0, 0, 50])
-    assert np.array_equal(vaccinate_groups(parms["n_groups"], u, 12, vaccination_uptake_schedule, parms), [0, 0, 0])
+    assert np.array_equal(
+        vaccinate_groups(parms["n_groups"], u, 5, vaccination_uptake_schedule, parms),
+        [0, 0, 0],
+    )
+    assert np.array_equal(
+        vaccinate_groups(parms["n_groups"], u, 10, vaccination_uptake_schedule, parms),
+        [0, 0, 50],
+    )
+    assert np.array_equal(
+        vaccinate_groups(parms["n_groups"], u, 11, vaccination_uptake_schedule, parms),
+        [0, 0, 50],
+    )
+    assert np.array_equal(
+        vaccinate_groups(parms["n_groups"], u, 12, vaccination_uptake_schedule, parms),
+        [0, 0, 0],
+    )
 
     ### Check: If vaccine_doses >> than S population
-    parms["total_vaccine_uptake_doses"] = 10000 # more doses than number of S in group 2
+    parms["total_vaccine_uptake_doses"] = (
+        10000  # more doses than number of S in group 2
+    )
     vaccination_uptake_schedule = build_vax_schedule(parms)
-    uptake = vaccinate_groups(parms["n_groups"], u, 10, vaccination_uptake_schedule, parms)
+    uptake = vaccinate_groups(
+        parms["n_groups"], u, 10, vaccination_uptake_schedule, parms
+    )
 
-    assert uptake[parms["vaccinated_group"]] == u[parms['vaccinated_group']][0], "Group 2 uptake is size of Susceptible population"
+    assert (
+        uptake[parms["vaccinated_group"]] == u[parms["vaccinated_group"]][0]
+    ), "Group 2 uptake is size of Susceptible population"
 
 
 def test_get_infected():
     # Define the initial state
     u = [
-        [99,  0, 0, 0, 1, 2, 0, 0],  # S V E1 E2 I1 I2 R Y
-        [100, 0, 0, 0, 3, 4, 0, 0]   # S V E1 E2 I1 I2 R Y
+        [99, 0, 0, 0, 1, 2, 0, 0],  # S V E1 E2 I1 I2 R Y
+        [100, 0, 0, 0, 3, 4, 0, 0],  # S V E1 E2 I1 I2 R Y
     ]
 
     # Define the indices of the I compartments
@@ -230,7 +265,7 @@ def test_get_infected():
         "symptomatic_isolation_start_day": 400,
         "symptomatic_isolation_duration_days": 100,
         "pre_rash_isolation_start_day": 400,
-        "pre_rash_isolation_duration_days": 100
+        "pre_rash_isolation_duration_days": 100,
     }
 
     # Call the get_infected function
@@ -238,7 +273,9 @@ def test_get_infected():
 
     # Check the results
     expected_infected = np.array([3, 7])  # Sum of I1 and I2 for each group
-    assert np.array_equal(infected, expected_infected), f"Expected {expected_infected}, but got {infected}"
+    assert np.array_equal(
+        infected, expected_infected
+    ), f"Expected {expected_infected}, but got {infected}"
 
 
 def test_symptomatic_isolation():
@@ -247,13 +284,13 @@ def test_symptomatic_isolation():
         "symptomatic_isolation_duration_days": 1,
         "isolation_success": 1.0,
         "pre_rash_isolation_start_day": 400,
-        "pre_rash_isolation_duration_days": 100
+        "pre_rash_isolation_duration_days": 100,
     }
 
     # Initial state for each group: Group 2 has no E or I individuals yet
     u = [
         [1000, 0, 0, 0, 100, 100, 0, 0, 0],  # Group 0: S, V, E1, E2, I1, I2, R, Y, X
-        [600, 0, 0, 0, 0, 0, 0, 0, 0]     # Group 2: S, V, E1, E2, I1, I2, R, Y, X
+        [600, 0, 0, 0, 0, 0, 0, 0, 0],  # Group 2: S, V, E1, E2, I1, I2, R, Y, X
     ]
 
     # Define the indices of the I compartments
@@ -270,7 +307,9 @@ def test_symptomatic_isolation():
 
     # Check the results
     expected_infected = np.array([200, 0])  # Sum of I1 and I2 for each group
-    assert np.array_equal(infected, expected_infected), f"Expected {expected_infected}, but got {infected}"
+    assert np.array_equal(
+        infected, expected_infected
+    ), f"Expected {expected_infected}, but got {infected}"
 
     # Next test that isolation happens on isolation day
     t2 = 10
@@ -280,7 +319,9 @@ def test_symptomatic_isolation():
 
     # Check the results
     expected_infected2 = np.array([100, 0])  # Should just be I1
-    assert np.array_equal(infected2, expected_infected2), f"Expected {expected_infected2}, but got {infected2}"
+    assert np.array_equal(
+        infected2, expected_infected2
+    ), f"Expected {expected_infected2}, but got {infected2}"
 
     # Next test that no longer happening after duration
     t3 = 100
@@ -289,7 +330,9 @@ def test_symptomatic_isolation():
     infected3 = get_infected(u, I_indices, groups, parms, t3)
 
     # Check the results, we should now be back to pre-isolation values
-    assert np.array_equal(infected3, expected_infected), f"Expected {expected_infected}, but got {infected3}"
+    assert np.array_equal(
+        infected3, expected_infected
+    ), f"Expected {expected_infected}, but got {infected3}"
 
 
 def test_pre_rash_isolation():
@@ -298,13 +341,13 @@ def test_pre_rash_isolation():
         "symptomatic_isolation_duration_days": 100,
         "pre_rash_isolation_start_day": 10,
         "pre_rash_isolation_duration_days": 1,
-        "pre_rash_isolation_success": 1.0
+        "pre_rash_isolation_success": 1.0,
     }
 
     # Initial state for each group: Group 2 has no E or I individuals yet
     u = [
         [1000, 0, 0, 0, 100, 100, 0, 0, 0],  # Group 0: S, V, E1, E2, I1, I2, R, Y, X
-        [600, 0, 0, 0, 0, 0, 0, 0, 0]     # Group 2: S, V, E1, E2, I1, I2, R, Y, X
+        [600, 0, 0, 0, 0, 0, 0, 0, 0],  # Group 2: S, V, E1, E2, I1, I2, R, Y, X
     ]
 
     # Define the indices of the I compartments
@@ -321,7 +364,9 @@ def test_pre_rash_isolation():
 
     # Check the results
     expected_infected = np.array([200, 0])  # Sum of I1 and I2 for each group
-    assert np.array_equal(infected, expected_infected), f"Expected {expected_infected}, but got {infected}"
+    assert np.array_equal(
+        infected, expected_infected
+    ), f"Expected {expected_infected}, but got {infected}"
 
     # Next test that isolation happens on isolation day
     t2 = 10
@@ -331,7 +376,9 @@ def test_pre_rash_isolation():
 
     # Check the results
     expected_infected2 = np.array([100, 0])  # Should just be I2
-    assert np.array_equal(infected2, expected_infected2), f"Expected {expected_infected2}, but got {infected2}"
+    assert np.array_equal(
+        infected2, expected_infected2
+    ), f"Expected {expected_infected2}, but got {infected2}"
 
     # Next test that no longer happening after duration
     t3 = 100
@@ -340,7 +387,9 @@ def test_pre_rash_isolation():
     infected3 = get_infected(u, I_indices, groups, parms, t3)
 
     # Check the results, we should now be back to pre-isolation values
-    assert np.array_equal(infected3, expected_infected), f"Expected {expected_infected}, but got {infected3}"
+    assert np.array_equal(
+        infected3, expected_infected
+    ), f"Expected {expected_infected}, but got {infected3}"
 
 
 def test_pre_post_isolation():
@@ -350,13 +399,13 @@ def test_pre_post_isolation():
         "isolation_success": 1.0,
         "pre_rash_isolation_start_day": 10,
         "pre_rash_isolation_duration_days": 1,
-        "pre_rash_isolation_success": 1.0
+        "pre_rash_isolation_success": 1.0,
     }
 
     # Initial state for each group: Group 2 has no E or I individuals yet
     u = [
         [1000, 0, 0, 0, 100, 100, 0, 0, 0],  # Group 0: S, V, E1, E2, I1, I2, R, Y, X
-        [600, 0, 0, 0, 0, 0, 0, 0, 0]     # Group 2: S, V, E1, E2, I1, I2, R, Y, X
+        [600, 0, 0, 0, 0, 0, 0, 0, 0],  # Group 2: S, V, E1, E2, I1, I2, R, Y, X
     ]
 
     # Define the indices of the I compartments
@@ -373,7 +422,9 @@ def test_pre_post_isolation():
 
     # Check the results
     expected_infected = np.array([200, 0])  # Sum of I1 and I2 for each group
-    assert np.array_equal(infected, expected_infected), f"Expected {expected_infected}, but got {infected}"
+    assert np.array_equal(
+        infected, expected_infected
+    ), f"Expected {expected_infected}, but got {infected}"
 
     # Next test that isolation happens on isolation day
     t2 = 10
@@ -383,7 +434,9 @@ def test_pre_post_isolation():
 
     # Check the results
     expected_infected2 = np.array([0, 0])  # Should just be no infections
-    assert np.array_equal(infected2, expected_infected2), f"Expected {expected_infected2}, but got {infected2}"
+    assert np.array_equal(
+        infected2, expected_infected2
+    ), f"Expected {expected_infected2}, but got {infected2}"
 
     # Next test that no longer happening after duration
     t3 = 100
@@ -392,12 +445,14 @@ def test_pre_post_isolation():
     infected3 = get_infected(u, I_indices, groups, parms, t3)
 
     # Check the results, we should now be back to pre-isolation values
-    assert np.array_equal(infected3, expected_infected), f"Expected {expected_infected}, but got {infected3}"
+    assert np.array_equal(
+        infected3, expected_infected
+    ), f"Expected {expected_infected}, but got {infected3}"
 
 
 def test_rate_to_frac():
     # Define the rate
-    rate = 0.0 # never happens
+    rate = 0.0  # never happens
 
     # Call the rate_to_frac function
     frac = rate_to_frac(rate)
@@ -435,19 +490,23 @@ def test_run_model_once_with_config():
     model = SEIRModel(parms)
 
     # Call the run_model function
-    S, V, E1, E2, I1, I2, R, Y, X, u = run_model(model, u, t, steps, groups, S, V, E1, E2, I1, I2, R, Y, X)
+    S, V, E1, E2, I1, I2, R, Y, X, u = run_model(
+        model, u, t, steps, groups, S, V, E1, E2, I1, I2, R, Y, X
+    )
 
     # Check the results
-    assert S.shape ==  (steps, groups)
-    assert V.shape ==  (steps, groups)
+    assert S.shape == (steps, groups)
+    assert V.shape == (steps, groups)
     assert E1.shape == (steps, groups)
     assert E2.shape == (steps, groups)
     assert I1.shape == (steps, groups)
     assert I2.shape == (steps, groups)
-    assert R.shape ==  (steps, groups)
-    assert Y.shape ==  (steps, groups)
-    assert X.shape ==  (steps, groups)
+    assert R.shape == (steps, groups)
+    assert Y.shape == (steps, groups)
+    assert X.shape == (steps, groups)
 
     # Check initial vax = end vax
     if parms["total_vaccine_uptake_doses"] == 0:
-        assert np.array_equal(V[0], V[-1]), "The starting V[0] should be the same as the ending V[0] when uptake is zero"
+        assert np.array_equal(
+            V[0], V[-1]
+        ), "The starting V[0] should be the same as the ending V[0] when uptake is zero"
