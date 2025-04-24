@@ -216,6 +216,9 @@ def app(replicates=20):
         placeholder="Select an outcome to plot",
     )
 
+    ### Run computations and display results
+    chart_placeholder = st.empty()
+
     # Map the selected option to the outcome variable
     outcome_mapping = get_outcome_mapping()
     outcome = outcome_mapping[outcome_option]
@@ -227,6 +230,7 @@ def app(replicates=20):
     scenario2 = [updated_parms2]
 
     # run the model with the updated parameters
+    chart_placeholder.text("Running scenarios...")
     results1 = get_scenario_results(scenario1)
     results2 = get_scenario_results(scenario2)
 
@@ -238,12 +242,14 @@ def app(replicates=20):
     groups = results1["group"].unique().to_list()
 
     # do some processing here to get daily incidence
+    chart_placeholder.text("Adding daily incidence...")
     results1 = add_daily_incidence(results1, groups)
     results2 = add_daily_incidence(results2, groups)
 
     # create tables with interval results - weekly incidence, weekly cumulative incidence
     interval = 7
 
+    chart_placeholder.text("Getting interval results...")
     interval_results1 = get_interval_results(results1, groups, interval)
     interval_results2 = get_interval_results(results2, groups, interval)
 
@@ -277,6 +283,7 @@ def app(replicates=20):
         vax_end = max(sched.keys()) / interval
 
     # get median line for each scenario (based on ALL sims, not just smaller sample)
+    chart_placeholder.text("Getting median trajectories...")
     ave_results1 = get_median_trajectory(alt_results1).with_columns(pl.lit(scenario_names[0]).alias("scenario"))
     ave_results2 = get_median_trajectory(alt_results2).with_columns(pl.lit(scenario_names[1]).alias("scenario"))
     combined_ave_results = ave_results1.vstack(ave_results2)
@@ -300,6 +307,7 @@ def app(replicates=20):
         combined_ave_results = ave_results1
         title = (f"No Intervention Scenario")
 
+    chart_placeholder.text("Building charts...")
     chart = alt.Chart(combined_alt_results.to_pandas()).mark_line(opacity=0.5, strokeWidth=0.75).encode(
         x=alt.X(x, title=time_label),
         y=alt.Y(outcome, title=outcome_option),
@@ -368,7 +376,7 @@ def app(replicates=20):
         chart = chart
 
     chart = chart.properties(padding = {"top": 10, "bottom": 30, "left": 30, "right": 40})
-    st.altair_chart(chart, use_container_width=True)
+    chart_placeholder.altair_chart(chart, use_container_width=True)
 
 
     ### Outbreak Summary Stats
