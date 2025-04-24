@@ -13,7 +13,7 @@ repos:
     rev: v0.8.0
     hooks:
       - id: ruff
-        args: [ --fix, --ignore, "E741,F405,F403" ]
+        args: ["--fix", "--ignore", "E741,F405,F403"]
       - name: Format Python code with Ruff
         id: ruff-format
   - repo: https://github.com/Yelp/detect-secrets
