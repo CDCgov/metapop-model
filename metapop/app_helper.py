@@ -1,11 +1,12 @@
 # This file contains helper functions for the metapop app.
-import streamlit as st
-import numpy as np
-import polars as pl
+import copy
+
 import altair as alt
 import griddler
 import griddler.griddle
-import copy
+import numpy as np
+import polars as pl
+import streamlit as st
 
 # import what's needed from other metapop modules
 from .sim import simulate
@@ -90,7 +91,7 @@ def get_scenario_results(parms):
 
 ### Methods to read in default parameters ###
 def read_parameters(filepath="scripts/app/app_config.yaml"):
-    """ "
+    """
     Read parameters from a YAML file and return the first set of parameters.
 
     Returns:
@@ -136,7 +137,7 @@ def get_default_full_parameters():
 
 
 def get_default_show_parameters_table():
-    """ "
+    """
     Get a Dataframe of the default simulation parameters that users always see
     in the app sidebar. This Dataframe contains default values for two
     scenarios that can be updated by the user through other methods.
@@ -320,7 +321,6 @@ def get_outcome_options():
         tuple: A tuple containing the available outcome options.
     """
     return (
-        # "Weekly Infections",
         "Weekly Incidence",
         "Weekly Cumulative Incidence",
         "Daily Infections",
@@ -341,7 +341,6 @@ def get_outcome_mapping():
         "Daily Infections": "I",
         "Daily Incidence": "inc",
         "Daily Cumulative Incidence": "Y",
-        # "Weekly Infections": "WI",
         "Weekly Incidence": "Winc",
         "Weekly Cumulative Incidence": "WCI",
     }
@@ -974,7 +973,7 @@ def add_daily_incidence(results, groups):
 
 
 def get_interval_cumulative_incidence(results, groups, interval=7):
-    """ "
+    """
     Calculate cumulative incidence over specified intervals.
 
     Args:
@@ -1008,7 +1007,7 @@ def get_interval_cumulative_incidence(results, groups, interval=7):
 
 
 def get_interval_results(results, groups, interval=7):
-    """ "
+    """
     Calculate interval results for cumulative incidence.
 
     Args:

@@ -1,7 +1,9 @@
 import os
-import polars.selectors as cs
+
 import griddler
 import griddler.griddle
+import polars.selectors as cs
+
 from metapop import simulate
 
 if __name__ == "__main__":

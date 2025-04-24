@@ -1,15 +1,16 @@
 # This file is part of the metapop package. It contains the simulation methods
 import numpy as np
 import polars as pl
-from .model import SEIRModel
 
 # import what's needed from other metapop modules
 from .helper import (
+    build_vax_schedule,
     construct_beta,
     initialize_population,
-    build_vax_schedule,
     time_to_rate,
 )
+from .model import SEIRModel
+
 # if you want to use methods from metapop in this file under
 # if __name__ == "__main__": you'll need to import them as:
 # from metapop.helper import (

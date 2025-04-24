@@ -1,5 +1,6 @@
-from metapop import app, advanced_app, app_with_table
 import streamlit as st
+
+from metapop import advanced_app, app, app_with_table
 
 
 def test_app():

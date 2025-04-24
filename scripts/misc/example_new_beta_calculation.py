@@ -2,10 +2,11 @@
 # population to achieve a desired R0, and how to calculate the beta matrix for
 # a multi-population model to achieve a desired R0 for the whole population.
 
-from metapop.helper import *
-import numpy as np
 import griddler
 import griddler.griddle
+import numpy as np
+
+from metapop.helper import *
 
 if __name__ == "__main__":
     # one population example

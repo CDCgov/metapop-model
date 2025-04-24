@@ -1,7 +1,9 @@
 import os
-import yaml
+
 import numpy as np
+import yaml
 from numpy.testing import assert_allclose
+
 from metapop.helper import *
 from metapop.model import *
 from metapop.sim import *  # noqa: F405

@@ -1,15 +1,17 @@
 # This file is part of the metapop package. It contains the SEIRModel class
 # implementation
-import numpy as np
 from enum import Enum
+
+import numpy as np
 
 # import what's needed from other metapop modules
 from .helper import (
-    get_infected,
     calculate_foi,
+    get_infected,
     rate_to_frac,
     vaccinate_groups,
 )
+
 # if you want to use methods from metapop in this file under
 # if __name__ == "__main__": you'll need to import them as:
 # from metapop.helper import (

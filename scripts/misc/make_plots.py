@@ -1,9 +1,9 @@
 ######## DEPRACATED: USE make_plots.R #########
 
 import matplotlib.pyplot as plt
-import seaborn as sns
-import polars as pl
 import numpy as np
+import polars as pl
+import seaborn as sns
 from numpy import unique
 
 results = pl.read_csv("output/results.csv")

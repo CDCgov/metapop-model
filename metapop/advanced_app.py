@@ -1,27 +1,27 @@
-import streamlit as st
+import altair as alt
 import numpy as np
 import polars as pl
-import altair as alt
+import streamlit as st
 
 # import what's needed from other metapop modules
 from .app_helper import (
-    get_scenario_results,
-    read_parameters,
-    get_show_parameter_mapping,
-    get_advanced_parameter_mapping,
-    get_outcome_options,
-    get_outcome_mapping,
-    app_editors,
-    get_widget_types,
-    get_min_values,
-    get_max_values,
-    get_step_values,
-    get_helpers,
-    get_formats,
-    get_widget_idkeys,
     add_daily_incidence,
-    get_interval_results,
+    app_editors,
     create_chart,
+    get_advanced_parameter_mapping,
+    get_formats,
+    get_helpers,
+    get_interval_results,
+    get_max_values,
+    get_min_values,
+    get_outcome_mapping,
+    get_outcome_options,
+    get_scenario_results,
+    get_show_parameter_mapping,
+    get_step_values,
+    get_widget_idkeys,
+    get_widget_types,
+    read_parameters,
 )
 
 __all__ = [

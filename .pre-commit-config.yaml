@@ -14,7 +14,10 @@ repos:
     hooks:
       - id: ruff
         args: ["--fix", "--ignore", "E741,F405,F403"]
-      - name: Format Python code with Ruff
+      - name: Sort imports with ruff
+        id: ruff
+        args: ["check", "--select", "I", "--fix"]
+      - name: Format with fuff
         id: ruff-format
   - repo: https://github.com/Yelp/detect-secrets
     rev: v1.5.0

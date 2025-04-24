@@ -1,6 +1,8 @@
 import os
+
 import numpy as np
 import yaml
+
 from metapop.app_helper import *
 
 # read in the test config file

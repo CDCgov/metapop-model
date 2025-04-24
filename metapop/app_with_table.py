@@ -1,27 +1,27 @@
 # This file is part of the metapop package. It contains the streamlit app with
 # a table interface for users
-import streamlit as st
-import polars as pl
-import numpy as np
 import altair as alt
+import numpy as np
+import polars as pl
+import streamlit as st
 
 # import what's needed from other metapop modules
 from .app_helper import (
-    get_scenario_results,
-    read_parameters,
+    add_daily_incidence,
+    correct_parameter_types,
+    create_chart,
     get_default_full_parameters,
     get_default_show_parameters_table,
-    get_show_parameter_mapping,
-    get_outcome_options,
-    get_outcome_mapping,
-    get_parms_from_table,
-    update_parms_from_table,
-    correct_parameter_types,
-    get_keys_in_list,
-    repack_list_parameters,
-    add_daily_incidence,
     get_interval_results,
-    create_chart,
+    get_keys_in_list,
+    get_outcome_mapping,
+    get_outcome_options,
+    get_parms_from_table,
+    get_scenario_results,
+    get_show_parameter_mapping,
+    read_parameters,
+    repack_list_parameters,
+    update_parms_from_table,
 )
 
 # if you want to use the methods from metapop in this file under
