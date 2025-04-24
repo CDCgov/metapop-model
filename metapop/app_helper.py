@@ -49,6 +49,7 @@ __all__ = [
     "set_parms_to_zero",
     "rescale_prop_vax",
     "get_median_trajectory",
+    "get_interventions"
 ]
 
 
@@ -1159,11 +1160,9 @@ def get_hospitalizations(combined_results, IHR):
     hospitalization_summary = (
         combined_results.group_by("Scenario")
         .mean()
-        .with_columns(
-            [pl.col("Hospitalizations").cast(pl.Int64), pl.col("Total").cast(pl.Int64)]
-        )
+        .with_columns([pl.col("Hospitalizations").round_sig_figs(2), pl.col("Total").round_sig_figs(2)])
         .drop("replicate")
-        .rename({"Total": "Total Infections"})
+        .rename({"Total": "Mean Outbreak Size", "Hospitalizations": "Mean Number of Hospitalizations"})
     )
 
     # Ensure the order of scenarios
@@ -1183,6 +1182,22 @@ def get_hospitalizations(combined_results, IHR):
 
     return hospitalization_summary
 
+def get_interventions(edited_parms):
+    dose_vec = [0, edited_parms['total_vaccine_uptake_doses']]
+    isolation_vec = [0, int(edited_parms['pre_rash_isolation_success']*100)]
+    symp_vec = [0, int(edited_parms['isolation_success']*100)]
+    scenario_order = ["No Interventions", "Interventions"]
+
+    intervention_summary = pl.DataFrame({
+        "Scenario": scenario_order,
+        "Vaccines Administered": dose_vec,
+        "Stay-at-home Success (%)": isolation_vec,
+        "Symptomatic Isolation Success (%)": symp_vec
+    })
+
+    return intervention_summary
+
+def get_median_trajectory(results):
 
 def get_median_trajectory(results):
     # data at the end of simulation
