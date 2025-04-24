@@ -449,8 +449,14 @@ def app(replicates=20):
     chart = chart.properties(padding={"top": 10, "bottom": 30, "left": 30, "right": 40})
     chart_placeholder.altair_chart(chart, use_container_width=True)
 
+<<<<<<< HEAD
     ### Outbreak Summary Stats
     st.subheader("Outbreak summary statistics")
+=======
+
+   ### Outbreak Summary Stats
+    st.subheader("Simulation summary")
+>>>>>>> 36c6082 (table with parameters)
     fullresults1 = fullresults1.with_columns(
         pl.lit(scenario_names[0]).alias("Scenario")
     )
@@ -472,6 +478,7 @@ def app(replicates=20):
 
     hospitalization_summary = get_hospitalizations(combined_results, parms["IHR"])
 
+<<<<<<< HEAD
     transposed = hospitalization_summary.select(
         [
             pl.col("Total Infections").alias("Average Outbreak Size"),
@@ -495,6 +502,35 @@ def app(replicates=20):
 
     if interventions == "Off":
         transposed = transposed.select("Metric", scenario_names[0])
+=======
+    dose_vec = [0, edited_parms2['total_vaccine_uptake_doses']]
+    isolation_vec = [0, int(edited_parms2['pre_rash_isolation_success']*100)]
+    symp_vec = [0, int(edited_parms2['isolation_success']*100)]
+
+
+    transposed = hospitalization_summary.with_columns(
+        pl.Series(name = "Vaccines Administered", values = dose_vec),
+        pl.Series(name = "Stay-at-home Success (%)", values = isolation_vec),
+        pl.Series(name = "Symptomatic Isolation Success (%)", values = symp_vec),
+        pl.col("Total Infections").round_sig_figs(2),
+        pl.col("Hospitalizations").round_sig_figs(2),
+    ).select([
+        pl.col("Vaccines Administered"),
+        pl.col("Stay-at-home Success (%)"),
+        pl.col("Symptomatic Isolation Success (%)"),
+        pl.col("Total Infections").alias("Mean Outbreak Size"),
+        pl.col("Hospitalizations").alias("Mean Number of Hospitalizations")
+    ]).transpose(include_header=True
+    ).rename({"column": "", "column_0": scenario_names[0], "column_1": scenario_names[1]}
+    ).with_columns(
+        ((pl.col(scenario_names[0]) - pl.col(scenario_names[1])) / pl.col(scenario_names[0])
+    ).round_sig_figs(2).alias("Relative Difference")
+    )
+
+
+    if(interventions == "Off"):
+        transposed = transposed.select("", scenario_names[0])
+>>>>>>> 36c6082 (table with parameters)
 
     st.dataframe(transposed)
 
