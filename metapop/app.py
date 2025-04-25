@@ -48,7 +48,7 @@ from .helper import build_vax_schedule
 #     get_interval_results,
 #     create_chart,
 #     calculate_outbreak_summary,
-#     get_hospitalizations,
+#     get_table,
 # )
 ### note: this is not recommended use within a file that is imported as a package module, but it can be useful for testing purposes
 
@@ -449,8 +449,7 @@ def app(replicates=20):
     chart = chart.properties(padding={"top": 10, "bottom": 30, "left": 30, "right": 40})
     chart_placeholder.altair_chart(chart, use_container_width=True)
 
-
-   ### Outbreak Summary Stats
+    ### Outbreak Summary Stats
     st.subheader("Simulation summary")
     fullresults1 = fullresults1.with_columns(
         pl.lit(scenario_names[0]).alias("Scenario")
@@ -473,7 +472,7 @@ def app(replicates=20):
 
     outbreak_summary = get_table(combined_results, parms["IHR"], edited_parms2)
 
-    if(interventions == "Off"):
+    if interventions == "Off":
         outbreak_summary = outbreak_summary.select("", scenario_names[0])
 
     st.dataframe(outbreak_summary)

@@ -45,11 +45,10 @@ __all__ = [
     "get_interval_results",
     "create_chart",
     "calculate_outbreak_summary",
-    "get_hospitalizations",
+    "get_table",
     "set_parms_to_zero",
     "rescale_prop_vax",
     "get_median_trajectory",
-    "get_interventions"
 ]
 
 
@@ -1136,6 +1135,7 @@ def calculate_outbreak_summary(combined_results, threshold):
             )
     return outbreak_summary
 
+
 def get_table(combined_results, IHR, edited_parms):
     """
     Calculate the hospitalization summary based on the given IHR.
@@ -1159,47 +1159,69 @@ def get_table(combined_results, IHR, edited_parms):
     hospitalization_summary = (
         combined_results.group_by("Scenario")
         .mean()
-        .with_columns([pl.col("Hospitalizations").round_sig_figs(2), pl.col("Total").round_sig_figs(2)])
+        .with_columns(
+            [
+                pl.col("Hospitalizations").round_sig_figs(2),
+                pl.col("Total").round_sig_figs(2),
+            ]
+        )
         .drop("replicate")
-        .rename({"Total": "Mean Outbreak Size", "Hospitalizations": "Mean Number of Hospitalizations"})
+        .rename(
+            {
+                "Total": "Mean Outbreak Size",
+                "Hospitalizations": "Mean Number of Hospitalizations",
+            }
+        )
     )
 
     # Ensure the order of scenarios
     scenario_names = ["No Interventions", "Interventions"]
 
-    hospitalization_summary = hospitalization_summary.with_columns(
-        pl.when(pl.col("Scenario") == scenario_names[0])
-        .then(0)
-        .when(pl.col("Scenario") == scenario_names[1])
-        .then(1)
-        .otherwise(2)
-        .alias("_sort_order")
-    ).sort("_sort_order").drop("_sort_order")
+    hospitalization_summary = (
+        hospitalization_summary.with_columns(
+            pl.when(pl.col("Scenario") == scenario_names[0])
+            .then(0)
+            .when(pl.col("Scenario") == scenario_names[1])
+            .then(1)
+            .otherwise(2)
+            .alias("_sort_order")
+        )
+        .sort("_sort_order")
+        .drop("_sort_order")
+    )
 
-    dose_vec = [0, edited_parms['total_vaccine_uptake_doses']]
-    isolation_vec = [0, int(edited_parms['pre_rash_isolation_success']*100)]
-    symp_vec = [0, int(edited_parms['isolation_success']*100)]
+    dose_vec = [0, edited_parms["total_vaccine_uptake_doses"]]
+    isolation_vec = [0, int(edited_parms["pre_rash_isolation_success"] * 100)]
+    symp_vec = [0, int(edited_parms["isolation_success"] * 100)]
 
+    intervention_summary = pl.DataFrame(
+        {
+            "Scenario": scenario_names,
+            "Vaccines Administered": dose_vec,
+            "Stay-at-home Success (%)": isolation_vec,
+            "Symptomatic Isolation Success (%)": symp_vec,
+        }
+    )
 
-    intervention_summary = pl.DataFrame({
-        "Scenario": scenario_names,
-        "Vaccines Administered": dose_vec,
-        "Stay-at-home Success (%)": isolation_vec,
-        "Symptomatic Isolation Success (%)": symp_vec
-    })
-
-    outbreak_summary = intervention_summary.join(
-        hospitalization_summary,
-        on="Scenario",
-        how = "inner"
-        ).drop("Scenario"
-        ).transpose(include_header=True
-        ).rename({"column": "", "column_0": scenario_names[0], "column_1": scenario_names[1]}
-        ).with_columns(
-            ((pl.col( scenario_names[0]) - pl.col( scenario_names[1])) / pl.col( scenario_names[0]) * 100
-        ).round_sig_figs(2).alias("Relative Difference (%)")
+    outbreak_summary = (
+        intervention_summary.join(hospitalization_summary, on="Scenario", how="inner")
+        .drop("Scenario")
+        .transpose(include_header=True)
+        .rename(
+            {"column": "", "column_0": scenario_names[0], "column_1": scenario_names[1]}
+        )
+        .with_columns(
+            (
+                (pl.col(scenario_names[0]) - pl.col(scenario_names[1]))
+                / pl.col(scenario_names[0])
+                * 100
+            )
+            .round_sig_figs(2)
+            .alias("Relative Difference (%)")
+        )
     )
     return outbreak_summary
+
 
 def get_median_trajectory(results):
     # data at the end of simulation
