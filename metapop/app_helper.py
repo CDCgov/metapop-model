@@ -1136,8 +1136,7 @@ def calculate_outbreak_summary(combined_results, threshold):
             )
     return outbreak_summary
 
-
-def get_hospitalizations(combined_results, IHR):
+def get_table(combined_results, IHR, edited_parms):
     """
     Calculate the hospitalization summary based on the given IHR.
 
@@ -1166,38 +1165,41 @@ def get_hospitalizations(combined_results, IHR):
     )
 
     # Ensure the order of scenarios
-    scenario_order = ["No Interventions", "Interventions"]
-    hospitalization_summary = (
-        hospitalization_summary.with_columns(
-            pl.when(pl.col("Scenario") == scenario_order[0])
-            .then(0)
-            .when(pl.col("Scenario") == scenario_order[1])
-            .then(1)
-            .otherwise(2)
-            .alias("_sort_order")
-        )
-        .sort("_sort_order")
-        .drop("_sort_order")
-    )
+    scenario_names = ["No Interventions", "Interventions"]
 
-    return hospitalization_summary
+    hospitalization_summary = hospitalization_summary.with_columns(
+        pl.when(pl.col("Scenario") == scenario_names[0])
+        .then(0)
+        .when(pl.col("Scenario") == scenario_names[1])
+        .then(1)
+        .otherwise(2)
+        .alias("_sort_order")
+    ).sort("_sort_order").drop("_sort_order")
 
-def get_interventions(edited_parms):
     dose_vec = [0, edited_parms['total_vaccine_uptake_doses']]
     isolation_vec = [0, int(edited_parms['pre_rash_isolation_success']*100)]
     symp_vec = [0, int(edited_parms['isolation_success']*100)]
-    scenario_order = ["No Interventions", "Interventions"]
+
 
     intervention_summary = pl.DataFrame({
-        "Scenario": scenario_order,
+        "Scenario": scenario_names,
         "Vaccines Administered": dose_vec,
         "Stay-at-home Success (%)": isolation_vec,
         "Symptomatic Isolation Success (%)": symp_vec
     })
 
-    return intervention_summary
-
-def get_median_trajectory(results):
+    outbreak_summary = intervention_summary.join(
+        hospitalization_summary,
+        on="Scenario",
+        how = "inner"
+        ).drop("Scenario"
+        ).transpose(include_header=True
+        ).rename({"column": "", "column_0": scenario_names[0], "column_1": scenario_names[1]}
+        ).with_columns(
+            ((pl.col( scenario_names[0]) - pl.col( scenario_names[1])) / pl.col( scenario_names[0]) * 100
+        ).round_sig_figs(2).alias("Relative Difference (%)")
+    )
+    return outbreak_summary
 
 def get_median_trajectory(results):
     # data at the end of simulation
