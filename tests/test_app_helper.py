@@ -204,7 +204,7 @@ def test_get_widget_idkeys():
 
     widget_idkeys = get_widget_idkeys(5)
     assert isinstance(widget_idkeys, dict), "Expected widget idkeys to be a dictionary"
-    expected_r0 = "R0_5"
+    expected_r0 = "desired_r0_5"
     assert (
         widget_idkeys["desired_r0"] == expected_r0
     ), f"Expected R0 idkey to be {expected_r0}, but got {widget_idkeys['desired_r0']}"

@@ -829,12 +829,12 @@ def get_formats(parms=None):
 
 def get_base_widget_idkeys(parms=None):
     widget_idkeys = dict(
-        desired_r0="R0",
+        desired_r0="desired_r0",
         k_i=["k_i_0", "k_i_1", "k_i_2"],
         k_g1="k_g1",
         k_g2="k_g2",
         k_21="k_21",
-        pop_sizes=["pop_size_0", "pop_size_1", "pop_size_2"],
+        pop_sizes=["pop_sizes_0", "pop_sizes_1", "pop_sizes_2"],
         latent_duration="latent_duration",
         infectious_duration="infectious_duration",
         I0=["I0_0", "I0_1", "I0_2"],
@@ -873,6 +873,14 @@ def get_widget_idkeys(widget_no):
             widget_idkeys[key] = f"{widget_idkeys[key]}_{widget_no}"
 
     return widget_idkeys
+
+
+def get_parameter_key_for_session_key(session_key):
+    return
+
+
+def reset():
+    return
 
 
 ### Methods to handle extraction of user inputs and updating parameter dictionaries to send for simulation ##
