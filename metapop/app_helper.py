@@ -876,7 +876,39 @@ def get_widget_idkeys(widget_no):
 
 
 def get_parameter_key_for_session_key(session_key):
-    return
+    """
+    Get the parameter key for a given session key.
+
+    Args:
+        session_key (str): The session key to look up.
+
+    Returns:
+        str, int: The corresponding model parameter key and index if applicable.
+    """
+
+    # Go from session key to model parameter key, possibly with an index if the
+    # parameter is a list or array for the metapop model
+
+    split_key = session_key.split("_")
+    # default values for key and index
+    key, index = "", ""
+
+    # find all session keys that are model parameters, assuming that we stitch
+    # them together with a model parameter and numbers to indicate the index if
+    # the parameter value is a list
+    if len(split_key) > 1:
+        # remove the value at the end of the key - this is used for naming
+        # purposes to make each key unique
+        split_key = split_key[:-1]
+
+        # check if the last element of the split key is a number - this means
+        # the value of this parameter was stored in a list in the model parameter
+        if split_key[-1].isdigit():
+            index = int(split_key[-1])
+            split_key = split_key[:-1]
+        key = "_".join(split_key)
+
+    return key, index
 
 
 def reset():
