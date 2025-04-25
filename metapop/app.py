@@ -364,7 +364,7 @@ def app(replicates=20):
             f"{int(edited_parms2['isolation_success'] * 100)}% stay-at-home"
         )
     else:
-        combined_alt_results = alt_results1
+        combined_alt_results = alt_results1.filter(pl.col("replicate").is_in(replicate_inds))
         combined_ave_results = ave_results1
         title = f"No Intervention Scenario"
 
