@@ -25,6 +25,7 @@ from .app_helper import (
     get_helpers,
     get_formats,
     get_widget_idkeys,
+    reset,
     add_daily_incidence,
     get_interval_results,
     get_hospitalizations,
@@ -94,6 +95,9 @@ def app(replicates=20):
         keys1 = get_widget_idkeys(1)  # keys for the parameters for scenario 1
         keys2 = get_widget_idkeys(2)  # keys for the parameters for Interventions
 
+        # add a section in the sidebar panel to reset the app
+        col_reset = st.columns(1)[0]
+
         # define parameters to be shared between scenarios that are shown in the sidebar by default
         # order of shared parameters in the sidebar
         shared_keys = [
@@ -108,8 +112,8 @@ def app(replicates=20):
             "initial_vaccine_coverage",
         ]
 
-        col0 = st.columns(1)
-        col0 = col0[0]
+        # add a section for the shared parameters in the sidebar panel
+        col0 = st.columns(1)[0]
 
         subheader = "Shared parameters"
 
@@ -156,9 +160,12 @@ def app(replicates=20):
             edited_parms, ["pre_rash_isolation_success", "isolation_success"]
         )
 
+        col_intervention = st.columns(1)[0]
+
         # For the intervention scenario, user defines values
         edited_parms2 = app_editors(
-            st.container(),
+            # st.container(),
+            col_intervention,
             "",
             edited_parms,
             ordered_keys,
@@ -268,6 +275,17 @@ def app(replicates=20):
     # Map the selected option to the outcome variable
     outcome_mapping = get_outcome_mapping()
     outcome = outcome_mapping[outcome_option]
+
+    # before running the model, reset the parameters to their original values if the user clicks the reset button
+    with col_reset:
+        reset_button = st.button(
+            "Reset parameters",
+            on_click=reset,
+            args=(
+                parms,
+                widget_types,
+            ),
+        )
 
     updated_parms1 = edited_advanced_parms1.copy()
     updated_parms2 = edited_advanced_parms2.copy()
