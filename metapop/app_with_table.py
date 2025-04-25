@@ -135,7 +135,10 @@ def app_with_table(replicates=20):
         value_col="No Interventions",
     )
     updated_parms2 = update_parms_from_table(
-        updated_parms2, edited_table, show_parameter_mapping, value_col="Interventions"
+        updated_parms2,
+        edited_table,
+        show_parameter_mapping,
+        value_col="Interventions",
     )
 
     # correct types for single values

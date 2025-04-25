@@ -25,7 +25,11 @@ def test_get_percapita_contact_matrix():
 
     # Check the result
     expected_percapita_contacts = np.array(
-        [[9.7, 1.0, 2.0], [0.1, 7.0, 2.0], [0.2, 2.0, 6.0]]
+        [
+            [9.7, 1.0, 2.0],
+            [0.1, 7.0, 2.0],
+            [0.2, 2.0, 6.0],
+        ]  # noqa: E501
     )
     assert np.array_equal(
         percapita_contacts, expected_percapita_contacts
@@ -37,7 +41,11 @@ def test_get_percapita_contact_matrix():
     percapita_contacts = get_percapita_contact_matrix(parms)
 
     expected_percapita_contacts = np.array(
-        [[9.7, 1.0, 2.0], [0.1, 17.0, 2.0], [0.2, 2.0, 11.0]]
+        [
+            [9.7, 1.0, 2.0],
+            [0.1, 17.0, 2.0],
+            [0.2, 2.0, 11.0],
+        ]  # noqa: E501
     )
     assert np.array_equal(
         percapita_contacts, expected_percapita_contacts
@@ -46,7 +54,12 @@ def test_get_percapita_contact_matrix():
 
 def test_get_r0():
     # keeling and rohani example
-    beta_matrix = np.array([[10.0, 0.1], [0.1, 1.0]])
+    beta_matrix = np.array(
+        [  # noqa: E231
+            [10.0, 0.1],
+            [0.1, 1.0],
+        ]  # noqa: E501
+    )
     gamma = 1.0
     pop_sizes = np.array([20, 80])
     expected_r0 = 2.001331855134916
@@ -168,7 +181,12 @@ def test_pop_initialization():
 
 def test_calculate_foi_0():
     # Define the parameters
-    beta = np.array([[0.1, 0.2], [0.3, 0.4]])
+    beta = np.array(
+        [
+            [0.1, 0.2],  # noqa: E231
+            [0.3, 0.4],  # noqa: E231
+        ]
+    )
     I_g = np.array([0, 0])
     pop_sizes = np.array([100, 200])
     target_group = 0
@@ -183,7 +201,12 @@ def test_calculate_foi_0():
 
 def test_calculate_foi():
     # Define the parameters
-    beta = np.array([[0.1, 0.2], [0.3, 0.4]])
+    beta = np.array(
+        [
+            [0.1, 0.2],  # noqa: E231
+            [0.3, 0.4],  # noqa: E231
+        ]
+    )
     I_g = np.array([1, 0])
     pop_sizes = np.array([100, 200])
     target_group = 0

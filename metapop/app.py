@@ -369,23 +369,24 @@ def app(replicates=20):
         title = f"No Intervention Scenario"
 
     chart_placeholder.text("Building charts...")
-    chart = alt.Chart(combined_alt_results.to_pandas()).mark_line(opacity=0.5, strokeWidth=0.75).encode(
-        x=alt.X(x, title=time_label),
-        y=alt.Y(outcome, title=outcome_option),
-        color=alt.Color(
-            "scenario",
-            title="Scenario",
-            scale=alt.Scale(
-                domain=[scenario_names[0], scenario_names[1]],  # Scenarios
-                range=["#cf4828","#20419a"]  # Corresponding colors (blue, red)
-            )
-        ),
-        detail = "replicate",
-        tooltip=["scenario", "t", outcome]
-    ).properties(
-        title=title,
-        width=800,
-        height=400
+    chart = (
+        alt.Chart(combined_alt_results.to_pandas())
+        .mark_line(opacity=0.5, strokeWidth=0.75)
+        .encode(
+            x=alt.X(x, title=time_label),
+            y=alt.Y(outcome, title=outcome_option),
+            color=alt.Color(
+                "scenario",
+                title="Scenario",
+                scale=alt.Scale(
+                    domain=[scenario_names[0], scenario_names[1]],  # Scenarios
+                    range=["#cf4828", "#20419a"],  # Corresponding colors (blue, red)
+                ),
+            ),
+            detail="replicate",
+            tooltip=["scenario", "t", outcome],
+        )
+        .properties(title=title, width=800, height=400)
     )
 
     # If vaccines administered > 0, add vax schedule to plot
@@ -445,7 +446,7 @@ def app(replicates=20):
     else:
         chart = chart
 
-    chart = chart.properties(padding = {"top": 10, "bottom": 30, "left": 30, "right": 40})
+    chart = chart.properties(padding={"top": 10, "bottom": 30, "left": 30, "right": 40})
     chart_placeholder.altair_chart(chart, use_container_width=True)
 
     ### Outbreak Summary Stats
