@@ -2,8 +2,11 @@
 # It imports all the necessary modules and functions from the package
 # and can also include initialization code if needed
 
-# import in order of increasing dependencies to avoid circular imports - any two modules should not depend on each other
+
 # from each module, define and import all the functions shared between modules
+# any two modules should not depend on each other. this results in a circular
+# import and will produce errors. for clarity, we name the dependencies of each
+# module in the comments here beside the module import
 from .advanced_app import advanced_app  # depends on app_helper
 from .app import app  # depends on app_helper
 from .app_helper import (
