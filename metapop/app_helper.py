@@ -911,8 +911,37 @@ def get_parameter_key_for_session_key(session_key):
     return key, index
 
 
-def reset():
-    return
+def reset(defaults, widget_types):
+    """
+    Reset the session state widget values to their default values.
+
+    Args:
+        defaults (dict): The default values for the parameters.
+        widget_types (dict): The types of widgets for the parameters.
+
+    Returns: None
+    """
+    for session_key in st.session_state.keys():
+        key, index = get_parameter_key_for_session_key(session_key)
+
+        if key == "":
+            continue
+        if index == "":
+            value = defaults[key]
+        elif isinstance(index, int):
+            value = defaults[key][index]
+        else:
+            raise ValueError(f"Invalid index type: {type(index)} for key: {key}")
+
+        # by default, turn toggles off
+        if widget_types[key] == "toggle":
+            value = False
+
+        # set the session state value to the default value
+        st.session_state[session_key] = value
+
+    # reset the session state for the app
+    st.session_state["reset"] = True
 
 
 ### Methods to handle extraction of user inputs and updating parameter dictionaries to send for simulation ##
