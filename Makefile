@@ -1,7 +1,7 @@
-.PHONY: run
+.PHONY: run_app run_advanced_app
 
-run:
+run_app:
 	streamlit run metapop/launch_app.py --global.disableWidgetStateDuplicationWarning=True
 
-run_advanced:
+run_advanced_app:
 	streamlit run metapop/launch_app.py -- --app_version advanced_app

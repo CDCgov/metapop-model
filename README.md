@@ -25,7 +25,7 @@
 
 
 ## Local app
-You can run the app locally using Streamlit with `streamlit run metapop/launch_app.py --global.disableWidgetStateDuplicationWarning=True`. To run the advanced app with 3 connected populations, use `streamlit run metapop/launch_app.py -- --app_version advanced_app`.
+You can run the app locally using Streamlit with `make run_app`. To run the advanced app with 3 connected populations, use `make run_advanced_app`.
 
 
 ## Project Admin
