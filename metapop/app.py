@@ -579,23 +579,24 @@ def app(replicates=20):
             of the simulation, either through past vaccination or previous
             infection, begin in the 'Vaccinated' compartment.<br><br>
 
+            <p style="font-size:14px;">
             Users can explore the impact of interventions, including vaccination,
             isolation, and stay-at-home measures ('interventions' scenario)
             compared to a baseline scenario without active interventions ('No
             Interventions'). The start and end time of the vaccine campaign
             can be specified.<br><br>
 
-            <b>Assumptions</b><br><br>
+            <b style="font-size:14px;">Assumptions</b><br><br>
             <ul>
-            <li>This is a compartmental SVEIR model of a well-mixed population, which means individuals have the same probability of contact with each other. At the county scale, this may underestimate the risk of an outbreak if unvaccinated people are more likely to come in contact with each other.</li>
-            <li>MMR vaccines in this model have 100% efficacy; the typical estimate of vaccine effectiveness for two doses of MMR vaccine is 97%. This means that the model cannot simulate breakthrough infections, which could lead to an underestimate of the probability of an outbreak and of the outbreak size.</li>
+            <li style="font-size:14px;">This is a compartmental SVEIR model of a well-mixed population, which means individuals have the same probability of contact with each other. At the county scale, this may underestimate the risk of an outbreak if unvaccinated people are more likely to come in contact with each other.</li>
+            <li style="font-size:14px;">MMR vaccines in this model have 100% efficacy; the typical estimate of vaccine effectiveness for two doses of MMR vaccine is 97%. This means that the model cannot simulate breakthrough infections, which could lead to an underestimate of the probability of an outbreak and of the outbreak size.</li>
             </ul>
 
-            <b>Model Parameters</b><br><br>
+            <b style="font-size:14px;">Model Parameters</b><br><br>
             <ul>
-            <li>R0 for measles is generally estimated to be between 12 and 18 <a href='https://www.cdc.gov/measles/about/transmission.html' target='_blank'>(Factsheet about measles)</a></li>
-            <li>The latent period is generally estimated to be around 11 days <a href='https://www.cdc.gov/measles/hcp/communication-resources/clinical-diagnosis-fact-sheet.html' target='_blank'>(Measles Clinical Diagnoses Fact Sheet | Measles (Rubeola) | CDC)</a></li>
-            <li>The infectious period is generally estimated to be around 9 days <a href='https://www.cdc.gov/measles/hcp/communication-resources/clinical-diagnosis-fact-sheet.html' target='_blank'>(Measles Clinical Diagnoses Fact Sheet | Measles (Rubeola) | CDC)</a></li>
+            <li style="font-size:14px;">R0 for measles is generally estimated to be between 12 and 18 <a href='https://www.cdc.gov/measles/about/transmission.html' target='_blank'>(Factsheet about measles)</a></li>
+            <li style="font-size:14px;">The latent period is generally estimated to be around 11 days <a href='https://www.cdc.gov/measles/hcp/communication-resources/clinical-diagnosis-fact-sheet.html' target='_blank'>(Measles Clinical Diagnoses Fact Sheet | Measles (Rubeola) | CDC)</a></li>
+            <li style="font-size:14px;">The infectious period is generally estimated to be around 9 days <a href='https://www.cdc.gov/measles/hcp/communication-resources/clinical-diagnosis-fact-sheet.html' target='_blank'>(Measles Clinical Diagnoses Fact Sheet | Measles (Rubeola) | CDC)</a></li>
             </ul>
             </p>
             """,
