@@ -133,7 +133,7 @@ def app(replicates=20):
         )
 
         col0.text(
-            "Enter a population size and baseline overall vaccine coverage, as"
+            "Enter a population size and baseline overall vaccine coverage, as "
             "well as the number of people initially infected with measles in the population. "
         )
 
@@ -176,8 +176,8 @@ def app(replicates=20):
             "uptake, isolation, or stay at home incorporated.",
         )
         st.text(
-            "Choose intervention to compare to a baseline scenario "
-            "with no active intervenions. Interventions can be applied "
+            "Choose interventions to simulate and to compare with a baseline "
+            "scenario with no active intervenions. Interventions can be applied "
             "independently or in combination with each other. The start time "
             "and duration of the vaccine campaign can be specified."
         )
