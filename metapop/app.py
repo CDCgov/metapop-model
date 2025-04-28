@@ -176,7 +176,7 @@ def app(replicates=20):
             "uptake, isolation, or stay at home incorporated.",
         )
         st.text(
-            "Choose interventions to simulate and to compare with a baseline "
+            "Choose interventions to simulate and compare with a baseline "
             "scenario with no active intervenions. Interventions can be applied "
             "independently or in combination with each other. The start time "
             "and duration of the vaccine campaign can be specified."
@@ -586,7 +586,9 @@ def app(replicates=20):
             Interventions'). The start and end time of the vaccine campaign
             can be specified.<br><br>
 
-            <b style="font-size:14px;">Assumptions</b><br><br>
+            <b style="font-size:14px;">Assumptions</b>
+            <p style="font-size:14px;">We note that this modeling approach
+            makes several simplifying assumptions, including the following:</p>
             <ul>
             <li style="font-size:14px;">This is a compartmental SVEIR model of
             a well-mixed population, which means individuals have the same
@@ -601,13 +603,13 @@ def app(replicates=20):
             of the reduction in outbreak size due to vaccination.</li>
             </ul>
 
-            <b style="font-size:14px;">Model Parameters</b><br><br>
+            <b style="font-size:14px;">Model Parameters</b>
             <ul>
             <li style="font-size:14px;">R<sub>0</sub> for measles is generally estimated
             to be between 12 and 18
             <a href='https://www.cdc.gov/measles/about/transmission.html' target='_blank'>[Factsheet about measles]</a></li>
             <li style="font-size:14px;">The latent period is generally
-            estimated to be 10.5 days
+            estimated to be around 11 days
             <a href='https://www.cdc.gov/measles/hcp/communication-resources/clinical-diagnosis-fact-sheet.html' target='_blank'>[Measles Clinical Diagnosis Fact Sheet | Measles (Rubeola) | CDC]</a></li>
             <li style="font-size:14px;">The infectious period is generally
             estimated to be around 9 days
