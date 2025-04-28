@@ -64,7 +64,7 @@ def app(replicates=20):
     st.text(
         "This interactive tool illustrates the impact of "
         "vaccination, isolation, and stay-at-home measures on the probability "
-        "and size of measles outbreaks over 365 days following introduction of measles into "
+        "and size of measles outbreaks following introduction of measles into "
         "a community, by comparing scenarios with and without interventions."
     )
     parms = read_parameters("scripts/app/onepop_config.yaml")
@@ -115,8 +115,16 @@ def app(replicates=20):
         # add a section for the shared parameters in the sidebar panel
         col0 = st.columns(1)[0]
 
-        subheader = "Shared parameters"
+        col0.subheader(
+            "Shared parameters",
+        )
 
+        col0.text(
+            "Enter a population size and baseline overall vaccine coverage, as"
+            "well as the number of people initially infected with measles in the population. "
+        )
+
+        subheader = ""
         edited_parms = app_editors(
             col0,
             subheader,
