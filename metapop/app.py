@@ -28,7 +28,7 @@ from .app_helper import (
     reset,
     add_daily_incidence,
     get_interval_results,
-    get_hospitalizations,
+    get_table,
     get_median_trajectory,
 )
 from .helper import build_vax_schedule
@@ -49,7 +49,7 @@ from .helper import build_vax_schedule
 #     get_interval_results,
 #     create_chart,
 #     calculate_outbreak_summary,
-#     get_hospitalizations,
+#     get_table,
 # )
 ### note: this is not recommended use within a file that is imported as a package module, but it can be useful for testing purposes
 
@@ -470,7 +470,7 @@ def app(replicates=20):
     chart_placeholder.altair_chart(chart, use_container_width=True)
 
     ### Outbreak Summary Stats
-    st.subheader("Outbreak summary statistics")
+    st.subheader("Simulation summary")
     fullresults1 = fullresults1.with_columns(
         pl.lit(scenario_names[0]).alias("Scenario")
     )
@@ -490,33 +490,12 @@ def app(replicates=20):
         .agg(pl.col("Y").sum().alias("Total"))
     )
 
-    hospitalization_summary = get_hospitalizations(combined_results, parms["IHR"])
-
-    transposed = hospitalization_summary.select(
-        [
-            pl.col("Total Infections").alias("Average Outbreak Size"),
-            pl.col("Hospitalizations").alias("Average Number of Hospitalizations"),
-        ]
-    ).transpose(include_header=True)
-
-    transposed = transposed.rename(
-        {
-            "column": "Metric",
-            "column_0": scenario_names[0],
-            "column_1": scenario_names[1],
-        }
-    )
-    transposed = transposed.with_columns(
-        (
-            (pl.col(scenario_names[0]) - pl.col(scenario_names[1]))
-            / pl.col(scenario_names[0])
-        ).alias("Relative Difference")
-    )
+    outbreak_summary = get_table(combined_results, parms["IHR"], edited_parms2)
 
     if interventions == "Off":
-        transposed = transposed.select("Metric", scenario_names[0])
+        outbreak_summary = outbreak_summary.select("", scenario_names[0])
 
-    st.dataframe(transposed)
+    st.dataframe(outbreak_summary)
 
 
 if __name__ == "__main__":
