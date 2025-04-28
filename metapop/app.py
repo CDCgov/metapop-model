@@ -563,8 +563,31 @@ def app(replicates=20):
         st.text(
             f"{intervention_text} decreases total cases by {relative_difference:.0f}%."
         )
-
-    st.dataframe(outbreak_summary)
+    print(outbreak_summary)
+    # Style the dataframe to show NaN or None values as empty or greyed out cells
+    # styled_outbreak_summary = outbreak_summary.to_pandas().replace(
+    #     {None: ""}
+    # ).style.applymap(
+    # lambda x: "background-color: lightgrey;" if pd.isna(x) else ""
+    # )
+    styled_outbreak_summary = (
+        outbreak_summary.to_pandas()
+        .style.format(
+            lambda x: f"{int(x)}"
+            if not pd.isna(x) and isinstance(x, (int, float)) and x == int(x)
+            else x
+        )
+        .applymap(lambda x: "background-color: lightgrey;" if pd.isna(x) else "")
+    )
+    # .format(
+    #     lambda x: f"{x}" if not pd.isna(x) else ""
+    # )
+    # applymap(
+    #     lambda x: "background-color: lightgrey;" if pd.isna(x) else ""
+    # )
+    # print
+    st.dataframe(styled_outbreak_summary)
+    # st.dataframe(outbreak_summary)
 
     # add a section on the detailed methods
     with st.expander("Detailed methods", expanded=False):
