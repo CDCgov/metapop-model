@@ -496,6 +496,16 @@ def app(replicates=20):
     chart = chart.properties(padding={"top": 10, "bottom": 30, "left": 30, "right": 40})
     chart_placeholder.altair_chart(chart, use_container_width=True)
 
+    # Text below the chart
+    st.text(
+        "Each thin line represents an individual simulation of the stochastic "
+        "model. All simulations within a given scenario (i.e., shown with "
+        "the same color) are run under the same set of parameters, and "
+        "differences between each individual simulation are due to random "
+        "variation in contact rates. Bolded lines show the median simulation "
+        "for each scenario. "
+    )
+
     ### Outbreak Summary Stats
     st.subheader("Simulation summary")
     fullresults1 = fullresults1.with_columns(
