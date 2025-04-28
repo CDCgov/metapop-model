@@ -535,7 +535,40 @@ def app(replicates=20):
     if interventions == "Off":
         outbreak_summary = outbreak_summary.select("", scenario_names[0])
 
+    # add highlight of the outbreak summary
+    if interventions == "On":
+        relative_difference = (
+            outbreak_summary.filter(pl.col("") == "Mean Outbreak Size")
+            .select("Relative Difference (%)")
+            .to_numpy()[0][0]
+        )
+
+        intervention_text = f"Adding "
+        if edited_parms2["total_vaccine_uptake_doses"] > 0:
+            interventions = []
+            if edited_parms2["total_vaccine_uptake_doses"] > 0:
+                interventions.append("vaccination")
+            if edited_parms2["pre_rash_isolation_success"] > 0:
+                interventions.append("pre-rash isolation")
+            if edited_parms2["isolation_success"] > 0:
+                interventions.append("symptomatic isolation")
+
+            if len(interventions) > 1:
+                intervention_text += (
+                    ", ".join(interventions[:-1]) + " and " + interventions[-1]
+                )
+            elif interventions:
+                intervention_text += interventions[0]
+
+        st.text(
+            f"{intervention_text} decreases total cases by {relative_difference:.0f}%"
+        )
+
     st.dataframe(outbreak_summary)
+
+    # add a section on the detailed methods
+    with st.expander("Detailed methods", expanded=False):
+        st.text("This model examines measles transmission")
 
 
 if __name__ == "__main__":
