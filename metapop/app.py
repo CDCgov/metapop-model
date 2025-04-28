@@ -572,12 +572,20 @@ def app(replicates=20):
     # )
     styled_outbreak_summary = (
         outbreak_summary.to_pandas()
-        .style.format(
-            lambda x: f"{int(x)}"
-            if not pd.isna(x) and isinstance(x, (int, float)) and x == int(x)
-            else x
+        .style.map(lambda x: "background-color: lightgrey;" if pd.isna(x) else "")
+        .format(
+            lambda x: f""
+            if pd.isna(x)
+            else (f"{int(x)}" if isinstance(x, (int, float)) else x)
+            # lambda x: f"{int(x)}"
+            # if not pd.isna(x) and isinstance(x, (int, float))
+            # else ("" if pd.isna(x) else x)
         )
-        .applymap(lambda x: "background-color: lightgrey;" if pd.isna(x) else "")
+        # .format(
+        #     lambda x: f"{int(x)}"
+        #     if not pd.isna(x) and isinstance(x, (int, float)) and x == int(x)
+        #     else x
+        # )
     )
     # .format(
     #     lambda x: f"{x}" if not pd.isna(x) else ""
