@@ -169,6 +169,12 @@ def app(replicates=20):
             "The results are compared to an 'unmitigated' scenario which does not have any vaccine "
             "uptake, isolation, or stay at home incorporated.",
         )
+        st.text(
+            "Choose intervention to compare to a baseline scenario "
+            "with no active intervenions. Interventions can be applied "
+            "independently or in combination with each other. The start time "
+            "and duration of the vaccine campaign can be specified."
+        )
 
         # For the no intervention scenario, intervention parameters are set to 0
         edited_parms1 = set_parms_to_zero(
