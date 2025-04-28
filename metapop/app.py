@@ -561,7 +561,7 @@ def app(replicates=20):
                 intervention_text += interventions[0]
 
         st.text(
-            f"{intervention_text} decreases total cases by {relative_difference:.0f}%"
+            f"{intervention_text} decreases total cases by {relative_difference:.0f}%."
         )
 
     st.dataframe(outbreak_summary)
