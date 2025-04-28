@@ -603,9 +603,35 @@ def app(replicates=20):
 
             <b style="font-size:14px;">Model Parameters</b><br><br>
             <ul>
-            <li style="font-size:14px;">R0 for measles is generally estimated to be between 12 and 18 <a href='https://www.cdc.gov/measles/about/transmission.html' target='_blank'>(Factsheet about measles)</a></li>
-            <li style="font-size:14px;">The latent period is generally estimated to be around 11 days <a href='https://www.cdc.gov/measles/hcp/communication-resources/clinical-diagnosis-fact-sheet.html' target='_blank'>(Measles Clinical Diagnoses Fact Sheet | Measles (Rubeola) | CDC)</a></li>
-            <li style="font-size:14px;">The infectious period is generally estimated to be around 9 days <a href='https://www.cdc.gov/measles/hcp/communication-resources/clinical-diagnosis-fact-sheet.html' target='_blank'>(Measles Clinical Diagnoses Fact Sheet | Measles (Rubeola) | CDC)</a></li>
+            <li style="font-size:14px;">R<sub>0</sub> for measles is generally estimated
+            to be between 12 and 18
+            <a href='https://www.cdc.gov/measles/about/transmission.html' target='_blank'>[Factsheet about measles]</a></li>
+            <li style="font-size:14px;">The latent period is generally
+            estimated to be 10.5 days
+            <a href='https://www.cdc.gov/measles/hcp/communication-resources/clinical-diagnosis-fact-sheet.html' target='_blank'>[Measles Clinical Diagnosis Fact Sheet | Measles (Rubeola) | CDC]</a></li>
+            <li style="font-size:14px;">The infectious period is generally
+            estimated to be around 9 days
+            <a href='https://www.cdc.gov/measles/hcp/communication-resources/clinical-diagnosis-fact-sheet.html' target='_blank'>[Measles Clinical Diagnosis Fact Sheet | Measles (Rubeola) | CDC]</a></li>
+            <li style="font-size:14px;">Measles rash onset is generally
+            estimated to be on day 5 of this infectious period
+            <a href='https://www.cdc.gov/measles/hcp/communication-resources/clinical-diagnosis-fact-sheet.html' target='_blank'>[Measles Clinical Diagnosis Fact Sheet | Measles (Rubeola) | CDC]</a>.
+            In this model, isolation when sick is assumed to start halfway through the infectious period.
+            </li>
+            <li style="font-size:14px;"> We assume vaccine efficacy is 100%.
+            This is a simplifying assumption; MMR vaccine effectiveness is
+            estimated to be 97% after two doses <a href='https://www.cdc.gov/measles/vaccines/index.html?CDC_AA_refVal=https%3A%2F%2Fwww.cdc.gov%2Fvaccines%2Fvpd%2Fmmr%2Fpublic%2Findex.html' target='_blank'>[MMR Vaccine Information]</a>.
+            </li>
+            <li style="font-size:14px;">Isolation when sick is estimated to be
+            approximately 75% effective at reducing transmission when comparing
+            people who do isolate when sick to people who do not isolate when sick
+            <a href='https://academic.oup.com/cid/article/75/1/152/6424734' target='_blank'>[Impact of Isolation and Exclusion as a Public Health Strategy to Contain Measles Virus Transmission During a Measles Outbreak | Clinical Infectious Diseases | Oxford Academic]</a>.
+            <li style="font-size:14px;">Stay-at-home for people who are unvaccinated but have been
+            exposed is estimated to be 44-76% effective at reducing transmission
+            when comparing those who do stay at home to those who do not.
+            We assume 60% efficacy, which is the mean of this range.
+            <a href='https://academic.oup.com/cid/article/75/1/152/6424734' target='_blank'>[Impact of Isolation and Exclusion as a Public Health Strategy to Contain Measles Virus Transmission During a Measles Outbreak | Clinical Infectious Diseases | Oxford Academic]</a>
+            </li>
+
             </ul>
             </p>
             """,
