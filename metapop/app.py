@@ -588,8 +588,17 @@ def app(replicates=20):
 
             <b style="font-size:14px;">Assumptions</b><br><br>
             <ul>
-            <li style="font-size:14px;">This is a compartmental SVEIR model of a well-mixed population, which means individuals have the same probability of contact with each other. At the county scale, this may underestimate the risk of an outbreak if unvaccinated people are more likely to come in contact with each other.</li>
-            <li style="font-size:14px;">MMR vaccines in this model have 100% efficacy; the typical estimate of vaccine effectiveness for two doses of MMR vaccine is 97%. This means that the model cannot simulate breakthrough infections, which could lead to an underestimate of the probability of an outbreak and of the outbreak size.</li>
+            <li style="font-size:14px;">This is a compartmental SVEIR model of
+            a well-mixed population, which means individuals have the same
+            probability of contact with each other. At the county scale, this
+            may underestimate the risk of an outbreak if unvaccinated people
+            are more likely to come in contact with each other.</li>
+            <li style="font-size:14px;">MMR vaccines in this model have 100%
+            efficacy; the typical estimate of vaccine effectiveness for two
+            doses of MMR vaccine is 97%. This means that the model cannot
+            simulate breakthrough infections, which could lead to an
+            underestimate of the probability of an outbreak and an overestimate
+            of the reduction in outbreak size due to vaccination.</li>
             </ul>
 
             <b style="font-size:14px;">Model Parameters</b><br><br>
