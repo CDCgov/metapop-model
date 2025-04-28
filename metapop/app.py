@@ -101,6 +101,12 @@ def app(replicates=20):
         helpers["initial_vaccine_coverage"][0] = (
             "The percent of the population with any immunity against measles, including both through MMR vaccination and through past infection."
         )
+        helpers["pre_rash_isolation_success"] = (
+            'When this intervention is "on", we assume that stay-at-home guidance reduces transmission during the pre-symptomatic period by 60%.'
+        )
+        helpers["isolation_success"] = (
+            'When this intervention is "on", we assume that isolation of symptomatic individuals reduces transmission during the symptomatic period by 75%.'
+        )
 
         # add a section in the sidebar panel to reset the app
         col_reset = st.columns(1)[0]
