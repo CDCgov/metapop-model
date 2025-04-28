@@ -568,7 +568,33 @@ def app(replicates=20):
 
     # add a section on the detailed methods
     with st.expander("Detailed methods", expanded=False):
-        st.text("This model examines measles transmission")
+        st.markdown(
+            '<p style="font-size:14px;">'
+            "This model examines measles transmission in a population after "
+            "introduction of measles cases. This is a stochastic SVEIR model, "
+            "with built-in random variation, meaning we run many individual "
+            "simulations to produce a range of possible outcomes and estimates "
+            "of associated uncertainty. People who are immune at the beginning "
+            "of the simulation, either through past vaccination or previous "
+            "infection, begin in the 'Vaccinated' compartment.<br><br>"
+            "Users can explore the impact of interventions, including vaccination, "
+            "isolation, and stay-at-home measures ('interventions' scenario) "
+            "compared to a baseline scenario without active interventions ('No "
+            "Interventions'). The start and end time of the vaccine campaign "
+            "can be specified.<br><br>"
+            "<b>Assumptions</b><br><br>"
+            "We note that this modeling approach makes several simplifying "
+            "assumptions, including the following:<br>"
+            "- This is a compartmental SVEIR model of a well-mixed population, which means individuals have the same probability of contact with each other. At the county scale, this may underestimate the risk of an outbreak if unvaccinated people are more likely to come in contact with each other.<br>"
+            "- MMR vaccines in this model have 100% efficacy; the typical estimate of vaccine effectiveness for two doses of MMR vaccine is 97%. This means that the model cannot simulate breakthrough infections, which could lead to an underestimate of the probability of an outbreak and of the outbreak size.<br><br>"
+            "<b>Model Parameters</b><br><br>"
+            "List of baseline parameters, notes, and citations:<br><br>"
+            " - R0 for measles is generally estimated to be between 12 and 18, with a median of 15. <a href='https://www.cdc.gov/measles/about/transmission.html' target='_blank'>Factsheet about measles</a><br>"
+            " - The latent period is generally estimated to be around 11 days <a href='https://www.cdc.gov/measles/hcp/communication-resources/clinical-diagnosis-fact-sheet.html' target='_blank'>Measles Clinical Diagnoses Fact Sheet | Measles (Rubeola) | CDC</a><br>"
+            " - The infectious period is generally estimated to be around 9 days <a href='https://www.cdc.gov/measles/hcp/communication-resources/clinical-diagnosis-fact-sheet.html' target='_blank'>Measles Clinical Diagnoses Fact Sheet | Measles (Rubeola) | CDC</a><br>"
+            "</p>",
+            unsafe_allow_html=True,
+        )
 
 
 if __name__ == "__main__":
