@@ -95,6 +95,13 @@ def app(replicates=20):
         keys1 = get_widget_idkeys(1)  # keys for the parameters for scenario 1
         keys2 = get_widget_idkeys(2)  # keys for the parameters for Interventions
 
+        # some customization of the helper texts in the sidebar
+        helpers["I0"][0] = "The model currently has a maximum of 10 initial infections."
+        helpers["pop_sizes"][0] = "The model currently has a maximum of 100,000 people."
+        helpers["initial_vaccine_coverage"][0] = (
+            "The percent of the population with any immunity against measles, including both through MMR vaccination and through past infection."
+        )
+
         # add a section in the sidebar panel to reset the app
         col_reset = st.columns(1)[0]
 
