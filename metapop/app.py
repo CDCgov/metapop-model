@@ -564,6 +564,21 @@ def app(replicates=20):
             f"{intervention_text} decreases total cases by {relative_difference:.0f}%."
         )
     print(outbreak_summary)
+
+    # convert the Relative Difference column to strings
+    outbreak_summary = outbreak_summary.with_columns(
+        pl.when(pl.col("Relative Difference (%)").is_nan())
+        .then(pl.lit(""))
+        .when(pl.col("Relative Difference (%)").is_null())
+        .then(pl.lit(""))
+        .otherwise(pl.col("Relative Difference (%)"))
+        .alias("Relative Difference (%)")
+        # pl.when(pl.col("Relative Difference (%)").is_not_null())
+        # .then(pl.col("Relative Difference (%)").cast(pl.Float64).round(0))
+        # .otherwise(pl.lit(""))
+        # .alias("Relative Difference (%)")
+    )
+
     # Style the dataframe to show NaN or None values as empty or greyed out cells
     # styled_outbreak_summary = outbreak_summary.to_pandas().replace(
     #     {None: ""}
@@ -571,29 +586,22 @@ def app(replicates=20):
     # lambda x: "background-color: lightgrey;" if pd.isna(x) else ""
     # )
     styled_outbreak_summary = (
-        outbreak_summary.to_pandas()
-        .style.map(lambda x: "background-color: lightgrey;" if pd.isna(x) else "")
-        .format(
-            lambda x: f""
-            if pd.isna(x)
-            else (f"{int(x)}" if isinstance(x, (int, float)) else x)
-            # lambda x: f"{int(x)}"
-            # if not pd.isna(x) and isinstance(x, (int, float))
-            # else ("" if pd.isna(x) else x)
-        )
+        outbreak_summary.to_pandas().style.hide(axis=0)
         # .format(
-        #     lambda x: f"{int(x)}"
-        #     if not pd.isna(x) and isinstance(x, (int, float)) and x == int(x)
-        #     else x
+        #     lambda x: f"{x}" if pd.isnull(x) else "Hello",
+        # )
+        # .map(lambda x: "background-color: lightgrey;" if pd.isna(x) else "")
+        # .format(
+        #     lambda x: f""
+        #     if pd.isna(x)
+        #     else (
+        #         f"{int(x)}"
+        #         if isinstance(x, (int, float))
+        #         else x
+        #     )
         # )
     )
-    # .format(
-    #     lambda x: f"{x}" if not pd.isna(x) else ""
-    # )
-    # applymap(
-    #     lambda x: "background-color: lightgrey;" if pd.isna(x) else ""
-    # )
-    # print
+
     st.dataframe(styled_outbreak_summary)
     # st.dataframe(outbreak_summary)
 
