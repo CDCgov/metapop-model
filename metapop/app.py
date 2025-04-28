@@ -563,47 +563,13 @@ def app(replicates=20):
         st.text(
             f"{intervention_text} decreases total cases by {relative_difference:.0f}%."
         )
-    print(outbreak_summary)
 
-    # convert the Relative Difference column to strings
+    # if the Relative Difference is NaN, set it to ""
     outbreak_summary = outbreak_summary.with_columns(
-        pl.when(pl.col("Relative Difference (%)").is_nan())
-        .then(pl.lit(""))
-        .when(pl.col("Relative Difference (%)").is_null())
-        .then(pl.lit(""))
-        .otherwise(pl.col("Relative Difference (%)"))
-        .alias("Relative Difference (%)")
-        # pl.when(pl.col("Relative Difference (%)").is_not_null())
-        # .then(pl.col("Relative Difference (%)").cast(pl.Float64).round(0))
-        # .otherwise(pl.lit(""))
-        # .alias("Relative Difference (%)")
+        pl.col("Relative Difference (%)").fill_nan("")
     )
 
-    # Style the dataframe to show NaN or None values as empty or greyed out cells
-    # styled_outbreak_summary = outbreak_summary.to_pandas().replace(
-    #     {None: ""}
-    # ).style.applymap(
-    # lambda x: "background-color: lightgrey;" if pd.isna(x) else ""
-    # )
-    styled_outbreak_summary = (
-        outbreak_summary.to_pandas().style.hide(axis=0)
-        # .format(
-        #     lambda x: f"{x}" if pd.isnull(x) else "Hello",
-        # )
-        # .map(lambda x: "background-color: lightgrey;" if pd.isna(x) else "")
-        # .format(
-        #     lambda x: f""
-        #     if pd.isna(x)
-        #     else (
-        #         f"{int(x)}"
-        #         if isinstance(x, (int, float))
-        #         else x
-        #     )
-        # )
-    )
-
-    st.dataframe(styled_outbreak_summary)
-    # st.dataframe(outbreak_summary)
+    st.dataframe(outbreak_summary)
 
     # add a section on the detailed methods
     with st.expander("Detailed methods", expanded=False):

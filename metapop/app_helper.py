@@ -1285,7 +1285,7 @@ def get_table(combined_results, IHR, edited_parms):
                 / pl.col(scenario_names[0])
                 * 100
             )
-            .round_sig_figs(2)
+            .round_sig_figs(3)
             .alias("Relative Difference (%)")
         )
     )
