@@ -627,7 +627,7 @@ def get_min_values(parms=None):
         dict: A dictionary of minimum values for the app parameters.
     """
     defaults = dict(
-        desired_r0=0.0,
+        desired_r0=10.0,
         k_i=[0.0, 0.0, 0.0],
         k_g1=0.0,
         k_g2=0.0,
@@ -666,7 +666,7 @@ def get_max_values(parms=None):
         dict: A dictionary of maximum values for the app parameters.
     """
     defaults = dict(
-        desired_r0=30.0,
+        desired_r0=18.0,
         k_i=[50.0, 50.0, 50.0],
         k_g1=50.0,
         k_g2=50.0,
