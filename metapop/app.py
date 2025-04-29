@@ -563,10 +563,10 @@ def app(replicates=20):
             f"{intervention_text} decreases total cases by {relative_difference:.0f}%."
         )
 
-    # if the Relative Difference is NaN, set it to ""
-    outbreak_summary = outbreak_summary.with_columns(
-        pl.col("Relative Difference (%)").fill_nan("")
-    )
+        # if the Relative Difference is NaN, set it to ""
+        outbreak_summary = outbreak_summary.with_columns(
+            pl.col("Relative Difference (%)").fill_nan("")
+        )
 
     st.dataframe(outbreak_summary)
 
