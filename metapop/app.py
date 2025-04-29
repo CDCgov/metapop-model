@@ -544,21 +544,20 @@ def app(replicates=20):
         )
 
         intervention_text = f"Adding "
+        interventions = []
         if edited_parms2["total_vaccine_uptake_doses"] > 0:
-            interventions = []
-            if edited_parms2["total_vaccine_uptake_doses"] > 0:
-                interventions.append("vaccination")
-            if edited_parms2["pre_rash_isolation_success"] > 0:
-                interventions.append("pre-rash isolation")
-            if edited_parms2["isolation_success"] > 0:
-                interventions.append("symptomatic isolation")
+            interventions.append("vaccination")
+        if edited_parms2["pre_rash_isolation_success"] > 0:
+            interventions.append("pre-rash isolation")
+        if edited_parms2["isolation_success"] > 0:
+            interventions.append("symptomatic isolation")
 
-            if len(interventions) > 1:
-                intervention_text += (
-                    ", ".join(interventions[:-1]) + " and " + interventions[-1]
-                )
-            elif interventions:
-                intervention_text += interventions[0]
+        if len(interventions) > 1:
+            intervention_text += (
+                ", ".join(interventions[:-1]) + " and " + interventions[-1]
+            )
+        elif interventions:
+            intervention_text += interventions[0]
 
         st.text(
             f"{intervention_text} decreases total cases by {relative_difference:.0f}%."
