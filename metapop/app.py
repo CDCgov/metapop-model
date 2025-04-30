@@ -428,7 +428,7 @@ def app(replicates=20):
     chart_placeholder.text("Building charts...")
     chart = (
         alt.Chart(combined_alt_results.to_pandas())
-        .mark_line(opacity=0.5, strokeWidth=0.75)
+        .mark_line(opacity=0.3, strokeWidth=0.75)
         .encode(
             x=alt.X(x, title=time_label),
             y=alt.Y(outcome, title=outcome_option),
@@ -437,7 +437,7 @@ def app(replicates=20):
                 title="Scenario",
                 scale=alt.Scale(
                     domain=[scenario_names[0], scenario_names[1]],  # Scenarios
-                    range=["#cf4828", "#20419a"],  # Corresponding colors (blue, red)
+                    range=["#FB7E38", "0057b7"],  # Corresponding colors (orange, blue)
                 ),
             ),
             detail="replicate",
