@@ -528,15 +528,15 @@ def app(replicates=20):
         columns[0].error(
             "No Interventions:\n"
             " - Vaccines administered during campaign: 0\n"
-            " - % of infectious individuals isolating before rash onset: 0\n"
-            " - % of infectious individuals isolating after rash onset: 0"
+            " - Reduction in transmission of pre-symptomatic individuals due to quarantine: 0%\n"
+            " - Reduction in transmission of symptomatic individuals due to isolation: 0%"
         )
         if interventions == "On":
             columns[1].info(
                 "Interventions:\n"
                 f" - Vaccines administered during campaign: {edited_parms2['total_vaccine_uptake_doses']} between day {edited_parms2['vaccine_uptake_start_day']} and day {edited_parms2['vaccine_uptake_start_day'] + edited_parms2['vaccine_uptake_duration_days']}\n"
-                f" - Reduction in transmission of pre-symptomatic individuals due to quarantine (applied to {edited_parms2['pre_rash_isolation_adherence']*100}% of individuals): {edited_parms2['pre_rash_isolation_reduction']*100}% between day {edited_parms2['pre_rash_isolation_start_day']} and day {edited_parms2['pre_rash_isolation_start_day'] + edited_parms2['pre_rash_isolation_duration_days']}\n"
-                f" - Reduction in transmission of symptomatic individuals due to isolation (applied to {edited_parms2['isolation_adherence']*100}% of individuals): {edited_parms2['isolation_reduction']*100}% between day {edited_parms2['symptomatic_isolation_start_day']} and day {edited_parms2['symptomatic_isolation_start_day'] + edited_parms2['symptomatic_isolation_duration_days']}\n"
+                f" - Reduction in transmission of pre-symptomatic individuals due to quarantine: {edited_advanced_parms2['pre_rash_isolation_success']*100}% between day {edited_parms2['pre_rash_isolation_start_day']} and day {edited_parms2['pre_rash_isolation_start_day'] + edited_parms2['pre_rash_isolation_duration_days']}\n"
+                f" - Reduction in transmission of symptomatic individuals due to isolation: {edited_advanced_parms2['isolation_success']*100}% between day {edited_parms2['symptomatic_isolation_start_day']} and day {edited_parms2['symptomatic_isolation_start_day'] + edited_parms2['symptomatic_isolation_duration_days']}\n"
             )
 
     fullresults1 = fullresults1.with_columns(
