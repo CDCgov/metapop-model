@@ -33,7 +33,6 @@ def test_get_outcome_options():
     options = get_outcome_options()
     assert isinstance(options, tuple), "Expected options to be a tuple"
     expected_values = (
-        "Daily Infections",
         "Daily Incidence",
         "Daily Cumulative Incidence",
         "Weekly Incidence",
@@ -51,7 +50,6 @@ def test_get_outcome_mapping():
     outcome_mapping = get_outcome_mapping()
     assert isinstance(outcome_mapping, dict), "Expected mapping to be a dictionary"
     expected_keys = [
-        "Daily Infections",
         "Daily Incidence",
         "Daily Cumulative Incidence",
         "Weekly Incidence",

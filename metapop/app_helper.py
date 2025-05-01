@@ -40,6 +40,7 @@ __all__ = [
     "get_parms_from_table",
     "update_parms_from_table",
     "correct_parameter_types",
+    "update_intervention_parameters_from_widget",
     "add_daily_incidence",
     "get_interval_cumulative_incidence",
     "get_interval_results",
@@ -253,30 +254,33 @@ def get_show_parameter_mapping(parms=None):
         I0_1="Initial infections in small population 1",
         I0_2="Initial infections in small population 2",
         # vaccine_uptake = "Enable vaccine uptake",
-        total_vaccine_uptake_doses="% unvaccinated individuals that get vaccinated",
-        vaccine_uptake_start_day="Active vaccination start day",
-        vaccine_uptake_duration_days="Active vaccination duration days",
+        total_vaccine_uptake_doses="Vaccine campaign: % unvaccinated individuals that get vaccinated. In this model, vaccination is assumed to be 100% effective after one dose.",
+        vaccine_uptake_start_day="Vaccine campaign start day",
+        vaccine_uptake_duration_days="Vaccine campaign duration (days)",
         vaccinated_group="Vaccinated group",
-        # symptomatic_isolation = "Enable symptomatic isolation",
-        isolation_success="Symptomatic individuals isolating",
+        isolation_on="Enable isolation",
+        isolation_adherence="Isolation adherence",
+        isolation_reduction="Reduction in transmission due to isolation",
         symptomatic_isolation_start_day="Symptomatic isolation start day",
         symptomatic_isolation_duration_days="Symptomatic isolation duration days",
-        pre_rash_isolation_success="Stay-at-home",
+        pre_rash_isolation_on="Enable quarantine ",
+        pre_rash_isolation_adherence="Quarantine adherence",
+        pre_rash_isolation_reduction="Reduction in transmission due to quarantine",
         pre_rash_isolation_start_day="Pre-rash isolation start day",
         pre_rash_isolation_duration_days="Pre-rash isolation duration days",
         tf="Time steps",
         # n_replicates = "Number of replicates",
         # seed = "Random seed",
-        initial_vaccine_coverage_0="Baseline vaccination in large population",
-        initial_vaccine_coverage_1="Baseline vaccination in small population 1",
-        initial_vaccine_coverage_2="Baseline vaccination in small population 2",
+        initial_vaccine_coverage_0="Baseline immunity in large population",
+        initial_vaccine_coverage_1="Baseline immunity in small population 1",
+        initial_vaccine_coverage_2="Baseline immunity in small population 2",
     )
 
     if parms is not None and isinstance(parms, dict):
         if parms["n_groups"] == 1:
             show_mapping["pop_sizes_0"] = "Population Size"
             show_mapping["I0_0"] = "Initial infections"
-            show_mapping["initial_vaccine_coverage_0"] = "Baseline vaccination"
+            show_mapping["initial_vaccine_coverage_0"] = "Baseline immunity"
 
     return show_mapping
 
@@ -294,8 +298,10 @@ def get_advanced_parameter_mapping():
         n_groups="Number of groups",
         infectious_duration="Infectious period (days)",
         latent_duration="Latent period (days)",
-        pre_rash_isolation_success="Daily proportion of infectious individuals who stay-at-home following exposure prior to rash onset",
-        isolation_success="Daily proportion of infectious individuals who isolate after rash onset",
+        pre_rash_isolation_adherence="Quarantine adherence",
+        pre_rash_isolation_reduction="Reduction in transmission due to quarantine",
+        isolation_adherence="Isolation adherence",
+        isolation_reduction="Reduction in transmission due to isolation",
         # n_e_compartments="Number of exposed compartments",
         # n_i_compartments="Number of infectious compartments",
         # tf="Number of time steps",
@@ -309,6 +315,7 @@ def get_advanced_parameter_mapping():
         k_g1="Average degree of small population 1 connecting to large population",
         k_g2="Average degree of small population 2 connecting to large population",
         k_21="Connectivity between smaller populations",
+        IHR="Infection Hospitalization Ratio",
     )
     return advanced_mapping
 
@@ -323,7 +330,6 @@ def get_outcome_options():
     return (
         "Weekly Incidence",
         "Weekly Cumulative Incidence",
-        "Daily Infections",
         "Daily Incidence",
         "Daily Cumulative Incidence",
     )
@@ -338,7 +344,6 @@ def get_outcome_mapping():
     """
     # Define the mapping of outcome names to their corresponding codes
     return {
-        "Daily Infections": "I",
         "Daily Incidence": "inc",
         "Daily Cumulative Incidence": "Y",
         "Weekly Incidence": "Winc",
@@ -522,11 +527,6 @@ def app_editors(
                         key=element_keys[key],
                         disabled=disabled,
                     )
-                    # if toggle is turned on, set value to the original value for the model
-                    if value is True:
-                        value = parms[key]
-                    if value is False:
-                        value = 0
                 else:
                     pass
                 edited_parms[key] = value
@@ -566,11 +566,6 @@ def app_editors(
                             key=element_keys[key][index],
                             disabled=disabled,
                         )
-                        # if toggle is turned on, set value to the original value for the model
-                        if value is True:
-                            value = parms[key][index]
-                        if value is False:
-                            value = 0
                     else:
                         pass
                     edited_parms[key][index] = value
@@ -602,13 +597,18 @@ def get_widget_types(widget_types=None):
         vaccine_uptake_duration_days="slider",
         total_vaccine_uptake_doses="slider",
         vaccinated_group="number_input",
-        isolation_success="toggle",
+        isolation_on="toggle",
+        isolation_adherence="slider",
+        isolation_reduction="slider",
         symptomatic_isolation_start_day="slider",
         symptomatic_isolation_duration_days="slider",
-        pre_rash_isolation_success="toggle",
+        pre_rash_isolation_on="toggle",
+        pre_rash_isolation_adherence="slider",
+        pre_rash_isolation_reduction="slider",
         pre_rash_isolation_start_day="slider",
         pre_rash_isolation_duration_days="slider",
         tf="number_input",
+        IHR="slider",
     )
     if widget_types is not None and isinstance(widget_types, dict):
         # update with parms if provided
@@ -641,13 +641,16 @@ def get_min_values(parms=None):
         vaccine_uptake_duration_days=0,
         total_vaccine_uptake_doses=0.0,
         vaccinated_group=0,
-        isolation_success=0.0,
+        isolation_adherence=0.25,
+        isolation_reduction=0.25,
         symptomatic_isolation_start_day=0,
         symptomatic_isolation_duration_days=0,
-        pre_rash_isolation_success=0.0,
+        pre_rash_isolation_adherence=0.25,
+        pre_rash_isolation_reduction=0.25,
         pre_rash_isolation_start_day=0,
         pre_rash_isolation_duration_days=0,
         tf=30,
+        IHR=0.05,
     )
     # update with parms if provided
     if parms is not None and isinstance(parms, dict):
@@ -680,13 +683,16 @@ def get_max_values(parms=None):
         vaccine_uptake_duration_days=365,
         total_vaccine_uptake_doses=100.0,
         vaccinated_group=2,
-        isolation_success=0.75,
+        isolation_adherence=1.0,
+        isolation_reduction=1.0,
         symptomatic_isolation_start_day=365,
         symptomatic_isolation_duration_days=365,
-        pre_rash_isolation_success=1.0,
+        pre_rash_isolation_adherence=1.0,
+        pre_rash_isolation_reduction=1.0,
         pre_rash_isolation_start_day=365,
         pre_rash_isolation_duration_days=365,
         tf=400,
+        IHR=0.20,
     )
     # update with parms if provided
     if parms is not None and isinstance(parms, dict):
@@ -719,13 +725,16 @@ def get_step_values(parms=None):
         vaccine_uptake_duration_days=7,
         total_vaccine_uptake_doses=5.0,
         vaccinated_group=1,
-        isolation_success=0.01,
+        isolation_adherence=0.01,
+        isolation_reduction=0.01,
         symptomatic_isolation_start_day=1,
         symptomatic_isolation_duration_days=1,
-        pre_rash_isolation_success=0.01,
+        pre_rash_isolation_adherence=0.01,
+        pre_rash_isolation_reduction=0.01,
         pre_rash_isolation_start_day=1,
         pre_rash_isolation_duration_days=1,
         tf=1,
+        IHR=0.01,
     )
     # update with parms if provided
     if parms is not None and isinstance(parms, dict):
@@ -766,21 +775,26 @@ def get_helpers(parms=None):
             "Initial infections in small population 2",
         ],
         initial_vaccine_coverage=[
-            "Baseline vaccination coverage in large population",
-            "Baseline vaccination coverage in small population 1",
-            "Baseline vaccination coverage in small population 2",
+            "Baseline immunity in large population",
+            "Baseline immunity in small population 1",
+            "Baseline immunity in small population 2",
         ],
-        vaccine_uptake_start_day="Day vaccination starts",
-        vaccine_uptake_duration_days="Days vaccines are administered",
-        total_vaccine_uptake_doses="Percent of unvaccinated individuals that get vaccinated",
+        vaccine_uptake_start_day="Day vaccine campaign starts (day 0 is the day infections are imported to the community).",
+        vaccine_uptake_duration_days="Duration of vaccine campaign (days). ",
+        total_vaccine_uptake_doses="Percent of unvaccinated individuals that get vaccinated. In this model, vaccination is assumed to be 100% effective after one dose",
         vaccinated_group="Population receiving the vaccine",
-        isolation_success="If turned on, 75% of symptomatic individuals isolate",
+        isolation_on="If turned on, reduce transmission of symptomatic individuals.",
+        isolation_adherence="Percent of symptomatic individuals who follow isolation guidance. Only used if isolation is turned on.",
+        isolation_reduction="Percent reduction in transmission due to isolation. Only used if isolation is turned on.",
         symptomatic_isolation_start_day="Day symptomatic isolation starts",
         symptomatic_isolation_duration_days="Duration of symptomatic isolation",
-        pre_rash_isolation_success="If turned on, 10% of individuals stay at home after being exposed",
+        pre_rash_isolation_on="If turned on, reduce transmission of individuals with a known exposure.",
+        pre_rash_isolation_adherence="Percent of pre-symptomatic infectious individuals who follow quarantine guidance. Only used if quarantine is turned on.",
+        pre_rash_isolation_reduction="Percent reduction in transmission due quarantine. Only used if quarantine is turned on.",
         pre_rash_isolation_start_day="Day pre-rash isolation starts",
         pre_rash_isolation_duration_days="Duration of pre-rash isolation",
         tf="Number of time steps to simulate",
+        IHR="Proportion of infected individuals who are hospitalized",
     )
     if parms is not None and isinstance(parms, dict):
         # update with parms if provided
@@ -813,13 +827,16 @@ def get_formats(parms=None):
         vaccine_uptake_duration_days="%.0d",
         total_vaccine_uptake_doses="%.1f",
         vaccinated_group="%.0d",
-        isolation_success="%.2f",
+        isolation_adherence="%.2f",
+        isolation_reduction="%.2f",
         symptomatic_isolation_start_day="%.0d",
         symptomatic_isolation_duration_days="%.0d",
-        pre_rash_isolation_success="%.2f",
+        pre_rash_isolation_adherence="%.2f",
+        pre_rash_isolation_reduction="%.2f",
         pre_rash_isolation_start_day="%.0d",
         pre_rash_isolation_duration_days="%.0d",
         tf="%.0d",
+        IHR="%.2f",
     )
     if parms is not None and isinstance(parms, dict):
         # update with parms if provided
@@ -847,13 +864,18 @@ def get_base_widget_idkeys(parms=None):
         vaccine_uptake_duration_days="vaccine_uptake_duration_days",
         total_vaccine_uptake_doses="total_vaccine_uptake_doses",
         vaccinated_group="vaccinated_group",
-        isolation_success="isolation_success",
+        isolation_on="isolation_on",
+        isolation_adherence="isolation_adherence",
+        isolation_reduction="isolation_reduction",
         symptomatic_isolation_start_day="symptomatic_isolation_start_day",
         symptomatic_isolation_duration_days="symptomatic_isolation_duration_days",
-        pre_rash_isolation_success="pre_rash_isolation_success",
+        pre_rash_isolation_on="pre_rash_isolation_on",
+        pre_rash_isolation_adherence="pre_rash_isolation_adherence",
+        pre_rash_isolation_reduction="pre_rash_isolation_reduction",
         pre_rash_isolation_start_day="pre_rash_isolation_start_day",
         pre_rash_isolation_duration_days="pre_rash_isolation_duration_days",
         tf="tf",
+        IHR="IHR",
     )
     if parms is not None and isinstance(parms, dict):
         # update with parms if provided
@@ -909,6 +931,36 @@ def get_parameter_key_for_session_key(session_key):
         key = "_".join(split_key)
 
     return key, index
+
+
+def update_intervention_parameters_from_widget(parms):
+    """
+    Update the model parameters for interventions based on the values in the session state.
+
+    Args:
+        parms (dict): The original parameters dictionary.
+
+    Returns:
+        dict: The updated parameters dictionary.
+    """
+    # symptomatic isolation
+    if parms["isolation_on"]:
+        parms["isolation_success"] = (
+            parms["isolation_adherence"] * parms["isolation_reduction"]
+        )
+    else:
+        parms["isolation_success"] = 0.0
+
+    # pre-symptomatic isolation
+    if parms["pre_rash_isolation_on"]:
+        parms["pre_rash_isolation_success"] = (
+            parms["pre_rash_isolation_adherence"]
+            * parms["pre_rash_isolation_reduction"]
+        )
+    else:
+        parms["pre_rash_isolation_success"] = 0.0
+
+    return parms
 
 
 def reset(defaults, widget_types):
@@ -1267,8 +1319,8 @@ def get_table(combined_results, IHR, edited_parms):
         {
             "Scenario": scenario_names,
             "Vaccines Administered": dose_vec,
-            "Stay-at-home Success (%)": isolation_vec,
-            "Symptomatic Isolation Success (%)": symp_vec,
+            "Quarantine Efficacy (%)": isolation_vec,
+            "Symptomatic Isolation Efficacy (%)": symp_vec,
         }
     )
 

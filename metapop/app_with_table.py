@@ -21,6 +21,7 @@ from .app_helper import (
     get_show_parameter_mapping,
     read_parameters,
     repack_list_parameters,
+    update_intervention_parameters_from_widget,
     update_parms_from_table,
 )
 
@@ -152,8 +153,15 @@ def app_with_table(replicates=20):
     updated_parms1 = repack_list_parameters(parms, updated_parms1, keys_in_list)
     updated_parms2 = repack_list_parameters(parms, updated_parms2, keys_in_list)
 
-    scenario1 = [updated_parms1]
-    scenario2 = [updated_parms2]
+    edited_intervention_parms1 = update_intervention_parameters_from_widget(
+        updated_parms1
+    )
+    edited_intervention_parms2 = update_intervention_parameters_from_widget(
+        updated_parms2
+    )
+
+    scenario1 = [edited_intervention_parms1]
+    scenario2 = [edited_intervention_parms2]
 
     # run the model with the updated parameters
     results1 = get_scenario_results(scenario1)

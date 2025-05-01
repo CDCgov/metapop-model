@@ -25,6 +25,7 @@ from .app_helper import (
     get_helpers,
     get_formats,
     get_widget_idkeys,
+    update_intervention_parameters_from_widget,
     reset,
     add_daily_incidence,
     get_interval_results,
@@ -63,8 +64,8 @@ def app(replicates=20):
     st.title("Measles Outbreak Simulator")
     st.text(
         "This interactive tool illustrates the impact of "
-        "vaccination, isolation, and stay-at-home measures on the probability "
-        "and size of measles outbreaks following introduction of measles into "
+        "vaccination, isolation, and quarantine measures on the "
+        "size of measles outbreaks following introduction of measles into "
         "a community, by comparing scenarios with and without interventions."
     )
     parms = read_parameters("scripts/app/onepop_config.yaml")
@@ -77,10 +78,8 @@ def app(replicates=20):
     with st.sidebar:
         st.header(
             "Model Inputs",
-            help="Enter the population size, overall vaccine coverage, and number of people "
-            "initially infected with measles in a community. "
-            "This tool is meant to demonstrate the dynamics following initial introductions "
-            "of cases into a community. Hover over the ? for more information about each parameter.",
+            help="Enter the population size, baseline immunity, and number of people "
+            "initially infected with measles in a community. ",
         )
 
         widget_types = (
@@ -100,12 +99,6 @@ def app(replicates=20):
         helpers["pop_sizes"][0] = "The model currently has a maximum of 100,000 people."
         helpers["initial_vaccine_coverage"][0] = (
             "The percent of the population with any immunity against measles, including both through MMR vaccination and through past infection."
-        )
-        helpers["pre_rash_isolation_success"] = (
-            'When this intervention is "on", we assume that stay-at-home guidance reduces transmission during the pre-symptomatic period by 60%.'
-        )
-        helpers["isolation_success"] = (
-            'When this intervention is "on", we assume that isolation of symptomatic individuals reduces transmission during the symptomatic period by 75%.'
         )
 
         # add a section in the sidebar panel to reset the app
@@ -133,8 +126,11 @@ def app(replicates=20):
         )
 
         col0.text(
-            "Enter a population size and baseline overall vaccine coverage, as "
+            "Enter a population size and baseline immunity, as "
             "well as the number of people initially infected with measles in the population. "
+            "This tool is meant for use at the beginning of an outbreak at the county level or finer geographic scale. "
+            "It is not intended to provide an exact forecast of cases into any community. "
+            "Hover over the ? for more information about each parameter."
         )
 
         subheader = ""
@@ -157,11 +153,11 @@ def app(replicates=20):
         # Set parameters for each scenario separately
         # order of parameters in the sidebar
         ordered_keys = [
+            "pre_rash_isolation_on",
+            "isolation_on",
             "total_vaccine_uptake_doses",
             "vaccine_uptake_start_day",
             "vaccine_uptake_duration_days",
-            "pre_rash_isolation_success",
-            "isolation_success",
         ]
         # parameters that are lists or arrays
         list_parameter_keys = []
@@ -184,7 +180,7 @@ def app(replicates=20):
 
         # For the no intervention scenario, intervention parameters are set to 0
         edited_parms1 = set_parms_to_zero(
-            edited_parms, ["pre_rash_isolation_success", "isolation_success"]
+            edited_parms, ["pre_rash_isolation_reduction", "isolation_reduction"]
         )
 
         col_intervention = st.columns(1)[0]
@@ -211,6 +207,12 @@ def app(replicates=20):
         if parms["use_prop_vaccine_uptake"]:
             edited_parms2 = rescale_prop_vax(edited_parms2)
 
+        # Display number of doses administered
+        st.text(
+            f"Total vaccines administered during campaign: {edited_parms2['total_vaccine_uptake_doses']}",
+            help="This number is calculated based on user input for the percentage of the non-immune population that gets vaccinated during the vaccine campaign.",
+        )
+
         with st.expander("Advanced options"):
             st.text(
                 "These options allow changes to parameter assumptions including "
@@ -222,6 +224,11 @@ def app(replicates=20):
                 "desired_r0",
                 "latent_duration",
                 "infectious_duration",
+                "pre_rash_isolation_adherence",
+                "pre_rash_isolation_reduction",
+                "isolation_adherence",
+                "isolation_reduction",
+                "IHR",
             ]
 
             # show additional advanced parameters if there are multiple population groups
@@ -263,29 +270,50 @@ def app(replicates=20):
     # instead of expander, can use st.radio:
     if (
         edited_parms2["total_vaccine_uptake_doses"] == 0
-        and edited_parms2["pre_rash_isolation_success"] == 0
-        and edited_parms2["isolation_success"] == 0
+        and edited_parms2["pre_rash_isolation_on"] == False
+        and edited_parms2["isolation_on"] == False
     ):
         interventions = "Off"
     else:
         interventions = "On"
 
-    with st.expander("Show intervention strategy info.", expanded=False):
-        columns = st.columns(2)
-
-        columns[0].error(
-            "No Interventions:\n"
-            " - Vaccine doses administered: 0\n"
-            " - % of infectious individuals isolating before rash onset: 0\n"
-            " - % of infectious individuals isolating after rash onset: 0"
+    # before running the model, reset the parameters to their original values if the user clicks the reset button
+    with col_reset:
+        reset_button = st.button(
+            "Reset parameters",
+            on_click=reset,
+            args=(
+                parms,
+                widget_types,
+            ),
         )
-        if interventions == "On":
-            columns[1].info(
-                "Interventions:\n"
-                f" - Vaccine doses administered: {edited_parms2['total_vaccine_uptake_doses']} between day {edited_parms2['vaccine_uptake_start_day']} and day {edited_parms2['vaccine_uptake_start_day'] + edited_parms2['vaccine_uptake_duration_days']}\n"
-                f" - % of infectious individuals isolating before rash onset: {edited_parms2['pre_rash_isolation_success']*100} between day {edited_parms2['pre_rash_isolation_start_day']} and day {edited_parms2['pre_rash_isolation_start_day'] + edited_parms2['pre_rash_isolation_duration_days']}\n"
-                f" - % of infectious individuals isolating after rash onset: {edited_parms2['isolation_success']*100} between day {edited_parms2['symptomatic_isolation_start_day']} and day {edited_parms2['symptomatic_isolation_start_day'] + edited_parms2['symptomatic_isolation_duration_days']}\n"
-            )
+
+    # set model parameters based on app inputs
+    edited_intervention_parms1 = update_intervention_parameters_from_widget(
+        edited_advanced_parms1
+    )
+    edited_intervention_parms2 = update_intervention_parameters_from_widget(
+        edited_advanced_parms2
+    )
+
+    ### Dictate that isolation > quarantine
+    if (
+        edited_intervention_parms2["isolation_adherence"]
+        <= edited_intervention_parms2["pre_rash_isolation_adherence"]
+        and edited_parms2["pre_rash_isolation_on"] == True
+        and edited_parms2["isolation_on"] == True
+    ):
+        st.error(
+            "Isolation adherence should be greater than quarantine adherence. "
+            "Please adjust the parameters."
+        )
+        return
+
+    updated_parms1 = edited_intervention_parms1.copy()
+    updated_parms2 = edited_intervention_parms2.copy()
+
+    scenario1 = [updated_parms1]
+    scenario2 = [updated_parms2]
 
     #### Plot Options:
     # get the selected outcome from the sidebar
@@ -302,23 +330,6 @@ def app(replicates=20):
     # Map the selected option to the outcome variable
     outcome_mapping = get_outcome_mapping()
     outcome = outcome_mapping[outcome_option]
-
-    # before running the model, reset the parameters to their original values if the user clicks the reset button
-    with col_reset:
-        reset_button = st.button(
-            "Reset parameters",
-            on_click=reset,
-            args=(
-                parms,
-                widget_types,
-            ),
-        )
-
-    updated_parms1 = edited_advanced_parms1.copy()
-    updated_parms2 = edited_advanced_parms2.copy()
-
-    scenario1 = [updated_parms1]
-    scenario2 = [updated_parms2]
 
     # run the model with the updated parameters
     chart_placeholder.text("Running scenarios...")
@@ -352,12 +363,11 @@ def app(replicates=20):
     # vax schedule for plotting
     sched = build_vax_schedule(edited_parms2)
 
-    if outcome not in ["I", "Y", "inc", "Winc", "WCI"]:
+    if outcome not in ["Y", "inc", "Winc", "WCI"]:
         print("outcome not available yet, defaulting to Cumulative Daily Incidence")
         outcome = "Y"
 
     if outcome_option in [
-        "Daily Infections",
         "Daily Incidence",
         "Daily Cumulative Incidence",
     ]:
@@ -403,10 +413,10 @@ def app(replicates=20):
     # create chart title, depending on whether interventions are on/off
     if interventions == "On":
         title = (
-            f"Outcome Comparison by Scenario: Reactive Vaccination "
-            f"({edited_parms2['total_vaccine_uptake_doses']} doses), "
-            f"{int(edited_parms2['pre_rash_isolation_success'] * 100)}% isolation, "
-            f"{int(edited_parms2['isolation_success'] * 100)}% stay-at-home"
+            f"Outcome Comparison by Scenario: Vaccine Campaign "
+            f"({edited_intervention_parms2['total_vaccine_uptake_doses']} doses), "
+            f"{int(edited_intervention_parms2['pre_rash_isolation_success'] * 100)}% quarantine, "
+            f"{int(edited_intervention_parms2['isolation_success'] * 100)}% isolation"
         )
     else:
         combined_alt_results = alt_results1.filter(
@@ -511,6 +521,24 @@ def app(replicates=20):
 
     ### Outbreak Summary Stats
     st.subheader("Simulation summary")
+
+    with st.expander("Show intervention strategy info.", expanded=False):
+        columns = st.columns(2)
+
+        columns[0].error(
+            "No Interventions:\n"
+            " - Vaccines administered during campaign: 0\n"
+            " - % of infectious individuals isolating before rash onset: 0\n"
+            " - % of infectious individuals isolating after rash onset: 0"
+        )
+        if interventions == "On":
+            columns[1].info(
+                "Interventions:\n"
+                f" - Vaccines administered during campaign: {edited_parms2['total_vaccine_uptake_doses']} between day {edited_parms2['vaccine_uptake_start_day']} and day {edited_parms2['vaccine_uptake_start_day'] + edited_parms2['vaccine_uptake_duration_days']}\n"
+                f" - Reduction in transmission of pre-symptomatic individuals due to quarantine (applied to {edited_parms2['pre_rash_isolation_adherence']*100}% of individuals): {edited_parms2['pre_rash_isolation_reduction']*100}% between day {edited_parms2['pre_rash_isolation_start_day']} and day {edited_parms2['pre_rash_isolation_start_day'] + edited_parms2['pre_rash_isolation_duration_days']}\n"
+                f" - Reduction in transmission of symptomatic individuals due to isolation (applied to {edited_parms2['isolation_adherence']*100}% of individuals): {edited_parms2['isolation_reduction']*100}% between day {edited_parms2['symptomatic_isolation_start_day']} and day {edited_parms2['symptomatic_isolation_start_day'] + edited_parms2['symptomatic_isolation_duration_days']}\n"
+            )
+
     fullresults1 = fullresults1.with_columns(
         pl.lit(scenario_names[0]).alias("Scenario")
     )
@@ -530,7 +558,9 @@ def app(replicates=20):
         .agg(pl.col("Y").sum().alias("Total"))
     )
 
-    outbreak_summary = get_table(combined_results, parms["IHR"], edited_parms2)
+    outbreak_summary = get_table(
+        combined_results, parms["IHR"], edited_intervention_parms2
+    )
 
     if interventions == "Off":
         outbreak_summary = outbreak_summary.select("", scenario_names[0])
@@ -545,12 +575,12 @@ def app(replicates=20):
 
         intervention_text = f"Adding "
         interventions = []
-        if edited_parms2["total_vaccine_uptake_doses"] > 0:
+        if edited_intervention_parms2["total_vaccine_uptake_doses"] > 0:
             interventions.append("vaccination")
-        if edited_parms2["pre_rash_isolation_success"] > 0:
-            interventions.append("pre-rash isolation")
-        if edited_parms2["isolation_success"] > 0:
-            interventions.append("symptomatic isolation")
+        if edited_intervention_parms2["pre_rash_isolation_success"] > 0:
+            interventions.append("quarantine")
+        if edited_intervention_parms2["isolation_success"] > 0:
+            interventions.append("isolation")
 
         if len(interventions) > 1:
             intervention_text += (
@@ -585,7 +615,7 @@ def app(replicates=20):
 
             <p style="font-size:14px;">
             Users can explore the impact of interventions, including vaccination,
-            isolation, and stay-at-home measures ('interventions' scenario)
+            isolation, and quarantine measures ('interventions' scenario)
             compared to a baseline scenario without active interventions ('No
             Interventions'). The start and end time of the vaccine campaign
             can be specified.<br><br>
@@ -631,9 +661,9 @@ def app(replicates=20):
             approximately 75% effective at reducing transmission when comparing
             people who do isolate when sick to people who do not isolate when sick
             <a href='https://academic.oup.com/cid/article/75/1/152/6424734' target='_blank'>[Impact of Isolation and Exclusion as a Public Health Strategy to Contain Measles Virus Transmission During a Measles Outbreak | Clinical Infectious Diseases | Oxford Academic]</a>.
-            <li style="font-size:14px;">Stay-at-home for people who are unvaccinated but have been
+            <li style="font-size:14px;">Quarantine for people who are unvaccinated but have been
             exposed is estimated to be 44-76% effective at reducing transmission
-            when comparing those who do stay at home to those who do not.
+            when comparing those who do quarantine to those who do not.
             We assume 60% efficacy, which is the mean of this range.
             <a href='https://academic.oup.com/cid/article/75/1/152/6424734' target='_blank'>[Impact of Isolation and Exclusion as a Public Health Strategy to Contain Measles Virus Transmission During a Measles Outbreak | Clinical Infectious Diseases | Oxford Academic]</a>
             </li>

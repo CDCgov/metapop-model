@@ -4,5 +4,5 @@ Version information for the metapop package.
 
 __all__ = ["__version__", "__versiondate__"]
 
-__version__ = "0.1.5"
-__versiondate__ = "2025-04-28"
+__version__ = "0.2.0"
+__versiondate__ = "2025-05-01"

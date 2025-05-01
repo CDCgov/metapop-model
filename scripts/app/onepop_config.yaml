@@ -16,13 +16,17 @@ baseline_parameters:
   use_prop_vaccine_uptake: true      # if true for the app,
   total_vaccine_uptake_doses: 20.0   # then prop unvax that get vax, else absolute number of doses
   vaccinated_group: 0
-  isolation_success: 0.75 # informed by 2017 Minnesota study
+  isolation_on: false
+  isolation_adherence: 0.5
+  isolation_reduction: 0.75 # informed by 2017 Minnesota study
   symptomatic_isolation_start_day: 0
   symptomatic_isolation_duration_days: 365
-  pre_rash_isolation_success: 0.60 # not informed by data
+  pre_rash_isolation_on: false
+  pre_rash_isolation_adherence: 0.25
+  pre_rash_isolation_reduction: 0.50
   pre_rash_isolation_start_day: 0
   pre_rash_isolation_duration_days: 365
-  IHR: 0.2 # Infection Hospitalization Rate
+  IHR: 0.15 # Infection Hospitalization Rate
   tf: 365        # total time modeled
   n_replicates: 100
   seed: 123

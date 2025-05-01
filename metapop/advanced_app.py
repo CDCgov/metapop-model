@@ -22,6 +22,7 @@ from .app_helper import (
     get_widget_idkeys,
     get_widget_types,
     read_parameters,
+    update_intervention_parameters_from_widget,
 )
 
 __all__ = [
@@ -65,7 +66,7 @@ def advanced_app(replicates=20):
             "total_vaccine_uptake_doses",
             "vaccine_uptake_start_day",
             "vaccine_uptake_duration_days",
-            "isolation_success",
+            "isolation_adherence",
             "symptomatic_isolation_start_day",
             "symptomatic_isolation_duration_days",
         ]
@@ -170,8 +171,15 @@ def advanced_app(replicates=20):
     outcome_mapping = get_outcome_mapping()
     outcome = outcome_mapping[outcome_option]
 
-    updated_parms1 = edited_advanced_parms1.copy()
-    updated_parms2 = edited_advanced_parms2.copy()
+    edited_intervention_parms1 = update_intervention_parameters_from_widget(
+        edited_advanced_parms1
+    )
+    edited_intervention_parms2 = update_intervention_parameters_from_widget(
+        edited_advanced_parms2
+    )
+
+    updated_parms1 = edited_intervention_parms1.copy()
+    updated_parms2 = edited_intervention_parms2.copy()
 
     scenario1 = [updated_parms1]
     scenario2 = [updated_parms2]
