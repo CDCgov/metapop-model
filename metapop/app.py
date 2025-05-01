@@ -437,7 +437,7 @@ def app(replicates=20):
                 title="Scenario",
                 scale=alt.Scale(
                     domain=[scenario_names[0], scenario_names[1]],  # Scenarios
-                    range=["#FB7E38", "0057b7"],  # Corresponding colors (orange, blue)
+                    range=["#FB7E38", "#0057b7"],  # Corresponding colors (orange, blue)
                 ),
             ),
             detail="replicate",
