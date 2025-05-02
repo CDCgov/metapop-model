@@ -1268,7 +1268,7 @@ def get_table(combined_results, IHR, edited_parms):
     Returns:
         pl.DataFrame: A DataFrame containing the hospitalization summary.
     """
-    # Calculate hospitalizations
+    # calculate hospitaltizations based on IHR
     combined_results = combined_results.with_columns(
         pl.Series(
             name="Hospitalizations",
@@ -1276,71 +1276,55 @@ def get_table(combined_results, IHR, edited_parms):
         )
     )
 
-    # Group by Scenario and get mean hospitalizations
-    hospitalization_summary = (
+    # mean and 95% credible interval for infections and hospitalizations
+    summary_stats = (
         combined_results.group_by("Scenario")
-        .mean()
-        .with_columns(
+        .agg(
             [
-                pl.col("Hospitalizations").round_sig_figs(2),
-                pl.col("Total").round_sig_figs(2),
+                # Infections
+                pl.col("Total").mean().alias("inf_mean"),
+                pl.col("Total").quantile(0.025).alias("inf_ci_low"),
+                pl.col("Total").quantile(0.975).alias("inf_ci_high"),
+                # Hospitalizations
+                pl.col("Hospitalizations").mean().alias("hosp_mean"),
+                pl.col("Hospitalizations").quantile(0.025).alias("hosp_ci_low"),
+                pl.col("Hospitalizations").quantile(0.975).alias("hosp_ci_high"),
             ]
         )
-        .drop("replicate")
-        .rename(
-            {
-                "Total": "Mean Outbreak Size",
-                "Hospitalizations": "Mean Number of Hospitalizations",
-            }
-        )
+        .sort("Scenario", descending=True)
     )
 
-    # Ensure the order of scenarios
-    scenario_names = ["No Interventions", "Interventions"]
-
-    hospitalization_summary = (
-        hospitalization_summary.with_columns(
-            pl.when(pl.col("Scenario") == scenario_names[0])
-            .then(0)
-            .when(pl.col("Scenario") == scenario_names[1])
-            .then(1)
-            .otherwise(2)
-            .alias("_sort_order")
-        )
-        .sort("_sort_order")
-        .drop("_sort_order")
-    )
-
-    dose_vec = [0, edited_parms["total_vaccine_uptake_doses"]]
-    isolation_vec = [0, int(edited_parms["pre_rash_isolation_success"] * 100)]
-    symp_vec = [0, int(edited_parms["isolation_success"] * 100)]
-
-    intervention_summary = pl.DataFrame(
+    ## build table for the app
+    infections = pl.DataFrame(
         {
-            "Scenario": scenario_names,
-            "Vaccines Administered": dose_vec,
-            "Quarantine Efficacy (%)": isolation_vec,
-            "Symptomatic Isolation Efficacy (%)": symp_vec,
+            "": ["Infections, mean (95% CI)"],
+            "No Interventions": [
+                f"{summary_stats['inf_mean'][0]:.0f} ({summary_stats['inf_ci_low'][0]:.0f} - {summary_stats['inf_ci_high'][0]:.0f})"
+            ],
+            "Interventions": [
+                f"{summary_stats['inf_mean'][1]:.0f} ({summary_stats['inf_ci_low'][1]:.0f} - {summary_stats['inf_ci_high'][1]:.0f})"
+            ],
+            "Relative Difference (%)": [
+                f"{((summary_stats['inf_mean'][0] - summary_stats['inf_mean'][1]) / summary_stats['inf_mean'][0] * 100):.0f}"
+            ],
         }
     )
+    hospitalizations = pl.DataFrame(
+        {
+            "": ["Hospitalizations, mean (95% CI)"],
+            "No Interventions": [
+                f"{summary_stats['hosp_mean'][0]:.0f} ({summary_stats['hosp_ci_low'][0]:.0f} - {summary_stats['hosp_ci_high'][0]:.0f})"
+            ],
+            "Interventions": [
+                f"{summary_stats['hosp_mean'][1]:.0f} ({summary_stats['hosp_ci_low'][1]:.0f} - {summary_stats['hosp_ci_high'][1]:.0f})"
+            ],
+            "Relative Difference (%)": [
+                f"{((summary_stats['hosp_mean'][0] - summary_stats['hosp_mean'][1]) / summary_stats['hosp_mean'][0] * 100):.0f}"
+            ],
+        }
+    )  # join the two tables
+    outbreak_summary = infections.vstack(hospitalizations)
 
-    outbreak_summary = (
-        intervention_summary.join(hospitalization_summary, on="Scenario", how="inner")
-        .drop("Scenario")
-        .transpose(include_header=True)
-        .rename(
-            {"column": "", "column_0": scenario_names[0], "column_1": scenario_names[1]}
-        )
-        .with_columns(
-            (
-                (pl.col(scenario_names[0]) - pl.col(scenario_names[1]))
-                / pl.col(scenario_names[0])
-                * 100
-            )
-            .round_sig_figs(3)
-            .alias("Relative Difference (%)")
-        )
-    )
     return outbreak_summary
 
 

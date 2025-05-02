@@ -178,6 +178,10 @@ def app(replicates=20):
             "and duration of the vaccine campaign can be specified."
         )
 
+        st.text(
+            "When quarantine and isolation are turned on, they are applied to entire duration of the simulation."
+        )
+
         # For the no intervention scenario, intervention parameters are set to 0
         edited_parms1 = set_parms_to_zero(
             edited_parms, ["pre_rash_isolation_reduction", "isolation_reduction"]
@@ -225,9 +229,7 @@ def app(replicates=20):
                 "latent_duration",
                 "infectious_duration",
                 "pre_rash_isolation_adherence",
-                "pre_rash_isolation_reduction",
                 "isolation_adherence",
-                "isolation_reduction",
                 "IHR",
             ]
 
@@ -568,7 +570,7 @@ def app(replicates=20):
     # add highlight of the outbreak summary
     if interventions == "On":
         relative_difference = (
-            outbreak_summary.filter(pl.col("") == "Mean Outbreak Size")
+            outbreak_summary.filter(pl.col("") == "Infections, mean (95% CI)")
             .select("Relative Difference (%)")
             .to_numpy()[0][0]
         )
@@ -590,13 +592,15 @@ def app(replicates=20):
             intervention_text += interventions[0]
 
         st.text(
-            f"{intervention_text} decreases total cases by {relative_difference:.0f}%."
+            f"{intervention_text} decreases total cases by {float(relative_difference):.0f}% "
+            f"in a population of size {edited_parms2['pop_sizes'][0]} "
+            f"with baseline immunity of {round(edited_parms2['initial_vaccine_coverage'][0]*100)}%."
         )
 
         # if the Relative Difference is NaN, set it to ""
-        outbreak_summary = outbreak_summary.with_columns(
-            pl.col("Relative Difference (%)").fill_nan("")
-        )
+        # outbreak_summary = outbreak_summary.with_columns(
+        #     pl.col("Relative Difference (%)").fill_nan("")
+        # )
 
     st.dataframe(outbreak_summary)
 
