@@ -530,15 +530,23 @@ def app(replicates=20):
         columns[0].error(
             "No Interventions:\n"
             " - Vaccines administered during campaign: 0\n"
-            " - Reduction in transmission of pre-symptomatic individuals due to quarantine: 0%\n"
-            " - Reduction in transmission of symptomatic individuals due to isolation: 0%"
+            " - Adherance to quarantine among pre-symptomatic infectious individuals: 0%\n"
+            " - Adherance to isolation among symptomatic infectious individuals: 0%"
         )
         if interventions == "On":
+            pre_rash_isolation_adherance = 0
+            isolation_adherance = 0
+            if edited_advanced_parms2["pre_rash_isolation_on"]:
+                pre_rash_isolation_adherance = edited_advanced_parms2[
+                    "pre_rash_isolation_adherence"
+                ]
+            if edited_advanced_parms2["isolation_on"]:
+                isolation_adherance = edited_advanced_parms2["isolation_adherence"]
             columns[1].info(
                 "Interventions:\n"
                 f" - Vaccines administered during campaign: {edited_parms2['total_vaccine_uptake_doses']} between day {edited_parms2['vaccine_uptake_start_day']} and day {edited_parms2['vaccine_uptake_start_day'] + edited_parms2['vaccine_uptake_duration_days']}\n"
-                f" - Reduction in transmission of pre-symptomatic individuals due to quarantine: {edited_advanced_parms2['pre_rash_isolation_success']*100}% between day {edited_parms2['pre_rash_isolation_start_day']} and day {edited_parms2['pre_rash_isolation_start_day'] + edited_parms2['pre_rash_isolation_duration_days']}\n"
-                f" - Reduction in transmission of symptomatic individuals due to isolation: {edited_advanced_parms2['isolation_success']*100}% between day {edited_parms2['symptomatic_isolation_start_day']} and day {edited_parms2['symptomatic_isolation_start_day'] + edited_parms2['symptomatic_isolation_duration_days']}\n"
+                f" - Adherance to quarantine among pre-symptomatic infectious individuals: {int(pre_rash_isolation_adherance*100)}%\n"
+                f" - Adherance to isolation among symptomatic infectious individuals: {int(isolation_adherance*100)}%\n"
             )
 
     fullresults1 = fullresults1.with_columns(
