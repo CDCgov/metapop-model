@@ -18,171 +18,183 @@ plot_cols <- c("#20419a", "#cf4828", "#f78f47")
 vax_levs <- c("low", "medium", "optimistic")
 sub_conns <- c(0.01, 0.1)
 filtered_results <- results |>
-    filter(
-        replicate %in% 1:plot_reps,
-        initial_coverage_scenario %in% vax_levs,
-        k_21 %in% sub_conns
-    )
+  filter(
+    replicate %in% 1:plot_reps,
+    initial_coverage_scenario %in% vax_levs,
+    k_21 %in% sub_conns
+  )
 
 #### Cumulative and incidence plots ####
 p <- filtered_results |>
-    ggplot() +
-    geom_line(
-        aes(t, Y,
-            col = factor(group),
-            group = interaction(replicate, group)
-        ),
-        alpha = 0.5
-    ) +
-    facet_grid(k_21 ~ initial_coverage_scenario,
-        labeller = label_both
-    ) +
-    theme_minimal(base_size = 18) +
-    scale_color_manual(values = plot_cols) +
-    # facet_wrap(~replicate) +
-    labs(x = "Days", y = "Cumulative Infections", col = "Group")
+  ggplot() +
+  geom_line(
+    aes(t, Y,
+      col = factor(group),
+      group = interaction(replicate, group)
+    ),
+    alpha = 0.5
+  ) +
+  facet_grid(k_21 ~ initial_coverage_scenario,
+    labeller = label_both
+  ) +
+  theme_minimal(base_size = 18) +
+  scale_color_manual(values = plot_cols) +
+  # facet_wrap(~replicate) +
+  labs(x = "Days", y = "Cumulative Infections", col = "Group")
 
 # png file name
 png_name <- create_filename(paste0("output/connectivity/cumulative_curves_r0_", R0), # nolint
-                            format = ".png")
-ggsave(filename = png_name,
-       plot = p, width = 10, height = 8)
+  format = ".png"
+)
+ggsave(
+  filename = png_name,
+  plot = p, width = 10, height = 8
+)
 
 
 #### Incidence plot ####
 incidence_results <- get_weekly_inc_from_cum(filtered_results,
-                                             grouping_params = c("initial_coverage_scenario", "k_21")) # nolint
+  grouping_params = c("initial_coverage_scenario", "k_21")
+) # nolint
 
 p <- incidence_results |>
-    ggplot(aes(week, weekly_Y_diff,
-        col = factor(group),
-        group = interaction(replicate, group)
-    )) +
-    geom_line(alpha = 0.25) +
-    facet_grid(k_21 ~ initial_coverage_scenario,
-        labeller = label_both
-    ) +
-    theme_minimal(base_size = 18) +
-    scale_color_manual(values = plot_cols) +
-    labs(x = "Week", y = "Weekly Incident Infections", col = "Group")
+  ggplot(aes(week, weekly_Y_diff,
+    col = factor(group),
+    group = interaction(replicate, group)
+  )) +
+  geom_line(alpha = 0.25) +
+  facet_grid(k_21 ~ initial_coverage_scenario,
+    labeller = label_both
+  ) +
+  theme_minimal(base_size = 18) +
+  scale_color_manual(values = plot_cols) +
+  labs(x = "Week", y = "Weekly Incident Infections", col = "Group")
 
 png_name <- create_filename(base_name = paste0("output/incidence_curves_r0_", R0), date = date, suffix = suffix, format = ".png")
-ggsave(filename = png_name,
-    plot = p, width = 10, height = 8)
+ggsave(
+  filename = png_name,
+  plot = p, width = 10, height = 8
+)
 
 #### Overeall final size plot
 for (i in c(12)) {
-    p <- results |>
-        filter(
-            t == 365,
-            initial_coverage_scenario %in% vax_levs,
-            k_21 %in% sub_conns
-        ) |>
-        group_by(replicate, initial_coverage_scenario, k_21) |>
-        summarise(final_size = sum(Y)) |> # total sum across groups
-        ggplot(aes(final_size)) +
-        # scale_x_log10() +
-        geom_histogram(bins = 50) +
-        theme_minimal(base_size = 18) +
-        labs(x = "Final Outbreak Size", y = "Number of Simulations") +
-        facet_grid(k_21 ~ initial_coverage_scenario,
-            labeller = label_both
-        )
+  p <- results |>
+    filter(
+      t == 365,
+      initial_coverage_scenario %in% vax_levs,
+      k_21 %in% sub_conns
+    ) |>
+    group_by(replicate, initial_coverage_scenario, k_21) |>
+    summarise(final_size = sum(Y)) |> # total sum across groups
+    ggplot(aes(final_size)) +
+    # scale_x_log10() +
+    geom_histogram(bins = 50) +
+    theme_minimal(base_size = 18) +
+    labs(x = "Final Outbreak Size", y = "Number of Simulations") +
+    facet_grid(k_21 ~ initial_coverage_scenario,
+      labeller = label_both
+    )
 
 
-    png_name <- create_filename(base_name = paste0("output/overall_final_size_r0_", i), date = date, suffix = suffix, format = ".png")
-    ggsave(filename = png_name,
-        plot = p, width = 10, height = 8)
+  png_name <- create_filename(base_name = paste0("output/overall_final_size_r0_", i), date = date, suffix = suffix, format = ".png")
+  ggsave(
+    filename = png_name,
+    plot = p, width = 10, height = 8
+  )
 }
 
 
 #### Grouped outbreak size plots ####
 for (i in c(12)) {
-    p <- results |>
-        filter(
-            t == 365, k_21 %in% sub_conns,
-            initial_coverage_scenario %in% vax_levs
-        ) |>
-        ggplot(aes(Y + 1, fill = factor(group))) +
-        geom_histogram(position = "identity", alpha = 0.5) +
-        scale_x_log10() +
-        facet_grid(k_21 ~ initial_coverage_scenario,
-            labeller = label_both
-        ) +
-        scale_fill_manual(values = plot_cols) +
-        theme_minimal(base_size = 18) +
-        labs(
-            title = "R0=12", x = "Final Group Outbreak Size",
-            y = "Number of simulations", fill = "Group"
-        )
-    png_name <- create_filename(base_name = paste0("output/group_final_size_r0_", i), date = date, suffix = suffix, format = ".png")
-    ggsave(filename = png_name,
-        plot = p, width = 10, height = 8)
+  p <- results |>
+    filter(
+      t == 365, k_21 %in% sub_conns,
+      initial_coverage_scenario %in% vax_levs
+    ) |>
+    ggplot(aes(Y + 1, fill = factor(group))) +
+    geom_histogram(position = "identity", alpha = 0.5) +
+    scale_x_log10() +
+    facet_grid(k_21 ~ initial_coverage_scenario,
+      labeller = label_both
+    ) +
+    scale_fill_manual(values = plot_cols) +
+    theme_minimal(base_size = 18) +
+    labs(
+      title = "R0=12", x = "Final Group Outbreak Size",
+      y = "Number of simulations", fill = "Group"
+    )
+  png_name <- create_filename(base_name = paste0("output/group_final_size_r0_", i), date = date, suffix = suffix, format = ".png")
+  ggsave(
+    filename = png_name,
+    plot = p, width = 10, height = 8
+  )
 }
 
 #### Percent of susceptible infected cumulative
 coverage_scenarios <- data.frame(
-    initial_coverage_scenario = c("low", "medium", "optimistic"), # nolint
-    coverage_0 = c(0.95, 0.95, 0.95),
-    coverage_1 = c(0.80, 0.80, 0.80),
-    coverage_2 = c(0.80, 0.90, 0.95)
+  initial_coverage_scenario = c("low", "medium", "optimistic"), # nolint
+  coverage_0 = c(0.95, 0.95, 0.95),
+  coverage_1 = c(0.80, 0.80, 0.80),
+  coverage_2 = c(0.80, 0.90, 0.95)
 )
 pop_sizes <- c(40000, 5000, 5000)
 
 filtered_categories <- filtered_results |>
-    left_join(coverage_scenarios, by = "initial_coverage_scenario") |>
-    mutate(sus_population = case_when(
-        group == 0 ~ (1 - coverage_0) * pop_sizes[1], # nolint
-        group == 1 ~ (1 - coverage_1) * pop_sizes[2], # nolint
-        group == 2 ~ (1 - coverage_2) * pop_sizes[3]
-    )) |> # nolint
-    mutate(Y_prop_sus = Y / sus_population)
+  left_join(coverage_scenarios, by = "initial_coverage_scenario") |>
+  mutate(sus_population = case_when(
+    group == 0 ~ (1 - coverage_0) * pop_sizes[1], # nolint
+    group == 1 ~ (1 - coverage_1) * pop_sizes[2], # nolint
+    group == 2 ~ (1 - coverage_2) * pop_sizes[3]
+  )) |> # nolint
+  mutate(Y_prop_sus = Y / sus_population)
 
 
 p <- filtered_categories |>
-    ggplot() +
-    geom_line(
-        aes(t, Y_prop_sus,
-            col = factor(group),
-            group = interaction(replicate, group)
-        ),
-        alpha = 0.5
-    ) +
-    facet_grid(k_21 ~ initial_coverage_scenario,
-        labeller = label_both
-    ) +
-    theme_minimal(base_size = 18) +
-    scale_color_manual(values = plot_cols) +
-    # facet_wrap(~replicate) +
-    labs(x = "Days", y = "Cumulative Infections", col = "Group")
+  ggplot() +
+  geom_line(
+    aes(t, Y_prop_sus,
+      col = factor(group),
+      group = interaction(replicate, group)
+    ),
+    alpha = 0.5
+  ) +
+  facet_grid(k_21 ~ initial_coverage_scenario,
+    labeller = label_both
+  ) +
+  theme_minimal(base_size = 18) +
+  scale_color_manual(values = plot_cols) +
+  # facet_wrap(~replicate) +
+  labs(x = "Days", y = "Cumulative Infections", col = "Group")
 
 png_name <- create_filename(base_name = paste0("output/cumulative_sus_infected_r0_", R0), date = date, suffix = suffix, format = ".png")
-ggsave(filename = png_name,
-    plot = p, width = 10, height = 8)
+ggsave(
+  filename = png_name,
+  plot = p, width = 10, height = 8
+)
 
 
 #### Summary table
 outbreak_sizes <- c(50, 100)
 for (i in outbreak_sizes) {
-    res_table <- results |>
-        filter(t == 365, Y >= i) |>
-        group_by(
-            group,
-            initial_coverage_scenario,
-            k_21
-        ) |>
-        count() |>
-        mutate(n = round(n / reps, 2) * 100) |>
-        pivot_wider(names_from = group, values_from = n) |>
-        select(
-            InitialCoverage = initial_coverage_scenario,
-            SubPopConnectivity = k_21,
-            Sub1 = `1`, Sub2 = `2`,
-            General = `0`
-        )
-    output_name <- create_filename(base_name = paste0("output/res_table_outbreak_size", i, "_r0_", 12), date = date, suffix = suffix, format = ".csv")
-    write_csv(
-        res_table,
-        output_name
+  res_table <- results |>
+    filter(t == 365, Y >= i) |>
+    group_by(
+      group,
+      initial_coverage_scenario,
+      k_21
+    ) |>
+    count() |>
+    mutate(n = round(n / reps, 2) * 100) |>
+    pivot_wider(names_from = group, values_from = n) |>
+    select(
+      InitialCoverage = initial_coverage_scenario,
+      SubPopConnectivity = k_21,
+      Sub1 = `1`, Sub2 = `2`,
+      General = `0`
     )
+  output_name <- create_filename(base_name = paste0("output/res_table_outbreak_size", i, "_r0_", 12), date = date, suffix = suffix, format = ".csv")
+  write_csv(
+    res_table,
+    output_name
+  )
 }

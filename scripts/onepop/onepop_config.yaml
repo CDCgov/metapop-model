@@ -26,6 +26,34 @@ baseline_parameters:
   n_replicates: 1000
   seed: 123
 
+
+  n_groups: 1    # general, subpop1, subpop2
+  desired_r0: 12.0
+  k_i: [10.]
+  k_g1: 0.1
+  k_g2: 0.01
+  k_21: 0.01
+  n_e_compartments: 2    # number of chained E compartments
+  latent_duration: 10.5
+  n_i_compartments: 2    # number of chained I compartments
+  infectious_duration: 9.0
+  pop_sizes: [15000]    # population sizes
+  I0: [5]     # initially infected
+  vaccine_efficacy_2_dose: 0.97
+  vaccine_efficacy_1_dose: 0.93
+  #initial_vaccine_coverage: [0.93]
+  vaccine_uptake_start_day:  21
+  vaccine_uptake_duration_days: 21 # duration of vaccine uptake campaign
+  symptomatic_isolation_duration_days: 365
+  isolation_success: 0.50 # isolation_adherance(0.5)*isolation_reduction (0.75)
+  pre_rash_isolation_success: 0.3 #quarantine_adherance(0.5)* _reduction(0.6)
+  pre_rash_isolation_duration_days: 365
+  vaccinated_group: 0
+  IHR: 0.15 #infection hospitalization rate
+  tf: 365        # total time modeled
+  n_replicates: 1000
+  seed: 123
+
 grid_parameters:
   initial_coverage_scenario: ['low', 'medium', 'optimistic'] #
   total_vaccine_uptake_doses: [0, 250] # constant, to be divided out among the days
