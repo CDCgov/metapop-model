@@ -6,6 +6,9 @@ import streamlit as st
 import numpy as np
 import polars as pl
 import altair as alt
+import st_flexible_callout_elements
+from st_flexible_callout_elements import flexible_callout
+
 
 # import what's needed from other metapop modules
 from .app_helper import (
@@ -538,11 +541,16 @@ def app(replicates=20):
     with st.expander("Show intervention strategy info.", expanded=False):
         columns = st.columns(2)
 
-        columns[0].error(
-            "No Interventions:\n"
-            " - Vaccines administered during campaign: 0\n"
-            " - Adherance to quarantine among pre-symptomatic infectious individuals: 0%\n"
-            " - Adherance to isolation among symptomatic infectious individuals: 0%"
+        flexible_callout(
+            (
+                "No Interventions:<br>"
+                " - Vaccines administered during campaign: 0<br>"
+                " - % of infectious individuals isolating before rash onset: 0<br>"
+                " - % of infectious individuals isolating after rash onset: 0"
+            ),
+            background_color="#feeadf",
+            font_color="#8f3604",
+            container=columns[0],
         )
         if interventions == "On":
             pre_rash_isolation_adherance = 0
@@ -565,7 +573,12 @@ def app(replicates=20):
             callout_text += f" - Adherance to quarantine among pre-symptomatic infectious individuals: {int(pre_rash_isolation_adherance*100)}%\n"
             callout_text += f" - Adherance to isolation among symptomatic infectious individuals: {int(isolation_adherance*100)}%\n"
 
-            columns[1].info(callout_text)
+            flexible_callout(
+                callout_text,
+                background_color="#cbe4ff",
+                font_color="#001833",
+                container=columns[1],
+            )
 
     fullresults1 = fullresults1.with_columns(
         pl.lit(scenario_names[0]).alias("Scenario")

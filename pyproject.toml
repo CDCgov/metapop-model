@@ -17,6 +17,7 @@ pytest = "^8.3.4"
 pyarrow = "^19.0.1"
 seaborn = "^0.13.2"
 streamlit = "^1.43.2"
+st_flexible_callout_elements = "0.1.0"
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.29.5"
