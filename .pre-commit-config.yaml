@@ -17,7 +17,7 @@ repos:
       - name: Sort imports with ruff
         id: ruff
         args: ["check", "--select", "I", "--fix"]
-      - name: Format with fuff
+      - name: Format with ruff
         id: ruff-format
   - repo: https://github.com/Yelp/detect-secrets
     rev: v1.5.0
