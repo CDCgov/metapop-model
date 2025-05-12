@@ -85,7 +85,9 @@ def app(replicates=20):
         widget_types = (
             get_widget_types()
         )  # defines the type of widget for each parameter
-        min_values = get_min_values()
+        # min_values = get_min_values()
+        min_values = dict(pop_sizes=[1000, 100, 100])
+        min_values = get_min_values(min_values)
         max_values = get_max_values()
         steps = get_step_values()
         helpers = get_helpers()
@@ -96,7 +98,9 @@ def app(replicates=20):
 
         # some customization of the helper texts in the sidebar
         helpers["I0"][0] = "The model currently has a maximum of 10 initial infections."
-        helpers["pop_sizes"][0] = "The model currently has a maximum of 100,000 people."
+        helpers["pop_sizes"][0] = (
+            "The model currently has a maximum of 100,000 people and a minimum of 1000 people. As population sizes get larger, the assumption of a well-mixed population becomes less valid."
+        )
         helpers["initial_vaccine_coverage"][0] = (
             "The percent of the population with any immunity against measles, including both through MMR vaccination and through past infection."
         )
