@@ -49,7 +49,7 @@ __all__ = [
     "get_table",
     "set_parms_to_zero",
     "rescale_prop_vax",
-    "get_median_trajectory",
+    "get_median_trajectory_from_episize",
 ]
 
 
@@ -1334,23 +1334,33 @@ def get_table(combined_results, IHR, edited_parms):
     return outbreak_summary
 
 
-def get_median_trajectory(results):
+def get_median_trajectory_from_episize(results: pl.DataFrame) -> pl.DataFrame:
     # data at the end of simulation
     max_t = results.select(pl.col("t").max()).item()  # Get the maximum value of t
     filtered_results = results.filter(pl.col("t") == max_t)
-    median_R = filtered_results.select(
-        pl.col("R").median()
-    ).item()  # Get the median value of R
+    median_R_values = filtered_results.group_by("group").agg(
+        pl.col("R").median().alias("median_R")
+    )  # Get the median value of R
 
+    # Get the largets value of median_R and its corresponding group
+    median_R = median_R_values["median_R"].max()
+    group_for_median = ( median_R_values
+        .filter(pl.col("median_R") == median_R)
+        .select("group")
+        .head(1)
+        .item()
+    )
     # get replicate closest to the median value of R
     closest_replicate = (
-        filtered_results.with_columns(
-            (pl.col("R") - median_R).abs().alias("distance")
-        )  # Calculate the absolute difference
-        .sort("distance")  # Sort by the distance
-        .select("replicate")  # Select the replicate column
-        .head(1)  # Get the first (closest) replicate
-        .item()
+        filtered_results
+            .filter(pl.col("group") == group_for_median)
+            .with_columns(
+                (pl.col("R") - median_R).abs().alias("distance")
+            )  # Calculate the absolute difference
+            .sort("distance")  # Sort by the distance
+            .select("replicate")  # Select the replicate column
+            .head(1)  # Get the first (closest) replicate
+            .item()
     )
 
     median_trajectory = results.filter(pl.col("replicate") == closest_replicate)

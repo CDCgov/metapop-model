@@ -33,7 +33,7 @@ from .app_helper import (
     add_daily_incidence,
     get_interval_results,
     get_table,
-    get_median_trajectory,
+    get_median_trajectory_from_episize,
 )
 from .helper import build_vax_schedule
 
@@ -404,10 +404,10 @@ def app(replicates=20):
         vax_end = max(sched.keys()) / interval
 
     # get median line for each scenario (based on ALL sims, not just smaller sample)
-    ave_results1 = get_median_trajectory(alt_results1).with_columns(
+    ave_results1 = get_median_trajectory_from_episize(alt_results1).with_columns(
         pl.lit(scenario_names[0]).alias("scenario")
     )
-    ave_results2 = get_median_trajectory(alt_results2).with_columns(
+    ave_results2 = get_median_trajectory_from_episize(alt_results2).with_columns(
         pl.lit(scenario_names[1]).alias("scenario")
     )
     combined_ave_results = ave_results1.vstack(ave_results2)
