@@ -1,8 +1,8 @@
 import os
+from math import isclose
 
 import numpy as np
 import polars as pl
-from math import isclose
 import yaml
 
 from metapop.app_helper import *
@@ -240,44 +240,55 @@ def test_rescale_prop_vax():
         rescaled_parms["total_vaccine_uptake_doses"] == expected_total_doses
     ), f"Expected total vaccine uptake doses to be {expected_total_doses}, but got {rescaled_parms['total_vaccine_uptake_doses']}"
 
+
 def test_get_median_from_episize_one_group():
     # Odd number of replicates to return a single median
     n_reps = 101
 
-    episize_df = pl.DataFrame({
-        "replicate": range(n_reps),
-        "R": np.random.normal(0, 0.5, n_reps),
-        "S": 0,
-        "group": 0,
-        "t": 1
-    })
+    episize_df = pl.DataFrame(
+        {
+            "replicate": range(n_reps),
+            "R": np.random.normal(0, 0.5, n_reps),
+            "S": 0,
+            "group": 0,
+            "t": 1,
+        }
+    )
 
     dummy_traj = get_median_trajectory_from_episize(episize_df)
     r = dummy_traj["R"].item()
-    
+
     # check that r is near 0
     assert isclose(r, 0, abs_tol=0.1), f"Expected R to be close to 0, but got {r}"
 
     # and equal to the median
-    assert r == np.median(episize_df["R"]), f"Expected R to be {np.median(episize_df['R'])}, but got {r}"
+    assert r == np.median(
+        episize_df["R"]
+    ), f"Expected R to be {np.median(episize_df['R'])}, but got {r}"
+
 
 def test_get_median_from_episize_multiple_groups():
     n_reps = 101
 
     # Create two groups, one with pop size of about 0 (S=0, R~Norm(0, 0.5)), the other of popsize of about 0 (s=10, R~Norm(0, 0.5))
-    episize_df = pl.DataFrame({
-        "replicate": list(range(n_reps)) * 2,
-        "R": np.concatenate([np.random.normal(0, 0.5, n_reps), np.random.normal(0, 0.5, n_reps)]),
-        "S": [0] * n_reps + [10] * n_reps,
-        "group": [0] * n_reps + [1] * n_reps,
-        "t": 1
-    })
+    episize_df = pl.DataFrame(
+        {
+            "replicate": list(range(n_reps)) * 2,
+            "R": np.concatenate(
+                [np.random.normal(0, 0.5, n_reps), np.random.normal(0, 0.5, n_reps)]
+            ),
+            "S": [0] * n_reps + [10] * n_reps,
+            "group": [0] * n_reps + [1] * n_reps,
+            "t": 1,
+        }
+    )
 
     dummy_traj = get_median_trajectory_from_episize(episize_df)
 
-    # Check that Group 1 Rin dummy_traj matches the median of Group 1 in episize_df
-    r_group_1 = dummy_traj.filter(pl.col("group") == 1)["R"].item()
-    median_group_1 = np.median(episize_df.filter(pl.col("group") == 1)["R"])
-    assert r_group_1 == median_group_1, f"Expected R for group 1 to be {median_group_1}, but got {r_group_1}"
+    # Check that Group 0, the base group, has a median r equal to function output
+    r_group = dummy_traj.filter(pl.col("group") == 0)["R"].item()
+    median_group = np.median(episize_df.filter(pl.col("group") == 0)["R"])
 
-
+    assert (
+        r_group == median_group
+    ), f"Expected R for group 1 to be {median_group}, but got {r_group}"

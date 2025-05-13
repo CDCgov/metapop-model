@@ -1335,33 +1335,35 @@ def get_table(combined_results, IHR, edited_parms):
 
 
 def get_median_trajectory_from_episize(results: pl.DataFrame) -> pl.DataFrame:
-    # data at the end of simulation
-    max_t = results.select(pl.col("t").max()).item()  # Get the maximum value of t
-    filtered_results = results.filter(pl.col("t") == max_t)
-    median_R_values = filtered_results.group_by("group").agg(
-        pl.col("R").median().alias("median_R")
-    )  # Get the median value of R
+    """
+    Get the trajectory of the replicate whose final value of R is closest to the median.
 
-    # Get the largets value of median_R and its corresponding group
-    median_R = median_R_values["median_R"].max()
-    group_for_median = ( median_R_values
-        .filter(pl.col("median_R") == median_R)
-        .select("group")
+    Args:
+        results (pl.DataFrame): The simulation results DataFrame from `get_scenario_results`.
+
+    Returns:
+        pl.DataFrame: The trajectory of the replicate closest to the median R value.
+    """
+    # Get the maximum time point
+    max_t = results["t"].max()
+    base_group = results["group"].min()
+
+    # Filter results for the last time point and group 0
+    filtered_results = results.filter(
+        (pl.col("t") == max_t) & (pl.col("group") == base_group)
+    )
+
+    # Calculate the median value of R
+    median_R = filtered_results["R"].median()
+
+    # Find the replicate with the closest R value to the median
+    closest_replicate = (
+        filtered_results.with_columns((pl.col("R") - median_R).abs().alias("distance"))
+        .sort("distance")
+        .select("replicate")
         .head(1)
         .item()
     )
-    # get replicate closest to the median value of R
-    closest_replicate = (
-        filtered_results
-            .filter(pl.col("group") == group_for_median)
-            .with_columns(
-                (pl.col("R") - median_R).abs().alias("distance")
-            )  # Calculate the absolute difference
-            .sort("distance")  # Sort by the distance
-            .select("replicate")  # Select the replicate column
-            .head(1)  # Get the first (closest) replicate
-            .item()
-    )
 
-    median_trajectory = results.filter(pl.col("replicate") == closest_replicate)
-    return median_trajectory
+    # Return the trajectory for the closest replicate
+    return results.filter(pl.col("replicate") == closest_replicate)
