@@ -274,7 +274,10 @@ def app(replicates=20):
     #### Intervention scenarios:
     # instead of expander, can use st.radio:
     if (
-        edited_parms2["total_vaccine_uptake_doses"] == 0
+        (
+            edited_parms2["total_vaccine_uptake_doses"] == 0
+            or edited_parms2["vaccine_uptake_duration_days"] == 0
+        )
         and edited_parms2["pre_rash_isolation_on"] == False
         and edited_parms2["isolation_on"] == False
     ):
