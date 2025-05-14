@@ -85,7 +85,6 @@ def app(replicates=20):
         widget_types = (
             get_widget_types()
         )  # defines the type of widget for each parameter
-        # min_values = get_min_values()
         min_values = dict(pop_sizes=[1000, 100, 100])
         min_values = get_min_values(min_values)
         max_values = get_max_values()
