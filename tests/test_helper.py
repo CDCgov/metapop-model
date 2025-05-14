@@ -219,6 +219,22 @@ def test_calculate_foi():
     assert np.isclose(foi, expected_foi), f"Expected {expected_foi}, but got {foi}"
 
 
+def test_vaccination_schedule_not_empty():
+    """
+    Test that if vaccine_uptake_duration_days is 0, then the schedule is not
+    empty but contains day 0 and with 0 doses.
+    """
+    parms = dict(
+        n_groups=3,
+        vaccine_uptake_start_day=10,
+        vaccine_uptake_duration_days=0,
+        total_vaccine_uptake_doses=0,
+        vaccinated_group=2,
+    )
+    vaccination_uptake_schedule = build_vax_schedule(parms)
+    assert vaccination_uptake_schedule == {parms["vaccine_uptake_start_day"]: 0}
+
+
 def test_vaccines_administered_on_single_day():
     """
     Test that if vaccine_uptake_duration_days is 1, then all vaccine doses i.e.,
@@ -240,9 +256,6 @@ def test_vaccines_administered_on_single_day():
     ]
 
     vaccination_uptake_schedule = build_vax_schedule(parms)
-
-    print()
-    print("vaccination_uptake_schedule", vaccination_uptake_schedule)
 
     # assert that all vaccine doses are administered on the same day
     assert np.array_equal(

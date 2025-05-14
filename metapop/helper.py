@@ -391,12 +391,13 @@ def build_vax_schedule(parms):
     else:
         doses_per_day = 0
 
-    # doses_per_day = round(
-    #     parms["total_vaccine_uptake_doses"] / len(vaccine_uptake_days)
-    # )
-
     # Create the schedule dictionary
     schedule = {day: doses_per_day for day in vaccine_uptake_days}
+
+    # If no days are specified, set the schedule to 0 doses for day 0 as a
+    # placeholder rather than an empty dictionary
+    if len(vaccine_uptake_days) == 0:
+        schedule = {parms["vaccine_uptake_start_day"]: 0}
     return schedule
 
 
