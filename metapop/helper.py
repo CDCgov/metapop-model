@@ -382,7 +382,7 @@ def build_vax_schedule(parms):
     # Generate a sequence of days between the start and end of the vaccine_uptake_range
     start_day = parms["vaccine_uptake_start_day"]
     end_day = start_day + parms["vaccine_uptake_duration_days"]
-    vaccine_uptake_days = list(range(start_day, end_day + 1))
+    vaccine_uptake_days = list(range(start_day, end_day))
     doses_per_day = round(
         parms["total_vaccine_uptake_doses"] / len(vaccine_uptake_days)
     )

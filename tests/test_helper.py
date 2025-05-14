@@ -219,11 +219,48 @@ def test_calculate_foi():
     assert np.isclose(foi, expected_foi), f"Expected {expected_foi}, but got {foi}"
 
 
+def test_vaccines_administered_on_single_day():
+    """
+    Test that if vaccine_uptake_duration_days is 1, then all vaccine doses i.e.,
+    vaccinations happen on that single day.
+    """
+    parms = dict(
+        n_groups=3,
+        vaccine_uptake_start_day=10,
+        vaccine_uptake_duration_days=1,
+        total_vaccine_uptake_doses=100,
+        vaccinated_group=2,
+    )
+
+    # Initial state for each group: Group 2 has no E or I individuals yet
+    u = [
+        [1000, 0, 100, 50, 0, 0, 0, 0, 0],  # Group 0: S, V, E1, E2, I1, I2, R, Y, X
+        [700, 0, 60, 40, 0, 0, 0, 0, 0],  # Group 1: S, V, E1, E2, I1, I2, R, Y, X
+        [600, 0, 0, 0, 0, 0, 0, 0, 0],  # Group 2: S, V, E1, E2, I1, I2, R, Y, X
+    ]
+
+    vaccination_uptake_schedule = build_vax_schedule(parms)
+
+    print()
+    print("vaccination_uptake_schedule", vaccination_uptake_schedule)
+
+    # assert that all vaccine doses are administered on the same day
+    assert np.array_equal(
+        vaccinate_groups(parms["n_groups"], u, 10, vaccination_uptake_schedule, parms),
+        [0, 0, 100],
+    )
+
+
 def test_active_vaccination():
+    """
+    Test that vaccination happens on the right days when vaccination campaign
+    starts after the first day in the model.
+    """
+    # Check that vaccine uptake happens on 2 days
     parms = {
         "n_groups": 3,
         "vaccine_uptake_start_day": 10,
-        "vaccine_uptake_duration_days": 1,
+        "vaccine_uptake_duration_days": 4,
         "total_vaccine_uptake_doses": 100,
         "vaccinated_group": 2,
     }
@@ -242,23 +279,52 @@ def test_active_vaccination():
         vaccinate_groups(parms["n_groups"], u, 5, vaccination_uptake_schedule, parms),
         [0, 0, 0],
     )
-    assert np.array_equal(
-        vaccinate_groups(parms["n_groups"], u, 10, vaccination_uptake_schedule, parms),
-        [0, 0, 50],
+    # Check that on every day of the vaccination campaign, the uptake is 25
+    doses_per_day = int(
+        parms["total_vaccine_uptake_doses"] / parms["vaccine_uptake_duration_days"]
     )
+    for day in vaccination_uptake_schedule:
+        assert np.array_equal(
+            vaccinate_groups(
+                parms["n_groups"], u, day, vaccination_uptake_schedule, parms
+            ),
+            [0, 0, doses_per_day],
+        )
+
+    day_after_vaccination = max(vaccination_uptake_schedule.keys()) + 1
     assert np.array_equal(
-        vaccinate_groups(parms["n_groups"], u, 11, vaccination_uptake_schedule, parms),
-        [0, 0, 50],
-    )
-    assert np.array_equal(
-        vaccinate_groups(parms["n_groups"], u, 12, vaccination_uptake_schedule, parms),
+        vaccinate_groups(
+            parms["n_groups"],
+            u,
+            day_after_vaccination,
+            vaccination_uptake_schedule,
+            parms,
+        ),
         [0, 0, 0],
     )
 
-    ### Check: If vaccine_doses >> than S population
-    parms["total_vaccine_uptake_doses"] = (
-        10000  # more doses than number of S in group 2
-    )
+
+def test_vaccine_doses_greater_than_population():
+    """
+    Test that if the number of vaccine doses is greater than the susceptible population
+    in the vaccinated group, the uptake is capped at that size.
+    """
+    # Check if vaccine_doses >> than S population
+    parms = {
+        "n_groups": 3,
+        "vaccine_uptake_start_day": 10,
+        "vaccine_uptake_duration_days": 1,
+        "total_vaccine_uptake_doses": 10000,
+        "vaccinated_group": 2,
+    }
+
+    # Initial state for each group: Group 2 has no E or I individuals yet
+    u = [
+        [1000, 0, 100, 50, 0, 0, 0, 0, 0],  # Group 0: S, V, E1, E2, I1, I2, R, Y, X
+        [700, 0, 60, 40, 0, 0, 0, 0, 0],  # Group 1: S, V, E1, E2, I1, I2, R, Y, X
+        [600, 0, 0, 0, 0, 0, 0, 0, 0],  # Group 2: S, V, E1, E2, I1, I2, R, Y, X
+    ]
+
     vaccination_uptake_schedule = build_vax_schedule(parms)
     uptake = vaccinate_groups(
         parms["n_groups"], u, 10, vaccination_uptake_schedule, parms
