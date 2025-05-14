@@ -130,7 +130,7 @@ def app(replicates=20):
         )
 
         col0.text(
-            "Enter a population size and baseline immunity, as "
+            "Type in a population size and baseline immunity, as "
             "well as the number of people initially infected with measles in the population. "
             "This tool is meant for use at the beginning of an outbreak at the county level or finer geographic scale. "
             "It is not intended to provide an exact forecast of cases into any community. "
