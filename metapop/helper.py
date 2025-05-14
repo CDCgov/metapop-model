@@ -383,9 +383,17 @@ def build_vax_schedule(parms):
     start_day = parms["vaccine_uptake_start_day"]
     end_day = start_day + parms["vaccine_uptake_duration_days"]
     vaccine_uptake_days = list(range(start_day, end_day))
-    doses_per_day = round(
-        parms["total_vaccine_uptake_doses"] / len(vaccine_uptake_days)
-    )
+
+    if parms["vaccine_uptake_duration_days"] > 0:
+        doses_per_day = round(
+            parms["total_vaccine_uptake_doses"] / parms["vaccine_uptake_duration_days"]
+        )
+    else:
+        doses_per_day = 0
+
+    # doses_per_day = round(
+    #     parms["total_vaccine_uptake_doses"] / len(vaccine_uptake_days)
+    # )
 
     # Create the schedule dictionary
     schedule = {day: doses_per_day for day in vaccine_uptake_days}
