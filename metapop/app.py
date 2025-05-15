@@ -460,7 +460,7 @@ def app(replicates=20):
     )
 
     # If vaccines administered > 0, add vax schedule to plot
-    if edited_parms2["total_vaccine_uptake_doses"] > 0:
+    if edited_intervention_parms2["total_vaccine_uptake_doses"] > 0:
         vax = (
             alt.Chart(
                 pd.DataFrame(
@@ -555,7 +555,10 @@ def app(replicates=20):
                 isolation_adherance = edited_advanced_parms2["isolation_adherence"]
 
             callout_text = "Interventions:\n"
-            if edited_intervention_parms2["total_vaccine_uptake_doses"] == 0:
+            if (
+                edited_intervention_parms2["total_vaccine_uptake_doses"] == 0
+                or edited_intervention_parms2["vaccine_uptake_duration_days"] == 0
+            ):
                 callout_text += " - Vaccines administered during campaign: 0\n"
             else:
                 callout_text += f" - Vaccines administered during campaign: {edited_intervention_parms2['total_vaccine_uptake_doses']} between day {edited_intervention_parms2['vaccine_uptake_start_day']} and day {edited_intervention_parms2['vaccine_uptake_start_day'] + edited_intervention_parms2['vaccine_uptake_duration_days']}\n"
