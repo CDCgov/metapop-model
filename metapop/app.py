@@ -553,12 +553,16 @@ def app(replicates=20):
                 ]
             if edited_advanced_parms2["isolation_on"]:
                 isolation_adherance = edited_advanced_parms2["isolation_adherence"]
-            columns[1].info(
-                "Interventions:\n"
-                f" - Vaccines administered during campaign: {edited_parms2['total_vaccine_uptake_doses']} between day {edited_parms2['vaccine_uptake_start_day']} and day {edited_parms2['vaccine_uptake_start_day'] + edited_parms2['vaccine_uptake_duration_days']}\n"
-                f" - Adherance to quarantine among pre-symptomatic infectious individuals: {int(pre_rash_isolation_adherance*100)}%\n"
-                f" - Adherance to isolation among symptomatic infectious individuals: {int(isolation_adherance*100)}%\n"
-            )
+
+            callout_text = "Interventions:\n"
+            if edited_intervention_parms2["total_vaccine_uptake_doses"] == 0:
+                callout_text += " - Vaccines administered during campaign: 0\n"
+            else:
+                callout_text += f" - Vaccines administered during campaign: {edited_intervention_parms2['total_vaccine_uptake_doses']} between day {edited_intervention_parms2['vaccine_uptake_start_day']} and day {edited_intervention_parms2['vaccine_uptake_start_day'] + edited_intervention_parms2['vaccine_uptake_duration_days']}\n"
+            callout_text += f" - Adherance to quarantine among pre-symptomatic infectious individuals: {int(pre_rash_isolation_adherance*100)}%\n"
+            callout_text += f" - Adherance to isolation among symptomatic infectious individuals: {int(isolation_adherance*100)}%\n"
+
+            columns[1].info(callout_text)
 
     fullresults1 = fullresults1.with_columns(
         pl.lit(scenario_names[0]).alias("Scenario")
