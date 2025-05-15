@@ -214,11 +214,9 @@ def app(replicates=20):
         if parms["use_prop_vaccine_uptake"]:
             edited_parms2 = rescale_prop_vax(edited_parms2)
 
-        # Display number of doses administered
-        st.text(
-            f"Total vaccines administered during campaign: {edited_parms2['total_vaccine_uptake_doses']}",
-            help="This number is calculated based on user input for the percentage of the non-immune population that gets vaccinated during the vaccine campaign.",
-        )
+        # placeholder for text about the vaccine campaign doses and other intervention effects in the siderbar
+        # defining this here allows us to place it above the advanced options section
+        col_intervention_text = st.columns(1)[0]
 
         with st.expander("Advanced options"):
             st.text(
@@ -303,6 +301,13 @@ def app(replicates=20):
     edited_intervention_parms2 = update_intervention_parameters_from_widget(
         edited_advanced_parms2
     )
+
+    # Display number of doses administered now that use has finished selecting parameters
+    with col_intervention_text:
+        st.text(
+            f"Total vaccines administered during campaign: {edited_intervention_parms2['total_vaccine_uptake_doses']}",
+            help="This number is calculated based on user input for the percentage of the non-immune population that gets vaccinated during the vaccine campaign.",
+        )
 
     ### Dictate that isolation > quarantine
     if (

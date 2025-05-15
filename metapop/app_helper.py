@@ -960,6 +960,9 @@ def update_intervention_parameters_from_widget(parms):
     else:
         parms["pre_rash_isolation_success"] = 0.0
 
+    if parms["vaccine_uptake_duration_days"] == 0:
+        parms["total_vaccine_uptake_doses"] = 0
+
     return parms
 
 
