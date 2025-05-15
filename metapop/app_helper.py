@@ -50,6 +50,7 @@ __all__ = [
     "set_parms_to_zero",
     "rescale_prop_vax",
     "get_median_trajectory_from_episize",
+    "get_median_trajectory_from_peak_time",
 ]
 
 
@@ -1336,7 +1337,7 @@ def get_table(combined_results, IHR, edited_parms):
 
 def get_median_trajectory_from_episize(results: pl.DataFrame) -> pl.DataFrame:
     """
-    Get the trajectory of the replicate whose final value of R is closest to the median.
+    Get the trajectory of the replicate whose final value of R in the `base_group` is closest to the median in that group.
 
     Args:
         results (pl.DataFrame): The simulation results DataFrame from `get_scenario_results`.
@@ -1359,6 +1360,40 @@ def get_median_trajectory_from_episize(results: pl.DataFrame) -> pl.DataFrame:
     # Find the replicate with the closest R value to the median
     closest_replicate = (
         filtered_results.with_columns((pl.col("R") - median_R).abs().alias("distance"))
+        .sort("distance")
+        .select("replicate")
+        .head(1)
+        .item()
+    )
+
+    # Return the trajectory for the closest replicate
+    return results.filter(pl.col("replicate") == closest_replicate)
+
+
+def get_median_trajectory_from_peak_time(results: pl.DataFrame) -> pl.DataFrame:
+    base_group = results["group"].min()
+
+    # Get the timing of peak infection within each replicate
+    # The maximum number of infected individuals may be present in multiple time points,
+    # so we aggregate for peak time within each replicate
+    filtered_results = (
+        results.filter(pl.col("group") == base_group)
+        .with_columns((pl.col("I1") + pl.col("I2")).alias("total_infections"))
+        .filter(
+            (pl.col("total_infections") == pl.col("total_infections").max()).over(
+                "replicate"
+            )
+        )
+        .group_by("replicate")
+        .agg(pl.col("t").median().alias("peak_time"))
+    )
+
+    # Filter for median peak time point across replicates
+    median_peak_time = filtered_results.select("peak_time").median()
+    closest_replicate = (
+        filtered_results.with_columns(
+            (pl.col("peak_time") - median_peak_time).abs().alias("distance")
+        )
         .sort("distance")
         .select("replicate")
         .head(1)

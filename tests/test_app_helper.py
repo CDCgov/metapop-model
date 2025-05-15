@@ -292,3 +292,37 @@ def test_get_median_from_episize_multiple_groups():
     assert (
         r_group == median_group
     ), f"Expected R for group 1 to be {median_group}, but got {r_group}"
+
+
+def test_get_median_from_peak_time():
+    # Odd number of replicates so that median is exactly equal to observed value
+    n_reps = 101
+    base_replicate_trajectory = pl.DataFrame(
+        {
+            "I1": [0, 1, 2, 1, 0],
+            "I2": [0, 0, 0, 0, 0],
+            "t_id": [0, 1, 2, 3, 4],
+            "group": 0,
+        }
+    )
+    # Create multiple trajectories from base and bind together
+    for replicate in range(n_reps):
+        current = base_replicate_trajectory.with_columns(
+            (pl.col("t_id") + np.random.normal(0, 0.5, 1)).alias("t"),
+            pl.lit(replicate).alias("replicate"),
+        )
+        if replicate == 0:
+            all_trajectories = current
+        else:
+            all_trajectories.vstack(current)
+
+    # Get the median trajectory
+    dummy_traj = get_median_trajectory_from_peak_time(all_trajectories)
+    # Check that the median trajectory is correct
+    true_median = (
+        all_trajectories.filter(pl.col("t_id") == 2).select("t").median().item()
+    )
+
+    assert (
+        dummy_traj["t"][2] == true_median
+    ), f"Expected median t to be {true_median}, but got {dummy_traj['t'][2]}"
