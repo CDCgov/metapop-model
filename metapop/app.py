@@ -555,12 +555,12 @@ def app(replicates=20):
         if interventions == "On":
             pre_rash_isolation_adherance = 0
             isolation_adherance = 0
-            if edited_advanced_parms2["pre_rash_isolation_on"]:
-                pre_rash_isolation_adherance = edited_advanced_parms2[
+            if edited_intervention_parms2["pre_rash_isolation_on"]:
+                pre_rash_isolation_adherance = edited_intervention_parms2[
                     "pre_rash_isolation_adherence"
                 ]
-            if edited_advanced_parms2["isolation_on"]:
-                isolation_adherance = edited_advanced_parms2["isolation_adherence"]
+            if edited_intervention_parms2["isolation_on"]:
+                isolation_adherance = edited_intervention_parms2["isolation_adherence"]
 
             callout_text = "Interventions:<br><ul>"
             if (
