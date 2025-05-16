@@ -1378,11 +1378,7 @@ def get_median_trajectory_from_peak_time(results: pl.DataFrame) -> pl.DataFrame:
     # so we aggregate for peak time within each replicate
     filtered_results = (
         results.filter(pl.col("group") == base_group)
-        .filter(
-            (pl.col("I") == pl.col("I").max()).over(
-                "replicate"
-            )
-        )
+        .filter((pl.col("I") == pl.col("I").max()).over("replicate"))
         .group_by("replicate")
         .agg(pl.col("t").median().alias("peak_time"))
     )

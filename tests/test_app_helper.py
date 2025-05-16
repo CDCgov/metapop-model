@@ -1,5 +1,4 @@
 import os
-from math import isclose
 
 import numpy as np
 import polars as pl
@@ -248,7 +247,7 @@ def test_get_median_from_episize_one_group():
     episize_df = pl.DataFrame(
         {
             "replicate": range(n_reps),
-            "R": np.random.normal(0, 0.5, n_reps),
+            "R": [x / 100.0 for x in range(n_reps)],
             "S": 0,
             "group": 0,
             "t": 1,
@@ -257,9 +256,6 @@ def test_get_median_from_episize_one_group():
 
     dummy_traj = get_median_trajectory_from_episize(episize_df)
     r = dummy_traj["R"].item()
-
-    # check that r is near 0
-    assert isclose(r, 0, abs_tol=0.1), f"Expected R to be close to 0, but got {r}"
 
     # and equal to the median
     assert r == np.median(
@@ -274,9 +270,7 @@ def test_get_median_from_episize_multiple_groups():
     episize_df = pl.DataFrame(
         {
             "replicate": list(range(n_reps)) * 2,
-            "R": np.concatenate(
-                [np.random.normal(0, 0.5, n_reps), np.random.normal(0, 0.5, n_reps)]
-            ),
+            "R": [x / 100.0 for x in range(n_reps)] * 2,
             "S": [0] * n_reps + [10] * n_reps,
             "group": [0] * n_reps + [1] * n_reps,
             "t": 1,
@@ -310,7 +304,7 @@ def test_get_median_from_peak_time_multiple_maxes():
     # Create multiple trajectories from base and bind together
     for replicate in range(n_reps):
         current = base_replicate_trajectory.with_columns(
-            (pl.col("t_id") + np.random.normal(0, 0.5, 1)).alias("t"),
+            (pl.col("t_id") + pl.lit(replicate / 100)).alias("t"),
             pl.lit(replicate).alias("replicate"),
         )
         if replicate == 0:
@@ -344,7 +338,7 @@ def test_get_median_from_peak_time_multiple_groups():
     for replicate in range(n_reps):
         for group in range(2):
             current = base_replicate_trajectory.with_columns(
-                (pl.col("t_id") + np.random.normal(0, 0.5, 1)).alias("t"),
+                (pl.col("t_id") + pl.lit(replicate / 100)).alias("t"),
                 pl.lit(replicate).alias("replicate"),
                 pl.lit(group).alias("group"),
             )
