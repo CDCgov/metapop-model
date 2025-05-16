@@ -548,9 +548,9 @@ def app(replicates=20):
                 " - % of infectious individuals isolating before rash onset: 0<br>"
                 " - % of infectious individuals isolating after rash onset: 0"
             ),
-            background_color = "#feeadf",
-            font_color = "#8f3604",
-            container = columns[0],
+            background_color="#feeadf",
+            font_color="#8f3604",
+            container=columns[0],
         )
         if interventions == "On":
             pre_rash_isolation_adherance = 0
@@ -575,9 +575,9 @@ def app(replicates=20):
 
             flexible_callout(
                 callout_text,
-                background_color = "#cbe4ff",
-                font_color = "#001833",
-                container = columns[1],
+                background_color="#cbe4ff",
+                font_color="#001833",
+                container=columns[1],
             )
 
     fullresults1 = fullresults1.with_columns(
