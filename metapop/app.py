@@ -6,6 +6,9 @@ import streamlit as st
 import numpy as np
 import polars as pl
 import altair as alt
+import st_flexible_callout_elements
+from st_flexible_callout_elements import flexible_callout
+
 
 # import what's needed from other metapop modules
 from .app_helper import (
@@ -538,34 +541,44 @@ def app(replicates=20):
     with st.expander("Show intervention strategy info.", expanded=False):
         columns = st.columns(2)
 
-        columns[0].error(
-            "No Interventions:\n"
-            " - Vaccines administered during campaign: 0\n"
-            " - Adherance to quarantine among pre-symptomatic infectious individuals: 0%\n"
-            " - Adherance to isolation among symptomatic infectious individuals: 0%"
+        flexible_callout(
+            (
+                "No Interventions:<br><ul>"
+                "<li> Vaccines administered during campaign: 0</li>"
+                "<li> % of infectious individuals isolating before rash onset: 0</li>"
+                "<li> % of infectious individuals isolating after rash onset: 0</li></ul>"
+            ),
+            background_color="#feeadf",
+            font_color="#8f3604",
+            container=columns[0],
         )
         if interventions == "On":
             pre_rash_isolation_adherance = 0
             isolation_adherance = 0
-            if edited_advanced_parms2["pre_rash_isolation_on"]:
-                pre_rash_isolation_adherance = edited_advanced_parms2[
+            if edited_intervention_parms2["pre_rash_isolation_on"]:
+                pre_rash_isolation_adherance = edited_intervention_parms2[
                     "pre_rash_isolation_adherence"
                 ]
-            if edited_advanced_parms2["isolation_on"]:
-                isolation_adherance = edited_advanced_parms2["isolation_adherence"]
+            if edited_intervention_parms2["isolation_on"]:
+                isolation_adherance = edited_intervention_parms2["isolation_adherence"]
 
-            callout_text = "Interventions:\n"
+            callout_text = "Interventions:<br><ul>"
             if (
                 edited_intervention_parms2["total_vaccine_uptake_doses"] == 0
                 or edited_intervention_parms2["vaccine_uptake_duration_days"] == 0
             ):
-                callout_text += " - Vaccines administered during campaign: 0\n"
+                callout_text += "<li> Vaccines administered during campaign: 0</li>"
             else:
-                callout_text += f" - Vaccines administered during campaign: {edited_intervention_parms2['total_vaccine_uptake_doses']} between day {edited_intervention_parms2['vaccine_uptake_start_day']} and day {edited_intervention_parms2['vaccine_uptake_start_day'] + edited_intervention_parms2['vaccine_uptake_duration_days']}\n"
-            callout_text += f" - Adherance to quarantine among pre-symptomatic infectious individuals: {int(pre_rash_isolation_adherance*100)}%\n"
-            callout_text += f" - Adherance to isolation among symptomatic infectious individuals: {int(isolation_adherance*100)}%\n"
+                callout_text += f"<li> Vaccines administered during campaign: {edited_intervention_parms2['total_vaccine_uptake_doses']} between day {edited_intervention_parms2['vaccine_uptake_start_day']} and day {edited_intervention_parms2['vaccine_uptake_start_day'] + edited_intervention_parms2['vaccine_uptake_duration_days']}</li>"
+            callout_text += f"<li> Adherance to quarantine among pre-symptomatic infectious individuals: {int(pre_rash_isolation_adherance*100)}%</li>"
+            callout_text += f"<li> Adherance to isolation among symptomatic infectious individuals: {int(isolation_adherance*100)}%</li></ul>"
 
-            columns[1].info(callout_text)
+            flexible_callout(
+                callout_text,
+                background_color="#cbe4ff",
+                font_color="#001833",
+                container=columns[1],
+            )
 
     fullresults1 = fullresults1.with_columns(
         pl.lit(scenario_names[0]).alias("Scenario")
