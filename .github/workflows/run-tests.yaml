@@ -3,6 +3,7 @@ name: metapop CI workflow
 on:
   pull_request:
   push:
+  workflow_dispatch:
 
 jobs:
   install_and_test:
