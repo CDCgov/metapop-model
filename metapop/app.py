@@ -594,7 +594,7 @@ def app(replicates=20):
             pl.col("group").cast(pl.Int64),
             pl.col("Y").cast(pl.Int64),
         )
-        .filter(pl.col("t") == 365)
+        .filter(pl.col("t") == pl.col("t").max())
         .group_by("Scenario", "replicate")
         .agg(pl.col("Y").sum().alias("Total"))
     )
