@@ -302,8 +302,7 @@ def test_get_median_from_peak_time_multiple_maxes():
     # Peak infection times are at 1 and 3, meaning time id 2 should be selected
     base_replicate_trajectory = pl.DataFrame(
         {
-            "I1": [0, 2, 1, 2, 0],
-            "I2": [0, 0, 0, 0, 0],
+            "I": [0, 2, 1, 2, 0],
             "t_id": [0, 1, 2, 3, 4],
             "group": 0,
         }
@@ -337,8 +336,7 @@ def test_get_median_from_peak_time_multiple_groups():
     n_reps = 101
     base_replicate_trajectory = pl.DataFrame(
         {
-            "I1": [0, 1, 2, 1, 0],
-            "I2": [0, 0, 0, 0, 0],
+            "I": [0, 1, 2, 1, 0],
             "t_id": [0, 1, 2, 3, 4],
         }
     )

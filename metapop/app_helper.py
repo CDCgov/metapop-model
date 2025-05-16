@@ -1378,9 +1378,8 @@ def get_median_trajectory_from_peak_time(results: pl.DataFrame) -> pl.DataFrame:
     # so we aggregate for peak time within each replicate
     filtered_results = (
         results.filter(pl.col("group") == base_group)
-        .with_columns((pl.col("I1") + pl.col("I2")).alias("total_infections"))
         .filter(
-            (pl.col("total_infections") == pl.col("total_infections").max()).over(
+            (pl.col("I") == pl.col("I").max()).over(
                 "replicate"
             )
         )
@@ -1389,7 +1388,7 @@ def get_median_trajectory_from_peak_time(results: pl.DataFrame) -> pl.DataFrame:
     )
 
     # Filter for median peak time point across replicates
-    median_peak_time = filtered_results.select("peak_time").median()
+    median_peak_time = filtered_results["peak_time"].median()
     closest_replicate = (
         filtered_results.with_columns(
             (pl.col("peak_time") - median_peak_time).abs().alias("distance")
