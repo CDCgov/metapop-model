@@ -530,8 +530,9 @@ def app(replicates=20):
         "model. All simulations within a given scenario (i.e., shown with "
         "the same color) are run under the same set of parameters, and "
         "differences between each individual simulation are due to random "
-        "variation in contact rates. Bolded lines show the simulation with "
-        "the median time of peak prevalence across all epidemic trajectories."
+        "variation in contact rates. Bolded lines show the simulation that possessed "
+        "the median time of peak prevalence across all epidemic trajectories for"
+        "each scenario."
         "</p>",
         unsafe_allow_html=True,
     )

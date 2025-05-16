@@ -1386,6 +1386,7 @@ def get_median_trajectory_from_peak_time(
 
     # Filter for median peak time point across replicates
     median_peak_time = filtered_results["peak_time"].median()
+
     closest_replicate = (
         filtered_results.with_columns(
             (pl.col("peak_time") - median_peak_time).abs().alias("distance")

@@ -281,12 +281,12 @@ def test_get_median_from_episize_multiple_groups():
         dummy_traj = get_median_trajectory_from_episize(episize_df, base_group=group)
 
         # Check that Group 0, the base group, has a median r equal to function output
-        r_group = dummy_traj.filter(pl.col("group") == 0)["R"].item()
+        r_group = dummy_traj.filter(pl.col("group") == group)["R"].item()
         median_group = np.median(episize_df.filter(pl.col("group") == group)["R"])
 
         assert (
             r_group == median_group
-        ), f"Expected R for group 1 to be {median_group}, but got {r_group}"
+        ), f"Expected R for group {group} to be {median_group}, but got {r_group}"
 
 
 # Test selection of median trajectory from peak time with multiple peaks in each replicate
@@ -338,8 +338,10 @@ def test_get_median_from_peak_time_multiple_groups():
     # Create multiple trajectories from base and bind together, distinguishing the median times for each group
     for replicate in range(n_reps):
         for group in range(2):
+            # Create a unique time for each replicate
+            unique_time = (replicate / 100) + group
             current = base_replicate_trajectory.with_columns(
-                (pl.col("t_id") + pl.lit(replicate * (group + 1) / 100)).alias("t"),
+                (pl.col("t_id") + pl.lit(unique_time)).alias("t"),
                 pl.lit(replicate).alias("replicate"),
                 pl.lit(group).alias("group"),
             )
@@ -350,8 +352,10 @@ def test_get_median_from_peak_time_multiple_groups():
 
     for group in range(2):
         # Get the median trajectory
-        dummy_traj = get_median_trajectory_from_peak_time(all_trajectories)
-        # Check that the median trajectory is correct for the base group (0)
+        dummy_traj = get_median_trajectory_from_peak_time(
+            all_trajectories, base_group=group
+        )
+        # Check that the median trajectory is correct for each base group
         true_median = (
             all_trajectories.filter((pl.col("t_id") == 2) & (pl.col("group") == group))
             .select("t")
@@ -359,6 +363,10 @@ def test_get_median_from_peak_time_multiple_groups():
             .item()
         )
 
+        observed_median = dummy_traj.filter(
+            (pl.col("group") == group) & (pl.col("t_id") == 2)
+        )["t"].item()
+
         assert (
-            dummy_traj["t"][2] == true_median
-        ), f"Expected median t to be {true_median}, but got {dummy_traj['t'][2]}"
+            observed_median == true_median
+        ), f"Expected median t in group {group} to be {true_median}, but got {observed_median}"
