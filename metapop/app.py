@@ -548,9 +548,9 @@ def app(replicates=20):
                 " - % of infectious individuals isolating before rash onset: 0<br>"
                 " - % of infectious individuals isolating after rash onset: 0"
             ),
-            background_color="#feeadf",
-            font_color="#8f3604",
-            container=columns[0],
+            background_color = "#feeadf",
+            font_color = "#8f3604",
+            container = columns[0],
         )
         if interventions == "On":
             pre_rash_isolation_adherance = 0
@@ -562,22 +562,22 @@ def app(replicates=20):
             if edited_advanced_parms2["isolation_on"]:
                 isolation_adherance = edited_advanced_parms2["isolation_adherence"]
 
-            callout_text = "Interventions:\n"
+            callout_text = "Interventions:<br>"
             if (
                 edited_intervention_parms2["total_vaccine_uptake_doses"] == 0
                 or edited_intervention_parms2["vaccine_uptake_duration_days"] == 0
             ):
-                callout_text += " - Vaccines administered during campaign: 0\n"
+                callout_text += " - Vaccines administered during campaign: 0<br>"
             else:
-                callout_text += f" - Vaccines administered during campaign: {edited_intervention_parms2['total_vaccine_uptake_doses']} between day {edited_intervention_parms2['vaccine_uptake_start_day']} and day {edited_intervention_parms2['vaccine_uptake_start_day'] + edited_intervention_parms2['vaccine_uptake_duration_days']}\n"
-            callout_text += f" - Adherance to quarantine among pre-symptomatic infectious individuals: {int(pre_rash_isolation_adherance*100)}%\n"
-            callout_text += f" - Adherance to isolation among symptomatic infectious individuals: {int(isolation_adherance*100)}%\n"
+                callout_text += f" - Vaccines administered during campaign: {edited_intervention_parms2['total_vaccine_uptake_doses']} between day {edited_intervention_parms2['vaccine_uptake_start_day']} and day {edited_intervention_parms2['vaccine_uptake_start_day'] + edited_intervention_parms2['vaccine_uptake_duration_days']}<br>"
+            callout_text += f" - Adherance to quarantine among pre-symptomatic infectious individuals: {int(pre_rash_isolation_adherance*100)}%<br>"
+            callout_text += f" - Adherance to isolation among symptomatic infectious individuals: {int(isolation_adherance*100)}%"
 
             flexible_callout(
                 callout_text,
-                background_color="#cbe4ff",
-                font_color="#001833",
-                container=columns[1],
+                background_color = "#cbe4ff",
+                font_color = "#001833",
+                container = columns[1],
             )
 
     fullresults1 = fullresults1.with_columns(
