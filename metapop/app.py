@@ -562,8 +562,8 @@ def app(replicates=20):
             (
                 "No Interventions:<br><ul>"
                 "<li> Vaccines administered during campaign: 0</li>"
-                "<li> % of infectious individuals isolating before rash onset: 0</li>"
-                "<li> % of infectious individuals isolating after rash onset: 0</li></ul>"
+                "<li> Adherence to quarantine among pre-symptomatic infectious individuals: 0%</li>"
+                "<li> Adherence to isolation among symptomatic infectious individuals: 0%</li></ul>"
             ),
             background_color="#feeadf",
             font_color="#8f3604",
