@@ -263,6 +263,8 @@ def get_infected(u, I_indices, groups, parms, t):
         u (list): The state of the system.
         I_indices (list): The indices of the I compartments.
         groups (int): The number of groups.
+        parms (dict): Dictionary containing model parameters
+        t (int): The current time step.
 
     Returns:
         np.array: An array of the number of infected individuals for each group.
