@@ -696,7 +696,7 @@ def get_max_values(parms=None):
         pre_rash_isolation_start_day=365,
         pre_rash_isolation_duration_days=365,
         tf=400,
-        IHR=0.20,
+        IHR=1.0,
     )
     # update with parms if provided
     if parms is not None and isinstance(parms, dict):
@@ -1264,7 +1264,7 @@ def calculate_outbreak_summary(combined_results, threshold):
     return outbreak_summary
 
 
-def get_table(combined_results, IHR, edited_parms):
+def get_table(combined_results, IHR):
     """
     Calculate the hospitalization summary based on the given IHR.
 

@@ -601,9 +601,7 @@ def app(replicates=20):
         .agg(pl.col("Y").sum().alias("Total"))
     )
 
-    outbreak_summary = get_table(
-        combined_results, parms["IHR"], edited_intervention_parms2
-    )
+    outbreak_summary = get_table(combined_results, edited_intervention_parms2["IHR"])
 
     if interventions == "Off":
         outbreak_summary = outbreak_summary.select("", scenario_names[0])
