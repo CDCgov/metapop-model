@@ -441,19 +441,24 @@ def app(replicates=20):
         isolation_adherance_pct = int(isolation_adherance * 100)
         title = alt.TitleParams(
             "Outcome Comparison by Scenario",
-            subtitle = [(f"Vaccine campaign: {edited_intervention_parms2['total_vaccine_uptake_doses']}" 
-                         "doses administered"),
-                         ("Transmission Reduction Adherence: "
-                          f"({pre_rash_isolation_adherance_pct}% quarantine on exposure, "
-                          f"{isolation_adherance_pct}% isolate on symptoms)"
-                          )],
+            subtitle=[
+                (
+                    f"Vaccine campaign: {edited_intervention_parms2['total_vaccine_uptake_doses']} "
+                    "doses administered"
+                ),
+                (
+                    "Transmission Reduction Adherence: "
+                    f"{pre_rash_isolation_adherance_pct}% quarantine on exposure, "
+                    f"{isolation_adherance_pct}% isolate on symptoms"
+                ),
+            ],
         )
     else:
         combined_alt_results = alt_results1.filter(
             pl.col("replicate").is_in(replicate_inds)
         )
         combined_ave_results = ave_results1
-        title = f"No Intervention Scenario"
+        title = "No Intervention Scenario"
 
     chart_placeholder.text("Building charts...")
     chart = (
