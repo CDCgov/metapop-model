@@ -6,7 +6,7 @@ authors = [
     "Paige Miller <yub1@cdc.gov>",
     "Theresa Sheets <utg8@cdc.gov>",
     "Will Koval <ad71@cdc.gov>",
-    "Beau Bruce <lue7@cdc.gov>",
+    "Beau B. Bruce <lue7@cdc.gov>",
     "Dina Mistry <uqx8@cdc.gov>"]
 readme = "README.md"
 
@@ -29,9 +29,25 @@ ipykernel = "^6.29.5"
 pre-commit = "^4.0.1"
 detect-secrets = "^1.5.0"
 
+[project]
+name = "metapop"
+version = "0.4.0"
+description = ""
+authors = [
+    { name = "Paige Miller", email = "yub1@cdc.gov" },
+    { name = "Theresa Sheets", email = "utg8@cdc.gov" },
+    { name = "Will Koval", email = "ad71@cdc.gov" },
+    { name = "Dina Mistry", email = "uqx8@cdc.gov" },
+    { name = "Beau B. Bruce", email = "lue7@cdc.gov" },
+]
+readme = "README.md"
+
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling >= 1.26"]
+build-backend = "hatchling.build"
 
 [tool.ruff.lint]
 ignore = ['E741']
+
+[tool.ruff]
+extend-exclude = ["stlite/launch_stlite.py"]

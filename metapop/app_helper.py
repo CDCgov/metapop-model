@@ -1279,7 +1279,9 @@ def get_table(combined_results, IHR):
     combined_results = combined_results.with_columns(
         pl.Series(
             name="Hospitalizations",
-            values=np.random.binomial(combined_results["Total"].to_numpy(), IHR),
+            values=np.random.binomial(
+                combined_results["Total"].to_numpy().astype("int32"), IHR
+            ),
         )
     )
 

@@ -1,14 +1,17 @@
 # flake8: noqa
 # This file is part of the metapop package. It contains the Streamlit app for
 # the metapopulation model
+
 import pandas as pd
 import streamlit as st
 import numpy as np
 import polars as pl
 import altair as alt
-import st_flexible_callout_elements
 from st_flexible_callout_elements import flexible_callout
-
+import io
+import sys
+import base64
+import datetime
 
 # import what's needed from other metapop modules
 from .app_helper import (
@@ -72,6 +75,7 @@ def app(replicates=20):
         "size of measles outbreaks following introduction of measles into "
         "a community, by comparing scenarios with and without interventions."
     )
+
     parms = read_parameters("scripts/app/onepop_config.yaml")
 
     scenario_names = ["No Interventions", "Interventions"]
@@ -469,7 +473,7 @@ def app(replicates=20):
 
     chart_placeholder.text("Building charts...")
     chart = (
-        alt.Chart(combined_alt_results.to_pandas())
+        alt.Chart(combined_alt_results)
         .mark_line(opacity=0.3, strokeWidth=0.75)
         .encode(
             x=alt.X(x, title=time_label),
@@ -509,7 +513,7 @@ def app(replicates=20):
         chart = chart + vax
 
     ave_line = (
-        alt.Chart(combined_ave_results)
+        alt.Chart(combined_ave_results.to_pandas())
         .mark_line(opacity=1.0, strokeWidth=3.0)
         .encode(
             x=alt.X(x, title=time_label),
@@ -666,7 +670,24 @@ def app(replicates=20):
         #     pl.col("Relative Difference (%)").fill_nan("")
         # )
 
-    st.dataframe(outbreak_summary)
+    if "pyodide" in sys.modules:
+        # Workaround for stlite not displying st.dataframe correctly in this case.
+        # Unclear if this is a stlite pyarrow problem (see notes at
+        # https://github.com/whitphx/stlite?tab=readme-ov-file#limitations
+        # about `st.dataframe()`.)
+        st.markdown(outbreak_summary.to_pandas().to_markdown(index=False))
+        csv_buffer = io.StringIO()
+        outbreak_summary.to_pandas().to_csv(csv_buffer, index=False)
+
+        base64_encoded = base64.b64encode(csv_buffer.getvalue().encode("utf-8")).decode(
+            "utf-8"
+        )
+        time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+
+        data_uri = f'<p style="font-size:10px;text-align:right;"><a download="measles-sim-{time}.csv" href="data:text/csv;base64,{base64_encoded}">Download as CSV</a></p>'
+        st.markdown(data_uri, unsafe_allow_html=True)
+    else:
+        st.dataframe(outbreak_summary)
 
     # add a section on the detailed methods
     with st.expander("Detailed methods", expanded=False):

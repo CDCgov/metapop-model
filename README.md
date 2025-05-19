@@ -57,14 +57,22 @@ graph LR
 * Similarly for a single population, we can build the model by setting `n_groups: 1`, `popsizes: [5000]` for the population size, `I0: 5`, `k_i: [10]`, etc. In this case, the contact matrix is equivalent to `k_i`.
 * As a work in progress, we are working to add functionality that will allow users to give a contact matrix of their choice and model a flexible number of groups that mapped to the contact matrix.
 
+## Local app
+You can run the app locally using Streamlit with `make run_app`. To run the advanced app with 3 connected populations, use `make run_advanced_app`.
+
+## Stlite app
+You can run the app in-browser only based on [stlite](https://github.com/whitphx/stlite).  Within the repo, you can load `stlite/index.html` directly in your browser.  To build a sharable version, run `make build_stlite_app` which will create `stlite/measles_sim.html` which can be shared and requires the internet but no access to internal resources nor to a server.  Note that `pygridler` required removal of `progressbar` for compatibility with `pyodide`/`stlite`.
+
+## Stlite app
+You can run the app in-browser only based on [stlite](https://github.com/whitphx/stlite).  Within the repo, you can load `stlite/index.html` directly in your browser.  To build a sharable version, run `make build_stlite_app` which will create `stlite/measles_sim.html` which can be shared and requires the internet but no access to internal resources nor to a server.  Note that `pygridler` required removal of `progressbar` for compatibility with `pyodide`/`stlite`.
 
 ## Project Admin
-
 * Paige Miller, yub1@cdc.gov (CDC/IOD/ORR/CFA)
 * Theresa Sheets, utg8@cdc.gov (CDC/IOD/ORR/CFA)
 * Will Koval, ad71@cdc.gov (CDC/IOD/ORR/CFA)
 * Beau Bruce, lue7@cdc.gov (CDC/IOD/ORR/CFA)
 * Dina Mistry, uqx8@cdc.gov (CDC/IOD/ORR/CFA)
+* Beau B. Bruce, lue7@cdc.gov (CDC/IOD/ORR/CFA) for the [stlite](https://github.com/whitphx/stlite) version
 
 ## General Disclaimer
 This repository was created for use by CDC programs to collaborate on public health related projects in support of the [CDC mission](https://www.cdc.gov/about/organization/mission.htm).  GitHub is not hosted by the CDC, but is a third party website used by CDC and its partners to share information and collaborate on software. CDC use of GitHub does not imply an endorsement of any one particular service, product, or enterprise.

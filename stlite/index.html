@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <title>Measles Metapop Model</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@stlite/browser@0.81.6/build/style.css">
+  </head>
+  <body>
+    <div id="root"></div>
+    <div id="foot" style="text-align:left;"> </div>
+    <script type="module">
+      import { mount } from "https://cdn.jsdelivr.net/npm/@stlite/browser@0.81.6/build/stlite.js";
+      mount(
+        {
+            requirements: ["tabulate", "pandas", "altair", "numpy", "st_flexible_callout_elements"],
+            entrypoint: "launch_stlite.py",
+            files: {
+                "launch_stlite.py": { url: "launch_stlite.py", },
+                "griddler-0.2.0-py3-none-any.whl": { url: "griddler-0.2.0-py3-none-any.whl", },
+                "metapop-0.4.0-py2.py3-none-any.whl": { url: "metapop-0.4.0-py2.py3-none-any.whl", },
+                "polars-1.24.0-cp39-abi3-emscripten_3_1_58_wasm32.whl": { url: "polars-1.24.0-cp39-abi3-emscripten_3_1_58_wasm32.whl", },
+                "scripts/app/app_config.yaml": { url: "../scripts/app/app_config.yaml", },
+                "scripts/app/onepop_config.yaml": { url: "../scripts/app/onepop_config.yaml", },
+            },
+        },
+        document.getElementById("root")
+    );
+    </script>
+  </body>
+</html>
