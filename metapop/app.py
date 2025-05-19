@@ -446,11 +446,8 @@ def app(replicates=20):
                     f"Vaccine campaign: {edited_intervention_parms2['total_vaccine_uptake_doses']} "
                     "doses administered"
                 ),
-                (
-                    "Transmission Reduction Adherence: "
-                    f"{pre_rash_isolation_adherance_pct}% quarantine on exposure, "
-                    f"{isolation_adherance_pct}% isolate on symptoms"
-                ),
+                f"Quarantine adherence: {pre_rash_isolation_adherance_pct}%",
+                f"Isolation adherence: {isolation_adherance_pct}%",
             ],
         )
     else:
