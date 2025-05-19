@@ -143,11 +143,14 @@ def test_pop_initialization():
         "pop_sizes": [1000, 2000],
         "initial_vaccine_coverage": [0.0, 0.95],
         "I0": [10, 2],
+        "vaccine_efficacy_2_dose": 0.95,
     }
     steps = 3
     groups = 2
 
-    S, V, E1, E2, I1, I2, R, Y, X, u = initialize_population(steps, groups, parms)
+    S, V, SV, E1, E2, E1_V, E2_V, I1, I2, R, Y, X, u = initialize_population(
+        steps, groups, parms
+    )
 
     # correct dimensions
     assert len(S) == steps
@@ -157,6 +160,14 @@ def test_pop_initialization():
     assert V[0][0] == 0
     assert_allclose(
         V[0][1],
+        parms["pop_sizes"][1]
+        * parms["initial_vaccine_coverage"][1]
+        * parms["vaccine_efficacy_2_dose"],
+        rtol=1e-2,
+        atol=1e-8,
+    )
+    assert_allclose(
+        V[0][1] + SV[0][1],
         parms["pop_sizes"][1] * parms["initial_vaccine_coverage"][1],
         rtol=1e-2,
         atol=1e-8,
@@ -168,7 +179,7 @@ def test_pop_initialization():
 
     # initial state vector is correct
     assert len(u) == groups
-    assert len(u[0]) == 9  # S V E1 E2 I1 I2 R Y X
+    assert len(u[0]) == 12  # S V SV E1 E2 E1_V, E2_V I1 I2 R Y X
     assert u[0][0] == S[0][0]
 
     assert (
@@ -246,21 +257,25 @@ def test_vaccines_administered_on_single_day():
         vaccine_uptake_duration_days=1,
         total_vaccine_uptake_doses=100,
         vaccinated_group=2,
+        vaccine_efficacy_1_dose=0.93,
     )
 
     # Initial state for each group: Group 2 has no E or I individuals yet
-    u = [
-        [1000, 0, 100, 50, 0, 0, 0, 0, 0],  # Group 0: S, V, E1, E2, I1, I2, R, Y, X
-        [700, 0, 60, 40, 0, 0, 0, 0, 0],  # Group 1: S, V, E1, E2, I1, I2, R, Y, X
-        [600, 0, 0, 0, 0, 0, 0, 0, 0],  # Group 2: S, V, E1, E2, I1, I2, R, Y, X
+    u = [  #  S, V, SV,  E1, E2, E1_V, E2_V, I1, I2, R, Y, X
+        [1000, 0, 0, 100, 50, 0, 0, 0, 0, 0, 0, 0],
+        [700, 0, 60, 40, 0, 0, 0, 0, 0, 0, 0, 0],
+        [600, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     ]
 
     vaccination_uptake_schedule = build_vax_schedule(parms)
 
     # assert that all vaccine doses are administered on the same day
+    fails = int(
+        parms["total_vaccine_uptake_doses"] * (1 - parms["vaccine_efficacy_1_dose"])
+    )
     assert np.array_equal(
         vaccinate_groups(parms["n_groups"], u, 10, vaccination_uptake_schedule, parms),
-        [0, 0, 100],
+        ([0, 0, 100 - fails], [0, 0, fails]),
     )
 
 
@@ -276,13 +291,14 @@ def test_active_vaccination():
         "vaccine_uptake_duration_days": 4,
         "total_vaccine_uptake_doses": 100,
         "vaccinated_group": 2,
+        "vaccine_efficacy_1_dose": 0.93,
     }
 
     # Initial state for each group: Group 2 has no E or I individuals yet
-    u = [
-        [1000, 0, 100, 50, 0, 0, 0, 0, 0],  # Group 0: S, V, E1, E2, I1, I2, R, Y, X
-        [700, 0, 60, 40, 0, 0, 0, 0, 0],  # Group 1: S, V, E1, E2, I1, I2, R, Y, X
-        [600, 0, 0, 0, 0, 0, 0, 0, 0],  # Group 2: S, V, E1, E2, I1, I2, R, Y, X
+    u = [  #  S, V, SV,  E1,  E2, E1_V, E2_V, I1, I2, R, Y, X
+        [1000, 0, 0, 100, 50, 0, 0, 0, 0, 0, 0, 0],
+        [700, 0, 0, 60, 40, 0, 0, 0, 0, 0, 0, 0],
+        [600, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     ]
 
     vaccination_uptake_schedule = build_vax_schedule(parms)
@@ -290,7 +306,7 @@ def test_active_vaccination():
     # Assertions to check the expected results: in group 2, 100% of eligible are susceptible
     assert np.array_equal(
         vaccinate_groups(parms["n_groups"], u, 5, vaccination_uptake_schedule, parms),
-        [0, 0, 0],
+        ([0, 0, 0], [0, 0, 0]),
     )
     # Check that on every day of the vaccination campaign, the uptake is 25
     doses_per_day = int(
@@ -298,13 +314,16 @@ def test_active_vaccination():
     )
     for day in vaccination_uptake_schedule:
         assert np.array_equal(
-            vaccinate_groups(
-                parms["n_groups"], u, day, vaccination_uptake_schedule, parms
+            sum(
+                vaccinate_groups(
+                    parms["n_groups"], u, day, vaccination_uptake_schedule, parms
+                )
             ),
             [0, 0, doses_per_day],
         )
 
     day_after_vaccination = max(vaccination_uptake_schedule.keys()) + 1
+
     assert np.array_equal(
         vaccinate_groups(
             parms["n_groups"],
@@ -313,7 +332,7 @@ def test_active_vaccination():
             vaccination_uptake_schedule,
             parms,
         ),
-        [0, 0, 0],
+        ([0, 0, 0], [0, 0, 0]),
     )
 
 
@@ -329,23 +348,31 @@ def test_vaccine_doses_greater_than_population():
         "vaccine_uptake_duration_days": 1,
         "total_vaccine_uptake_doses": 10000,
         "vaccinated_group": 2,
+        "vaccine_efficacy_1_dose": 0.93,
     }
 
     # Initial state for each group: Group 2 has no E or I individuals yet
-    u = [
-        [1000, 0, 100, 50, 0, 0, 0, 0, 0],  # Group 0: S, V, E1, E2, I1, I2, R, Y, X
-        [700, 0, 60, 40, 0, 0, 0, 0, 0],  # Group 1: S, V, E1, E2, I1, I2, R, Y, X
-        [600, 0, 0, 0, 0, 0, 0, 0, 0],  # Group 2: S, V, E1, E2, I1, I2, R, Y, X
+    u = [  #  S, V, SV,  E1,  E2, E1_V, E2_V, I1, I2, R, Y, X
+        [1000, 0, 0, 100, 50, 0, 0, 0, 0, 0, 0, 0],
+        [700, 0, 0, 60, 40, 0, 0, 0, 0, 0, 0, 0],
+        [600, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     ]
 
+    initial_S_group_2 = u[parms["vaccinated_group"]][0]
+
     vaccination_uptake_schedule = build_vax_schedule(parms)
-    uptake = vaccinate_groups(
+    success, fails = vaccinate_groups(
         parms["n_groups"], u, 10, vaccination_uptake_schedule, parms
     )
 
+    failed_vax = int(initial_S_group_2 * (1 - parms["vaccine_efficacy_1_dose"]))
     assert (
-        uptake[parms["vaccinated_group"]] == u[parms["vaccinated_group"]][0]
-    ), "Group 2 uptake is size of Susceptible population"
+        success[parms["vaccinated_group"]] == initial_S_group_2 - failed_vax
+    ), "Group 2 success is size of Susceptible population (accounting for vaccine efficacy)"
+
+    assert (
+        fails[parms["vaccinated_group"]] == failed_vax
+    ), "Group 2 fails is size of Susceptible population (accounting for vaccine efficacy)"
 
 
 def test_get_infected():
@@ -588,21 +615,33 @@ def test_run_model_once_with_config():
     steps = parms["tf"]
     t = np.linspace(1, steps, steps)
 
-    S, V, E1, E2, I1, I2, R, Y, X, u = initialize_population(steps, groups, parms)
+    S, V, SV, E1, E2, E1_V, E2_V, I1, I2, R, Y, X, u = initialize_population(
+        steps, groups, parms
+    )
+
+    # Individuals with vaccine
+    SV_initial = (u[0][2], u[1][2], u[2][2])
+    E1_V_initial = (u[0][5], u[1][5], u[2][5])
+
+    # assert the sum of E1_V_initial is 0
+    assert sum(E1_V_initial) == 0, "E1_V_initial should be 0"
 
     # Create an instance of SEIRModel
     model = SEIRModel(parms)
 
     # Call the run_model function
-    S, V, E1, E2, I1, I2, R, Y, X, u = run_model(
-        model, u, t, steps, groups, S, V, E1, E2, I1, I2, R, Y, X
+    S, V, SV, E1, E2, E1_V, E2_V, I1, I2, R, Y, X, u = run_model(
+        model, u, t, steps, groups, S, V, SV, E1, E2, E1_V, E2_V, I1, I2, R, Y, X
     )
 
     # Check the results
     assert S.shape == (steps, groups)
     assert V.shape == (steps, groups)
+    assert SV.shape == (steps, groups)
     assert E1.shape == (steps, groups)
     assert E2.shape == (steps, groups)
+    assert E1_V.shape == (steps, groups)
+    assert E2_V.shape == (steps, groups)
     assert I1.shape == (steps, groups)
     assert I2.shape == (steps, groups)
     assert R.shape == (steps, groups)
@@ -614,3 +653,10 @@ def test_run_model_once_with_config():
         assert np.array_equal(
             V[0], V[-1]
         ), "The starting V[0] should be the same as the ending V[0] when uptake is zero"
+
+    # Check that SV_initial is smaller than it is at the end (group 0)
+    # if people are leaving SV, then they should be populating E1_V
+    if SV_initial[0] > SV[-1][0]:
+        assert (
+            sum(sum(E1_V)) > 0.0
+        ), "Individuals should be entering E1_V after SV, i.e., this vector should be getting populated through the simulation"

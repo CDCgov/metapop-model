@@ -11,6 +11,9 @@ baseline_parameters:
   infectious_duration: 9.0
   pop_sizes: [15000]    # population sizes
   I0: [5]     # initially infected
+  initial_vaccine_coverage: [0.80]
+  vaccine_efficacy_2_dose: 0.97
+  vaccine_efficacy_1_dose: 0.93
   vaccine_uptake_start_day: 0
   vaccine_uptake_duration_days: 21
   use_prop_vaccine_uptake: true      # if true for the app,
@@ -30,4 +33,3 @@ baseline_parameters:
   tf: 365        # total time modeled
   n_replicates: 100
   seed: 123
-  initial_vaccine_coverage: [0.80]

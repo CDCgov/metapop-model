@@ -672,13 +672,6 @@ def app(replicates=20):
             probability of contact with each other. At the county scale, this
             may underestimate the risk of an outbreak if unvaccinated people
             are more likely to come in contact with each other.</li>
-            <li style="font-size:14px;">MMR vaccines in this model have 100%
-            efficacy; the typical estimate of vaccine effectiveness for two
-            doses of MMR vaccine is 97%. This means that the model cannot
-            simulate breakthrough infections, which could lead to an
-            underestimate of the probability of an outbreak and an overestimate
-            of the reduction in outbreak size due to vaccination.</li>
-            </ul>
 
             <b style="font-size:14px;">Model Parameters</b>
             <ul>
@@ -696,10 +689,12 @@ def app(replicates=20):
             <a href='https://www.cdc.gov/measles/hcp/communication-resources/clinical-diagnosis-fact-sheet.html' target='_blank'>[Measles Clinical Diagnosis Fact Sheet | Measles (Rubeola) | CDC]</a>.
             In this model, isolation when sick is assumed to start halfway through the infectious period.
             </li>
-            <li style="font-size:14px;"> We assume vaccine efficacy is 100%.
-            This is a simplifying assumption; MMR vaccine effectiveness is
-            estimated to be 97% after two doses <a href='https://www.cdc.gov/measles/vaccines/index.html?CDC_AA_refVal=https%3A%2F%2Fwww.cdc.gov%2Fvaccines%2Fvpd%2Fmmr%2Fpublic%2Findex.html' target='_blank'>[MMR Vaccine Information]</a>.
+            <li style="font-size:14px;"> We assume vaccine efficacy for individuals vaccinated during the campaign is 93%, the estimate for one dose of MMR <a href='https://www.cdc.gov/measles/vaccines/index.html?CDC_AA_refVal=https%3A%2F%2Fwww.cdc.gov%2Fvaccines%2Fvpd%2Fmmr%2Fpublic%2Findex.html' target='_blank'>[MMR Vaccine Information]</a>.
             </li>
+            </li>
+            <li style="font-size:14px;"> Individuals with immunity prior to introduction are assumed to have one or two doses of MMR or have had a prior measles infection.
+            </li>
+
             <li style="font-size:14px;">Isolation when sick is estimated to be
             approximately 75% effective at reducing transmission when comparing
             people who do isolate when sick to people who do not isolate when sick

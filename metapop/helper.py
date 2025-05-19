@@ -26,10 +26,10 @@ def get_percapita_contact_matrix(parms):
 
     Args:
         parms (dict): Dictionary containing the parameters, including:
-        k (int): Contacts total
-        k_g1 (int): contacts general and sub pop 1
-        k_21 (int): contacts between sub pop 1 and 2
-        k_g2 (int): contacts general and sub pop 2
+        k_i (float): Contacts total
+        k_g1 (float): contacts general and sub pop 1
+        k_21 (float): contacts between sub pop 1 and 2
+        k_g2 (float): contacts general and sub pop 2
         pop_sizes (array): population sizes of each group
 
     Returns:
@@ -84,7 +84,6 @@ def get_r0(beta_matrix, gamma, pop_sizes):
         beta_matrix (np.array): The transmission rate matrix.
         gamma (float): The recovery rate.
         pop_sizes (list or np.array): The population sizes of each group.
-        n_i_compartments (int): The number of infectious compartments.
 
     Returns:
         float: The spectral radius of the R0 matrix, representing the basic reproduction number.
@@ -138,8 +137,6 @@ def get_r0_one_group(k, gamma):
     Args:
         k (list): Contacts per day (unscaled)
         gamma (float): The recovery rate.
-        pop_sizes (list or np.array): The population sizes of each group.
-        n_i_compartments (int): The number of infectious compartments.
 
     Returns:
         float: R0, contacts per day / recovery rate
@@ -155,7 +152,10 @@ def construct_beta(parms):
 
     Args:
         parms (dict): Dictionary containing the parameters, including:
-            - k, kg1, kg2, k12
+            - k_i (float): Total per capita contacts per group.
+            - k_g1 (float): Contacts between the general population and subpopulation 1.
+            - k_g2 (float): Contacts between the general population and subpopulation 2.
+            - k_21 (float): Contacts between subpopulation 1 and subpopulation 2.
             - gamma (float): The recovery rate.
             - pop_sizes (list or np.array): The population sizes of each group.
             - n_i_compartments (int): The number of infectious compartments.
@@ -184,36 +184,50 @@ def construct_beta(parms):
 
 def initialize_population(steps, groups, parms):
     """
-    Initialize the population arrays and the initial state based on the provided parameters.
+        Initialize the population arrays and the initial state based on the provided parameters.
 
-    Args:
-        steps (int): Number of time steps.
-        groups (int): Number of groups.
-        parms (dict): Dictionary containing the parameters, including "N", "initial_vaccine_coverage", and "I0".
+        Args:
+            steps (int): Number of time steps.
+            groups (int): Number of groups.
+            parms (dict): Dictionary containing the parameters, including "N", "initial_vaccine_coverage", "vaccine_efficacy_2_dose" and "I0".
 
     Returns:
-        tuple: A tuple containing the initialized arrays (S, V, E1, E2, I1, I2, R, Y) and the initial state (u).
+        tuple: A tuple containing the initialized arrays:
+            - S, V, SV, E1, E2, E1_V, E2_V, I1, I2, R, Y, X (np.array): Arrays representing the state of the population.
+            - u (list): The initial state vector for each group.
     """
     # arrays for each state
-    state_arrays = [np.zeros((steps, groups)) for _ in range(9)]
-    S, V, E1, E2, I1, I2, R, Y, X = state_arrays
+    state_arrays = [np.zeros((steps, groups)) for _ in range(12)]
+    S, V, SV, E1, E2, E1_V, E2_V, I1, I2, R, Y, X = state_arrays
 
     # set up u vector
     u = []
 
     for group in range(groups):
         u_i = [
-            0,
-            int(parms["pop_sizes"][group] * parms["initial_vaccine_coverage"][group]),
-            0,
-            0,
-            parms["I0"][group],
-            0,
-            0,
-            0,
-            0,
+            0,  # S
+            int(
+                parms["pop_sizes"][group]
+                * parms["initial_vaccine_coverage"][group]
+                * parms["vaccine_efficacy_2_dose"]
+            ),  # V
+            0,  # SV
+            0,  # E1
+            0,  # E2
+            0,  # E1_V
+            0,  # E2_V
+            parms["I0"][group],  # I1
+            0,  # I2
+            0,  # R
+            0,  # Y
+            0,  # X
         ]
-        u_i[0] = int(parms["pop_sizes"][group] - np.sum(u_i))
+        u_i[2] = int(
+            parms["pop_sizes"][group] * parms["initial_vaccine_coverage"][group]
+            - u_i[1]
+        )  # SV
+
+        u_i[0] = int(parms["pop_sizes"][group] - np.sum(u_i))  # S
         u.append(u_i)
 
     # first time step is initial state
@@ -221,8 +235,11 @@ def initialize_population(steps, groups, parms):
         (
             S[0, group],
             V[0, group],
+            SV[0, group],
             E1[0, group],
             E2[0, group],
+            E1_V[0, group],
+            E2_V[0, group],
             I1[0, group],
             I2[0, group],
             R[0, group],
@@ -230,7 +247,7 @@ def initialize_population(steps, groups, parms):
             X[0, group],
         ) = u[group]
 
-    return S, V, E1, E2, I1, I2, R, Y, X, u
+    return S, V, SV, E1, E2, E1_V, E2_V, I1, I2, R, Y, X, u
 
 
 def get_infected(u, I_indices, groups, parms, t):
@@ -362,12 +379,16 @@ def time_to_rate(duration):
 
 def build_vax_schedule(parms):
     """
-    Build dictionary desribing vaccination schedule for group 2
+    Build dictionary describing vaccination schedule for group 2
 
     Args:
-        parms(dict): contains columns vaccine_uptake_days and vaccine_uptake_doses
+        parms (dict): Dictionary containing the parameters, including:
+            - vaccine_uptake_start_day (int): The day the vaccination campaign starts.
+            - vaccine_uptake_duration_days (int): The duration of the vaccination campaign.
+            - total_vaccine_uptake_doses (int): The total number of vaccine doses available.
+
     Returns:
-        dict: dictionary with days and doses
+        dict: A dictionary with days as keys and doses as values.
     """
     assert (
         "vaccine_uptake_start_day" in parms
@@ -410,15 +431,22 @@ def vaccinate_groups(groups, u, t, vaccination_uptake_schedule, parms):
         u (list): The state of the system.
         t: timestep
         vaccination_uptake_schedule (dict): dictionary with keys of days and values of doses on that day for group 2
-        vaccinated_group: group to vaccinate
+        parms (dict): Dictionary containing the parameters, including:
+            - vaccinated_group (int): The group to be vaccinated.
+            - vaccine_efficacy_1_dose (float): The efficacy of the vaccine after one dose.
     Returns:
-        np.array: Number of susceptibles vaccinated on that day for each group (should only be group 2)
+        np.array: Number of susceptibles successfully vaccinated on that day for each group (should only be group 2)
+        np.array: Number of susceptibles unsuccessfully vaccinated on that day for each group (should only be group 2), individuals remain susceptible but cannot be vaccinated again
     """
     new_vaccinated = np.zeros(groups, dtype=int)
+    new_failures = np.zeros(groups, dtype=int)
     vaccinated_group = parms["vaccinated_group"]
+    vaccine_efficacy = parms["vaccine_efficacy_1_dose"]
 
     if t in vaccination_uptake_schedule:
-        S, V, E1, E2, I1, I2, R, Y, X = u[vaccinated_group]  # get group 2
+        S, V, SV, E1, E2, E1_V, E2_V, I1, I2, R, Y, X = u[
+            vaccinated_group
+        ]  # get group 2
         vaccine_eligible = S + E1 + E2
         doses = vaccination_uptake_schedule[t]
         # Calculate the proportion of doses to assign to S, E1, and E2
@@ -430,6 +458,8 @@ def vaccinate_groups(groups, u, t, vaccination_uptake_schedule, parms):
         else:
             S_doses = 0
 
-        new_vaccinated[vaccinated_group] = S_doses
+        vaccine_failures = int(S_doses * (1 - vaccine_efficacy))
+        new_vaccinated[vaccinated_group] = S_doses - vaccine_failures
+        new_failures[vaccinated_group] = vaccine_failures
 
-    return new_vaccinated
+    return new_vaccinated, new_failures

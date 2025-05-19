@@ -28,7 +28,9 @@ __all__ = [
 
 
 # run a single simulation of the SEIR model given a model instance
-def run_model(model, u, t, steps, groups, S, V, E1, E2, I1, I2, R, Y, X):
+def run_model(
+    model, u, t, steps, groups, S, V, SV, E1, E2, E1_V, E2_V, I1, I2, R, Y, X
+):
     """
     Update the population arrays based on the SEIR model.
 
@@ -38,10 +40,10 @@ def run_model(model, u, t, steps, groups, S, V, E1, E2, I1, I2, R, Y, X):
         t: The time array.
         steps: The number of time steps.
         groups: The number of groups.
-        S, V, E1, E2, I1, I2, R, Y, X: The population arrays to be updated. Y is a infection counter (counted when they become infectious I1). X is vaccine uptake counter.
+        S, V, SV, E1, E2, E1_V, E2_V, I1, I2, R, Y, X: The population arrays to be updated. Y is a infection counter (counted when they become infectious I1). X is vaccine uptake counter.
 
     Returns:
-        S, V, E1, E2, I1, I2, R, Y, X, u
+        S, V, SV, E1, E2, E1_V, E2_V, I1, I2, R, Y, X, u
     """
     for j in range(1, steps):
         u = model.seirmodel(u, t[j])
@@ -49,8 +51,11 @@ def run_model(model, u, t, steps, groups, S, V, E1, E2, I1, I2, R, Y, X):
             (
                 S[j, group],
                 V[j, group],
+                SV[j, group],
                 E1[j, group],
                 E2[j, group],
+                E1_V[j, group],
+                E2_V[j, group],
                 I1[j, group],
                 I2[j, group],
                 R[j, group],
@@ -58,7 +63,7 @@ def run_model(model, u, t, steps, groups, S, V, E1, E2, I1, I2, R, Y, X):
                 X[j, group],
             ) = u[group]
 
-    return S, V, E1, E2, I1, I2, R, Y, X, u
+    return S, V, SV, E1, E2, E1_V, E2_V, I1, I2, R, Y, X, u
 
 
 def simulate(parms):
@@ -80,12 +85,14 @@ def simulate(parms):
 
     #### Initialize population
     groups = parms["n_groups"]
-    S, V, E1, E2, I1, I2, R, Y, X, u = initialize_population(steps, groups, parms)
+    S, V, SV, E1, E2, E1_V, E2_V, I1, I2, R, Y, X, u = initialize_population(
+        steps, groups, parms
+    )
 
     #### Run the model
     model = SEIRModel(parms)
-    S, V, E1, E2, I1, I2, R, Y, X, u = run_model(
-        model, u, t, steps, groups, S, V, E1, E2, I1, I2, R, Y, X
+    S, V, SV, E1, E2, E1_V, E2_V, I1, I2, R, Y, X, u = run_model(
+        model, u, t, steps, groups, S, V, SV, E1, E2, E1_V, E2_V, I1, I2, R, Y, X
     )
 
     #### Flatten into a dataframe
@@ -95,8 +102,11 @@ def simulate(parms):
             "group": np.tile(np.arange(groups), steps),
             "S": S.flatten(),
             "V": V.flatten(),
+            "SV": SV.flatten(),
             "E1": E1.flatten(),
             "E2": E2.flatten(),
+            "E1_V": E1_V.flatten(),
+            "E2_V": E2_V.flatten(),
             "I1": I1.flatten(),
             "I2": I2.flatten(),
             "R": R.flatten(),

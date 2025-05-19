@@ -28,13 +28,16 @@ __all__ = ["Ind", "SEIRModel"]
 class Ind(Enum):
     S = 0
     V = 1
-    E1 = 2
-    E2 = 3
-    I1 = 4
-    I2 = 5
-    R = 6
-    Y = 7
-    X = 8
+    SV = 2
+    E1 = 3
+    E2 = 4
+    E1_V = 5
+    E2_V = 6
+    I1 = 7
+    I2 = 8
+    R = 9
+    Y = 10
+    X = 11
 
 
 class SEIRModel:
@@ -47,71 +50,75 @@ class SEIRModel:
         # define internal model variables
         self.groups = parms["n_groups"]
 
-    def exposed(self, u, current_susceptibles, t):
-        new_exposed = []
-        old_exposed = []
+    def exposed(self, u, current_susceptibles, current_vacc_fails, t):
+        new_E1 = []
+        new_E1_V = []
+        new_E2 = []
+        new_E2_V = []
 
         # Extract the number of infected individuals for each group
         I_g = get_infected(u, [Ind.I1.value, Ind.I2.value], self.groups, self.parms, t)
 
         for target_group in range(self.groups):
             S = current_susceptibles[target_group]
+            VF = current_vacc_fails[target_group]
 
             # Get new Infections, for beta: rows are to, columns are from
             foi = calculate_foi(
                 self.parms["beta"], I_g, self.parms["pop_sizes"], target_group
             )
             new_e_frac = rate_to_frac(foi)
-            new_exposed.append(
-                np.random.binomial(S, new_e_frac)
-            )  # Ensure S is non-negative
+            new_E1.append(np.random.binomial(S, new_e_frac))
+
+            new_E1_V.append(np.random.binomial(VF, new_e_frac))
 
             # Get within E chain movement (E1 -> E2)
             e1_to_e2_frac = rate_to_frac(self.parms["sigma_scaled"])
-            old_exposed.append(
+            new_E2.append(
                 np.random.binomial(u[target_group][Ind.E1.value], e1_to_e2_frac)
             )
+            new_E2_V.append(
+                np.random.binomial(u[target_group][Ind.E1_V.value], e1_to_e2_frac)
+            )
 
-        return [new_exposed, old_exposed]
+        return new_E1, new_E1_V, new_E2, new_E2_V
 
     def vaccinate(self, u, t):
-        new_vaccinated = []
-
+        new_V = []
+        new_SV = []
         if self.parms["total_vaccine_uptake_doses"] > 0:
             vaccination_uptake_schedule = self.parms["vaccination_uptake_schedule"]
-            new_vaccinated = vaccinate_groups(
+            new_V, new_SV = vaccinate_groups(
                 self.groups, u, t, vaccination_uptake_schedule, self.parms
             )
         else:
             for group in range(self.groups):
-                new_vaccinated.append(0)
+                new_V.append(0)
+                new_SV.append(0)
 
-        return new_vaccinated
+        return new_V, new_SV
 
     def infectious(self, u):
-        new_infectious = []
-        old_infectious = []
+        new_I1 = []
+        new_I1_V = []
+        new_I2 = []
         for group in range(self.groups):
             new_i_frac = rate_to_frac(self.parms["sigma_scaled"])
-            new_infectious.append(
-                np.random.binomial(u[group][Ind.E2.value], new_i_frac)
-            )
+            new_I1.append(np.random.binomial(u[group][Ind.E2.value], new_i_frac))
+            new_I1_V.append(np.random.binomial(u[group][Ind.E2_V.value], new_i_frac))
+
             i1_to_i2_frac = rate_to_frac(self.parms["gamma_scaled"])
-            old_infectious.append(
-                np.random.binomial(u[group][Ind.I1.value], i1_to_i2_frac)
-            )
-        return [new_infectious, old_infectious]
+            new_I2.append(np.random.binomial(u[group][Ind.I1.value], i1_to_i2_frac))
+        return new_I1, new_I1_V, new_I2
 
     def recovery(self, u, t):
-        new_recoveries = []
+        new_R = []
         for group in range(self.groups):
             new_r_frac = rate_to_frac(self.parms["gamma_scaled"])
-            new_recoveries.append(
-                np.random.binomial(u[group][Ind.I2.value], new_r_frac)
-            )
-        return new_recoveries
+            new_R.append(np.random.binomial(u[group][Ind.I2.value], new_r_frac))
+        return new_R
 
-    def get_updated_susceptibles(self, u, new_vaccinated):
+    def get_updated_susceptibles(self, u, new_vaccinated, new_failures):
         """
         Get the number of susceptibles in each target group based on the new vaccinated individuals.
         Args:
@@ -121,31 +128,61 @@ class SEIRModel:
             list: The updated number of susceptibles for each target group to pass on.
         """
         updated_susceptibles = []
+        updated_failures = []
         for target_group in range(len(u)):
-            S = u[target_group][Ind.S.value] - new_vaccinated[target_group]
+            S = (
+                u[target_group][Ind.S.value]
+                - new_vaccinated[target_group]
+                - new_failures[target_group]
+            )
             updated_susceptibles.append(S)
-        return updated_susceptibles
+
+        for target_group in range(len(u)):
+            SV = u[target_group][Ind.SV.value] + new_failures[target_group]
+            updated_failures.append(SV)
+
+        return updated_susceptibles, updated_failures
 
     def seirmodel(self, u, t):
         new_u = []
-        new_vaccinated = self.vaccinate(u, t)
-        current_susceptibles = self.get_updated_susceptibles(u, new_vaccinated)
-        new_exposed, old_exposed = self.exposed(u, current_susceptibles, t)
-        new_infectious, old_infectious = self.infectious(u)
-        new_recoveries = self.recovery(u, t)
+        s_v, s_sv = self.vaccinate(u, t)
+        current_susceptibles, current_failures = self.get_updated_susceptibles(
+            u, s_v, s_sv
+        )
+        s_e1, sv_e1v, e1_e2, e1v_e2v = self.exposed(
+            u, current_susceptibles, current_failures, t
+        )
+        e2_i1, e2v_i1, i1_i2 = self.infectious(u)
+        i2_r = self.recovery(u, t)
         for group in range(self.groups):
-            S, V, E1, E2, I1, I2, R, Y, X = u[group]
-            new_S = S - new_exposed[group] - new_vaccinated[group]
-            new_V = V + new_vaccinated[group]
-            new_E1 = E1 + new_exposed[group] - old_exposed[group]
-            new_E2 = E2 + old_exposed[group] - new_infectious[group]
-            new_I1 = I1 + new_infectious[group] - old_infectious[group]
-            new_I2 = I2 + old_infectious[group] - new_recoveries[group]
-            new_R = R + new_recoveries[group]
-            new_Y = Y + new_infectious[group]
-            new_X = X + new_vaccinated[group]
+            S, V, SV, E1, E2, E1_V, E2_V, I1, I2, R, Y, X = u[group]
+            new_S = S - s_e1[group] - s_v[group]
+            new_V = V + s_v[group]
+            new_SV = SV + s_sv[group] - sv_e1v[group]
+            new_E1 = E1 + s_e1[group] - e1_e2[group]
+            new_E2 = E2 + e1_e2[group] - e2_i1[group]
+            new_E1_V = E1_V + sv_e1v[group] - e1v_e2v[group]
+            new_E2_V = E2_V + e1v_e2v[group] - e2v_i1[group]
+            new_I1 = I1 + e2v_i1[group] + e2_i1[group] - i1_i2[group]
+            new_I2 = I2 + i1_i2[group] - i2_r[group]
+            new_R = R + i2_r[group]
+            new_Y = Y + sv_e1v[group] + s_e1[group]
+            new_X = X + s_sv[group] + s_v[group]
             new_u.append(
-                [new_S, new_V, new_E1, new_E2, new_I1, new_I2, new_R, new_Y, new_X]
+                [
+                    new_S,
+                    new_V,
+                    new_SV,
+                    new_E1,
+                    new_E2,
+                    new_E1_V,
+                    new_E2_V,
+                    new_I1,
+                    new_I2,
+                    new_R,
+                    new_Y,
+                    new_X,
+                ]
             )
 
         return new_u
