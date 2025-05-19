@@ -33,7 +33,8 @@ from .app_helper import (
     add_daily_incidence,
     get_interval_results,
     get_table,
-    get_median_trajectory,
+    get_median_trajectory_from_episize,
+    get_median_trajectory_from_peak_time,
 )
 from .helper import build_vax_schedule
 
@@ -404,10 +405,10 @@ def app(replicates=20):
         vax_end = max(sched.keys()) / interval
 
     # get median line for each scenario (based on ALL sims, not just smaller sample)
-    ave_results1 = get_median_trajectory(alt_results1).with_columns(
+    ave_results1 = get_median_trajectory_from_peak_time(alt_results1).with_columns(
         pl.lit(scenario_names[0]).alias("scenario")
     )
-    ave_results2 = get_median_trajectory(alt_results2).with_columns(
+    ave_results2 = get_median_trajectory_from_peak_time(alt_results2).with_columns(
         pl.lit(scenario_names[1]).alias("scenario")
     )
     combined_ave_results = ave_results1.vstack(ave_results2)
@@ -529,8 +530,9 @@ def app(replicates=20):
         "model. All simulations within a given scenario (i.e., shown with "
         "the same color) are run under the same set of parameters, and "
         "differences between each individual simulation are due to random "
-        "variation in contact rates. Bolded lines show the median simulation "
-        "for each scenario."
+        "variation in contact rates. Bolded lines show the simulation that possessed "
+        "the median time of peak prevalence across all epidemic trajectories for "
+        "each scenario."
         "</p>",
         unsafe_allow_html=True,
     )

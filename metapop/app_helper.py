@@ -49,7 +49,8 @@ __all__ = [
     "get_table",
     "set_parms_to_zero",
     "rescale_prop_vax",
-    "get_median_trajectory",
+    "get_median_trajectory_from_episize",
+    "get_median_trajectory_from_peak_time",
 ]
 
 
@@ -1334,24 +1335,67 @@ def get_table(combined_results, IHR, edited_parms):
     return outbreak_summary
 
 
-def get_median_trajectory(results):
-    # data at the end of simulation
-    max_t = results.select(pl.col("t").max()).item()  # Get the maximum value of t
-    filtered_results = results.filter(pl.col("t") == max_t)
-    median_R = filtered_results.select(
-        pl.col("R").median()
-    ).item()  # Get the median value of R
+def get_median_trajectory_from_episize(
+    results: pl.DataFrame, base_group: int = 0
+) -> pl.DataFrame:
+    """
+    Get the trajectory of the replicate whose final value of R in the `base_group` is closest to the median in that group.
 
-    # get replicate closest to the median value of R
+    Args:
+        results (pl.DataFrame): The simulation results DataFrame from `get_scenario_results`.
+
+    Returns:
+        pl.DataFrame: The trajectory of the replicate closest to the median R value.
+    """
+    # Get the maximum time point
+    max_t = results["t"].max()
+
+    # Filter results for the last time point and group 0
+    filtered_results = results.filter(
+        (pl.col("t") == max_t) & (pl.col("group").cast(pl.UInt32) == pl.lit(base_group))
+    )
+
+    # Calculate the median value of R
+    median_R = filtered_results["R"].median()
+
+    # Find the replicate with the closest R value to the median
     closest_replicate = (
-        filtered_results.with_columns(
-            (pl.col("R") - median_R).abs().alias("distance")
-        )  # Calculate the absolute difference
-        .sort("distance")  # Sort by the distance
-        .select("replicate")  # Select the replicate column
-        .head(1)  # Get the first (closest) replicate
+        filtered_results.with_columns((pl.col("R") - median_R).abs().alias("distance"))
+        .sort("distance")
+        .select("replicate")
+        .head(1)
         .item()
     )
 
-    median_trajectory = results.filter(pl.col("replicate") == closest_replicate)
-    return median_trajectory
+    # Return the trajectory for the closest replicate
+    return results.filter(pl.col("replicate") == closest_replicate)
+
+
+def get_median_trajectory_from_peak_time(
+    results: pl.DataFrame, base_group: int = 0
+) -> pl.DataFrame:
+    # Get the timing of peak infection within each replicate
+    # The maximum number of infected individuals may be present in multiple time points,
+    # so we aggregate for peak time within each replicate
+    filtered_results = (
+        results.filter(pl.col("group").cast(pl.UInt32) == pl.lit(base_group))
+        .filter((pl.col("I") == pl.col("I").max()).over("replicate"))
+        .group_by("replicate")
+        .agg(pl.col("t").median().alias("peak_time"))
+    )
+
+    # Filter for median peak time point across replicates
+    median_peak_time = filtered_results["peak_time"].median()
+
+    closest_replicate = (
+        filtered_results.with_columns(
+            (pl.col("peak_time") - median_peak_time).abs().alias("distance")
+        )
+        .sort("distance")
+        .select("replicate")
+        .head(1)
+        .item()
+    )
+
+    # Return the trajectory for the closest replicate
+    return results.filter(pl.col("replicate") == closest_replicate)

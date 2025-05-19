@@ -1,6 +1,7 @@
 import os
 
 import numpy as np
+import polars as pl
 import yaml
 
 from metapop.app_helper import *
@@ -237,3 +238,135 @@ def test_rescale_prop_vax():
     assert (
         rescaled_parms["total_vaccine_uptake_doses"] == expected_total_doses
     ), f"Expected total vaccine uptake doses to be {expected_total_doses}, but got {rescaled_parms['total_vaccine_uptake_doses']}"
+
+
+def test_get_median_from_episize_one_group():
+    # Odd number of replicates to return a single median
+    n_reps = 101
+
+    episize_df = pl.DataFrame(
+        {
+            "replicate": range(n_reps),
+            "R": [x / 100.0 for x in range(n_reps)],
+            "S": 0,
+            "group": 0,
+            "t": 1,
+        }
+    )
+
+    dummy_traj = get_median_trajectory_from_episize(episize_df)
+    r = dummy_traj["R"].item()
+
+    # and equal to the median
+    assert r == np.median(
+        episize_df["R"]
+    ), f"Expected R to be {np.median(episize_df['R'])}, but got {r}"
+
+
+def test_get_median_from_episize_multiple_groups():
+    n_reps = 101
+
+    # Create two groups with different final epidemic sizes
+    episize_df = pl.DataFrame(
+        {
+            "replicate": list(range(n_reps)) * 2,
+            "R": [x / 100.0 for x in range(n_reps)] + [x / 50.0 for x in range(n_reps)],
+            "S": [0] * n_reps + [10] * n_reps,
+            "group": [0] * n_reps + [1] * n_reps,
+            "t": 1,
+        }
+    )
+
+    for group in range(2):
+        dummy_traj = get_median_trajectory_from_episize(episize_df, base_group=group)
+
+        # Check that Group 0, the base group, has a median r equal to function output
+        r_group = dummy_traj.filter(pl.col("group") == group)["R"].item()
+        median_group = np.median(episize_df.filter(pl.col("group") == group)["R"])
+
+        assert (
+            r_group == median_group
+        ), f"Expected R for group {group} to be {median_group}, but got {r_group}"
+
+
+# Test selection of median trajectory from peak time with multiple peaks in each replicate
+def test_get_median_from_peak_time_multiple_maxes():
+    # Odd number of replicates so that median is exactly equal to observed value
+    n_reps = 101
+
+    # Peak infection times are at 1 and 3, meaning time id 2 should be selected
+    base_replicate_trajectory = pl.DataFrame(
+        {
+            "I": [0, 2, 1, 2, 0],
+            "t_id": [0, 1, 2, 3, 4],
+            "group": 0,
+        }
+    )
+    # Create multiple trajectories from base and bind together
+    for replicate in range(n_reps):
+        current = base_replicate_trajectory.with_columns(
+            (pl.col("t_id") + pl.lit(replicate / 100)).alias("t"),
+            pl.lit(replicate).alias("replicate"),
+        )
+        if replicate == 0:
+            all_trajectories = current
+        else:
+            all_trajectories = all_trajectories.vstack(current)
+
+    # Get the median trajectory
+    dummy_traj = get_median_trajectory_from_peak_time(all_trajectories)
+    # Check that the median trajectory is correct
+    true_median = (
+        all_trajectories.filter(pl.col("t_id") == 2).select("t").median().item()
+    )
+
+    assert (
+        dummy_traj["t"][2] == true_median
+    ), f"Expected median t to be {true_median}, but got {dummy_traj['t'][2]}"
+
+
+# Use a single peak infection time but have multiple groups
+def test_get_median_from_peak_time_multiple_groups():
+    # Odd number of replicates so that median is exactly equal to observed value
+    n_reps = 101
+    base_replicate_trajectory = pl.DataFrame(
+        {
+            "I": [0, 1, 2, 1, 0],
+            "t_id": [0, 1, 2, 3, 4],
+        }
+    )
+    # Create multiple trajectories from base and bind together, distinguishing the median times for each group
+    for replicate in range(n_reps):
+        for group in range(2):
+            # Create a unique time for each replicate
+            unique_time = (replicate / 100) + group
+            current = base_replicate_trajectory.with_columns(
+                (pl.col("t_id") + pl.lit(unique_time)).alias("t"),
+                pl.lit(replicate).alias("replicate"),
+                pl.lit(group).alias("group"),
+            )
+            if replicate == 0 and group == 0:
+                all_trajectories = current
+            else:
+                all_trajectories = all_trajectories.vstack(current)
+
+    for group in range(2):
+        # Get the median trajectory
+        dummy_traj = get_median_trajectory_from_peak_time(
+            all_trajectories, base_group=group
+        )
+        # Check that the median trajectory is correct for each base group
+        true_median = (
+            all_trajectories.filter((pl.col("t_id") == 2) & (pl.col("group") == group))
+            .select("t")
+            .median()
+            .item()
+        )
+
+        observed_median = dummy_traj.filter(
+            (pl.col("group") == group) & (pl.col("t_id") == 2)
+        )["t"].item()
+
+        assert (
+            observed_median == true_median
+        ), f"Expected median t in group {group} to be {true_median}, but got {observed_median}"
