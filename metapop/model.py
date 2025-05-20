@@ -60,17 +60,17 @@ class SEIRModel:
         I_g = get_infected(u, [Ind.I1.value, Ind.I2.value], self.groups, self.parms, t)
 
         for target_group in range(self.groups):
-            S = current_susceptibles[target_group]
-            VF = current_vacc_fails[target_group]
+            S_val = current_susceptibles[target_group]
+            VF_val = current_vacc_fails[target_group]
 
             # Get new Infections, for beta: rows are to, columns are from
             foi = calculate_foi(
                 self.parms["beta"], I_g, self.parms["pop_sizes"], target_group
             )
             new_e_frac = rate_to_frac(foi)
-            new_E1.append(np.random.binomial(S, new_e_frac))
+            new_E1.append(np.random.binomial(S_val, new_e_frac))
 
-            new_E1_V.append(np.random.binomial(VF, new_e_frac))
+            new_E1_V.append(np.random.binomial(VF_val, new_e_frac))
 
             # Get within E chain movement (E1 -> E2)
             e1_to_e2_frac = rate_to_frac(self.parms["sigma_scaled"])
@@ -129,17 +129,17 @@ class SEIRModel:
         """
         updated_susceptibles = []
         updated_failures = []
-        for target_group in range(len(u)):
-            S = (
+        for target_group in range(self.groups):
+            S_val = (
                 u[target_group][Ind.S.value]
                 - new_vaccinated[target_group]
                 - new_failures[target_group]
             )
-            updated_susceptibles.append(S)
+            updated_susceptibles.append(S_val)
 
-        for target_group in range(len(u)):
-            SV = u[target_group][Ind.SV.value] + new_failures[target_group]
-            updated_failures.append(SV)
+        for target_group in range(self.groups):
+            SV_val = u[target_group][Ind.SV.value] + new_failures[target_group]
+            updated_failures.append(SV_val)
 
         return updated_susceptibles, updated_failures
 
@@ -156,7 +156,7 @@ class SEIRModel:
         i2_r = self.recovery(u, t)
         for group in range(self.groups):
             S, V, SV, E1, E2, E1_V, E2_V, I1, I2, R, Y, X = u[group]
-            new_S = S - s_e1[group] - s_v[group]
+            new_S = S - s_e1[group] - s_v[group] - s_sv[group]
             new_V = V + s_v[group]
             new_SV = SV + s_sv[group] - sv_e1v[group]
             new_E1 = E1 + s_e1[group] - e1_e2[group]

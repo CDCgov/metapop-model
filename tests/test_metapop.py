@@ -1,7 +1,17 @@
-import numpy as np
+import os
 
-from metapop.helper import build_vax_schedule
+import numpy as np
+import polars as pl
+import yaml
+
+from metapop.helper import (
+    build_vax_schedule,
+    construct_beta,
+    initialize_population,
+    time_to_rate,
+)
 from metapop.model import *
+from metapop.sim import simulate
 
 
 def test_only_expose_susceptible():
@@ -125,3 +135,89 @@ def test_aon_vaccine():
     assert sum(new_e1[0]) > 0
     # not guaranteed to have infections in SV -- maybe make it run abunch of times and check
     assert sum(new_e1_V[0]) > 0
+
+
+def test_states_updating():
+    """Test that the states are updating correctly so that population sizes are always conserved"""
+    testdir = os.path.dirname(__file__)
+    with open(os.path.join(testdir, "test_config.yaml"), "r") as file:
+        config = yaml.safe_load(file)
+
+    parms = config["baseline_parameters"]
+
+    parms["n_groups"] = 1
+    parms["k_i"] = [10]
+    parms["k"] = 10
+    parms["sigma"] = time_to_rate(parms["latent_duration"])
+    parms["gamma"] = time_to_rate(parms["infectious_duration"])
+    parms["sigma_scaled"] = parms["sigma"] * parms["n_e_compartments"]
+    parms["gamma_scaled"] = parms["gamma"] * parms["n_i_compartments"]
+    parms["pop_sizes"] = [1000]
+    parms["beta"] = construct_beta(parms)
+    parms["I0"] = [10]
+    parms["tf"] = 5
+    parms["initial_vaccine_coverage"] = [0.30]
+    parms["vaccine_efficacy_1_dose"] = 0.0
+    parms["vaccine_efficacy_2_dose"] = 0.0
+    parms["vaccinated_group"] = 0
+    parms["total_vaccine_uptake_doses"] = 20.0
+    parms["vaccine_uptake_start_day"] = 0
+    parms["vaccine_uptake_duration_days"] = 21
+
+    parms["vaccination_uptake_schedule"] = build_vax_schedule(parms)
+
+    t_i = 1
+    t = np.arange(1, parms["tf"] + 1)
+    # Initial state for each group
+    S, V, SV, E1, E2, E1_V, E2_V, I1, I2, R, Y, X, u = initialize_population(
+        parms["tf"], parms["n_groups"], parms
+    )
+    # set up model
+    model = SEIRModel(parms)
+
+    # Check that updates to the state vector are correct from seirmodel()
+    for j in range(len(t)):
+        u = model.seirmodel(u, t[j])
+        for group in range(parms["n_groups"]):
+            (
+                S[j, group],
+                V[j, group],
+                SV[j, group],
+                E1[j, group],
+                E2[j, group],
+                E1_V[j, group],
+                E2_V[j, group],
+                I1[j, group],
+                I2[j, group],
+                R[j, group],
+                Y[j, group],
+                X[j, group],
+            ) = u[group]
+
+        assert (
+            sum(u[0][:-2]) == parms["pop_sizes"][0]
+        ), f"Population size mismatch at time {j}, expected {parms['pop_sizes'][0]}, got {sum(u[0][:-2])}"
+
+    df = simulate(parms)
+
+    # Check that the population sizes are conserved at each time step when
+    # running the simulation through simulate()
+    for i in range(len(t)):
+        t_i = t[i]
+        for group in range(parms["n_groups"]):
+            u_i = df.filter(pl.col("t") == t_i).filter(pl.col("group") == group)
+            pop_size_at_t = int(
+                u_i["S"].to_numpy()[0]
+                + u_i["V"].to_numpy()[0]
+                + u_i["SV"].to_numpy()[0]
+                + u_i["E1"].to_numpy()[0]
+                + u_i["E2"].to_numpy()[0]
+                + u_i["E1_V"].to_numpy()[0]
+                + u_i["E2_V"].to_numpy()[0]
+                + u_i["I1"].to_numpy()[0]
+                + u_i["I2"].to_numpy()[0]
+                + u_i["R"].to_numpy()[0]
+            )
+            assert (
+                (pop_size_at_t) == parms["pop_sizes"][group]
+            ), f"Population size mismatch at time {i}, group {group}, expected {parms['pop_sizes'][group]}, got {pop_size_at_t}"
