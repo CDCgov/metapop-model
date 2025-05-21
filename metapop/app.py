@@ -316,12 +316,12 @@ def app(replicates=20):
     ### Dictate that isolation > quarantine
     if (
         edited_intervention_parms2["isolation_adherence"]
-        <= edited_intervention_parms2["pre_rash_isolation_adherence"]
+        < edited_intervention_parms2["pre_rash_isolation_adherence"]
         and edited_parms2["pre_rash_isolation_on"] == True
         and edited_parms2["isolation_on"] == True
     ):
         st.error(
-            "Isolation adherence should be greater than quarantine adherence. "
+            "Isolation adherence should be greater than or equal to quarantine adherence. "
             "Please adjust the parameters."
         )
         return
