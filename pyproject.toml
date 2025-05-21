@@ -2,7 +2,12 @@
 name = "metapop"
 version = "0.4.4"
 description = ""
-authors = ["Paige Miller <yub1@cdc.gov>", "Theresa Sheets <utg8@cdc.gov>", "Dina Mistry <uqx8@cdc.gov>"]
+authors = [
+    "Paige Miller <yub1@cdc.gov>",
+    "Theresa Sheets <utg8@cdc.gov>",
+    "Will Koval <ad71@cdc.gov>",
+    "Beau Bruce <lue7@cdc.gov>",
+    "Dina Mistry <uqx8@cdc.gov>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]

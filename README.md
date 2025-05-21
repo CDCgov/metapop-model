@@ -32,6 +32,8 @@ You can run the app locally using Streamlit with `make run_app`. To run the adva
 
 * Paige Miller, yub1@cdc.gov (CDC/IOD/ORR/CFA)
 * Theresa Sheets, utg8@cdc.gov (CDC/IOD/ORR/CFA)
+* Will Koval, ad71@cdc.gov (CDC/IOD/ORR/CFA)
+* Beau Bruce, lue7@cdc.gov (CDC/IOD/ORR/CFA)
 * Dina Mistry, uqx8@cdc.gov (CDC/IOD/ORR/CFA)
 
 ## General Disclaimer
