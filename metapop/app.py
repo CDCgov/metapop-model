@@ -429,18 +429,33 @@ def app(replicates=20):
 
     # create chart title, depending on whether interventions are on/off
     if interventions == "On":
-        title = (
-            f"Outcome Comparison by Scenario: Vaccine Campaign "
-            f"({edited_intervention_parms2['total_vaccine_uptake_doses']} doses), "
-            f"{int(edited_intervention_parms2['pre_rash_isolation_success'] * 100)}% quarantine, "
-            f"{int(edited_intervention_parms2['isolation_success'] * 100)}% isolation"
+        pre_rash_isolation_adherance = 0
+        isolation_adherance = 0
+        if edited_intervention_parms2["pre_rash_isolation_on"]:
+            pre_rash_isolation_adherance = edited_intervention_parms2[
+                "pre_rash_isolation_adherence"
+            ]
+        if edited_intervention_parms2["isolation_on"]:
+            isolation_adherance = edited_intervention_parms2["isolation_adherence"]
+        pre_rash_isolation_adherance_pct = int(pre_rash_isolation_adherance * 100)
+        isolation_adherance_pct = int(isolation_adherance * 100)
+        title = alt.TitleParams(
+            "Outcome Comparison by Scenario",
+            subtitle=[
+                (
+                    f"Vaccine campaign: {edited_intervention_parms2['total_vaccine_uptake_doses']} "
+                    "doses administered"
+                ),
+                f"Quarantine adherence: {pre_rash_isolation_adherance_pct}%",
+                f"Isolation adherence: {isolation_adherance_pct}%",
+            ],
         )
     else:
         combined_alt_results = alt_results1.filter(
             pl.col("replicate").is_in(replicate_inds)
         )
         combined_ave_results = ave_results1
-        title = f"No Intervention Scenario"
+        title = "No Intervention Scenario"
 
     chart_placeholder.text("Building charts...")
     chart = (
@@ -547,8 +562,8 @@ def app(replicates=20):
             (
                 "No Interventions:<br><ul>"
                 "<li> Vaccines administered during campaign: 0</li>"
-                "<li> % of infectious individuals isolating before rash onset: 0</li>"
-                "<li> % of infectious individuals isolating after rash onset: 0</li></ul>"
+                "<li> Adherence to quarantine among pre-symptomatic infectious individuals: 0%</li>"
+                "<li> Adherence to isolation among symptomatic infectious individuals: 0%</li></ul>"
             ),
             background_color="#feeadf",
             font_color="#8f3604",
@@ -572,8 +587,8 @@ def app(replicates=20):
                 callout_text += "<li> Vaccines administered during campaign: 0</li>"
             else:
                 callout_text += f"<li> Vaccines administered during campaign: {edited_intervention_parms2['total_vaccine_uptake_doses']} between day {edited_intervention_parms2['vaccine_uptake_start_day']} and day {edited_intervention_parms2['vaccine_uptake_start_day'] + edited_intervention_parms2['vaccine_uptake_duration_days']}</li>"
-            callout_text += f"<li> Adherance to quarantine among pre-symptomatic infectious individuals: {int(pre_rash_isolation_adherance*100)}%</li>"
-            callout_text += f"<li> Adherance to isolation among symptomatic infectious individuals: {int(isolation_adherance*100)}%</li></ul>"
+            callout_text += f"<li> Adherence to quarantine among pre-symptomatic infectious individuals: {int(pre_rash_isolation_adherance*100)}%</li>"
+            callout_text += f"<li> Adherence to isolation among symptomatic infectious individuals: {int(isolation_adherance*100)}%</li></ul>"
 
             flexible_callout(
                 callout_text,
