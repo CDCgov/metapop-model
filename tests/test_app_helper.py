@@ -144,7 +144,7 @@ def test_get_helpers():
     """Test the get_helpers function."""
     helpers = get_helpers()
     assert isinstance(helpers, dict), "Expected helpers to be a dictionary"
-    expected_r0 = "Basic reproduction number R0. R0 cannot be negative"
+    expected_r0 = "Basic reproduction number R0. R0 cannot be negative."
     assert (
         helpers["desired_r0"] == expected_r0
     ), f"Expected R0 helper to be {expected_r0}, but got {helpers['desired_r0']}"
