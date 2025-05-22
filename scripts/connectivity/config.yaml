@@ -13,6 +13,8 @@ baseline_parameters:
   vaccine_uptake_start_day:  400
   vaccine_uptake_duration_days: 30 # duration of vaccine uptake campaign
   total_vaccine_uptake_doses: 0
+  vaccine_efficacy_2_dose: 0.97
+  vaccine_efficacy_1_dose: 0.93
   vaccinated_group: 2
   isolation_success: 0.0
   symptomatic_isolation_start_day: 400

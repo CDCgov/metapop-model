@@ -14,6 +14,8 @@ baseline_parameters:
   initial_vaccine_coverage: [0.95, 0.8, 0.8]
   vaccine_uptake_start_day:  30
   vaccine_uptake_duration_days: 30 # duration of vaccine uptake campaign
+  vaccine_efficacy_2_dose: 0.97
+  vaccine_efficacy_1_dose: 0.93
   symptomatic_isolation_duration_days: 365
   isolation_success: 0.80
   pre_rash_isolation_success: 0.80

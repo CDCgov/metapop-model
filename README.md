@@ -1,4 +1,4 @@
-# A stochastic SEIR metapopulation model in python
+# A stochastic SEIRV metapopulation model in python
 
 ⚠️ This is a work in progress
 
@@ -6,15 +6,49 @@
 
 * Stochastic SEIRV model
 * Flexible numbers of groups (e.g., age classes or connected populations) that is changeable using the config
-* Intervention strategies common for measles: pre-introduction vaccination, active vaccination, and isolation of infectious populations
+* Intervention strategies common for measles: pre-introduction vaccination, active vaccination, and quarantine and isolation of infectious populations
 * An interactive widget built in streamlit
 
 ## Getting started
 
 * Enable [poetry](https://python-poetry.org/) with `poetry install` and then start a poetry environment by activating the virtual environment: `source $(poetry env info --path)/bin/activate`
+* **Run the app locally** using Streamlit with `make run_app`. To run the advanced app with 3 connected populations, use `make run_advanced_app`.
 * Run the example in `scripts/connectivity` exploring the impact of changing connectivity patterns and initial vaccine coverage with `python scripts/connectivity/simulate.py`. This will produce output in the `output` folder. Visualization and summary statistic tables for these results can be made with `Rscript scripts/connectivity/make_plots.R`.
-* We also provide examples exploring other features in the model. The subfolder `scripts/interventions` contains an example exploring the impact of active vaccination and isolation in 3 connection populations. The subfolder `scripts/onepop` contains an example exploring these interventions in a single population.
+* We also provide examples exploring other features in the model. The subfolder `scripts/interventions` contains an example exploring the impact of active vaccination and isolation in 3 connected populations. The subfolder `scripts/onepop` contains an example exploring these interventions in a single population.
 
+## Model details
+
+* The model is built using the `metapop` package, which allows for the modeling of multiple groups with different epidemiological characteristics. The model is built using a discrete time step and uses a stochastic approach to simulate the spread of disease.
+
+* The model has the following compartments:
+  * S: Susceptible
+  * E1: Exposed 1
+  * E2: Exposed 2
+  * I1: Infectious 1
+  * I2: Infectious 2
+  * R: Recovered
+  * V: Vaccinated
+  * SV: Susceptible, but vaccinated
+
+```mermaid
+graph LR
+
+    a(Susceptible) -->|FOI| b(Exposed 1)
+    b --> |"$$\frac{\sigma}{2}$$"|c(Exposed 2)
+    c --> |"$$\frac{\sigma}{2}$$"|d(Pre-rash infectious)
+    d --> |"$$\frac{\gamma}{2}$$"|e(Symptomatic infectious)
+    e --> |"$$\frac{\gamma}{2}$$"|f(Recovered)
+    a --> | 1 dose success |g(Vaccinated)
+    a --> | 2 dose success |g(Vaccinated)
+    a --> | 1 dose failure |h(Susceptible, but vaccinated)
+    a --> | 2 dose failure |h
+    h --> |FOI| b
+```
+
+* Modeled interventions:
+  * Pre-introduction vaccination: Vaccination of susceptible individuals before the introduction of the disease. This is modeled as a proportion of the population that is vaccinated with 2 doses of MMR vaccine. Users can specify the efficacy of 2 doses of MMR vaccine; current data put this estimate at 97% efficacy [(Measles (Rubeola) Factsheet | CDC)](https://www.cdc.gov/measles/vaccines/index.html?CDC_AA_refVal=https%3A%2F%2Fwww.cdc.gov%2Fvaccines%2Fvpd%2Fmmr%2Fpublic%2Findex.html).
+  * Active vaccination: Vaccination of susceptible individuals after the introduction of the disease. This is modeled as a proportion of the population that is vaccinated with 1 dose of MMR vaccine. Users can specify the timing of the vaccination campaign and the proportion of the population that is vaccinated. Users can also specify the efficacy of 1 dose of MMR vaccine; current data put this estimate at 93% efficacy [(Measles (Rubeola) Factsheet | CDC)](https://www.cdc.gov/measles/vaccines/index.html?CDC_AA_refVal=https%3A%2F%2Fwww.cdc.gov%2Fvaccines%2Fvpd%2Fmmr%2Fpublic%2Findex.html)
+  * Quarantine and isolation: Quarantine is modeled as a proportion of pre-symptomatic infectious individuals that are isolated. Isolation is modeled as a proportion of symptomatic infectious individuals that are isolated. Users can specify the timing of the quarantine and isolation campaigns and the proportion of the population that is quarantined or isolated. Users can also specify the efficacy of quarantine and isolation.
 
 ## Running with a flexible number of compartments
 
@@ -22,10 +56,6 @@
 * For example, if we wanted 3 groups, we could specify `n_groups: 3` and then modify other parameters defining conditions for the populations: `popsizes: [300, 200, 100]` for population sizes, `I0: [0, 5, 2]` to specify the number of initial infected people in each population, `k_i: [10, 15, 10]` for the average degree per person in each population, etc. The parameters `k_g1`, `k_g2`, `k_21` define connectivity rates between groups: `k_ij` is the number of contacts the average person in group j makes with others in group i. These parameters define the contact matrix between populations (constructed through the method `get_per_capita_contact_matrix`).
 * Similarly for a single population, we can build the model by setting `n_groups: 1`, `popsizes: [5000]` for the population size, `I0: 5`, `k_i: [10]`, etc. In this case, the contact matrix is equivalent to `k_i`.
 * As a work in progress, we are working to add functionality that will allow users to give a contact matrix of their choice and model a flexible number of groups that mapped to the contact matrix.
-
-
-## Local app
-You can run the app locally using Streamlit with `make run_app`. To run the advanced app with 3 connected populations, use `make run_advanced_app`.
 
 
 ## Project Admin
