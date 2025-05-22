@@ -1,8 +1,6 @@
 .PHONY: run_app run_advanced_app
 
-poetry: lock install
-
-lock: poetry.lock
+poetry: poetry.lock install
 
 poetry.lock: pyproject.toml
 	(poetry lock --no-update)
