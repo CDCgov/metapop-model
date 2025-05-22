@@ -18,12 +18,12 @@ baseline_parameters:
   vaccine_efficacy_1_dose: 0.93
   isolation_on: true
   isolation_adherence: 0.5
-  isolation_reduction: 0.75 # informed by 2017 Minnesota study
+  isolation_reduction: 1.0 # informed by 2017 Minnesota study
   symptomatic_isolation_start_day: 365
   symptomatic_isolation_duration_days: 365
   pre_rash_isolation_on: false
   pre_rash_isolation_adherence: 0.5
-  pre_rash_isolation_reduction: 0.75
+  pre_rash_isolation_reduction: 0.6
   pre_rash_isolation_start_day: 365
   pre_rash_isolation_duration_days: 0
   IHR: 0.2 # Infection Hospitalization Rate
