@@ -222,7 +222,7 @@ def app(replicates=20):
         # defining this here allows us to place it above the advanced options section
         col_intervention_text = st.columns(1)[0]
 
-        with st.expander("Advanced options"):
+        with st.expander("Disease parameters"):
             st.text(
                 "These options allow changes to parameter assumptions including "
                 "measles natural history parameters as well as parameters governing "

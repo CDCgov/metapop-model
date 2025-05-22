@@ -25,7 +25,7 @@ baseline_parameters:
   symptomatic_isolation_start_day: 0
   symptomatic_isolation_duration_days: 365
   pre_rash_isolation_on: false
-  pre_rash_isolation_adherence: 0.25
+  pre_rash_isolation_adherence: 0.5
   pre_rash_isolation_reduction: 0.60
   pre_rash_isolation_start_day: 0
   pre_rash_isolation_duration_days: 365
