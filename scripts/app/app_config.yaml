@@ -17,7 +17,7 @@ baseline_parameters:
   vaccine_efficacy_2_dose: 0.97
   vaccine_efficacy_1_dose: 0.93
   isolation_on: true
-  isolation_adherence: 1.0
+  isolation_adherence: 0.5
   isolation_reduction: 0.75 # informed by 2017 Minnesota study
   symptomatic_isolation_start_day: 365
   symptomatic_isolation_duration_days: 365

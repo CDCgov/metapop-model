@@ -696,7 +696,7 @@ def get_max_values(parms=None):
         pre_rash_isolation_start_day=365,
         pre_rash_isolation_duration_days=365,
         tf=400,
-        IHR=1.0,
+        IHR=0.25,
     )
     # update with parms if provided
     if parms is not None and isinstance(parms, dict):
@@ -798,7 +798,7 @@ def get_helpers(parms=None):
         pre_rash_isolation_start_day="Day pre-rash isolation starts",
         pre_rash_isolation_duration_days="Duration of pre-rash isolation",
         tf="Number of time steps to simulate",
-        IHR="Proportion of infected individuals who are hospitalized",
+        IHR="Proportion of infected individuals who are hospitalized. The typical estimate of IHR is 15-20% for measles. However, in some circumstances more infectious individuals may end up hospitalized for isolation purposes while infectious, so this range has been extended.",
     )
     if parms is not None and isinstance(parms, dict):
         # update with parms if provided
