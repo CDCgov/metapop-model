@@ -314,16 +314,16 @@ def app(replicates=20):
         )
 
     ### Dictate that isolation > quarantine
-    if(
+    if (
         edited_parms2["pre_rash_isolation_on"] == True
         and edited_parms2["isolation_on"] == False
-
     ):
-        st.error("Isolation must be activated for quarantine to be activated. "
-                 "Please adjust the intervention toggles"
+        st.error(
+            "Isolation must be activated for quarantine to be activated. "
+            "Please adjust the intervention toggles"
         )
         return
-    
+
     if (
         edited_intervention_parms2["isolation_adherence"]
         < edited_intervention_parms2["pre_rash_isolation_adherence"]
