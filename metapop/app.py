@@ -691,7 +691,7 @@ def app(replicates=20):
             <b style="font-size:14px;">Model Parameters</b>
             <ul>
             <li style="font-size:14px;"> The basic reproductive number (R<sub>0</sub>), captures contact rates and the probability of infection given contact with an infectious individual. R<sub>0</sub> for measles is generally estimated
-            to be between 12 and 18  <a href='https://www.cdc.gov/measles/about/transmission.html' target='_blank'>[Factsheet about measles]</a>. Communities with higher contact rates, for example populations with higher population density
+            to be between 12 and 18  <a href='https://www.ecdc.europa.eu/en/measles/facts' target='_blank'>[Factsheet about measles]</a>. Communities with higher contact rates, for example populations with higher population density
             or larger households <a href='https://pmc.ncbi.nlm.nih.gov/articles/PMC8765757/' target='_blank'>[Social contact patterns and implications for infectious disease transmission – a systematic review and meta-analysis of contact surveys | eLife]</a>, may have higher contact rates and higher R<sub>0</sub>. The probability of infection given contact with an infectious individuals is very high for measles;
             the household attack rate is estimated to be 90% <a href='https://www.cdc.gov/yellow-book/hcp/travel-associated-infections-diseases/measles-rubeola.html#:~:text=Measles%20is%20among%20the%20most,global%20eradication%20of%20measles%20feasible' target='_blank'>[CDC Yellow Book: Measles (Rubeola)]</a>.
            </a></li>
