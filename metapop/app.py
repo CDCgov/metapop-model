@@ -160,8 +160,8 @@ def app(replicates=20):
         # Set parameters for each scenario separately
         # order of parameters in the sidebar
         ordered_keys = [
-            "pre_rash_isolation_on",
             "isolation_on",
+            "pre_rash_isolation_on",
             "total_vaccine_uptake_doses",
             "vaccine_uptake_start_day",
             "vaccine_uptake_duration_days",
@@ -314,6 +314,16 @@ def app(replicates=20):
         )
 
     ### Dictate that isolation > quarantine
+    if (
+        edited_parms2["pre_rash_isolation_on"] == True
+        and edited_parms2["isolation_on"] == False
+    ):
+        st.error(
+            "Isolation must be activated for quarantine to be activated. "
+            "Please adjust the intervention toggles"
+        )
+        return
+
     if (
         edited_intervention_parms2["isolation_adherence"]
         < edited_intervention_parms2["pre_rash_isolation_adherence"]
