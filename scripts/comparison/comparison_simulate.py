@@ -17,14 +17,9 @@ if __name__ == "__main__":
 
     results_all = griddler.run_squash(griddler.replicated(simulate), parameter_sets)
 
-    results_all = (
-    results_all
-    .with_columns(
-        pl.col("initial_vaccine_coverage")
-        .list.get(0)
-        .alias("initial_vaccine_coverage")
+    results_all = results_all.with_columns(
+        pl.col("initial_vaccine_coverage").list.get(0).alias("initial_vaccine_coverage")
     )
-)
 
     results = results_all.select(
         cs.by_name(
@@ -50,6 +45,5 @@ if __name__ == "__main__":
             ]
         )
     )
-
 
     results.write_csv(os.path.join(output_dir, "results.csv"))
