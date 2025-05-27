@@ -3,7 +3,7 @@
 poetry: poetry.lock install
 
 poetry.lock: pyproject.toml
-	(poetry lock --no-update)
+	(poetry lock)
 
 install: poetry.lock
 	(poetry install)
