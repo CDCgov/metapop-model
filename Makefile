@@ -24,10 +24,6 @@ build_stlite: poetry
 	rm launch_stlite.py
 	python3 stlite/make_measles_sim_html.py
 
-rsconnect_requirements: poetry
-	requirements
-	manifest
-
 requirements:
 	pip freeze > tmp_requirements.txt
 	grep -v "metapop" tmp_requirements.txt > requirements.txt
@@ -38,4 +34,4 @@ requirements:
 manifest:
 	LANG=en_US.UTF-8 rsconnect write-manifest streamlit . --overwrite --exclude Makefile --exclude README.md
 
-release: requirements manifest
+release: poetry requirements manifest
