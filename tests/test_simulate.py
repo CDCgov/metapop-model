@@ -33,13 +33,13 @@ def test_simulate_replicates_seed():
     assert len(p1_r1_seed) == 3
 
     assert p1_r1_seed[0] == BASE_SEED
-    seed1_hash = p1_r1_seed[1]  # This should be the stable hash of the parameter set
+    seed1_hash = p1_r1_seed[1]
     assert p1_r1_seed[2] == 0  # First replicate
 
     assert p1_r2_seed[0] == BASE_SEED
-    assert p1_r2_seed[1] == seed1_hash  # Same hash for same parameters
+    assert p1_r2_seed[1] == seed1_hash
     assert p1_r2_seed[2] == 1  # Second replicate
 
     assert p2_r1_seed[0] == BASE_SEED
-    assert p2_r1_seed[1] != seed1_hash  # Different hash for different parameters
+    assert p2_r1_seed[1] == seed1_hash
     assert p2_r1_seed[2] == 0  # First replicate

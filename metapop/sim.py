@@ -2,13 +2,13 @@
 import griddler
 import numpy as np
 import polars as pl
-from griddler import ParameterSet
 
 # import what's needed from other metapop modules
 from .helper import (
     build_vax_schedule,
     construct_beta,
     initialize_population,
+    seed_from_string,
     time_to_rate,
 )
 from .model import SEIRModel
@@ -139,11 +139,11 @@ def simulate_replicates(parameter_sets, simulate_fn=simulate):
 
         n_replicates = parameter_set["n_replicates"]
         base_seed = parameter_set["seed"]
-        param_hash = int(ParameterSet(parameter_set).stable_hash(), 16)
+        rng_name = seed_from_string("model")
 
         outputs = []
         for i in range(n_replicates):
-            seed = [base_seed, param_hash, i]
+            seed = [base_seed, rng_name, i]
             current_params = parameter_set.copy()
             outputs.append(simulate_fn(current_params, seed))
 
