@@ -565,7 +565,8 @@ def app(replicates=20):
         "differences between each individual simulation are due to random "
         "variation in contact rates. Bolded lines show the simulation that possessed "
         "the median time of peak prevalence across all epidemic trajectories for "
-        "each scenario."
+        "each scenario. If a vaccine campaign is activated, the time period over "
+        "which vaccines are distributed is shown by gray rectangle."
         "</p>",
         unsafe_allow_html=True,
     )
