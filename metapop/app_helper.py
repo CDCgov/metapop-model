@@ -1,5 +1,6 @@
 # This file contains helper functions for the metapop app.
 import copy
+import os
 
 import altair as alt
 import griddler
@@ -117,7 +118,8 @@ def get_default_full_parameters():
         pl.DataFrame: DataFrame containing the default parameters and their values for two scenarios.
     """
     # read in parms, some of which are lists
-    parms = read_parameters()
+    filepath = os.path.join(os.path.dirname(__file__), "app_assets", "app_config.yaml")
+    parms = read_parameters(filepath)
 
     # get keys that are lists, unpack them and add to the dictionary
     list_keys = get_list_keys(parms)

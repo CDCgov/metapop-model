@@ -1,7 +1,7 @@
 # flake8: noqa
 # This file is part of the metapop package. It contains the Streamlit app for
 # the metapopulation model
-
+import os
 import pandas as pd
 import streamlit as st
 import numpy as np
@@ -77,8 +77,11 @@ def app(replicates=20):
         "size of measles outbreaks following introduction of measles into "
         "a community, by comparing scenarios with and without interventions."
     )
-
-    parms = read_parameters("scripts/app/onepop_config.yaml")
+    # get path to the app assets
+    filepath = os.path.join(
+        os.path.dirname(__file__), "app_assets", "onepop_config.yaml"
+    )
+    parms = read_parameters(filepath)
 
     scenario_names = ["No Interventions", "Interventions"]
     show_parameter_mapping = get_show_parameter_mapping(parms)

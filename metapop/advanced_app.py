@@ -1,3 +1,5 @@
+import os
+
 import altair as alt
 import numpy as np
 import polars as pl
@@ -35,8 +37,8 @@ def advanced_app(replicates=20):
     st.text(
         "This interactive tool illustrates the impact of vaccination and isolation on the probability and size of measles outbreaks following introduction of measles into different connected communities."
     )
-
-    parms = read_parameters()
+    filepath = os.path.join(os.path.dirname(__file__), "app_assets", "app_config.yaml")
+    parms = read_parameters(filepath)
 
     show_parameter_mapping = get_show_parameter_mapping()
     advanced_parameter_mapping = get_advanced_parameter_mapping()
