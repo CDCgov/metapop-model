@@ -187,7 +187,7 @@ def app(replicates=20):
         )
         st.text(
             "Choose interventions to simulate and compare with a "
-            "scenario with no active intervenions. Interventions can be applied "
+            "scenario with no active interventions. Interventions can be applied "
             "independently or in combination with each other. "
             "The results are compared to a baseline scenario that does not "
             "have any vaccine uptake, isolation, or quarantine incorporated."
@@ -725,33 +725,47 @@ def app(replicates=20):
 
             <b style="font-size:14px;">Model Parameters</b>
             <ul>
-            <li style="font-size:14px;"> The basic reproductive number (R<sub>0</sub>), captures contact rates and the probability of infection given contact with an infectious individual. R<sub>0</sub> for measles is generally estimated
-            to be between 12 and 18  <a href='https://www.ecdc.europa.eu/en/measles/facts' target='_blank'>[Factsheet about measles]</a>. Communities with higher contact rates — for example populations with higher population density
-            or larger households <a href='https://pmc.ncbi.nlm.nih.gov/articles/PMC8765757/' target='_blank'>[Social contact patterns and implications for infectious disease transmission – a systematic review and meta-analysis of contact surveys | eLife]</a> — may have higher contact rates and higher R<sub>0</sub>. The probability of infection given contact with an infectious individuals is very high for measles;
-            the household attack rate is estimated to be 90% <a href='https://www.cdc.gov/yellow-book/hcp/travel-associated-infections-diseases/measles-rubeola.html#:~:text=Measles%20is%20among%20the%20most,global%20eradication%20of%20measles%20feasible' target='_blank'>[CDC Yellow Book: Measles (Rubeola)]</a>.
-           </a></li>
+            <li style="font-size:14px;"> The basic reproductive number (R<sub>0</sub>),
+            captures contact rates and the probability of infection given contact with an infectious individual
+            . R<sub>0</sub> for measles is generally estimated to be between 12 and 18
+            <a href='https://www.ecdc.europa.eu/en/measles/facts' target='_blank'>[Factsheet about measles]</a>
+            . Communities with higher contact rates — for example populations with higher population density
+            or larger households
+            <a href='https://pmc.ncbi.nlm.nih.gov/articles/PMC8765757/' target='_blank'>[Social contact patterns and implications for infectious disease transmission – a systematic review and meta-analysis of contact surveys | eLife]</a> — may have higher contact rates and higher R<sub>0</sub>. The probability of infection given contact with an infectious individuals is very high for measles;
+            the household attack rate is estimated to be 90%
+            <a href='https://www.cdc.gov/yellow-book/hcp/travel-associated-infections-diseases/measles-rubeola.html#:~:text=Measles%20is%20among%20the%20most,global%20eradication%20of%20measles%20feasible' target='_blank'>[CDC Yellow Book: Measles (Rubeola)]</a>.
+            </li>
+
             <li style="font-size:14px;">The latent period is generally
             estimated to be around 11 days
-            <a href='https://www.cdc.gov/measles/hcp/communication-resources/clinical-diagnosis-fact-sheet.html' target='_blank'>[Measles Clinical Diagnosis Fact Sheet | Measles (Rubeola) | CDC]</a>.</li>
+            <a href='https://www.cdc.gov/measles/hcp/communication-resources/clinical-diagnosis-fact-sheet.html' target='_blank'>[Measles Clinical Diagnosis Fact Sheet | Measles (Rubeola) | CDC]</a>.
+            </li>
+
             <li style="font-size:14px;">The infectious period is generally
             estimated to be around 9 days
-            <a href='https://www.cdc.gov/measles/hcp/communication-resources/clinical-diagnosis-fact-sheet.html' target='_blank'>[Measles Clinical Diagnosis Fact Sheet | Measles (Rubeola) | CDC]</a>.</li>
+            <a href='https://www.cdc.gov/measles/hcp/communication-resources/clinical-diagnosis-fact-sheet.html' target='_blank'>[Measles Clinical Diagnosis Fact Sheet | Measles (Rubeola) | CDC]</a>.
+            </li>
+
             <li style="font-size:14px;">Measles rash onset is generally
             estimated to be on day 5 of this infectious period
             <a href='https://www.cdc.gov/measles/hcp/communication-resources/clinical-diagnosis-fact-sheet.html' target='_blank'>[Measles Clinical Diagnosis Fact Sheet | Measles (Rubeola) | CDC]</a>.
             In this model, isolation when sick is assumed to start halfway through the infectious period.
             </li>
-            <li style="font-size:14px;"> We assume vaccine efficacy for individuals vaccinated during the campaign is 93%,
-            the estimate for one dose of MMR
+
+            <li style="font-size:14px;"> We assume vaccine efficacy for individuals
+            vaccinated during the campaign is 93%, the estimate for one dose of MMR
             <a href='https://www.cdc.gov/measles/vaccines/index.html?CDC_AA_refVal=https%3A%2F%2Fwww.cdc.gov%2Fvaccines%2Fvpd%2Fmmr%2Fpublic%2Findex.html' target='_blank'>[MMR Vaccine Information]</a>.
             </li>
-            </li>
+
             <li style="font-size:14px;"> We assume vaccine efficacy for individuals vaccinated prior
             to the campaign is 97%, the estimate for two doses of MMR
             <a href='https://www.cdc.gov/measles/vaccines/index.html?CDC_AA_refVal=https%3A%2F%2Fwww.cdc.gov%2Fvaccines%2Fvpd%2Fmmr%2Fpublic%2Findex.html' target='_blank'>[MMR Vaccine Information]</a>.
             </li>
-            <li style="font-size:14px;"> Individuals with immunity prior to introduction are assumed to have one or two doses of MMR or have had a prior measles infection.
+
+            <li style="font-size:14px;"> Individuals with immunity prior to introduction
+            are assumed to have one or two doses of MMR or have had a prior measles infection.
             </li>
+
             <li style="font-size:14px;">Isolation when sick is estimated to be
             approximately 75% effective at reducing transmission when comparing
             people who do isolate when sick to people who do not
@@ -759,13 +773,21 @@ def app(replicates=20):
             . In this model, since isolation starts only at rash onset,
             isolation reduces transmission by 100% during the second half of the infectious period,
             leading to a reduction of 50% overall.
-            <li style="font-size:14px;">Quarantine for people who are unvaccinated but have been
+            </li>
+
+            <li style="font-size:14px;">
+            Quarantine for people who are unvaccinated but have been
             exposed is estimated to be 44-76% effective at reducing transmission
             when comparing those who do quarantine to those who do not.
             We assume a 60% reduction in transmission, which is the mean of this range.
             <a href='https://academic.oup.com/cid/article/75/1/152/6424734' target='_blank'>[Impact of Isolation and Exclusion as a Public Health Strategy to Contain Measles Virus Transmission During a Measles Outbreak | Clinical Infectious Diseases | Oxford Academic]</a>
             </li>
 
+            <li style="font-size:14px;">
+            The infection hospitalization ratio (IHR) has been estimated at 20% in past outbreaks,
+            but we allow users to vary this value between 5% and 25%
+            <a href='https://www.cdc.gov/measles/signs-symptoms/index.html' target='blank'>[Measles Symptoms and Complications | Measles (Rubeola) | CDC]</a>.
+            </li>
             </ul>
             </p>
             """,

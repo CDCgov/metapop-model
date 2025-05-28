@@ -757,7 +757,7 @@ def get_helpers(parms=None):
         dict: A dictionary of help text for the app parameters.
     """
     defaults = dict(
-        desired_r0="The basic reproductive number captures contact rates and the probability of infection given contact with an infectious individual. Some communities may have higher contact rates—for example in communities with larger households or higher population density. R0 values for measles are typically estimated to be between 12 and 18 (see Detailed Methods)",
+        desired_r0="The basic reproductive number captures contact rates and the probability of infection given contact with an infectious individual. Some communities may have higher contact rates—for example, in communities with larger households or higher population density. R0 values for measles are typically estimated to be between 12 and 18 (see Detailed Methods)",
         k_i=[
             "Average daily contacts for large population",
             "Average daily contacts for small population 1",
@@ -787,7 +787,7 @@ def get_helpers(parms=None):
         vaccine_uptake_duration_days="The vaccine doses are distributed evenly throughout the specified duration of time (i.e., the same number of vaccines will be distributed on each day). ",
         total_vaccine_uptake_doses="Percent of unvaccinated individuals that get vaccinated. In this model, we administer one dose of the MMR vaccine per person vaccinated during the campaign, with 93% effectiveness as indicated by vaccine studies.",
         vaccinated_group="Population receiving the vaccine",
-        isolation_on="If turned on, reduces transmission of symptomatic individuals who adhere to isolation measures (the percentage as selected under “Isolation adherence”) by % during the symptomatic period (see Detailed Methods).",
+        isolation_on="If turned on, reduces transmission of symptomatic individuals who adhere to isolation measures (the percentage as selected under “Isolation adherence”) by 100% during the symptomatic period (see Detailed Methods).",
         isolation_adherence="Percent of symptomatic individuals who follow isolation guidance.",
         isolation_reduction="Percent reduction in transmission due to isolation. Only used if isolation is turned on.",
         symptomatic_isolation_start_day="Day symptomatic isolation starts",
