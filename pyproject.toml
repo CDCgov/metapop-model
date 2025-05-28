@@ -23,6 +23,8 @@ pyarrow = "^19.0.1"
 seaborn = "^0.13.2"
 streamlit = "^1.43.2"
 st_flexible_callout_elements = "0.1.0"
+build = "^1.2.2.post1"
+bs4 = "^0.0.2"
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.29.5"
@@ -43,7 +45,7 @@ authors = [
 readme = "README.md"
 
 [build-system]
-requires = ["hatchling >= 1.26"]
+requires = ["hatchling == 1.21"]
 build-backend = "hatchling.build"
 
 [tool.ruff.lint]
