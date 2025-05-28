@@ -31,9 +31,11 @@ rsconnect_requirements: poetry
 requirements:
 	pip freeze > tmp_requirements.txt
 	grep -v "metapop" tmp_requirements.txt > requirements.txt
-	# metapop_version=$$(pip show metapop 2>/dev/null | grep Version: | cut -d' ' -f2 || echo "0.0.0"); echo "metapop==$$metapop_version" >> requirements.txt
-	echo "metapop==0.4.7" >> requirements.txt
+	metapop_version=$$(poetry version -s); \
+	echo "metapop==$$metapop_version" >> requirements.txt
 	rm tmp_requirements.txt
 
 manifest:
-	rsconnect write-manifest streamlit . --overwrite --exclude Makefile --exclude README.md
+	LANG=en_US.UTF-8 rsconnect write-manifest streamlit . --overwrite --exclude Makefile --exclude README.md
+
+release: requirements manifest
