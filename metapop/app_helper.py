@@ -500,7 +500,11 @@ def app_editors(
 
         for key in ordered_keys:
             if key not in list_keys:
-                # if key in slider_keys:
+                callback = None
+                if key == "isolation_on":
+                    callback = coerce_quarantine_to_isolation(
+                        element_keys,
+                    )
                 if widget_types[key] == "slider":
                     value = st.slider(
                         show_parameter_mapping[key],
@@ -526,12 +530,18 @@ def app_editors(
                         disabled=disabled,
                     )
                 elif widget_types[key] == "toggle":
+                    if key == "pre_rash_isolation_on":
+                        # if isolation is not on, pre-rash isolation cannot be turned on
+                        disabled_toggle = not edited_parms["isolation_on"]
+                    else:
+                        disabled_toggle = disabled
                     value = st.toggle(
                         show_parameter_mapping[key],
                         value=False,
                         help=helpers[key],
                         key=element_keys[key],
-                        disabled=disabled,
+                        disabled=disabled_toggle,
+                        on_change=callback,
                     )
                 else:
                     pass
@@ -937,6 +947,19 @@ def get_parameter_key_for_session_key(session_key):
         key = "_".join(split_key)
 
     return key, index
+
+
+def coerce_quarantine_to_isolation(element_keys):
+    """
+    Callback function for isolation on
+    If isolation is turned off, quarantine is coerced to be off as well
+    """
+    if element_keys["isolation_on"] not in st.session_state:
+        st.session_state[element_keys["isolation_on"]] = False
+
+    if not st.session_state[element_keys["isolation_on"]]:
+        st.session_state[element_keys["pre_rash_isolation_on"]] = False
+        st.write("Quarantine cannot be enabled while isolation is not enabled.")
 
 
 def update_intervention_parameters_from_widget(parms):
