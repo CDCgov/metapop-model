@@ -258,7 +258,7 @@ def get_show_parameter_mapping(parms=None):
         I0_1="Initial infections in small population 1",
         I0_2="Initial infections in small population 2",
         # vaccine_uptake = "Enable vaccine uptake",
-        total_vaccine_uptake_doses="Vaccine campaign: % unvaccinated individuals that get vaccinated. In this model, we administer one dose of the MMR vaccine per person vaccinated during the campaign with 93% effectiveness as indicated by vaccine studies.",
+        total_vaccine_uptake_doses="Vaccine campaign:",
         vaccine_uptake_start_day="Vaccine campaign start day",
         vaccine_uptake_duration_days="Vaccine campaign duration (days)",
         vaccinated_group="Vaccinated group",
@@ -298,7 +298,7 @@ def get_advanced_parameter_mapping():
     """
     # Define the mapping of advanced parameter names to display names
     advanced_mapping = dict(
-        desired_r0="R0: The basic reproductive number captures contact rates and the probability of infection given contact with an infectious individual. Some communities may have higher contact rates, for example in communities with larger households or higher population density.",
+        desired_r0="R0",
         n_groups="Number of groups",
         infectious_duration="Infectious period (days)",
         latent_duration="Latent period (days)",
@@ -757,7 +757,7 @@ def get_helpers(parms=None):
         dict: A dictionary of help text for the app parameters.
     """
     defaults = dict(
-        desired_r0="Basic reproduction number R0. R0 cannot be negative.",
+        desired_r0="The basic reproductive number captures contact rates and the probability of infection given contact with an infectious individual. Some communities may have higher contact rates—for example, in communities with larger households or higher population density. R0 values for measles are typically estimated to be between 12 and 18 (see Detailed Methods)",
         k_i=[
             "Average daily contacts for large population",
             "Average daily contacts for small population 1",
@@ -771,8 +771,8 @@ def get_helpers(parms=None):
             "Size of the small population 1",
             "Size of the small population 2",
         ],
-        latent_duration="Latent period (days)",
-        infectious_duration="Infectious period (days)",
+        latent_duration="The number of days from when a person is infected to when they become infectious.",
+        infectious_duration="The number of days a person who is infected with measles is infectious. For measles, rash onset is halfway through the infectious period.",
         I0=[
             "Initial infections in large population",
             "Initial infections in small population 1",
@@ -783,22 +783,22 @@ def get_helpers(parms=None):
             "Baseline immunity in small population 1",
             "Baseline immunity in small population 2",
         ],
-        vaccine_uptake_start_day="Day vaccine campaign starts (day 0 is the day infections are imported to the community).",
-        vaccine_uptake_duration_days="Duration of vaccine campaign (days). ",
-        total_vaccine_uptake_doses="Percent of unvaccinated individuals that get vaccinated. In this model, vaccines administered during the campaign are assumed to be 93% effective after one dose",
+        vaccine_uptake_start_day="Day that the vaccine campaign starts (day 0 is the day infections are imported to the community).",
+        vaccine_uptake_duration_days="The vaccine doses are distributed evenly throughout the specified duration of time (i.e., the same number of vaccines will be distributed on each day). ",
+        total_vaccine_uptake_doses="Percent of unvaccinated individuals that get vaccinated. In this model, we administer one dose of the MMR vaccine per person vaccinated during the campaign, with 93% effectiveness as indicated by vaccine studies.",
         vaccinated_group="Population receiving the vaccine",
-        isolation_on="If turned on, reduce transmission of symptomatic individuals.",
-        isolation_adherence="Percent of symptomatic individuals who follow isolation guidance. Only used if isolation is turned on.",
+        isolation_on="If turned on, reduces transmission of symptomatic individuals who adhere to isolation measures (the percentage as selected under “Isolation adherence”) by 100% during the symptomatic period (see Detailed Methods).",
+        isolation_adherence="Percent of symptomatic individuals who follow isolation guidance.",
         isolation_reduction="Percent reduction in transmission due to isolation. Only used if isolation is turned on.",
         symptomatic_isolation_start_day="Day symptomatic isolation starts",
         symptomatic_isolation_duration_days="Duration of symptomatic isolation",
-        pre_rash_isolation_on="If turned on, reduce transmission of individuals with a known exposure.",
-        pre_rash_isolation_adherence="Percent of pre-symptomatic infectious individuals who follow quarantine guidance. Only used if quarantine is turned on.",
+        pre_rash_isolation_on="If turned on, reduces transmission of individuals who are exposed but pre-symptomatic and adhere to quarantine measures (the percentage as selected under “Quarantine adherence”) by 60% during the pre-symptomatic period (see Detailed Methods)",
+        pre_rash_isolation_adherence="Percent of pre-symptomatic infectious individuals who follow quarantine guidance.",
         pre_rash_isolation_reduction="Percent reduction in transmission due quarantine. Only used if quarantine is turned on.",
         pre_rash_isolation_start_day="Day pre-rash isolation starts",
         pre_rash_isolation_duration_days="Duration of pre-rash isolation",
         tf="Number of time steps to simulate",
-        IHR="Proportion of infected individuals who are hospitalized. The typical estimate of IHR is 15-20% for measles. However, in some circumstances more infectious individuals may end up hospitalized for isolation purposes while infectious, so this range has been extended.",
+        IHR="Proportion of infected individuals who are hospitalized",
     )
     if parms is not None and isinstance(parms, dict):
         # update with parms if provided
