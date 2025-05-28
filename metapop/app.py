@@ -642,6 +642,7 @@ def app(replicates=20):
         .filter(pl.col("t") == pl.col("t").max())
         .group_by("Scenario", "replicate")
         .agg(pl.col("Y").sum().alias("Total"))
+        .sort(["Scenario", "replicate"])
     )
 
     outbreak_summary = get_table(
