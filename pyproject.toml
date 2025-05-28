@@ -7,14 +7,15 @@ authors = [
     "Theresa Sheets <utg8@cdc.gov>",
     "Will Koval <ad71@cdc.gov>",
     "Beau B. Bruce <lue7@cdc.gov>",
-    "Dina Mistry <uqx8@cdc.gov>"]
+    "Dina Mistry <uqx8@cdc.gov>",
+]
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10"
 pandas = "^2.2.3"
 numpy = "^2.2.0"
-griddler = {git = "https://github.com/CDCgov/pygriddler.git", tag = "v0.2"}
+griddler = { git = "https://github.com/CDCgov/pygriddler.git", tag = "v0.2" }
 polars = "^1.17.1"
 altair = "^5.5.0"
 matplotlib = "^3.10.0"
@@ -33,7 +34,7 @@ detect-secrets = "^1.5.0"
 
 [project]
 name = "metapop"
-version = "0.4.0"
+version = "0.4.7"
 description = ""
 authors = [
     { name = "Paige Miller", email = "yub1@cdc.gov" },
