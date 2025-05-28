@@ -16,7 +16,7 @@ run_advanced_app: poetry
 
 build_stlite: poetry
 	python -m build
-	cp dist/metapop-0.4.0-*-none-any.whl stlite
+	cp dist/metapop-0.4.6-*-none-any.whl stlite
 	cp stlite/*.whl .
 	cp stlite/launch_stlite.py .
 	zip -r stlite/metapop_stlite.zip launch_stlite.py *.whl scripts/app
