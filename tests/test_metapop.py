@@ -47,7 +47,7 @@ def test_only_expose_susceptible():
     current_vax_fails = [0, 0]
 
     # Create an instance of SEIRModel
-    model = SEIRModel(parms)
+    model = SEIRModel(parms, seed=[42, 1])
 
     # Call the exposed method
     new_exposed, new_exposed_vax, old_exposed, old_exposed_vax = model.exposed(
@@ -89,7 +89,7 @@ def test_aon_vaccine():
     initial_SV = u[0][Ind.SV.value]
 
     ### test: 100% effective vaccine
-    model = SEIRModel(parms)
+    model = SEIRModel(parms, seed=[42, 1])
 
     # vaccinate working properly
     new_v, new_sv = model.vaccinate(u, t)
@@ -114,7 +114,7 @@ def test_aon_vaccine():
     ### test: 0% effective vaccine
     parms["vaccine_efficacy_1_dose"] = 0.0
     # u = [[690, 500, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0]] # increase SV to 500
-    model = SEIRModel(parms)
+    model = SEIRModel(parms, seed=[42, 1])
 
     # vaccinate working properly
     new_v, new_sv = model.vaccinate(u, t)
@@ -173,7 +173,7 @@ def test_states_updating():
         parms["tf"], parms["n_groups"], parms
     )
     # set up model
-    model = SEIRModel(parms)
+    model = SEIRModel(parms, seed=[42, 1])
 
     # Check that updates to the state vector are correct from seirmodel()
     for j in range(len(t)):
@@ -198,7 +198,7 @@ def test_states_updating():
             sum(u[0][:-2]) == parms["pop_sizes"][0]
         ), f"Population size mismatch at time {j}, expected {parms['pop_sizes'][0]}, got {sum(u[0][:-2])}"
 
-    df = simulate(parms)
+    df = simulate(parms, [42])
 
     # Check that the population sizes are conserved at each time step when
     # running the simulation through simulate()

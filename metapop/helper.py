@@ -1,3 +1,5 @@
+import hashlib
+
 import numpy as np
 import numpy.linalg as la
 
@@ -15,6 +17,7 @@ __all__ = [
     "time_to_rate",
     "build_vax_schedule",
     "vaccinate_groups",
+    "seed_from_string",
 ]
 
 
@@ -463,3 +466,16 @@ def vaccinate_groups(groups, u, t, vaccination_uptake_schedule, parms):
         new_failures[vaccinated_group] = vaccine_failures
 
     return new_vaccinated, new_failures
+
+
+def seed_from_string(string):
+    """
+    Generate a stable seed from a string
+    Args:
+        string (str): The input string to generate the seed from.
+    Returns:
+        int: A stable seed derived from the input string.
+    """
+    hash_object = hashlib.blake2b(string.encode(), digest_size=10)
+    seed = int(hash_object.hexdigest(), 16)
+    return seed

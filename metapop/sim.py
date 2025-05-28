@@ -1,6 +1,8 @@
 # This file is part of the metapop package. It contains the simulation methods
+import griddler
 import numpy as np
 import polars as pl
+from griddler import ParameterSet
 
 # import what's needed from other metapop modules
 from .helper import (
@@ -24,6 +26,7 @@ from .model import SEIRModel
 __all__ = [
     "run_model",
     "simulate",
+    "simulate_replicates",
 ]
 
 
@@ -66,7 +69,7 @@ def run_model(
     return S, V, SV, E1, E2, E1_V, E2_V, I1, I2, R, Y, X, u
 
 
-def simulate(parms):
+def simulate(parms, seed):
     #### Set up rate params
     parms["sigma"] = time_to_rate(parms["latent_duration"])
     parms["gamma"] = time_to_rate(parms["infectious_duration"])
@@ -90,7 +93,7 @@ def simulate(parms):
     )
 
     #### Run the model
-    model = SEIRModel(parms)
+    model = SEIRModel(parms, seed)
     S, V, SV, E1, E2, E1_V, E2_V, I1, I2, R, Y, X, u = run_model(
         model, u, t, steps, groups, S, V, SV, E1, E2, E1_V, E2_V, I1, I2, R, Y, X
     )
@@ -116,3 +119,39 @@ def simulate(parms):
     )
 
     return df
+
+
+def simulate_replicates(parameter_sets, simulate_fn=simulate):
+    """
+    Runs multiple replicates of the SEIR model for a grid of parameter sets.
+    A unique seed is generated for each replicated based on a base seed,
+    a stable hash of the parameter set, and the replicate index.
+    Args:
+        parameter_sets (Sequence[dict]): A sequence containing the parameters for the simulation.
+            Parameter sets must include 'n_replicates' and 'seed'.
+        simulate_fn (function): The function to run the simulation. Defaults to `simulate`.
+    Returns:
+        inner_simulate_replicates (function): A function that takes a parameter set and returns the simulation results.
+    """
+
+    def inner_simulate_replicates(parameter_set):
+        assert isinstance(parameter_set, dict)
+
+        n_replicates = parameter_set["n_replicates"]
+        base_seed = parameter_set["seed"]
+        param_hash = int(ParameterSet(parameter_set).stable_hash(), 16)
+
+        outputs = []
+        for i in range(n_replicates):
+            seed = [base_seed, param_hash, i]
+            current_params = parameter_set.copy()
+            outputs.append(simulate_fn(current_params, seed))
+
+        return pl.concat(
+            [
+                output.with_columns(pl.lit(i, dtype=pl.Int64).alias("replicate"))
+                for i, output in enumerate(outputs)
+            ]
+        )
+
+    return griddler.run_squash(inner_simulate_replicates, parameter_sets)

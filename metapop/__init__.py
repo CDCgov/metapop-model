@@ -33,7 +33,7 @@ from .model import (
     Ind,
     SEIRModel,
 )  # depends on helper
-from .sim import run_model, simulate  # depends on model
+from .sim import run_model, simulate, simulate_replicates  # depends on model
 from .version import *  # depends on nothing
 
 # when declared, this variable defines the public modules, subpackages and
@@ -58,6 +58,7 @@ __all__ = [
     "SEIRModel",
     "run_model",
     "simulate",
+    "simulate_replicates",
     "get_scenario_results",
     "read_parameters",
     "app",

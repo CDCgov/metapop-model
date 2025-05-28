@@ -26,6 +26,7 @@ from .app_helper import (
     read_parameters,
     update_intervention_parameters_from_widget,
 )
+from .helper import seed_from_string
 
 __all__ = [
     "advanced_app",
@@ -39,6 +40,7 @@ def advanced_app(replicates=20):
     )
     filepath = os.path.join(os.path.dirname(__file__), "app_assets", "app_config.yaml")
     parms = read_parameters(filepath)
+    plot_rng = np.random.default_rng([parms["seed"], seed_from_string("plot")])
 
     show_parameter_mapping = get_show_parameter_mapping()
     advanced_parameter_mapping = get_advanced_parameter_mapping()
@@ -246,7 +248,7 @@ def advanced_app(replicates=20):
         time_label = "Time (weeks)"
 
     # filter for a sample of replicates
-    replicate_inds = np.random.choice(
+    replicate_inds = plot_rng.choice(
         results1["replicate"].unique().to_numpy(), replicates, replace=False
     )
     alt_results1 = alt_results1.filter(pl.col("replicate").is_in(replicate_inds))

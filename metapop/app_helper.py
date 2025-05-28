@@ -10,7 +10,7 @@ import polars as pl
 import streamlit as st
 
 # import what's needed from other metapop modules
-from .sim import simulate
+from .sim import simulate_replicates
 
 # if you want to use methods from metapop in this file under
 # if __name__ == "__main__": you'll need to import them as:
@@ -62,11 +62,12 @@ def get_scenario_results(parms):
 
     Args:
         parms (list): List of dictionaries containing model parameters.
+        scenario_name (str): Name of the scenario to run.
 
     Returns:
 
     """
-    results = griddler.run_squash(griddler.replicated(simulate), parms)
+    results = simulate_replicates(parms)
     # cast group to string
     results = results.with_columns(pl.col("group").cast(pl.Utf8))
     # select subset of values to return
@@ -123,6 +124,7 @@ def get_default_full_parameters():
 
     # get keys that are lists, unpack them and add to the dictionary
     list_keys = get_list_keys(parms)
+
     for key in list_keys:
         for i, value in enumerate(parms[key]):
             parms["{}_{}".format(key, i)] = value
@@ -369,6 +371,8 @@ def get_list_keys(parms):
         list: The keys of the parameters that have lists values.
     """
     list_keys = [key for key, value in parms.items() if isinstance(value, list)]
+    # Sort to ensure deterministic order
+    list_keys = sorted(list_keys)
     return list_keys
 
 
@@ -1289,22 +1293,24 @@ def calculate_outbreak_summary(combined_results, threshold):
     return outbreak_summary
 
 
-def get_table(combined_results, IHR):
+def get_table(combined_results, IHR, rng):
     """
     Calculate the hospitalization summary based on the given IHR.
 
     Args:
         combined_results (pl.DataFrame): The combined results DataFrame.
         IHR (float): The infection hospitalization rate.
+        rng (np.random.Generator): Random number generator for binomial sampling.
 
     Returns:
         pl.DataFrame: A DataFrame containing the hospitalization summary.
     """
+
     # calculate hospitaltizations based on IHR
     combined_results = combined_results.with_columns(
         pl.Series(
             name="Hospitalizations",
-            values=np.random.binomial(
+            values=rng.binomial(
                 combined_results["Total"].to_numpy().astype("int32"), IHR
             ),
         )

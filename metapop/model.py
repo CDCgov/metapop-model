@@ -41,7 +41,7 @@ class Ind(Enum):
 
 
 class SEIRModel:
-    def __init__(self, parms):
+    def __init__(self, parms, seed):
         self.parms = parms
 
         # convert some lists to arrays
@@ -49,6 +49,8 @@ class SEIRModel:
 
         # define internal model variables
         self.groups = parms["n_groups"]
+
+        self.rng = np.random.default_rng(seed)
 
     def exposed(self, u, current_susceptibles, current_vacc_fails, t):
         new_E1 = []
@@ -68,17 +70,17 @@ class SEIRModel:
                 self.parms["beta"], I_g, self.parms["pop_sizes"], target_group
             )
             new_e_frac = rate_to_frac(foi)
-            new_E1.append(np.random.binomial(S_val, new_e_frac))
+            new_E1.append(self.rng.binomial(S_val, new_e_frac))
 
-            new_E1_V.append(np.random.binomial(VF_val, new_e_frac))
+            new_E1_V.append(self.rng.binomial(VF_val, new_e_frac))
 
             # Get within E chain movement (E1 -> E2)
             e1_to_e2_frac = rate_to_frac(self.parms["sigma_scaled"])
             new_E2.append(
-                np.random.binomial(u[target_group][Ind.E1.value], e1_to_e2_frac)
+                self.rng.binomial(u[target_group][Ind.E1.value], e1_to_e2_frac)
             )
             new_E2_V.append(
-                np.random.binomial(u[target_group][Ind.E1_V.value], e1_to_e2_frac)
+                self.rng.binomial(u[target_group][Ind.E1_V.value], e1_to_e2_frac)
             )
 
         return new_E1, new_E1_V, new_E2, new_E2_V
@@ -104,18 +106,18 @@ class SEIRModel:
         new_I2 = []
         for group in range(self.groups):
             new_i_frac = rate_to_frac(self.parms["sigma_scaled"])
-            new_I1.append(np.random.binomial(u[group][Ind.E2.value], new_i_frac))
-            new_I1_V.append(np.random.binomial(u[group][Ind.E2_V.value], new_i_frac))
+            new_I1.append(self.rng.binomial(u[group][Ind.E2.value], new_i_frac))
+            new_I1_V.append(self.rng.binomial(u[group][Ind.E2_V.value], new_i_frac))
 
             i1_to_i2_frac = rate_to_frac(self.parms["gamma_scaled"])
-            new_I2.append(np.random.binomial(u[group][Ind.I1.value], i1_to_i2_frac))
+            new_I2.append(self.rng.binomial(u[group][Ind.I1.value], i1_to_i2_frac))
         return new_I1, new_I1_V, new_I2
 
     def recovery(self, u, t):
         new_R = []
         for group in range(self.groups):
             new_r_frac = rate_to_frac(self.parms["gamma_scaled"])
-            new_R.append(np.random.binomial(u[group][Ind.I2.value], new_r_frac))
+            new_R.append(self.rng.binomial(u[group][Ind.I2.value], new_r_frac))
         return new_R
 
     def get_updated_susceptibles(self, u, new_vaccinated, new_failures):

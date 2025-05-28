@@ -4,7 +4,7 @@ import griddler
 import griddler.griddle
 import polars.selectors as cs
 
-from metapop import simulate
+from metapop import simulate_replicates
 
 if __name__ == "__main__":
     # setup output directory
@@ -13,7 +13,7 @@ if __name__ == "__main__":
     os.makedirs(output_dir, exist_ok=True)
 
     parameter_sets = griddler.griddle.read("scripts/onepop/onepop_config.yaml")
-    results_all = griddler.run_squash(griddler.replicated(simulate), parameter_sets)
+    results_all = simulate_replicates(parameter_sets)
     results = results_all.select(
         cs.by_name(
             [

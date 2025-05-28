@@ -26,6 +26,7 @@ from .app_helper import (
     update_intervention_parameters_from_widget,
     update_parms_from_table,
 )
+from .helper import seed_from_string
 
 # if you want to use the methods from metapop in this file under
 # if __name__ == "__main__": you'll need to import them as:
@@ -59,6 +60,7 @@ def app_with_table(replicates=20):
     filepath = os.path.join(os.path.dirname(__file__), "app_assets", "app_config.yaml")
 
     parms = read_parameters(filepath)
+    plot_rng = np.random.default_rng([parms["seed"], seed_from_string("plot")])
 
     default_table = get_default_show_parameters_table()
     show_parameter_mapping = get_show_parameter_mapping(parms)
@@ -226,7 +228,7 @@ def app_with_table(replicates=20):
         time_label = "Time (weeks)"
 
     # for altair, plot only a subset
-    replicate_inds = np.random.choice(
+    replicate_inds = plot_rng.choice(
         results1["replicate"].unique().to_numpy(), replicates, replace=False
     )
     alt_results1 = alt_results1.filter(pl.col("replicate").is_in(replicate_inds))

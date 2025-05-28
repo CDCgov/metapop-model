@@ -39,7 +39,7 @@ from .app_helper import (
     get_median_trajectory_from_episize,
     get_median_trajectory_from_peak_time,
 )
-from .helper import build_vax_schedule
+from .helper import build_vax_schedule, seed_from_string
 
 # if you want to use the methods from metapop in this file under
 # if __name__ == "__main__": you'll need to import them as:
@@ -82,6 +82,11 @@ def app(replicates=20):
         os.path.dirname(__file__), "app_assets", "onepop_config.yaml"
     )
     parms = read_parameters(filepath)
+
+    plot_rng = np.random.default_rng([parms["seed"], seed_from_string("plot")])
+    hosp_rng = np.random.default_rng(
+        [parms["seed"], seed_from_string("hospitalizations")]
+    )
 
     scenario_names = ["No Interventions", "Interventions"]
     show_parameter_mapping = get_show_parameter_mapping(parms)
@@ -442,7 +447,7 @@ def app(replicates=20):
     alt_results2 = alt_results2.with_columns(
         pl.lit(scenario_names[1]).alias("scenario")
     )
-    replicate_inds = np.random.choice(
+    replicate_inds = plot_rng.choice(
         results1["replicate"].unique().to_numpy(), replicates, replace=False
     )
     combined_alt_results = alt_results1.vstack(alt_results2).filter(
@@ -610,8 +615,8 @@ def app(replicates=20):
                 callout_text += "<li> Vaccines administered during campaign: 0</li>"
             else:
                 callout_text += f"<li> Vaccines administered during campaign: {edited_intervention_parms2['total_vaccine_uptake_doses']} between day {edited_intervention_parms2['vaccine_uptake_start_day']} and day {edited_intervention_parms2['vaccine_uptake_start_day'] + edited_intervention_parms2['vaccine_uptake_duration_days']}</li>"
-            callout_text += f"<li> Adherence to quarantine among pre-symptomatic infectious individuals: {int(pre_rash_isolation_adherance*100)}%</li>"
-            callout_text += f"<li> Adherence to isolation among symptomatic infectious individuals: {int(isolation_adherance*100)}%</li></ul>"
+            callout_text += f"<li> Adherence to quarantine among pre-symptomatic infectious individuals: {int(pre_rash_isolation_adherance * 100)}%</li>"
+            callout_text += f"<li> Adherence to isolation among symptomatic infectious individuals: {int(isolation_adherance * 100)}%</li></ul>"
 
             flexible_callout(
                 callout_text,
@@ -639,7 +644,9 @@ def app(replicates=20):
         .agg(pl.col("Y").sum().alias("Total"))
     )
 
-    outbreak_summary = get_table(combined_results, edited_intervention_parms2["IHR"])
+    outbreak_summary = get_table(
+        combined_results, edited_intervention_parms2["IHR"], hosp_rng
+    )
 
     if interventions == "Off":
         outbreak_summary = outbreak_summary.select("", scenario_names[0])
@@ -671,7 +678,7 @@ def app(replicates=20):
         st.text(
             f"{intervention_text} decreases total cases by {float(relative_difference):.0f}% "
             f"in a population of size {edited_parms2['pop_sizes'][0]} "
-            f"with baseline immunity of {round(edited_parms2['initial_vaccine_coverage'][0]*100)}%."
+            f"with baseline immunity of {round(edited_parms2['initial_vaccine_coverage'][0] * 100)}%."
         )
 
         # if the Relative Difference is NaN, set it to ""

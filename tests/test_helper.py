@@ -627,7 +627,7 @@ def test_run_model_once_with_config():
     assert sum(E1_V_initial) == 0, "E1_V_initial should be 0"
 
     # Create an instance of SEIRModel
-    model = SEIRModel(parms)
+    model = SEIRModel(parms, seed=123)
 
     # Call the run_model function
     S, V, SV, E1, E2, E1_V, E2_V, I1, I2, R, Y, X, u = run_model(
@@ -660,3 +660,13 @@ def test_run_model_once_with_config():
         assert (
             sum(sum(E1_V)) > 0.0
         ), "Individuals should be entering E1_V after SV, i.e., this vector should be getting populated through the simulation"
+
+
+def test_seed_from_string():
+    # Check that seeds are 10-digit integers
+    result = seed_from_string("test")
+    assert isinstance(result, int), "Seed should be an integer"
+
+    # Check that seeds are different
+    assert seed_from_string("test") == seed_from_string("test")
+    assert seed_from_string("test") != seed_from_string("test2")
