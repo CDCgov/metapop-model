@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "metapop"
-version = "0.4.4"
+version = "0.4.5"
 description = ""
 authors = [
     "Paige Miller <yub1@cdc.gov>",
@@ -33,7 +33,7 @@ detect-secrets = "^1.5.0"
 
 [project]
 name = "metapop"
-version = "0.4.0"
+version = "0.4.5"
 description = ""
 authors = [
     { name = "Paige Miller", email = "yub1@cdc.gov" },
