@@ -365,7 +365,9 @@ def app(replicates=20):
 
     scenario1 = [updated_parms1]
     scenario2 = [updated_parms2]
-    initial_states = initialize_population(1, 1, scenario2[0])
+
+    # check size of susceptible population
+    initial_states = initialize_population(1, 1, updated_parms2)
 
     # if there is no one to vaccinate and other interventions are turned off
     if (
@@ -374,8 +376,7 @@ def app(replicates=20):
         and (not scenario2[0]["pre_rash_isolation_on"])
     ):
         st.warning(
-            "There are no people to vaccinate in this population and other interventions are turned off. "
-            "Only showing results for the No Intervention scenario. "
+            "With these initial conditions, there are no people to vaccinate in this population and other interventions are turned off. "
             "Please turn on isolation or quarantine or adjust the population size or baseline immunity."
         )
 
