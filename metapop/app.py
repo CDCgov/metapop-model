@@ -72,6 +72,9 @@ def app(replicates=20):
 
     st.title("Measles Outbreak Simulator")
 
+    if os.environ.get("MODE", "PRODUCTION") == "DEVELOPMENT":
+        st.warning(f"Building from dev branch")
+
     st.text(
         "This interactive tool illustrates the impact of "
         "vaccination, isolation, and quarantine measures on the "
