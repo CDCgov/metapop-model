@@ -366,7 +366,7 @@ def app(replicates=20):
     scenario1 = [updated_parms1]
     scenario2 = [updated_parms2]
     initial_states = initialize_population(1, 1, scenario2[0])
-    print(scenario2[0]["total_vaccine_uptake_doses"])
+
     # if there is no one to vaccinate and other interventions are turned off
     if (
         (initial_states[12][0][0] == 0)
