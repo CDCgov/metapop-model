@@ -2,6 +2,7 @@
 # This file is part of the metapop package. It contains the Streamlit app for
 # the metapopulation model
 import os
+import importlib
 import pandas as pd
 import streamlit as st
 import numpy as np
@@ -289,6 +290,9 @@ def app(replicates=20):
             edited_advanced_parms1 = edited_parms1
             for key in advanced_ordered_keys:
                 edited_advanced_parms1[key] = edited_advanced_parms2[key]
+
+        st.caption(f"Metapop version: {importlib.metadata.version('metapop')}")
+    #### End of sidebar panel
 
     #### Intervention scenarios:
     # instead of expander, can use st.radio:
