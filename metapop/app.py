@@ -76,7 +76,7 @@ def app(replicates=20):
         "This interactive tool illustrates the impact of "
         "vaccination, isolation, and quarantine measures on the "
         "size of measles outbreaks following introduction of measles into "
-        "a community, by comparing scenarios with and without interventions."
+        "a community by comparing scenarios with and without interventions."
     )
     # get path to the app assets
     filepath = os.path.join(
