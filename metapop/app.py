@@ -476,6 +476,7 @@ def app(replicates=20):
                 f"Quarantine adherence: {pre_rash_isolation_adherance_pct}%",
                 f"Isolation adherence: {isolation_adherance_pct}%",
             ],
+            subtitleColor="#808080",
         )
     else:
         combined_alt_results = alt_results1.filter(
