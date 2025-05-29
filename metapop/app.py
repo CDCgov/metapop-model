@@ -240,7 +240,7 @@ def app(replicates=20):
         # defining this here allows us to place it above the advanced options section
         col_intervention_text = st.columns(1)[0]
 
-        with st.expander("Disease parameters"):
+        with st.expander("Advanced parameters"):
             st.text(
                 "These options allow changes to parameter assumptions including "
                 "measles natural history parameters as well as parameters governing "
@@ -331,7 +331,7 @@ def app(replicates=20):
     with col_intervention_text:
         st.text(
             f"Total vaccines administered during campaign: {edited_intervention_parms2['total_vaccine_uptake_doses']}",
-            help="This number is calculated based on user input for the percentage of the non-immune population that gets vaccinated during the vaccine campaign.",
+            help="This number is calculated based on user input for the percentage of the non-immune population that gets vaccinated during the campaign.",
         )
 
     ### Dictate that isolation > quarantine

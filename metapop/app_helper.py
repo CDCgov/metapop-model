@@ -262,9 +262,9 @@ def get_show_parameter_mapping(parms=None):
         I0_1="Initial infections in small population 1",
         I0_2="Initial infections in small population 2",
         # vaccine_uptake = "Enable vaccine uptake",
-        total_vaccine_uptake_doses="Vaccine campaign:",
-        vaccine_uptake_start_day="Vaccine campaign start day",
-        vaccine_uptake_duration_days="Vaccine campaign duration (days)",
+        total_vaccine_uptake_doses="Percent of people without prior immunity that get vaccinated",
+        vaccine_uptake_start_day="Vaccination campaign start day",
+        vaccine_uptake_duration_days="Vaccination campaign duration (days)",
         vaccinated_group="Vaccinated group",
         isolation_on="Enable isolation",
         isolation_adherence="Isolation adherence",
@@ -509,6 +509,8 @@ def app_editors(
                     callback = coerce_quarantine_to_isolation(
                         element_keys,
                     )
+                if key == "total_vaccine_uptake_doses":
+                    st.write("Vaccination Campaign:")
                 if widget_types[key] == "slider":
                     value = st.slider(
                         show_parameter_mapping[key],
@@ -799,9 +801,9 @@ def get_helpers(parms=None):
             "Baseline immunity in small population 1",
             "Baseline immunity in small population 2",
         ],
-        vaccine_uptake_start_day="Day that the vaccine campaign starts (day 0 is the day infections are imported to the community).",
+        vaccine_uptake_start_day="Day that the vaccination campaign starts (day 0 is the day infections are imported to the community).",
         vaccine_uptake_duration_days="The vaccine doses are distributed evenly throughout the specified duration of time (i.e., the same number of vaccines will be distributed on each day). ",
-        total_vaccine_uptake_doses="Percent of unvaccinated individuals that get vaccinated. In this model, we administer one dose of the MMR vaccine per person vaccinated during the campaign, with 93% effectiveness as indicated by vaccine studies.",
+        total_vaccine_uptake_doses="In this model, we administer one dose of the MMR vaccine per person vaccinated during the campaign, with 93% effectiveness as indicated by vaccine studies.",
         vaccinated_group="Population receiving the vaccine",
         isolation_on="If turned on, reduces transmission of symptomatic individuals who adhere to isolation measures (the percentage as selected under “Isolation adherence”) by 100% during the symptomatic period (see Detailed Methods).",
         isolation_adherence="Percent of symptomatic individuals who follow isolation guidance.",
