@@ -249,7 +249,6 @@ def initialize_population(steps, groups, parms):
             Y[0, group],
             X[0, group],
         ) = u[group]
-
     return S, V, SV, E1, E2, E1_V, E2_V, I1, I2, R, Y, X, u
 
 

@@ -40,7 +40,7 @@ from .app_helper import (
     get_median_trajectory_from_episize,
     get_median_trajectory_from_peak_time,
 )
-from .helper import build_vax_schedule, seed_from_string
+from .helper import build_vax_schedule, seed_from_string, initialize_population
 
 # if you want to use the methods from metapop in this file under
 # if __name__ == "__main__": you'll need to import them as:
@@ -365,6 +365,19 @@ def app(replicates=20):
 
     scenario1 = [updated_parms1]
     scenario2 = [updated_parms2]
+    initial_states = initialize_population(1, 1, scenario2[0])
+    print(scenario2[0]["total_vaccine_uptake_doses"])
+    # if there is no one to vaccinate and other interventions are turned off
+    if (
+        (initial_states[12][0][0] == 0)
+        and (not scenario2[0]["isolation_on"])
+        and (not scenario2[0]["pre_rash_isolation_on"])
+    ):
+        st.warning(
+            "There are no people to vaccinate in this population and other interventions are turned off. "
+            "Only showing results for the No Intervention scenario. "
+            "Please turn on isolation or quarantine or adjust the population size or baseline immunity."
+        )
 
     #### Plot Options:
     # get the selected outcome from the sidebar
