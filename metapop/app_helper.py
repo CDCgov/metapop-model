@@ -1396,7 +1396,7 @@ def get_median_trajectory_from_episize(
     # Find the replicate with the closest R value to the median
     closest_replicate = (
         filtered_results.with_columns((pl.col("R") - median_R).abs().alias("distance"))
-        .sort("distance")
+        .sort("distance", "replicate")
         .select("replicate")
         .head(1)
         .item()
@@ -1426,7 +1426,7 @@ def get_median_trajectory_from_peak_time(
         filtered_results.with_columns(
             (pl.col("peak_time") - median_peak_time).abs().alias("distance")
         )
-        .sort("distance")
+        .sort("distance", "replicate")
         .select("replicate")
         .head(1)
         .item()
