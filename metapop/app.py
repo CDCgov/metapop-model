@@ -294,7 +294,11 @@ def app(replicates=20):
             for key in advanced_ordered_keys:
                 edited_advanced_parms1[key] = edited_advanced_parms2[key]
 
-        st.caption(f"Metapop version: {importlib.metadata.version('metapop')}")
+        with st.expander("About this app"):
+            st.caption(f"metapop version: {importlib.metadata.version('metapop')}")
+            commit = os.popen("git rev-parse HEAD").read().strip().split("\n")[-1]
+            st.caption(f"commit hash: {commit}")
+
     #### End of sidebar panel
 
     #### Intervention scenarios:
