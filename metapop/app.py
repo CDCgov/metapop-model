@@ -313,7 +313,7 @@ def app(replicates=20):
         st.markdown(
             f'<a href="{url}" target="_blank">'
             f'<img src="{image_url}" width="30" style="vertical-align:middle; margin-right:8px;">'
-            "View on GitHub"
+            "Source code"
             "</a>",
             unsafe_allow_html=True,
         )
