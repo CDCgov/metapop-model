@@ -1,4 +1,5 @@
 import hashlib
+import os
 
 import numpy as np
 import numpy.linalg as la
@@ -18,6 +19,7 @@ __all__ = [
     "build_vax_schedule",
     "vaccinate_groups",
     "seed_from_string",
+    "get_metapop_info",
 ]
 
 
@@ -479,3 +481,50 @@ def seed_from_string(string):
     hash_object = hashlib.blake2b(string.encode(), digest_size=10)
     seed = int(hash_object.hexdigest(), 16)
     return seed
+
+
+def get_metapop_info():
+    """
+    Get metadata on the metapopulation model.
+
+    Returns:
+        dict: A dictionary containing metadata on the metapopulation model.
+    """
+
+    # version info from the requirements.txt file at root
+    version = "unknown"
+    req_path = os.path.join(
+        os.path.dirname(os.path.dirname(__file__)), "requirements.txt"
+    )
+    try:
+        with open(req_path, "r") as f:
+            for line in f:
+                if line.strip().startswith("metapop"):
+                    # Accept both == and >= or other version specifiers
+                    parts = line.strip().split("==")
+                    if len(parts) == 2:
+                        version = parts[1]
+                    else:
+                        # Try to split on >= or other specifiers
+                        for sep in [">=", "<=", "~=", ">", "<"]:
+                            if sep in line:
+                                version = line.strip().split(sep)[1]
+                                break
+                    break
+    except Exception:
+        pass
+    # If running locally, this is the version being run
+    # version = importlib.metadata.version("metapop")
+
+    # commit info from git
+    commit = os.popen("git rev-parse HEAD").read().strip().split("\n")[-1][0:7]
+
+    info = {
+        "name": "Measles Metapopulation Model",
+        "description": "A model simulating measles transmission in a metapopulation with public health interventions.",
+        "version": version,
+        "commit": commit,
+        "url": "https://github.com/cdcent/metapop-model",
+    }
+
+    return info

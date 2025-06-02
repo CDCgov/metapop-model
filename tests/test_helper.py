@@ -670,3 +670,14 @@ def test_seed_from_string():
     # Check that seeds are different
     assert seed_from_string("test") == seed_from_string("test")
     assert seed_from_string("test") != seed_from_string("test2")
+
+
+def test_get_metapop_info():
+    # Call the get_metadata_info function
+    metadata = get_metapop_info()
+
+    # Check the result
+    assert isinstance(metadata, dict), "Metadata should be a dictionary"
+    assert "version" in metadata, "Metadata should contain 'version' key"
+    assert "commit" in metadata, "Metadata should contain 'commit' key"
+    assert metadata["url"] == "https://github.com/cdcent/metapop-model"

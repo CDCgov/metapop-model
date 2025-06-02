@@ -20,6 +20,7 @@ from .helper import (
     calculate_foi,
     construct_beta,
     get_infected,
+    get_metapop_info,
     get_percapita_contact_matrix,
     get_r0,
     get_r0_one_group,
@@ -64,4 +65,5 @@ __all__ = [
     "app",
     "advanced_app",
     "app_with_table",
+    "get_metapop_info",
 ]
