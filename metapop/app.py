@@ -107,7 +107,7 @@ def app(replicates=20):
         st.text(
             "This tool is meant for use at the beginning of an outbreak at the county level or finer geographic scale. "
             "It is not intended to provide an exact forecast of cases in any community. "
-            "Hover over the ? for more information about each parameter."
+            "Hover over the (?) for more information about each parameter."
         )
         st.header(
             "Model Inputs",
