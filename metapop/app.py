@@ -368,10 +368,11 @@ def app(replicates=20):
 
     # check size of susceptible population
     initial_states = initialize_population(1, 1, updated_parms2)
+    u_ind = len(initial_states) - 1
 
     # if there is no one to vaccinate and other interventions are turned off
     if (
-        (initial_states[12][0][0] == 0)
+        (initial_states[u_ind][0][0] == 0)
         and (not scenario2[0]["isolation_on"])
         and (not scenario2[0]["pre_rash_isolation_on"])
     ):
