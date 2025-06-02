@@ -366,8 +366,10 @@ def app(replicates=20):
     scenario1 = [updated_parms1]
     scenario2 = [updated_parms2]
 
-    # check size of susceptible population
+    # build population state vectors, first elements are state vectors over time
     initial_states = initialize_population(1, 1, updated_parms2)
+
+    # last element returned by initialize_population is the initial state vector
     u_ind = len(initial_states) - 1
 
     # if there is no one to vaccinate and other interventions are turned off
