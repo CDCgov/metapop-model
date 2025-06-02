@@ -22,9 +22,11 @@ def test_vaccine_schedule_day_1():
     parms["vaccine_uptake_start_day"] = 0
     parms["vaccine_uptake_duration_days"] = 1
     parms["total_vaccine_uptake_doses"] = 100
+    parms["vaccine_efficacy_1_dose"] = 1
+    parms["vaccine_efficacy_2_dose"] = 1
     parms["vaccinated_group"] = 2
 
-    df = simulate(parms)
+    df = simulate(parms, seed=parms["seed"])
     # print(df.head(n=10))
     # for key, value in parms.items():
     #     print(f"{key}: {value}")
@@ -33,8 +35,11 @@ def test_vaccine_schedule_day_1():
     vdf = df.filter(df["group"] == parms["vaccinated_group"])
     vaccinations_on_day_1 = vdf.filter(vdf["t"] == 1)["X"][0]
     print("\nVaccines starting on day 1 and continuing for 1 day total")
+    print(vdf)
     print(f"Day 1: {vaccinations_on_day_1}\n")
-    # assert vaccinations_on_day_1 == parms["total_vaccine_uptake_doses"], f"Expected {parms['total_vaccine_uptake_doses']} but got {vaccinations_on_day_1}"
+    assert (
+        vaccinations_on_day_1 == parms["total_vaccine_uptake_doses"]
+    ), f"Expected {parms['total_vaccine_uptake_doses']} but got {vaccinations_on_day_1}"
 
 
 def test_vaccine_schedule_including_day_1():
@@ -50,9 +55,11 @@ def test_vaccine_schedule_including_day_1():
     parms["vaccine_uptake_start_day"] = 0
     parms["vaccine_uptake_duration_days"] = 5
     parms["total_vaccine_uptake_doses"] = 100
+    parms["vaccine_efficacy_1_dose"] = 1
+    parms["vaccine_efficacy_2_dose"] = 1
     parms["vaccinated_group"] = 2
 
-    df = simulate(parms)
+    df = simulate(parms, seed=parms["seed"])
     vdf = df.filter(df["group"] == parms["vaccinated_group"])
 
     vaccine_uptake_start_day_in_model = 1 + parms["vaccine_uptake_start_day"]
@@ -73,7 +80,9 @@ def test_vaccine_schedule_including_day_1():
     ][0]
     print(f"Total vaccines from day 1 to 5: {vaccines_administered}\n")
 
-    # assert vaccines_administered == parms["total_vaccine_uptake_doses"], f"Expected {parms['total_vaccine_uptake_doses']} but got {vaccines_administered}"
+    assert (
+        vaccines_administered == parms["total_vaccine_uptake_doses"]
+    ), f"Expected {parms['total_vaccine_uptake_doses']} but got {vaccines_administered}"
 
 
 def test_vaccine_schedule_starting_day_2():
@@ -89,9 +98,11 @@ def test_vaccine_schedule_starting_day_2():
     parms["vaccine_uptake_start_day"] = 1
     parms["vaccine_uptake_duration_days"] = 5
     parms["total_vaccine_uptake_doses"] = 100
+    parms["vaccine_efficacy_1_dose"] = 1
+    parms["vaccine_efficacy_2_dose"] = 1
     parms["vaccinated_group"] = 2
 
-    df = simulate(parms)
+    df = simulate(parms, seed=parms["seed"])
     vdf = df.filter(df["group"] == parms["vaccinated_group"])
 
     vaccine_uptake_start_day_in_model = 1 + parms["vaccine_uptake_start_day"]
@@ -112,7 +123,9 @@ def test_vaccine_schedule_starting_day_2():
         "X"
     ][0]
     print(f"Total vaccines from day 2 to 6: {vaccines_administered}\n")
-    # assert vaccines_administered == parms["total_vaccine_uptake_doses"], f"Expected {parms['total_vaccine_uptake_doses']} but got {vaccines_administered}"
+    assert (
+        vaccines_administered == parms["total_vaccine_uptake_doses"]
+    ), f"Expected {parms['total_vaccine_uptake_doses']} but got {vaccines_administered}"
 
 
 def test_vaccine_schedule_starting_after_day_2():
@@ -128,9 +141,11 @@ def test_vaccine_schedule_starting_after_day_2():
     parms["vaccine_uptake_start_day"] = 2
     parms["vaccine_uptake_duration_days"] = 5
     parms["total_vaccine_uptake_doses"] = 100
+    parms["vaccine_efficacy_1_dose"] = 1
+    parms["vaccine_efficacy_2_dose"] = 1
     parms["vaccinated_group"] = 2
 
-    df = simulate(parms)
+    df = simulate(parms, seed=parms["seed"])
     vdf = df.filter(df["group"] == parms["vaccinated_group"])
 
     vaccine_uptake_start_day_in_model = 1 + parms["vaccine_uptake_start_day"]
@@ -151,4 +166,6 @@ def test_vaccine_schedule_starting_after_day_2():
         "X"
     ][0]
     print(f"Total vaccines from day 3 to 7: {vaccines_administered}\n")
-    # assert vaccines_administered == parms["total_vaccine_uptake_doses"], f"Expected {parms['total_vaccine_uptake_doses']} but got {vaccines_administered}"
+    assert (
+        vaccines_administered == parms["total_vaccine_uptake_doses"]
+    ), f"Expected {parms['total_vaccine_uptake_doses']} but got {vaccines_administered}"

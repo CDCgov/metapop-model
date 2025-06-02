@@ -11,7 +11,10 @@ from metapop.helper import (
     time_to_rate,
 )
 from metapop.model import *
-from metapop.sim import simulate
+from metapop.sim import (
+    get_time_array,
+    simulate,
+)
 
 
 def test_only_expose_susceptible():
@@ -76,12 +79,14 @@ def test_aon_vaccine():
         beta=np.array([[20]]),
         pop_sizes=[1000],
         sigma_scaled=1 / 10.0,
+        tf=20,
     )
     # Build vax schedule
+    parms["t_array"] = get_time_array(parms)
     parms["vaccination_uptake_schedule"] = build_vax_schedule(parms)
 
     # Set time
-    t = 1
+    t = parms["t_array"][parms["vaccine_uptake_start_day"]]
 
     # Initial state for each group
     u = [[690, 300, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0]]
@@ -155,7 +160,7 @@ def test_states_updating():
     parms["pop_sizes"] = [1000]
     parms["beta"] = construct_beta(parms)
     parms["I0"] = [10]
-    parms["tf"] = 5
+    parms["tf"] = 30
     parms["initial_vaccine_coverage"] = [0.30]
     parms["vaccine_efficacy_1_dose"] = 0.0
     parms["vaccine_efficacy_2_dose"] = 0.0
@@ -164,10 +169,13 @@ def test_states_updating():
     parms["vaccine_uptake_start_day"] = 0
     parms["vaccine_uptake_duration_days"] = 21
 
+    parms["t_array"] = get_time_array(parms)
     parms["vaccination_uptake_schedule"] = build_vax_schedule(parms)
 
-    t_i = 1
-    t = np.arange(1, parms["tf"] + 1)
+    # t_i = 1
+    # t = np.arange(1, parms["tf"] + 1)
+    t = parms["t_array"]
+
     # Initial state for each group
     S, V, SV, E1, E2, E1_V, E2_V, I1, I2, R, Y, X, u = initialize_population(
         parms["tf"], parms["n_groups"], parms

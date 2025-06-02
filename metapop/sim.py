@@ -11,7 +11,7 @@ from .helper import (
     seed_from_string,
     time_to_rate,
 )
-from .model import SEIRModel
+from .model import Ind, SEIRModel
 
 # if you want to use methods from metapop in this file under
 # if __name__ == "__main__": you'll need to import them as:
@@ -27,12 +27,13 @@ __all__ = [
     "run_model",
     "simulate",
     "simulate_replicates",
+    "get_time_array",
 ]
 
 
 # run a single simulation of the SEIR model given a model instance
 def run_model(
-    model, u, t, steps, groups, S, V, SV, E1, E2, E1_V, E2_V, I1, I2, R, Y, X
+    model, u, t_array, steps, groups, S, V, SV, E1, E2, E1_V, E2_V, I1, I2, R, Y, X
 ):
     """
     Update the population arrays based on the SEIR model.
@@ -40,7 +41,7 @@ def run_model(
     Args:
         model: The SEIR model instance.
         u: The initial state.
-        t: The time array.
+        t_array: The time array.
         steps: The number of time steps.
         groups: The number of groups.
         S, V, SV, E1, E2, E1_V, E2_V, I1, I2, R, Y, X: The population arrays to be updated. Y is a infection counter (counted when they become infectious I1). X is vaccine uptake counter.
@@ -49,7 +50,7 @@ def run_model(
         S, V, SV, E1, E2, E1_V, E2_V, I1, I2, R, Y, X, u
     """
     for j in range(1, steps):
-        u = model.seirmodel(u, t[j])
+        u = model.seirmodel(u, t_array[j])
         for group in range(groups):
             (
                 S[j, group],
@@ -69,6 +70,21 @@ def run_model(
     return S, V, SV, E1, E2, E1_V, E2_V, I1, I2, R, Y, X, u
 
 
+def get_time_array(parms):
+    """
+    Get the time array for the simulation based on the total time and time step.
+
+    Args:
+        parms (dict): The parameters dictionary containing 'tf' (total time)
+
+    Returns:
+        np.ndarray: An array of time steps.
+    """
+    steps = parms["tf"]
+    t_array = np.arange(1, steps + 1)
+    return t_array
+
+
 def simulate(parms, seed):
     #### Set up rate params
     parms["sigma"] = time_to_rate(parms["latent_duration"])
@@ -79,12 +95,14 @@ def simulate(parms, seed):
     #### Set beta matrix based on desired R0 and connectivity scenario ###
     parms["beta"] = construct_beta(parms)
 
-    #### Set up vaccine schedule for group 2
-    parms["vaccination_uptake_schedule"] = build_vax_schedule(parms)
-
     #### Set up the model time steps
     steps = parms["tf"]
-    t = np.arange(1, steps + 1)
+
+    parms["t_array"] = get_time_array(parms)
+    t_array = parms["t_array"]
+
+    #### Set up vaccine schedule for group 2
+    parms["vaccination_uptake_schedule"] = build_vax_schedule(parms)
 
     #### Initialize population
     groups = parms["n_groups"]
@@ -92,16 +110,47 @@ def simulate(parms, seed):
         steps, groups, parms
     )
 
-    #### Run the model
+    #### Initialize the model
     model = SEIRModel(parms, seed)
+
+    #### Vaccinate the population on the first day if applicable
+    print("Vaccination uptake schedule:", parms["vaccination_uptake_schedule"])
+    first_day = t_array[0]
+    if first_day in parms["vaccination_uptake_schedule"]:
+        # if parms["vaccination_uptake_schedule"][1] > 0:
+        new_vaccinated, new_vaccine_failures = model.vaccinate(u, t_array[0])
+        print("Vaccinated individuals on day 1:", new_vaccinated)
+        print("Vaccine failures on day 1:", new_vaccine_failures)
+        updated_susceptibles, updated_failures = model.get_updated_susceptibles(
+            u, new_vaccinated, new_vaccine_failures
+        )
+        print("Updated susceptibles on day 1:", updated_susceptibles)
+        print("Updated vaccine failures on day 1:", updated_failures)
+
+        # Update the state vector with the new susceptibles and vaccine failures
+        for group in range(groups):
+            u[group][Ind.S.value] = updated_susceptibles[group]
+            u[group][Ind.SV.value] = updated_failures[group]
+            u[group][Ind.V.value] += new_vaccinated[group]
+            u[group][Ind.X.value] += new_vaccinated[group] + new_vaccine_failures[group]
+            S[0, group] = updated_susceptibles[group]
+            V[0, group] = u[group][Ind.V.value]
+            SV[0, group] = updated_failures[group]
+            X[0, group] = u[group][Ind.X.value]
+    else:
+        print("No vaccinations on the first day.")
+    print("Initial state vector:", u)
+
+    #### Run the model
+    # model = SEIRModel(parms, seed)
     S, V, SV, E1, E2, E1_V, E2_V, I1, I2, R, Y, X, u = run_model(
-        model, u, t, steps, groups, S, V, SV, E1, E2, E1_V, E2_V, I1, I2, R, Y, X
+        model, u, t_array, steps, groups, S, V, SV, E1, E2, E1_V, E2_V, I1, I2, R, Y, X
     )
 
     #### Flatten into a dataframe
     df = pl.DataFrame(
         {
-            "t": np.repeat(t, groups),
+            "t": np.repeat(t_array, groups),
             "group": np.tile(np.arange(groups), steps),
             "S": S.flatten(),
             "V": V.flatten(),

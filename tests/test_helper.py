@@ -241,7 +241,9 @@ def test_vaccination_schedule_not_empty():
         vaccine_uptake_duration_days=0,
         total_vaccine_uptake_doses=0,
         vaccinated_group=2,
+        tf=20,
     )
+    parms["t_array"] = get_time_array(parms)
     vaccination_uptake_schedule = build_vax_schedule(parms)
     assert vaccination_uptake_schedule == {parms["vaccine_uptake_start_day"]: 0}
 
@@ -258,6 +260,7 @@ def test_vaccines_administered_on_single_day():
         total_vaccine_uptake_doses=100,
         vaccinated_group=2,
         vaccine_efficacy_1_dose=0.93,
+        tf=20,
     )
 
     # Initial state for each group: Group 2 has no E or I individuals yet
@@ -266,7 +269,7 @@ def test_vaccines_administered_on_single_day():
         [700, 0, 60, 40, 0, 0, 0, 0, 0, 0, 0, 0],
         [600, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     ]
-
+    parms["t_array"] = get_time_array(parms)
     vaccination_uptake_schedule = build_vax_schedule(parms)
 
     # assert that all vaccine doses are administered on the same day
@@ -274,7 +277,7 @@ def test_vaccines_administered_on_single_day():
         parms["total_vaccine_uptake_doses"] * (1 - parms["vaccine_efficacy_1_dose"])
     )
     assert np.array_equal(
-        vaccinate_groups(parms["n_groups"], u, 10, vaccination_uptake_schedule, parms),
+        vaccinate_groups(parms["n_groups"], u, 11, vaccination_uptake_schedule, parms),
         ([0, 0, 100 - fails], [0, 0, fails]),
     )
 
@@ -292,6 +295,7 @@ def test_active_vaccination():
         "total_vaccine_uptake_doses": 100,
         "vaccinated_group": 2,
         "vaccine_efficacy_1_dose": 0.93,
+        "tf": 20,
     }
 
     # Initial state for each group: Group 2 has no E or I individuals yet
@@ -300,7 +304,7 @@ def test_active_vaccination():
         [700, 0, 0, 60, 40, 0, 0, 0, 0, 0, 0, 0],
         [600, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     ]
-
+    parms["t_array"] = get_time_array(parms)
     vaccination_uptake_schedule = build_vax_schedule(parms)
 
     # Assertions to check the expected results: in group 2, 100% of eligible are susceptible
@@ -349,6 +353,7 @@ def test_vaccine_doses_greater_than_population():
         "total_vaccine_uptake_doses": 10000,
         "vaccinated_group": 2,
         "vaccine_efficacy_1_dose": 0.93,
+        "tf": 20,
     }
 
     # Initial state for each group: Group 2 has no E or I individuals yet
@@ -360,9 +365,11 @@ def test_vaccine_doses_greater_than_population():
 
     initial_S_group_2 = u[parms["vaccinated_group"]][0]
 
+    parms["t_array"] = get_time_array(parms)
     vaccination_uptake_schedule = build_vax_schedule(parms)
+
     success, fails = vaccinate_groups(
-        parms["n_groups"], u, 10, vaccination_uptake_schedule, parms
+        parms["n_groups"], u, 11, vaccination_uptake_schedule, parms
     )
 
     failed_vax = int(initial_S_group_2 * (1 - parms["vaccine_efficacy_1_dose"]))

@@ -393,6 +393,7 @@ def build_vax_schedule(parms):
             - vaccine_uptake_start_day (int): The day the vaccination campaign starts.
             - vaccine_uptake_duration_days (int): The duration of the vaccination campaign.
             - total_vaccine_uptake_doses (int): The total number of vaccine doses available.
+            - t_array (list): The array of time steps in the model.
 
     Returns:
         dict: A dictionary with days as keys and doses as values.
@@ -408,8 +409,15 @@ def build_vax_schedule(parms):
     ), "total_vaccine_uptake_doses must be provided in parms"
 
     # Generate a sequence of days between the start and end of the vaccine_uptake_range
-    start_day = parms["vaccine_uptake_start_day"]
-    end_day = start_day + parms["vaccine_uptake_duration_days"]
+    t_array = parms["t_array"]
+    # print(f"vaccine start day: {t_array[parms['vaccine_uptake_start_day']]}")
+    # print(f"vaccine end day: {t_array[parms['vaccine_uptake_start_day'] + parms['vaccine_uptake_duration_days']]}")
+    start_day = t_array[parms["vaccine_uptake_start_day"]]
+    end_day = t_array[
+        parms["vaccine_uptake_start_day"] + parms["vaccine_uptake_duration_days"]
+    ]
+    print("vaccine uptake days:", start_day, "to", end_day)
+
     vaccine_uptake_days = list(range(start_day, end_day))
 
     if parms["vaccine_uptake_duration_days"] > 0:

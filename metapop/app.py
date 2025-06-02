@@ -47,7 +47,7 @@ from .helper import (
     seed_from_string,
     get_metapop_info,
 )
-
+from .sim import get_time_array
 # if you want to use the methods from metapop in this file under
 # if __name__ == "__main__": you'll need to import them as:
 # from metapop.app_helper import (
@@ -466,6 +466,7 @@ def app(replicates=20):
     interval_results2 = interval_results2.rename(app_column_mapping)
 
     # vax schedule for plotting
+    edited_parms2["t_array"] = get_time_array(edited_parms2)
     sched = build_vax_schedule(edited_parms2)
 
     if outcome not in ["Y", "inc", "Winc", "WCI"]:
