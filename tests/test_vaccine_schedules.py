@@ -27,9 +27,6 @@ def test_vaccine_schedule_day_1():
     parms["vaccinated_group"] = 2
 
     df = simulate(parms, seed=parms["seed"])
-    # print(df.head(n=10))
-    # for key, value in parms.items():
-    #     print(f"{key}: {value}")
 
     # Check that the number of vaccinated individuals is equal to the total vaccine uptake doses
     vdf = df.filter(df["group"] == parms["vaccinated_group"])
