@@ -305,11 +305,14 @@ def app(replicates=20):
         st.header("About this app")
         st.caption(f"metapop version: {info['version']}")
         st.caption(f"commit hash: {info['commit']}")
-        # st.page_link(info['url'], label = "GitHub repository")
+        # show the url of the repo
         url = info["url"]
+        image_url = (
+            "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
+        )
         st.markdown(
             f'<a href="{url}" target="_blank">'
-            '<img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" width="30" style="vertical-align:middle; margin-right:8px;">'
+            f'<img src="{image_url}" width="30" style="vertical-align:middle; margin-right:8px;">'
             "View on GitHub"
             "</a>",
             unsafe_allow_html=True,
