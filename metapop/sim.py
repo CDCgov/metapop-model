@@ -85,6 +85,50 @@ def get_time_array(parms):
     return t_array
 
 
+def vaccinate_on_day(
+    model,
+    u,
+    t,
+    groups,
+    S,
+    V,
+    SV,
+    E1,
+    E2,
+    E1_V,
+    E2_V,
+    I1,
+    I2,
+    R,
+    Y,
+    X,
+    vaccination_uptake_schedule,
+):
+    """
+    Check if vaccination should occur on the current day and update
+    states if so. No other transitions occur in this function.
+
+    Returns:
+
+    """
+    if t in vaccination_uptake_schedule:
+        new_vaccinated, new_vaccine_failures = model.vaccinate(u, t)
+        updated_susceptibles, updated_failures = model.get_updated_susceptibles(
+            u, new_vaccinated, new_vaccine_failures
+        )
+        for group in range(groups):
+            u[group][Ind.S.value] = updated_susceptibles[group]
+            u[group][Ind.SV.value] = updated_failures[group]
+            u[group][Ind.V.value] += new_vaccinated[group]
+            u[group][Ind.X.value] += new_vaccinated[group] + new_vaccine_failures[group]
+            S[0, group] = updated_susceptibles[group]
+            V[0, group] = u[group][Ind.V.value]
+            SV[0, group] = updated_failures[group]
+            X[0, group] = u[group][Ind.X.value]
+
+    return S, V, SV, E1, E2, E1_V, E2_V, I1, I2, R, Y, X, u
+
+
 def simulate(parms, seed):
     #### Set up rate params
     parms["sigma"] = time_to_rate(parms["latent_duration"])
@@ -114,18 +158,15 @@ def simulate(parms, seed):
     model = SEIRModel(parms, seed)
 
     #### Vaccinate the population on the first day if applicable
-    print("Vaccination uptake schedule:", parms["vaccination_uptake_schedule"])
+    # print("Vaccination uptake schedule:", parms["vaccination_uptake_schedule"])
     first_day = t_array[0]
     if first_day in parms["vaccination_uptake_schedule"]:
-        # if parms["vaccination_uptake_schedule"][1] > 0:
         new_vaccinated, new_vaccine_failures = model.vaccinate(u, t_array[0])
-        print("Vaccinated individuals on day 1:", new_vaccinated)
-        print("Vaccine failures on day 1:", new_vaccine_failures)
         updated_susceptibles, updated_failures = model.get_updated_susceptibles(
             u, new_vaccinated, new_vaccine_failures
         )
-        print("Updated susceptibles on day 1:", updated_susceptibles)
-        print("Updated vaccine failures on day 1:", updated_failures)
+        # print("Updated susceptibles on day 1:", updated_susceptibles)
+        # print("Updated vaccine failures on day 1:", updated_failures)
 
         # Update the state vector with the new susceptibles and vaccine failures
         for group in range(groups):
@@ -137,9 +178,9 @@ def simulate(parms, seed):
             V[0, group] = u[group][Ind.V.value]
             SV[0, group] = updated_failures[group]
             X[0, group] = u[group][Ind.X.value]
-    else:
-        print("No vaccinations on the first day.")
-    print("Initial state vector:", u)
+    # else:
+    #    print("No vaccinations on the first day.")
+    # print("Initial state vector:", u)
 
     #### Run the model
     # model = SEIRModel(parms, seed)
