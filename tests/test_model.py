@@ -172,8 +172,6 @@ def test_states_updating():
     parms["t_array"] = get_time_array(parms)
     parms["vaccination_uptake_schedule"] = build_vax_schedule(parms)
 
-    # t_i = 1
-    # t = np.arange(1, parms["tf"] + 1)
     t = parms["t_array"]
 
     # Initial state for each group
