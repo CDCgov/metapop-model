@@ -766,7 +766,7 @@ def app(replicates=20):
             <a href='https://www.ecdc.europa.eu/en/measles/facts' target='_blank'>[Factsheet about measles]</a>
             . Communities with higher contact rates — for example populations with higher population density
             or larger households
-            <a href='https://pmc.ncbi.nlm.nih.gov/articles/PMC8765757/' target='_blank'>[Social contact patterns and implications for infectious disease transmission – a systematic review and meta-analysis of contact surveys | eLife]</a> — may have higher contact rates and higher R<sub>0</sub>. The probability of infection given contact with an infectious individuals is very high for measles;
+            <a href='https://pmc.ncbi.nlm.nih.gov/articles/PMC8765757/' target='_blank'>[Social contact patterns and implications for infectious disease transmission – a systematic review and meta-analysis of contact surveys | eLife]</a> — may have higher R<sub>0</sub>. The probability of infection given contact with an infectious individuals is very high for measles;
             the household attack rate is estimated to be 90%
             <a href='https://www.cdc.gov/yellow-book/hcp/travel-associated-infections-diseases/measles-rubeola.html#:~:text=Measles%20is%20among%20the%20most,global%20eradication%20of%20measles%20feasible' target='_blank'>[CDC Yellow Book: Measles (Rubeola)]</a>.
             </li>
