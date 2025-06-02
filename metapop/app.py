@@ -295,7 +295,31 @@ def app(replicates=20):
                 edited_advanced_parms1[key] = edited_advanced_parms2[key]
 
         with st.expander("About this app"):
-            st.caption(f"metapop version: {importlib.metadata.version('metapop')}")
+            # Read version from requirements.txt at project root - this is what package manager should reference for building
+            req_path = os.path.join(
+                os.path.dirname(os.path.dirname(__file__)), "requirements.txt"
+            )
+            version = "unknown"
+            try:
+                with open(req_path, "r") as f:
+                    for line in f:
+                        if line.strip().startswith("metapop"):
+                            # Accept both == and >= or other version specifiers
+                            parts = line.strip().split("==")
+                            if len(parts) == 2:
+                                version = parts[1]
+                            else:
+                                # Try to split on >= or other specifiers
+                                for sep in [">=", "<=", "~=", ">", "<"]:
+                                    if sep in line:
+                                        version = line.strip().split(sep)[1]
+                                        break
+                            break
+            except Exception:
+                pass
+            # If running locally, this is the version being run
+            version = importlib.metadata.version("metapop")
+            st.caption(f"metapop version: {version}")
             commit = os.popen("git rev-parse HEAD").read().strip().split("\n")[-1]
             st.caption(f"commit hash: {commit}")
 
