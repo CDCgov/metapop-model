@@ -300,10 +300,11 @@ def app(replicates=20):
             for key in advanced_ordered_keys:
                 edited_advanced_parms1[key] = edited_advanced_parms2[key]
 
-        with st.expander("About this app"):
-            info = get_metapop_info()
-            st.caption(f"metapop version: {info['version']}")
-            st.caption(f"commit hash: {info['commit']}")
+        # Add an About this app section to the sidebar
+        info = get_metapop_info()
+        st.header("About this app")
+        st.caption(f"metapop version: {info['version']}")
+        st.caption(f"commit hash: {info['commit']}")
 
     #### End of sidebar panel
 
