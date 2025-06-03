@@ -90,15 +90,16 @@ class SEIRModel:
         new_SV = []
         if self.parms["total_vaccine_uptake_doses"] > 0:
             vaccination_uptake_schedule = self.parms["vaccination_uptake_schedule"]
-            new_V, new_SV = vaccinate_groups(
+            new_V, new_SV, new_EV = vaccinate_groups(
                 self.groups, u, t, vaccination_uptake_schedule, self.parms
             )
         else:
             for group in range(self.groups):
                 new_V.append(0)
                 new_SV.append(0)
+                new_EV.append(0)
 
-        return new_V, new_SV
+        return new_V, new_SV, new_EV
 
     def infectious(self, u):
         new_I1 = []
@@ -147,7 +148,7 @@ class SEIRModel:
 
     def seirmodel(self, u, t):
         new_u = []
-        s_v, s_sv = self.vaccinate(u, t)
+        s_v, s_sv, e_v = self.vaccinate(u, t)
         current_susceptibles, current_failures = self.get_updated_susceptibles(
             u, s_v, s_sv
         )
@@ -169,7 +170,7 @@ class SEIRModel:
             new_I2 = I2 + i1_i2[group] - i2_r[group]
             new_R = R + i2_r[group]
             new_Y = Y + sv_e1v[group] + s_e1[group]
-            new_X = X + s_sv[group] + s_v[group]
+            new_X = X + s_sv[group] + s_v[group] + e_v[group]
             new_u.append(
                 [
                     new_S,

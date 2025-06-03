@@ -440,6 +440,12 @@ def build_vax_schedule(parms):
     # Create the schedule dictionary
     schedule = {day: doses_per_day for day in vaccine_uptake_days}
 
+    if sum(schedule.values()) > parms["total_vaccine_uptake_doses"]:
+        last_day = vaccine_uptake_days[-1]
+        schedule[last_day] = (
+            parms["total_vaccine_uptake_doses"] - sum(schedule.values()) + doses_per_day
+        )
+
     # If no days are specified, set the schedule to 0 doses for day the first day of the vaccine schedule as a
     # placeholder rather than an empty dictionary
     if len(vaccine_uptake_days) == 0:
@@ -465,6 +471,7 @@ def vaccinate_groups(groups, u, t, vaccination_uptake_schedule, parms):
     """
     new_vaccinated = np.zeros(groups, dtype=int)
     new_failures = np.zeros(groups, dtype=int)
+    new_exposed_doses = np.zeros(groups, dtype=int)
     vaccinated_group = parms["vaccinated_group"]
     vaccine_efficacy = parms["vaccine_efficacy_1_dose"]
 
@@ -483,11 +490,12 @@ def vaccinate_groups(groups, u, t, vaccination_uptake_schedule, parms):
         else:
             S_doses = 0
 
+        new_exposed_doses[vaccinated_group] = doses - S_doses
         vaccine_failures = int(S_doses * (1 - vaccine_efficacy))
         new_vaccinated[vaccinated_group] = S_doses - vaccine_failures
         new_failures[vaccinated_group] = vaccine_failures
 
-    return new_vaccinated, new_failures
+    return new_vaccinated, new_failures, new_exposed_doses
 
 
 def seed_from_string(string):

@@ -469,6 +469,14 @@ def app(replicates=20):
     results1 = get_scenario_results(scenario1)
     results2 = get_scenario_results(scenario2)
 
+    # Display number of doses administered now that use has finished selecting parameters
+    with col_intervention_text:
+        st.text(
+            f"Total vaccines administered during campaign: {int(results2['X'][-1])} doses",
+            help="This number is calculated based on user input for the percentage of the non-immune population that gets vaccinated during the campaign.",
+        )
+
+
     # fullresults for later
     fullresults1 = results1
     fullresults2 = results2
