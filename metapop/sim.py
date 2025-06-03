@@ -108,7 +108,16 @@ def vaccinate_on_day(
     Check if vaccination should occur on the current day and update
     states if so. No other transitions occur in this function.
 
+    Args:
+        model: The SEIR model instance.
+        u: The current state of the population.
+        t: The current time step.
+        groups: The number of groups in the population.
+        S, V, SV, E1, E2, E1_V, E2_V, I1, I2, R, Y, X: The population arrays to be updated. Y is a infection counter (counted when they become infectious I1). X is vaccine uptake counter.
+        vaccination_uptake_schedule: A schedule indicating when vaccinations occur.
+
     Returns:
+        S, V, SV, E1, E2, E1_V, E2_V, I1, I2, R, Y, X, u
 
     """
     if t in vaccination_uptake_schedule:
