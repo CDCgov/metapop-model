@@ -410,7 +410,6 @@ def build_vax_schedule(parms):
 
     # Generate a sequence of days between the start and end of the vaccine_uptake_range
     t_array = parms["t_array"]
-    # start_day = t_array[parms["vaccine_uptake_start_day"]]
 
     # if the start day is beyond the end of the time series, return a schedule with zero doses on that day
     if parms["vaccine_uptake_start_day"] >= len(t_array):
