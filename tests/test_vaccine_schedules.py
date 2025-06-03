@@ -3,6 +3,8 @@ import os
 import yaml
 
 from metapop import simulate
+from metapop.helper import build_vax_schedule
+from metapop.sim import get_time_array
 
 testdir = os.path.dirname(__file__)
 
@@ -18,7 +20,7 @@ def test_vaccine_schedule_day_1():
 
     # reset scenario so that there are no infections but vaccines should be given and all on day 1
     parms["I0"] = [0, 0, 0]
-    parms["tf"] = 10
+    parms["tf"] = 3
     parms["vaccine_uptake_start_day"] = 0
     parms["vaccine_uptake_duration_days"] = 1
     parms["total_vaccine_uptake_doses"] = 100
@@ -132,7 +134,7 @@ def test_vaccine_schedule_starting_after_day_2():
     parms = config["baseline_parameters"]
 
     # reset scenario so that there are no infections but vaccines should be
-    # given starting on the first day and continuing for 5 days total
+    # given starting on the second day and continuing for 5 days total
     parms["I0"] = [0, 0, 0]
     parms["tf"] = 10
     parms["vaccine_uptake_start_day"] = 2
@@ -166,3 +168,34 @@ def test_vaccine_schedule_starting_after_day_2():
     assert (
         vaccines_administered == parms["total_vaccine_uptake_doses"]
     ), f"Expected {parms['total_vaccine_uptake_doses']} but got {vaccines_administered}"
+
+
+def test_vaccine_schedule_clipped_past_end_of_simulation():
+    with open(os.path.join(testdir, "test_config.yaml"), "r") as f:
+        config = yaml.safe_load(f)
+
+    parms = config["baseline_parameters"]
+    # reset scenario so that there are no infections but vaccines should be
+    # given starting on the eighth day after introduction (day 9), lasting for 5 days total, 3 days past the end of the simulation
+    # so the vaccination schedule built is only for 2 days
+    parms["I0"] = [0, 0, 0]
+    parms["tf"] = 10
+    parms["vaccine_uptake_start_day"] = 8
+    parms["vaccine_uptake_duration_days"] = 5
+    parms["total_vaccine_uptake_doses"] = 100
+    parms["vaccine_efficacy_1_dose"] = 1
+    parms["vaccine_efficacy_2_dose"] = 1
+    parms["vaccinated_group"] = 2
+
+    parms["t_array"] = get_time_array(parms)
+
+    schedule = build_vax_schedule(parms)
+    print(
+        "Vaccines starting on day 9 and continuing for 5 days total, clipped to 2 days"
+    )
+    for day in schedule:
+        vaccinations_on_day = schedule[day]
+        print(f"Day {day}: {vaccinations_on_day}")
+    assert (
+        len(schedule) == parms["tf"] - parms["vaccine_uptake_start_day"]
+    ), "Expected vaccination schedule to be clipped to 2 days"

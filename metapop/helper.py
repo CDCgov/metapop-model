@@ -413,14 +413,14 @@ def build_vax_schedule(parms):
     start_day = t_array[parms["vaccine_uptake_start_day"]]
     # try to set the end day to the last day of the campaign if it's within the time series for simulation
     # if not, set it to the last day of the time series
-    if parms["vaccine_uptake_start_day"] + parms["vaccine_uptake_duration_days"] < len(
+    if parms["vaccine_uptake_start_day"] + parms["vaccine_uptake_duration_days"] <= len(
         t_array
     ):
         end_day = t_array[
             parms["vaccine_uptake_start_day"] + parms["vaccine_uptake_duration_days"]
         ]
     else:
-        end_day = t_array[-1]
+        end_day = t_array[-1] + 1
 
     vaccine_uptake_days = list(range(start_day, end_day))
 
