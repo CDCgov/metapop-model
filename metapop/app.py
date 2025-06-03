@@ -218,14 +218,27 @@ def app(replicates=20):
 
         # For the no intervention scenario, intervention parameters are set to 0
         edited_parms1 = set_parms_to_zero(
-            edited_parms, ["pre_rash_isolation_reduction", "isolation_reduction"]
+            edited_parms,
+            [
+                "pre_rash_isolation_reduction",
+                "isolation_reduction",
+                "total_vaccine_uptake_doses",
+            ],
         )
+        assert (
+            edited_parms1["total_vaccine_uptake_doses"] == 0
+        ), "Total vaccine uptake doses should be 0 for the no intervention scenario"
+        assert (
+            edited_parms1["pre_rash_isolation_reduction"] == 0
+        ), "Pre-rash isolation reduction should be 0 for the no intervention scenario"
+        assert (
+            edited_parms1["isolation_reduction"] == 0
+        ), "Isolation reduction should be 0 for the no intervention scenario"
 
         col_intervention = st.columns(1)[0]
 
         # For the intervention scenario, user defines values
         edited_parms2 = app_editors(
-            # st.container(),
             col_intervention,
             "",
             edited_parms,
@@ -243,6 +256,7 @@ def app(replicates=20):
 
         # if total uptake doses is a proportion, scale to a number of doses
         if parms["use_prop_vaccine_uptake"]:
+            edited_parms1 = rescale_prop_vax(edited_parms1)
             edited_parms2 = rescale_prop_vax(edited_parms2)
 
         # placeholder for text about the vaccine campaign doses and other intervention effects in the siderbar

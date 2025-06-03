@@ -456,7 +456,7 @@ def vaccinate_groups(groups, u, t, vaccination_uptake_schedule, parms):
         doses = vaccination_uptake_schedule[t]
         # Calculate the proportion of doses to assign to S, E1, and E2
         if vaccine_eligible > 0:
-            S_doses = int(
+            S_doses = round(
                 doses * S / vaccine_eligible
             )  # proportion of doses going to S
             S_doses = min(S_doses, S)  # Ensure S_doses does not exceed S
