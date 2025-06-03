@@ -476,6 +476,8 @@ def app(replicates=20):
     if sum(schedule.values()) == 0:
         st.warning(
             "With the selected vaccine campaign parameters, no vaccine doses will be administered during the campaign."
+            " Vaccine doses are evenly distributed over the campaign period and rounded to the closest integer for use in a discrete stochastic model."
+            " As a result, the selected parameters may result in less than zero doses being administered per day with rounding."
             " Please review vaccine campaign parameters to administer at least one dose during the campaign."
         )
 
