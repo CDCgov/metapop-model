@@ -429,7 +429,6 @@ def build_vax_schedule(parms):
     else:
         end_day = t_array[-1] + 1
 
-    print(f"start_day: {start_day}, end_day: {end_day}")
     vaccine_uptake_days = list(range(start_day, end_day))
 
     if parms["vaccine_uptake_duration_days"] > 0:

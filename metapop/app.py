@@ -472,8 +472,6 @@ def app(replicates=20):
     edited_parms2["t_array"] = get_time_array(edited_parms2)
     schedule = build_vax_schedule(edited_parms2)
 
-    print(f"Vaccine schedule: {schedule}")
-
     # if doses are zero, warn the user
     if sum(schedule.values()) == 0:
         st.warning(
