@@ -406,11 +406,14 @@ def app(replicates=20):
     scenario1 = [updated_parms1]
     scenario2 = [updated_parms2]
 
+    # check the initial population state and see if conditions allow for vaccination to run
     # build population state vectors, first elements are state vectors over time
     initial_states = initialize_population(1, 1, updated_parms2)
 
     # last element returned by initialize_population is the initial state vector
     u_ind = len(initial_states) - 1
+
+    warning_message = ""
 
     # if there is no one to vaccinate and other interventions are turned off
     if (
@@ -418,9 +421,30 @@ def app(replicates=20):
         and (not scenario2[0]["isolation_on"])
         and (not scenario2[0]["pre_rash_isolation_on"])
     ):
-        st.warning(
+        warning_message += (
             "With these initial conditions, there are no people to vaccinate in this population and other interventions are turned off. "
             "Please turn on isolation or quarantine or adjust the population size or baseline immunity."
+            "\n\n"
+        )
+
+    # vax schedule for plotting and warning messages to users
+    edited_parms2["t_array"] = get_time_array(edited_parms2)
+    schedule = build_vax_schedule(edited_parms2)
+
+    # if doses are zero, warn the user
+    if sum(schedule.values()) == 0:
+        # if no other warning message defined yet, create this one instead
+        if warning_message == "":
+            warning_message += (
+                "With the selected vaccine campaign parameters, no vaccine doses will be administered during the campaign."
+                " Vaccine doses are evenly distributed over the campaign period and rounded to the closest integer for use in a discrete stochastic model."
+                " As a result, the selected parameters may result in less than one dose being administered per day with rounding."
+                " Please review vaccine campaign parameters to administer at least one dose during the campaign."
+            )
+
+    if warning_message != "":
+        st.warning(
+            warning_message,
         )
 
     #### Plot Options:
@@ -467,19 +491,6 @@ def app(replicates=20):
     app_column_mapping = {f"inc_{interval}": "Winc", "Y": "WCI"}
     interval_results1 = interval_results1.rename(app_column_mapping)
     interval_results2 = interval_results2.rename(app_column_mapping)
-
-    # vax schedule for plotting
-    edited_parms2["t_array"] = get_time_array(edited_parms2)
-    schedule = build_vax_schedule(edited_parms2)
-
-    # if doses are zero, warn the user
-    if sum(schedule.values()) == 0:
-        st.warning(
-            "With the selected vaccine campaign parameters, no vaccine doses will be administered during the campaign."
-            " Vaccine doses are evenly distributed over the campaign period and rounded to the closest integer for use in a discrete stochastic model."
-            " As a result, the selected parameters may result in less than one dose being administered per day with rounding."
-            " Please review vaccine campaign parameters to administer at least one dose during the campaign."
-        )
 
     if outcome not in ["Y", "inc", "Winc", "WCI"]:
         print("outcome not available yet, defaulting to Cumulative Daily Incidence")
