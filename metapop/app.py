@@ -535,7 +535,7 @@ def app(replicates=20):
     chart_placeholder.text("Building charts...")
     chart = (
         alt.Chart(combined_alt_results)
-        .mark_line(opacity=0.3, strokeWidth=0.75)
+        .mark_line(opacity=0.3, strokeWidth=0.75, clip=True)
         .encode(
             x=alt.X(x, title=time_label),
             y=alt.Y(outcome, title=outcome_option),
@@ -575,7 +575,7 @@ def app(replicates=20):
 
     ave_line = (
         alt.Chart(combined_ave_results.to_pandas())
-        .mark_line(opacity=1.0, strokeWidth=3.0)
+        .mark_line(opacity=1.0, strokeWidth=3.0, clip=True)
         .encode(
             x=alt.X(x, title=time_label),
             y=alt.Y(outcome, title=outcome_option),
