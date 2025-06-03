@@ -120,7 +120,10 @@ def app(replicates=20):
         )  # defines the type of widget for each parameter
         min_values = dict(pop_sizes=[1000, 100, 100], I0=[1, 0, 0])
         min_values = get_min_values(min_values)
-        max_values = dict(initial_vaccine_coverage=[0.99, 0.99, 0.99])
+        max_values = dict(
+            initial_vaccine_coverage=[0.99, 0.99, 0.99],
+            vaccine_uptake_start_day=364,
+        )
         max_values = get_max_values(max_values)
         steps = get_step_values()
         helpers = get_helpers()
