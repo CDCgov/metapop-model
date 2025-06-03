@@ -467,7 +467,16 @@ def app(replicates=20):
 
     # vax schedule for plotting
     edited_parms2["t_array"] = get_time_array(edited_parms2)
-    sched = build_vax_schedule(edited_parms2)
+    schedule = build_vax_schedule(edited_parms2)
+
+    print(f"Vaccine schedule: {schedule}")
+
+    # if doses are zero, warn the user
+    if sum(schedule.values()) == 0:
+        st.warning(
+            "With the selected vaccine campaign parameters, no vaccine doses will be administered during the campaign."
+            " Please review vaccine campaign parameters to administer at least one dose during the campaign."
+        )
 
     if outcome not in ["Y", "inc", "Winc", "WCI"]:
         print("outcome not available yet, defaulting to Cumulative Daily Incidence")
@@ -482,16 +491,16 @@ def app(replicates=20):
         # min_y, max_y = 0, max(results1[outcome].max(), results2[outcome].max())
         x = "t:Q"
         time_label = "Time (days)"
-        vax_start = min(sched.keys())
-        vax_end = max(sched.keys())
+        vax_start = min(schedule.keys())
+        vax_end = max(schedule.keys())
     elif outcome_option in ["Weekly Incidence", "Weekly Cumulative Incidence"]:
         alt_results1 = interval_results1
         alt_results2 = interval_results2
         # min_y, max_y = 0, max(interval_results1[outcome].max(), interval_results2[outcome].max())
         x = "interval_t:Q"
         time_label = "Time (weeks)"
-        vax_start = min(sched.keys()) / interval
-        vax_end = max(sched.keys()) / interval
+        vax_start = min(schedule.keys()) / interval
+        vax_end = max(schedule.keys()) / interval
 
     # get median line for each scenario (based on ALL sims, not just smaller sample)
     ave_results1 = get_median_trajectory_from_peak_time(alt_results1).with_columns(

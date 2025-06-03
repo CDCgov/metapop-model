@@ -410,7 +410,14 @@ def build_vax_schedule(parms):
 
     # Generate a sequence of days between the start and end of the vaccine_uptake_range
     t_array = parms["t_array"]
-    start_day = t_array[parms["vaccine_uptake_start_day"]]
+    # start_day = t_array[parms["vaccine_uptake_start_day"]]
+
+    # if the start day is beyond the end of the time series, return a schedule with zero doses on that day
+    if parms["vaccine_uptake_start_day"] >= len(t_array):
+        start_day = parms["vaccine_uptake_start_day"] + 1
+    else:
+        start_day = t_array[parms["vaccine_uptake_start_day"]]
+
     # try to set the end day to the last day of the campaign if it's within the time series for simulation
     # if not, set it to the last day of the time series
     if parms["vaccine_uptake_start_day"] + parms["vaccine_uptake_duration_days"] <= len(
@@ -422,6 +429,7 @@ def build_vax_schedule(parms):
     else:
         end_day = t_array[-1] + 1
 
+    print(f"start_day: {start_day}, end_day: {end_day}")
     vaccine_uptake_days = list(range(start_day, end_day))
 
     if parms["vaccine_uptake_duration_days"] > 0:
@@ -434,10 +442,10 @@ def build_vax_schedule(parms):
     # Create the schedule dictionary
     schedule = {day: doses_per_day for day in vaccine_uptake_days}
 
-    # If no days are specified, set the schedule to 0 doses for day 0 as a
+    # If no days are specified, set the schedule to 0 doses for day the first day of the vaccine schedule as a
     # placeholder rather than an empty dictionary
     if len(vaccine_uptake_days) == 0:
-        schedule = {parms["vaccine_uptake_start_day"]: 0}
+        schedule = {parms["vaccine_uptake_start_day"] + 1: 0}
     return schedule
 
 

@@ -199,3 +199,34 @@ def test_vaccine_schedule_clipped_past_end_of_simulation():
     assert (
         len(schedule) == parms["tf"] - parms["vaccine_uptake_start_day"]
     ), "Expected vaccination schedule to be clipped to 2 days"
+
+
+def test_vaccine_schedule_starting_on_last_day_of_simulation():
+    with open(os.path.join(testdir, "test_config.yaml"), "r") as f:
+        config = yaml.safe_load(f)
+
+    parms = config["baseline_parameters"]
+
+    # reset scenario so that there are no infections but vaccines should be
+    # given starting on the eighth day after introduction (day 9), lasting for 5 days total, 3 days past the end of the simulation
+    # so the vaccination schedule built is only for 2 days
+    parms["I0"] = [0, 0, 0]
+    parms["tf"] = 365
+    parms["vaccine_uptake_start_day"] = 365
+    parms["vaccine_uptake_duration_days"] = 5
+    parms["total_vaccine_uptake_doses"] = 100
+    parms["vaccine_efficacy_1_dose"] = 1
+    parms["vaccine_efficacy_2_dose"] = 1
+    parms["vaccinated_group"] = 2
+
+    parms["t_array"] = get_time_array(parms)
+
+    schedule = build_vax_schedule(parms)
+    print(schedule)
+    print(f"The last day of simulation is {parms['tf']}")
+    print(
+        f"Vaccines are starting {parms['vaccine_uptake_start_day']} days after introduction, which is day {parms['vaccine_uptake_start_day'] + 1} in the simulation"
+    )
+    assert schedule == {
+        parms["vaccine_uptake_start_day"] + 1: 0
+    }, "No vaccines should be administered past the end of simulation"

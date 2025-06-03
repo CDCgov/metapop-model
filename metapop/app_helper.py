@@ -802,7 +802,7 @@ def get_helpers(parms=None):
             "Baseline immunity in small population 1",
             "Baseline immunity in small population 2",
         ],
-        vaccine_uptake_start_day="Day that the vaccination campaign starts (day 0 is the day infections are imported to the community).",
+        vaccine_uptake_start_day="Number of days after introduction that the vaccination campaign starts (0 days is the day infections are imported to the community).",
         vaccine_uptake_duration_days="The vaccine doses are distributed evenly throughout the specified duration of time (i.e., the same number of vaccines will be distributed on each day). ",
         total_vaccine_uptake_doses="In this model, we administer one dose of the MMR vaccine per person vaccinated during the campaign, with 93% effectiveness as indicated by vaccine studies.",
         vaccinated_group="Population receiving the vaccine",

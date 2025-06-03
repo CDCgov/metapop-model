@@ -245,7 +245,7 @@ def test_vaccination_schedule_not_empty():
     )
     parms["t_array"] = get_time_array(parms)
     vaccination_uptake_schedule = build_vax_schedule(parms)
-    assert vaccination_uptake_schedule == {parms["vaccine_uptake_start_day"]: 0}
+    assert vaccination_uptake_schedule == {parms["vaccine_uptake_start_day"] + 1: 0}
 
 
 def test_vaccines_administered_on_single_day():
