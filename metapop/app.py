@@ -423,7 +423,6 @@ def app(replicates=20):
     # vax schedule for plotting and warning messages to users
     edited_intervention_parms2["t_array"] = get_time_array(edited_intervention_parms2)
     schedule = build_vax_schedule(edited_intervention_parms2)
-    print(schedule)
 
     # if doses are zero, warn the user
     if sum(schedule.values()) == 0:
@@ -462,8 +461,6 @@ def app(replicates=20):
     chart_placeholder.text("Running scenarios...")
     results1 = get_scenario_results(scenario1)
     results2 = get_scenario_results(scenario2)
-
-    st.dataframe(results2.filter(pl.col("t") > 363))
 
     # Display number of doses administered now that use has finished selecting parameters
     with col_intervention_text:
