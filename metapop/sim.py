@@ -121,7 +121,9 @@ def vaccinate_on_day(
 
     """
     if t in vaccination_uptake_schedule:
-        new_vaccinated, new_vaccine_failures, new_exposed_vaccinated = model.vaccinate(u, t)
+        new_vaccinated, new_vaccine_failures, new_exposed_vaccinated = model.vaccinate(
+            u, t
+        )
         updated_susceptibles, updated_failures = model.get_updated_susceptibles(
             u, new_vaccinated, new_vaccine_failures
         )
@@ -129,7 +131,11 @@ def vaccinate_on_day(
             u[group][Ind.S.value] = updated_susceptibles[group]
             u[group][Ind.SV.value] = updated_failures[group]
             u[group][Ind.V.value] += new_vaccinated[group]
-            u[group][Ind.X.value] += new_vaccinated[group] + new_vaccine_failures[group] + new_exposed_vaccinated[group]
+            u[group][Ind.X.value] += (
+                new_vaccinated[group]
+                + new_vaccine_failures[group]
+                + new_exposed_vaccinated[group]
+            )
             S[0, group] = updated_susceptibles[group]
             V[0, group] = u[group][Ind.V.value]
             SV[0, group] = updated_failures[group]
