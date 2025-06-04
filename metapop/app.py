@@ -469,7 +469,6 @@ def app(replicates=20):
             help="This number is calculated based on user input for the percentage of the non-immune population that gets vaccinated during the campaign.",
         )
 
-
     # fullresults for later
     fullresults1 = results1
     fullresults2 = results2
