@@ -555,14 +555,13 @@ def app(replicates=20):
             isolation_adherance = edited_intervention_parms2["isolation_adherence"]
         pre_rash_isolation_adherance_pct = int(pre_rash_isolation_adherance * 100)
         isolation_adherance_pct = int(isolation_adherance * 100)
-        mean_doses_administered = round(results2.filter(pl.col("t") == 365).select("X").mean().item())
+        mean_doses_administered = round(
+            results2.filter(pl.col("t") == 365).select("X").mean().item()
+        )
         title = alt.TitleParams(
             "Outcome Comparison by Scenario",
             subtitle=[
-                (
-                    f"Vaccine campaign: {mean_doses_administered} "
-                    "doses administered"
-                ),
+                (f"Vaccine campaign: {mean_doses_administered} " "doses administered"),
                 f"Quarantine adherence: {pre_rash_isolation_adherance_pct}%",
                 f"Isolation adherence: {isolation_adherance_pct}%",
             ],
@@ -881,6 +880,11 @@ def app(replicates=20):
             to the campaign is 97%, the estimate for two doses of MMR
             <a href='https://www.cdc.gov/measles/vaccines/index.html?CDC_AA_refVal=https%3A%2F%2Fwww.cdc.gov%2Fvaccines%2Fvpd%2Fmmr%2Fpublic%2Findex.html' target='_blank'>[MMR Vaccine Information]</a>.
             </li>
+
+            <li style="font-size:14px;"> We assume that susceptible and exposed individuals that are not yet infectious are eligible to get vaccinated during the simulation.
+            After vaccination, only susceptible individuals become immune, while exposed individuals remain in the exposed state and continue with infection progression as normal. The number of doses administered may be lower than the number of doses scheduled if by the time of the campaign, the doses scheduled exceeds the number of individuals eligible.
+            </li>
+
 
             <li style="font-size:14px;"> Individuals with immunity prior to introduction
             are assumed to have one or two doses of MMR or have had a prior measles infection.
