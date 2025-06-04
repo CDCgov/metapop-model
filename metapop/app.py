@@ -423,6 +423,7 @@ def app(replicates=20):
     # vax schedule for plotting and warning messages to users
     edited_intervention_parms2["t_array"] = get_time_array(edited_intervention_parms2)
     schedule = build_vax_schedule(edited_intervention_parms2)
+    print(schedule)
 
     # if doses are zero, warn the user
     if sum(schedule.values()) == 0:
@@ -462,11 +463,13 @@ def app(replicates=20):
     results1 = get_scenario_results(scenario1)
     results2 = get_scenario_results(scenario2)
 
+    st.dataframe(results2.filter(pl.col("t") > 363))
+
     # Display number of doses administered now that use has finished selecting parameters
     with col_intervention_text:
         st.text(
-            f"Total vaccines administered during campaign: {int(results2['X'][-1])} doses",
-            help="This number is calculated based on user input for the percentage of the non-immune population that gets vaccinated during the campaign.",
+            f"Total vaccines scheduled to be administered during campaign: {sum(schedule.values())} doses",
+            help="This number is calculated based on user input for the percentage of the non-immune population that gets vaccinated during the campaign. If the campaign starts too late, the actual doses administered may be lower, if there were not enough susceptible individuals left to vaccinate.",
         )
 
     # fullresults for later
@@ -552,11 +555,12 @@ def app(replicates=20):
             isolation_adherance = edited_intervention_parms2["isolation_adherence"]
         pre_rash_isolation_adherance_pct = int(pre_rash_isolation_adherance * 100)
         isolation_adherance_pct = int(isolation_adherance * 100)
+        mean_doses_administered = round(results2.filter(pl.col("t") == 365).select("X").mean().item())
         title = alt.TitleParams(
             "Outcome Comparison by Scenario",
             subtitle=[
                 (
-                    f"Vaccine campaign: {edited_intervention_parms2['total_vaccine_uptake_doses']} "
+                    f"Vaccine campaign: {mean_doses_administered} "
                     "doses administered"
                 ),
                 f"Quarantine adherence: {pre_rash_isolation_adherance_pct}%",
@@ -701,7 +705,7 @@ def app(replicates=20):
             ):
                 callout_text += "<li> Vaccines administered during campaign: 0</li>"
             else:
-                callout_text += f"<li> Vaccines administered during campaign: {edited_intervention_parms2['total_vaccine_uptake_doses']} between day {min(schedule.keys())} and day {max(schedule.keys())}</li>"
+                callout_text += f"<li> Vaccines administered during campaign: {mean_doses_administered} between day {min(schedule.keys())} and day {max(schedule.keys())}</li>"
             callout_text += f"<li> Adherence to quarantine among pre-symptomatic infectious individuals: {int(pre_rash_isolation_adherance * 100)}%</li>"
             callout_text += f"<li> Adherence to isolation among symptomatic infectious individuals: {int(isolation_adherance * 100)}%</li></ul>"
 
