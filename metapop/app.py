@@ -466,7 +466,7 @@ def app(replicates=20):
     with col_intervention_text:
         st.text(
             f"Total vaccines scheduled to be administered during campaign: {sum(schedule.values())} doses",
-            help="This number is calculated based on user input for the percentage of the non-immune population that gets vaccinated during the campaign. If the campaign starts too late, the actual doses administered may be lower, if there were not enough susceptible individuals left to vaccinate.",
+            help="This number is calculated based on user input for the percentage of the non-immune population that gets vaccinated during the campaign. If the campaign starts too late, the actual number of doses administered may be lower due to there being not enough eligible individuals left to vaccinate.",
         )
 
     # fullresults for later
