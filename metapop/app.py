@@ -39,7 +39,7 @@ from .app_helper import (
     get_table,
     get_median_trajectory_from_episize,
     get_median_trajectory_from_peak_time,
-    # get_metapop_info,
+    totals_same_by_ks,
 )
 from .helper import (
     build_vax_schedule,
@@ -445,6 +445,7 @@ def app(replicates=20):
     if warning_message != "":
         st.warning(
             warning_message,
+            icon="⚠️",
         )
 
     #### Plot Options:
@@ -735,6 +736,8 @@ def app(replicates=20):
         combined_results, edited_intervention_parms2["IHR"], hosp_rng
     )
 
+    no_scenario_difference = totals_same_by_ks(combined_results, scenario_names)
+
     if interventions == "Off":
         outbreak_summary = outbreak_summary.select("", scenario_names[0])
 
@@ -767,6 +770,12 @@ def app(replicates=20):
             f"in a population of size {edited_parms2['pop_sizes'][0]} "
             f"with baseline immunity of {round(edited_parms2['initial_vaccine_coverage'][0] * 100)}%."
         )
+        if no_scenario_difference:
+            st.warning(
+                "The two scenarios are statistically indistinguishable based on a 2 sample KS test. "
+                "Relative difference is not a reliable metric.",
+                icon="⚠️",
+            )
 
         # if the Relative Difference is NaN, set it to ""
         # outbreak_summary = outbreak_summary.with_columns(
@@ -807,9 +816,14 @@ def app(replicates=20):
 
             <p style="font-size:14px;">
             Users can explore the impact of interventions, including vaccination,
-            isolation, and quarantine measures ("interventions" scenario)
+            isolation, and quarantine measures ("Interventions" scenario)
             compared to a baseline scenario without active interventions ("No
-            Interventions"). The start and end time of the vaccine campaign
+            Interventions". We conduct a two-sample K-S test to determine if the
+            total cases from the "Interventions" scenario differ from the total
+            cases of the "No Interventions" baseline scenario.<br><br>
+
+            <p style="font-size:14px;">
+            The start and end time of the vaccine campaign
             can be specified.<br><br>
 
             <b style="font-size:14px;">Assumptions</b>

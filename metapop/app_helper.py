@@ -7,6 +7,7 @@ import griddler
 import griddler.griddle
 import numpy as np
 import polars as pl
+import scipy.stats as stats
 import streamlit as st
 
 # import what's needed from other metapop modules
@@ -52,7 +53,7 @@ __all__ = [
     "rescale_prop_vax",
     "get_median_trajectory_from_episize",
     "get_median_trajectory_from_peak_time",
-    # "get_metapop_info",
+    "totals_same_by_ks",
 ]
 
 
@@ -1435,3 +1436,35 @@ def get_median_trajectory_from_peak_time(
 
     # Return the trajectory for the closest replicate
     return results.filter(pl.col("replicate") == closest_replicate)
+
+
+def totals_same_by_ks(
+    combined_results: pl.DataFrame, scenario_names: list, p_threshold: float = 0.05
+) -> bool:
+    """
+    Perform a 2 sample Kolmogorov-Smirnov test to compare the total cases between two scenarios.
+
+    Args:
+        combined_results (pl.DataFrame): The combined results DataFrame.
+        scenario_names (list): List of scenario name labels created by the simulation.
+        p_threshold (float): The p-value threshold for determining indistinguishable distributions. Default is 0.5.
+        - In general, we want to be selective about when to throw the error, as similar, but different, distributions
+            may not reject the null hyppothesis but still be visually different for low sample sizes.
+
+    Returns:
+        bool: True if the p-value is greater than the specified threshold, indicating two indistinguishable distributions.
+        - A value of 0.05 would reject the null hyptohesis that the two distributions are independent samples of the same distribution
+        - Higher threshold values will increase the confidence that the two distirbutions are identical.
+    """
+    # Get total cases for each scenario
+    scenario_0 = combined_results.filter(pl.col("Scenario") == scenario_names[0])[
+        "Total"
+    ].to_numpy()
+    scenario_1 = combined_results.filter(pl.col("Scenario") == scenario_names[1])[
+        "Total"
+    ].to_numpy()
+
+    # Perform KS test
+    _, p_value = stats.ks_2samp(scenario_0, scenario_1)
+
+    return p_value > p_threshold

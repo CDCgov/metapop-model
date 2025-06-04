@@ -27,6 +27,7 @@ st_flexible_callout_elements = "0.1.0"
 build = "^1.2.2.post1"
 bs4 = "^0.0.2"
 rsconnect-python = "^1.25.2"
+scipy = "^1.15.3"
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.29.5"

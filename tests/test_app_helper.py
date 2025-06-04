@@ -370,3 +370,97 @@ def test_get_median_from_peak_time_multiple_groups():
         assert (
             observed_median == true_median
         ), f"Expected median t in group {group} to be {true_median}, but got {observed_median}"
+
+
+def ks_compare(base: list, compared_array: list, expect: bool, threshold: float):
+    base_scenario = pl.DataFrame({"Total": base, "Scenario": ["base"] * len(base)})
+    compared_scenario = pl.DataFrame(
+        {"Total": compared_array, "Scenario": ["compared"] * len(compared_array)}
+    )
+    assert (
+        totals_same_by_ks(
+            base_scenario.vstack(compared_scenario), ["base", "compared"], threshold
+        )
+        == expect
+    )
+
+
+def test_totals_same_by_ks():
+    base = [1, 2, 2, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 5]
+    similar = [1, 2, 2, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5]
+    with_outlier = [1, 2, 2, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 5, 15]
+    moderate_different = [1, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 4]
+    different = [6, 7, 7, 8, 8, 8, 9, 9, 9, 9, 10, 10, 10, 10, 10]
+
+    ks_compare(base, base, True, 0.05)
+    ks_compare(base, similar, True, 0.05)
+    ks_compare(base, with_outlier, True, 0.05)
+    ks_compare(base, moderate_different, False, 0.05)
+    ks_compare(base, different, False, 0.05)
+
+
+def test_indistinguishable_scenarios():
+    # modify to be a single population
+    parms = config["baseline_parameters"]
+    parms["n_replicates"] = 2000
+    parms["n_groups"] = 1
+    parms["initial_vaccine_coverage"] = [0.99]
+    parms["pop_sizes"] = [2000]
+    parms["I0"] = [5]
+
+    parms["vaccinated_group"] = 0
+    parms["vaccine_uptake_start_day"] = 0
+    parms["vaccine_uptake_duration_days"] = 0
+    parms["total_vaccine_uptake_doses"] = 0
+
+    # Write out scenario names
+    scenario_names = ["no_intervention", "intervention"]
+
+    # Make the no intervention simulation outputs
+    reps_no_intervention = get_scenario_results([parms])
+    reps_no_intervention = reps_no_intervention.with_columns(
+        pl.lit(scenario_names[0]).alias("Scenario")
+    )
+
+    # Make the vax intervention scenario and change base seed
+    # The vax intervention should vaccinate all individuals in the population who are not infected
+    # or vaccinated, whether protected or who had a vaccine failure.
+    parms["vaccine_uptake_start_day"] = 75
+    parms["vaccine_uptake_duration_days"] = 20
+    parms["seed"] = 1234
+
+    # Set vaccine doses to be equivalent to 100% of unvaccinated susceptibles as in the app slider
+    parms["total_vaccine_uptake_doses"] = (
+        parms["pop_sizes"][0] * (1 - parms["initial_vaccine_coverage"][0])
+        - parms["I0"][0]
+    )
+    reps_with_vax = get_scenario_results([parms])
+    reps_with_vax = reps_with_vax.with_columns(
+        pl.lit(scenario_names[1]).alias("Scenario")
+    )
+
+    # Combine results as in app.py
+    combined_results = (
+        reps_with_vax.vstack(reps_no_intervention)
+        .with_columns(
+            pl.col("t").cast(pl.Int64),
+            pl.col("group").cast(pl.Int64),
+            pl.col("Y").cast(pl.Int64),
+        )
+        .filter(pl.col("t") == pl.col("t").max())
+        .group_by("Scenario", "replicate")
+        .agg(pl.col("Y").sum().alias("Total"))
+        .sort(["Scenario", "replicate"])
+    )
+
+    # Scenarios for these sets should be indistinguishable
+    assert totals_same_by_ks(combined_results, scenario_names, 0.05)
+
+    # Average difference between replicates across scenarios should be zero
+    diffs = combined_results.filter(pl.col("Scenario") == scenario_names[0]).select(
+        "Total"
+    ) - combined_results.filter(pl.col("Scenario") == scenario_names[1]).select("Total")
+
+    assert (
+        abs(diffs["Total"].mean()) < 0.1
+    ), f"Expected the mean difference to be close to 0, but got {diffs['Total'].mean()}"
