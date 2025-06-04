@@ -97,7 +97,7 @@ def test_aon_vaccine():
     model = SEIRModel(parms, seed=[42, 1])
 
     # vaccinate working properly
-    new_v, new_sv = model.vaccinate(u, t)
+    new_v, new_sv, new_ev = model.vaccinate(u, t)
     assert new_sv == [0]
     assert new_v == [50]
 
@@ -122,7 +122,7 @@ def test_aon_vaccine():
     model = SEIRModel(parms, seed=[42, 1])
 
     # vaccinate working properly
-    new_v, new_sv = model.vaccinate(u, t)
+    new_v, new_sv, new_ev = model.vaccinate(u, t)
     assert new_sv == [50]
     assert new_v == [0]
 

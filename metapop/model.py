@@ -88,6 +88,7 @@ class SEIRModel:
     def vaccinate(self, u, t):
         new_V = []
         new_SV = []
+        new_EV = []
         if self.parms["total_vaccine_uptake_doses"] > 0:
             vaccination_uptake_schedule = self.parms["vaccination_uptake_schedule"]
             new_V, new_SV, new_EV = vaccinate_groups(

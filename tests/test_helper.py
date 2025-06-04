@@ -278,7 +278,7 @@ def test_vaccines_administered_on_single_day():
     )
     assert np.array_equal(
         vaccinate_groups(parms["n_groups"], u, 11, vaccination_uptake_schedule, parms),
-        ([0, 0, 100 - fails], [0, 0, fails]),
+        ([0, 0, 100 - fails], [0, 0, fails], [0, 0, 0]),
     )
 
 
@@ -308,9 +308,10 @@ def test_active_vaccination():
     vaccination_uptake_schedule = build_vax_schedule(parms)
 
     # Assertions to check the expected results: in group 2, 100% of eligible are susceptible
+    # no vaccines on day 5 - the campaign has not started yet
     assert np.array_equal(
         vaccinate_groups(parms["n_groups"], u, 5, vaccination_uptake_schedule, parms),
-        ([0, 0, 0], [0, 0, 0]),
+        ([0, 0, 0], [0, 0, 0], [0, 0, 0]),
     )
     # Check that on every day of the vaccination campaign, the uptake is 25
     doses_per_day = int(
@@ -336,7 +337,7 @@ def test_active_vaccination():
             vaccination_uptake_schedule,
             parms,
         ),
-        ([0, 0, 0], [0, 0, 0]),
+        ([0, 0, 0], [0, 0, 0], [0, 0, 0]),
     )
 
 
@@ -368,7 +369,7 @@ def test_vaccine_doses_greater_than_population():
     parms["t_array"] = get_time_array(parms)
     vaccination_uptake_schedule = build_vax_schedule(parms)
 
-    success, fails = vaccinate_groups(
+    success, fails, vaccinated_exposed = vaccinate_groups(
         parms["n_groups"], u, 11, vaccination_uptake_schedule, parms
     )
 
