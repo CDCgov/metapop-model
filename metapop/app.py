@@ -428,8 +428,8 @@ def app(replicates=20):
         )
 
     # vax schedule for plotting and warning messages to users
-    edited_parms2["t_array"] = get_time_array(edited_parms2)
-    schedule = build_vax_schedule(edited_parms2)
+    edited_intervention_parms2["t_array"] = get_time_array(edited_intervention_parms2)
+    schedule = build_vax_schedule(edited_intervention_parms2)
 
     # if doses are zero, warn the user
     if sum(schedule.values()) == 0:
@@ -708,7 +708,7 @@ def app(replicates=20):
             ):
                 callout_text += "<li> Vaccines administered during campaign: 0</li>"
             else:
-                callout_text += f"<li> Vaccines administered during campaign: {edited_intervention_parms2['total_vaccine_uptake_doses']} between day {edited_intervention_parms2['vaccine_uptake_start_day']} and day {edited_intervention_parms2['vaccine_uptake_start_day'] + edited_intervention_parms2['vaccine_uptake_duration_days']}</li>"
+                callout_text += f"<li> Vaccines administered during campaign: {edited_intervention_parms2['total_vaccine_uptake_doses']} between day {min(schedule.keys())} and day {max(schedule.keys())}</li>"
             callout_text += f"<li> Adherence to quarantine among pre-symptomatic infectious individuals: {int(pre_rash_isolation_adherance * 100)}%</li>"
             callout_text += f"<li> Adherence to isolation among symptomatic infectious individuals: {int(isolation_adherance * 100)}%</li></ul>"
 

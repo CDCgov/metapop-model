@@ -805,7 +805,7 @@ def get_helpers(parms=None):
             "Baseline immunity in small population 2",
         ],
         vaccine_uptake_start_day="Number of days after introduction that the vaccination campaign starts (0 days is day 1 in the model when infections are imported to the community; 364 days after is day 365).",
-        vaccine_uptake_duration_days="The vaccine doses are distributed evenly throughout the specified duration of time (i.e., the same number of vaccines will be distributed on each day). ",
+        vaccine_uptake_duration_days="The vaccine doses are distributed evenly throughout the specified duration of time (i.e., the same number of vaccines will be distributed on each day). If the duration results in the vaccine campaign ending after the last simulation day (day 365), the campaign will end on the last simulation day and remaining doses are administered on that day.",
         total_vaccine_uptake_doses="In this model, we administer one dose of the MMR vaccine per person vaccinated during the campaign, with 93% effectiveness as indicated by vaccine studies.",
         vaccinated_group="Population receiving the vaccine",
         isolation_on="If turned on, reduces transmission of symptomatic individuals who adhere to isolation measures (the percentage as selected under “Isolation adherence”) by 100% during the symptomatic period (see Detailed Methods).",
