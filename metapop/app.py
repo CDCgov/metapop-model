@@ -370,13 +370,6 @@ def app(replicates=20):
         edited_advanced_parms2
     )
 
-    # # Display number of doses administered now that use has finished selecting parameters
-    # with col_intervention_text:
-    #     st.text(
-    #         f"Total vaccines scheduled to be administered during campaign: {edited_intervention_parms2['total_vaccine_uptake_doses']}",
-    #         help="This number is calculated based on user input for the percentage of the non-immune population that gets vaccinated during the campaign.",
-    #     )
-
     ### Dictate that isolation > quarantine
     if (
         edited_parms2["pre_rash_isolation_on"] == True
