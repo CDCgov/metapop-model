@@ -440,11 +440,10 @@ def build_vax_schedule(parms):
     # Create the schedule dictionary
     schedule = {day: doses_per_day for day in vaccine_uptake_days}
 
-    if sum(schedule.values()) > parms["total_vaccine_uptake_doses"]:
+    if sum(schedule.values()) != parms["total_vaccine_uptake_doses"]:
         last_day = vaccine_uptake_days[-1]
-        schedule[last_day] = (
-            parms["total_vaccine_uptake_doses"] - sum(schedule.values()) + doses_per_day
-        )
+        dose_difference = parms["total_vaccine_uptake_doses"] - sum(schedule.values())
+        schedule[last_day] += dose_difference
 
     # If no days are specified, set the schedule to 0 doses for day the first day of the vaccine schedule as a
     # placeholder rather than an empty dictionary
