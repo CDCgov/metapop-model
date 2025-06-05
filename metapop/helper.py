@@ -528,10 +528,11 @@ def get_metapop_info():
         dict: A dictionary containing metadata on the metapopulation model.
     """
     # get version info from version.py
+    version = "unknown"
     try:
         version = __version__
     except Exception:
-        version = "unknown"
+        pass
 
     # commit info from git
     commit = os.popen("git rev-parse HEAD").read().strip().split("\n")[-1][0:7]
