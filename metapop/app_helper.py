@@ -1410,10 +1410,17 @@ def get_median_trajectory_from_episize(
 
 def get_median_trajectory_from_peak_time(
     results: pl.DataFrame, base_group: int = 0
-) -> pl.DataFrame:
-    # Get the timing of peak infection within each replicate
-    # The maximum number of infected individuals may be present in multiple time points,
-    # so we aggregate for peak time within each replicate
+) -> int:
+    """
+    Selects the replicate whose infection peak timing is closest to the median peak time across all replicates for a given group.
+
+    Args:
+        results (pl.DataFrame): A Polars DataFrame containing simulation results with columns including 'group', 'replicate', 'I' (infected count), and 't' (time).
+        base_group (int, optional): The group identifier to filter results by. Defaults to 0.
+
+    Returns:
+        int: The replicate identifier whose peak infection time is closest to the median peak time across all replicates in the specified group.
+    """
     filtered_results = (
         results.filter(pl.col("group").cast(pl.UInt32) == pl.lit(base_group))
         .filter((pl.col("I") == pl.col("I").max()).over("replicate"))
@@ -1435,7 +1442,7 @@ def get_median_trajectory_from_peak_time(
     )
 
     # Return the trajectory for the closest replicate
-    return results.filter(pl.col("replicate") == closest_replicate)
+    return closest_replicate
 
 
 def totals_same_by_ks(

@@ -314,15 +314,19 @@ def test_get_median_from_peak_time_multiple_maxes():
             all_trajectories = all_trajectories.vstack(current)
 
     # Get the median trajectory
-    dummy_traj = get_median_trajectory_from_peak_time(all_trajectories)
+    dummy_traj_id = get_median_trajectory_from_peak_time(all_trajectories)
     # Check that the median trajectory is correct
     true_median = (
         all_trajectories.filter(pl.col("t_id") == 2).select("t").median().item()
     )
 
+    observed_median = all_trajectories.filter(
+        (pl.col("t_id") == 2) & (pl.col("replicate") == dummy_traj_id)
+    )["t"].item()
+
     assert (
-        dummy_traj["t"][2] == true_median
-    ), f"Expected median t to be {true_median}, but got {dummy_traj['t'][2]}"
+        observed_median == true_median
+    ), f"Expected median t to be {true_median}, but got {observed_median}"
 
 
 # Use a single peak infection time but have multiple groups
@@ -352,7 +356,7 @@ def test_get_median_from_peak_time_multiple_groups():
 
     for group in range(2):
         # Get the median trajectory
-        dummy_traj = get_median_trajectory_from_peak_time(
+        dummy_traj_id = get_median_trajectory_from_peak_time(
             all_trajectories, base_group=group
         )
         # Check that the median trajectory is correct for each base group
@@ -363,8 +367,10 @@ def test_get_median_from_peak_time_multiple_groups():
             .item()
         )
 
-        observed_median = dummy_traj.filter(
-            (pl.col("group") == group) & (pl.col("t_id") == 2)
+        observed_median = all_trajectories.filter(
+            (pl.col("group") == group)
+            & (pl.col("t_id") == 2)
+            & (pl.col("replicate") == dummy_traj_id)
         )["t"].item()
 
         assert (
