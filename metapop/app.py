@@ -466,7 +466,7 @@ def app(replicates=20):
     with col_intervention_text:
         st.text(
             f"Total vaccines scheduled to be administered during campaign: {sum(schedule.values())} doses",
-            help="This number is calculated based on user input for the percentage of the non-immune population that gets vaccinated during the campaign. If the campaign starts too late, the actual number of doses administered may be lower due to there being not enough eligible individuals left to vaccinate.",
+            help="This number is calculated based on user input for the percentage of the non-immune population that gets vaccinated during the campaign. If the campaign starts late, the actual number of doses administered may be lower due to there being not enough eligible individuals left to vaccinate.",
         )
 
     # fullresults for later
@@ -881,7 +881,7 @@ def app(replicates=20):
             <a href='https://www.cdc.gov/measles/vaccines/index.html?CDC_AA_refVal=https%3A%2F%2Fwww.cdc.gov%2Fvaccines%2Fvpd%2Fmmr%2Fpublic%2Findex.html' target='_blank'>[MMR Vaccine Information]</a>.
             </li>
 
-            <li style="font-size:14px;"> We assume that susceptible and exposed individuals that are not yet infectious are eligible to get vaccinated during the simulation. We assume that exposed individuals are not yet aware of their exposure status and so they are equally likely to seek vaccination.
+            <li style="font-size:14px;"> We assume that both susceptible and exposed individuals who are not yet infectious are eligible to get vaccinated during the vaccine campaign. We also assume that exposed individuals are not yet aware of their exposure status and so they are equally likely to seek vaccination.
             After vaccination, only susceptible individuals become immune, while exposed individuals remain in the exposed state and continue with infection progression as normal. The number of doses administered may be lower than the number of doses scheduled if by the time of the campaign, the daily dose rate scheduled exceeds the number of individuals eligible.
             </li>
 
