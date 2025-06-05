@@ -1,10 +1,9 @@
 import hashlib
-import os
 
 import numpy as np
 import numpy.linalg as la
 
-from .version import __version__
+from .version import __git_commit__, __version__
 
 __all__ = [
     "get_percapita_contact_matrix",
@@ -553,21 +552,12 @@ def get_metapop_info():
     Returns:
         dict: A dictionary containing metadata on the metapopulation model.
     """
-    # get version info from version.py
-    version = "unknown"
-    try:
-        version = __version__
-    except Exception:
-        pass
-
-    # commit info from git
-    commit = os.popen("git rev-parse HEAD").read().strip().split("\n")[-1][0:7]
 
     info = {
         "name": "Measles Metapopulation Model",
         "description": "A model simulating measles transmission in a metapopulation with public health interventions.",
-        "version": version,  # version from version.py
-        "commit": commit,
+        "version": __version__,
+        "commit": __git_commit__,
         "url": "https://github.com/cdcent/metapop-model",
         "email": "eocevent410@cdc.gov",
     }

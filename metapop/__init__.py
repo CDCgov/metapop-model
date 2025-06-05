@@ -35,7 +35,7 @@ from .model import (
     SEIRModel,
 )  # depends on helper
 from .sim import run_model, simulate, simulate_replicates  # depends on model
-from .version import __version__, __versiondate__  # depends on nothing
+from .version import __git_commit__, __version__, __versiondate__  # depends on nothing
 
 # when declared, this variable defines the public modules, subpackages and
 # other named objects that should be available when a user uses
@@ -68,4 +68,5 @@ __all__ = [
     "get_metapop_info",
     "__version__",
     "__versiondate__",
+    "__git_commit__",
 ]

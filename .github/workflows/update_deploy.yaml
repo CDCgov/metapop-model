@@ -1,0 +1,36 @@
+name: Generate Deployment from main
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: "main"
+        fetch-depth: 0
+    - name: Merge in changes to deploy branch
+      run: |
+        git checkout main
+        git checkout -B main-deploy
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+        cache: 'pip'
+    - name: update manifest.json requirements.txt and update versions
+      run: |
+        pip install poetry
+        make release
+    - name: Push Changes
+      run: |
+        git config --global user.email "you@example.com"
+        git config --global user.name "update-deploy-bot"
+        git add -f manifest.json requirements.txt metapop/version.py
+        git commit -m "updating manifest.json and requirements.txt"
+        git push origin main-deploy -f
