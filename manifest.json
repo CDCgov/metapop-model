@@ -13,9 +13,14 @@
       "package_file": "requirements.txt"
     }
   },
+  "environment": {
+    "python": {
+      "requires": "~=3.10.0"
+    }
+  },
   "files": {
     "requirements.txt": {
-      "checksum": "d1b9ef07fdbc772b86e8eca1e973bc01"
+      "checksum": "7965262263109a83e12995a25348deed"
     },
     ".github/ISSUE_TEMPLATE/bug_report.md": {
       "checksum": "e468801d29e6b66b0d496136e22e8b34"
@@ -54,7 +59,7 @@
       "checksum": "2afaacb44127a6858cc758801ea102f8"
     },
     ".pytest_cache/v/cache/nodeids": {
-      "checksum": "5866db0f18e9697217701a3f9e217759"
+      "checksum": "283ca3e731e5cfd45642664120339e59"
     },
     ".pytest_cache/v/cache/stepwise": {
       "checksum": "d751713988987e9331980363e24189ce"
@@ -80,8 +85,14 @@
     ".ruff_cache/0.8.0/12393146795999687682": {
       "checksum": "734f09d10ee00c5bd1381eddc6ef733c"
     },
+    ".ruff_cache/0.8.0/12648351509475049": {
+      "checksum": "ba016cbcda7bebb4a5f8565bec7ddb34"
+    },
     ".ruff_cache/0.8.0/1306128005301595256": {
       "checksum": "78af8f2674ee7feb516affbbc9908bd1"
+    },
+    ".ruff_cache/0.8.0/13522010039126269408": {
+      "checksum": "f9c6ae6cba54bbc5e6a973c422e9c836"
     },
     ".ruff_cache/0.8.0/13781844967596256189": {
       "checksum": "b6f52a5de0402b7adc7158003a2cd605"
@@ -89,11 +100,23 @@
     ".ruff_cache/0.8.0/13975396712855618141": {
       "checksum": "ef0d967fe16e0276cf15365c399a7303"
     },
+    ".ruff_cache/0.8.0/14123877743081374894": {
+      "checksum": "1e2e59572172e91119cc78e3a2b04d00"
+    },
     ".ruff_cache/0.8.0/14599899315979596653": {
       "checksum": "c407175cccf47e81af07238034ece994"
     },
+    ".ruff_cache/0.8.0/15382409084954706784": {
+      "checksum": "05e4e8b4b68c21b2e714a097ed36e709"
+    },
     ".ruff_cache/0.8.0/15396347316032351983": {
       "checksum": "1125ee3cdd44130709378b231e0aac92"
+    },
+    ".ruff_cache/0.8.0/1539984312611044413": {
+      "checksum": "89647a57a30c3c0dc4dbb3a22cee5792"
+    },
+    ".ruff_cache/0.8.0/15676818111541113305": {
+      "checksum": "994849a390c4e82b87d3de3a12a5ff29"
     },
     ".ruff_cache/0.8.0/15924873491477017932": {
       "checksum": "835e4e5cb285884f0d1ac76a27b0152d"
@@ -101,14 +124,32 @@
     ".ruff_cache/0.8.0/16052287106699247440": {
       "checksum": "281034c1d3ed21d82eb39b55a00750da"
     },
+    ".ruff_cache/0.8.0/1740405586962471630": {
+      "checksum": "732afd9154c6fd77a93626872bfb6eb8"
+    },
     ".ruff_cache/0.8.0/17509851148512150537": {
-      "checksum": "2dc2e5e6a7ff6a02ef913c76e9a386fc"
+      "checksum": "ff263894b5b678f743cd72f915ba34b7"
+    },
+    ".ruff_cache/0.8.0/17522866466971922673": {
+      "checksum": "42e9248d525f8b3e810b2ba484e5e0c1"
+    },
+    ".ruff_cache/0.8.0/17880537970487996775": {
+      "checksum": "bbfea12d2de1c06689495f58d69ddca2"
     },
     ".ruff_cache/0.8.0/17932600727921560641": {
       "checksum": "73e78ac57614cc695340f61fbf3f2608"
     },
+    ".ruff_cache/0.8.0/18048431165052526121": {
+      "checksum": "f34655035d337d029df1c15399898971"
+    },
+    ".ruff_cache/0.8.0/18291637074983955623": {
+      "checksum": "9eaf2cec9ed8e965196b47624ec824df"
+    },
+    ".ruff_cache/0.8.0/1893555574070690810": {
+      "checksum": "fb9933f984f24499bd5680b726ed5ee9"
+    },
     ".ruff_cache/0.8.0/197233566632481794": {
-      "checksum": "ce51a42d5d9cbdd4f45a68f3ee19e2bf"
+      "checksum": "375ef48079a12927826eac95dc10399c"
     },
     ".ruff_cache/0.8.0/2070837956115299736": {
       "checksum": "c8aeab443a084b88618e6e32d0cee1c6"
@@ -116,17 +157,23 @@
     ".ruff_cache/0.8.0/2089622596736742684": {
       "checksum": "1d16c97b1a7b74ccc0c8e4c2aa8c495e"
     },
+    ".ruff_cache/0.8.0/2485032054064997126": {
+      "checksum": "1e008b16b586c3568264d1d10e5d7f6d"
+    },
     ".ruff_cache/0.8.0/2631152302998649546": {
       "checksum": "346c52fec1f902e1434d5475503bd363"
     },
     ".ruff_cache/0.8.0/264926624814178333": {
       "checksum": "0acfaafea587dc2fc4be5155df94c8d3"
     },
+    ".ruff_cache/0.8.0/2866792094164269028": {
+      "checksum": "9939c2436b8ce79e514925ba74ede9b0"
+    },
     ".ruff_cache/0.8.0/3054602129858795665": {
       "checksum": "f7b1b6ef0543f76314074afb6759fe04"
     },
     ".ruff_cache/0.8.0/310454266097819202": {
-      "checksum": "83132ec29952a9ff020030ed495b200c"
+      "checksum": "f4caba28d32b00374ae7eeee3f3c4321"
     },
     ".ruff_cache/0.8.0/3116160819213646803": {
       "checksum": "b688ab1badb57c1c65350ca6b8f4414f"
@@ -150,22 +197,28 @@
       "checksum": "99db14356555667a4376ebfd2c8a054e"
     },
     ".ruff_cache/0.8.0/5827867282252533098": {
-      "checksum": "2a3a2b664f54b310ef8c303627b51221"
+      "checksum": "2caab601c6164b222af94b85777f824b"
     },
     ".ruff_cache/0.8.0/6172605744966214629": {
       "checksum": "e9dcbbcba8d043dc56021e69c327190d"
+    },
+    ".ruff_cache/0.8.0/6433385149984307436": {
+      "checksum": "055ce57ba51b1ef6fd1fd783252c68a1"
+    },
+    ".ruff_cache/0.8.0/6585959421506397730": {
+      "checksum": "9a9a3ac546f2229ceba161c71c667ba8"
     },
     ".ruff_cache/0.8.0/6619150986505407337": {
       "checksum": "25826893e318ed374082f0419fa68d54"
     },
     ".ruff_cache/0.8.0/6695957596687232765": {
-      "checksum": "e4d5cc533a377d05984311c5ac945a04"
+      "checksum": "7d4e3a9e5fdc7bcc55316203de62a7f0"
     },
     ".ruff_cache/0.8.0/718854262766002828": {
       "checksum": "d1995e568267ef33cfd6ad30fdb1ab50"
     },
     ".ruff_cache/0.8.0/7291019340065104675": {
-      "checksum": "31d8908460cd78d3aa366ea34078d4a7"
+      "checksum": "9db4440af7dca3eea42b854c665b1196"
     },
     ".ruff_cache/0.8.0/7417979908861592690": {
       "checksum": "7fc92b0ea13b31b99aa3eda351014919"
@@ -179,8 +232,14 @@
     ".ruff_cache/0.8.0/8446292732603687266": {
       "checksum": "75dea7cf979ae57fbfa9b8da767a2d35"
     },
+    ".ruff_cache/0.8.0/9733008720317841332": {
+      "checksum": "abdb165f99a306e4ad2f292c78203284"
+    },
     ".ruff_cache/0.8.0/9953415518699520318": {
       "checksum": "bd465af57b6b6462752eb3028c52744e"
+    },
+    ".ruff_cache/0.8.0/9961003208169427086": {
+      "checksum": "57bdcfe17e002f949ecbc8a6ec41e1c4"
     },
     ".ruff_cache/CACHEDIR.TAG": {
       "checksum": "4b50dc490ca121c935cec9c15273aa95"
@@ -209,20 +268,32 @@
     "dist/metapop-0.4.0.tar.gz": {
       "checksum": "242440f2e06e8d50c20cd5c126775c62"
     },
+    "dist/metapop-0.4.12-py2.py3-none-any.whl": {
+      "checksum": "64439a1231f99d38da3c231f6dc33606"
+    },
+    "dist/metapop-0.4.12.tar.gz": {
+      "checksum": "7cca01532d8f2fc11fa3e24066426180"
+    },
+    "dist/metapop-0.4.13-py2.py3-none-any.whl": {
+      "checksum": "7b2d76caf3a42f7323ad71f0f88dad82"
+    },
+    "dist/metapop-0.4.13.tar.gz": {
+      "checksum": "fbef7bbd01e6995db3949025baa04f0c"
+    },
     "metapop/__init__.py": {
-      "checksum": "ce24eddff7319050094d52f1c6640f0f"
+      "checksum": "7693fbe9bc28d0f5ac229c3ea2ace16a"
     },
     "metapop/__pycache__/__init__.cpython-310.pyc": {
-      "checksum": "22328e0e56481b0062c56be21b18a672"
+      "checksum": "79fe1ea46744d1ce4c8fbcf9f5df9542"
     },
     "metapop/__pycache__/advanced_app.cpython-310.pyc": {
-      "checksum": "1d312cdff373a463d7a8d178cfe1ca8e"
+      "checksum": "5c524484604ad20a7b495cf52f0d0ecd"
     },
     "metapop/__pycache__/app.cpython-310.pyc": {
-      "checksum": "71fcbc15689d12b5f049ab0e33180a40"
+      "checksum": "5c0e2575ba9fe98971577d04a47b6a60"
     },
     "metapop/__pycache__/app_helper.cpython-310.pyc": {
-      "checksum": "77fe82ec2aac71efe4e2aa6555c7407f"
+      "checksum": "f331c08796f4c8635aa2df42675705a5"
     },
     "metapop/__pycache__/app_simple.cpython-310.pyc": {
       "checksum": "779127be50f95b12bcd7164a676682c5"
@@ -231,28 +302,28 @@
       "checksum": "9282c84c4e6bbd4ff7a07fbf8f12ee21"
     },
     "metapop/__pycache__/app_with_table.cpython-310.pyc": {
-      "checksum": "55ef8c8db3f2ace681e2dfd32400370f"
+      "checksum": "1b280f205610b139bb7bd39fb9098e01"
     },
     "metapop/__pycache__/helper.cpython-310.pyc": {
-      "checksum": "95dc2de7f4221080e21bee7625009de9"
+      "checksum": "6a456c948db341dabb8081d8f575d1f6"
     },
     "metapop/__pycache__/model.cpython-310.pyc": {
-      "checksum": "8c1af96e513362f1cff50746e2a9d66c"
+      "checksum": "bdc3eace77d41070cafab669f3a8a39f"
     },
     "metapop/__pycache__/plotting.cpython-310.pyc": {
       "checksum": "1db410eaeccbd2bee342fded42e201f4"
     },
     "metapop/__pycache__/sim.cpython-310.pyc": {
-      "checksum": "5526c0c10cf153affdb1fda056b36458"
+      "checksum": "3c3cfe7d00bd2422497ccc05b9f4a4f8"
     },
     "metapop/__pycache__/version.cpython-310.pyc": {
-      "checksum": "a067644ee02cebdd185e1240d1dd7715"
+      "checksum": "02726616181ba90d3dedb8c81890bbb9"
     },
     "metapop/advanced_app.py": {
       "checksum": "00f5f41a9efaacc26434b7070a1b9da3"
     },
     "metapop/app.py": {
-      "checksum": "3c000b39e52812981bf5841c793ea368"
+      "checksum": "a238c5a03f51888108b2c781275e06df"
     },
     "metapop/app_assets/app_config.yaml": {
       "checksum": "447b82209adbe709a748d19f19add918"
@@ -261,22 +332,22 @@
       "checksum": "0aa86e3b5620c534c934c90b99f58f31"
     },
     "metapop/app_helper.py": {
-      "checksum": "f2bb86cc213707f00bb3fb0f3c9a16b9"
+      "checksum": "2e24b8c7b65147a4ef9d92c54af5ae07"
     },
     "metapop/app_with_table.py": {
       "checksum": "c992b0ae93c763f86d14715edaf1f1f0"
     },
     "metapop/helper.py": {
-      "checksum": "cd73cdc1f70b3666828db34525a63236"
+      "checksum": "b8edb257782b48d5732a81e39ab2ba3e"
     },
     "metapop/model.py": {
-      "checksum": "50cdc3f2ff43c0604b5c5059afbf59a2"
+      "checksum": "ee7076e7ea8f9e296e19bd6245802e4e"
     },
     "metapop/sim.py": {
-      "checksum": "6d676d5e203dffa1e9f3fecee3185106"
+      "checksum": "745bc275386de777e2e775bdeb04500a"
     },
     "metapop/version.py": {
-      "checksum": "f6ff74f2b5d3cac00b1d0c05802bc249"
+      "checksum": "2a946bdf0e6f4010a44a4630ae0a31a7"
     },
     "output/connectivity/results.csv": {
       "checksum": "62e4188c969160d4071f2b95d2fe62b9"
@@ -591,10 +662,10 @@
       "checksum": "cb9d97b60fbb0230a9c79640a9e1506e"
     },
     "poetry.lock": {
-      "checksum": "240d702268e874fcf5a49ac35b1a0197"
+      "checksum": "483f525f9991572f242439362c51c1c4"
     },
     "pyproject.toml": {
-      "checksum": "ddd39ea119c02cc583e708b99bf30b87"
+      "checksum": "cdf97377e988551f93b5591000d5d7a2"
     },
     "scripts/00_analyze_outputs.py": {
       "checksum": "ac1e5c6e38cdc97b757cf3f797912d6c"
@@ -656,9 +727,6 @@
     "scripts/profiling/profiling_results_one_pop_app.txt": {
       "checksum": "0216c6a96596333fabd583c212943569"
     },
-    "scripts/readme_metapop_output_2025_03_21.txt": {
-      "checksum": "0350d8f30300731bc62ea75d0ecab56d"
-    },
     "stlite/griddler-0.2.0-py3-none-any.whl": {
       "checksum": "fd6dabc3b5ac5ca9ce1e496b2d966344"
     },
@@ -672,13 +740,13 @@
       "checksum": "ed812b3360433ddb94f261050cee4657"
     },
     "stlite/measles_sim.html": {
-      "checksum": "728ad701b5aed6b45c98ca14ae4e2d48"
+      "checksum": "b13cd025ba998cc1f3b0259f4759c547"
     },
     "stlite/metapop-0.4.0-py2.py3-none-any.whl": {
       "checksum": "f4650b7b32e59398c9d7d849acb548a2"
     },
     "stlite/metapop_stlite.zip": {
-      "checksum": "49b8f730c537ec7028c4d4f40663efb7"
+      "checksum": "014fe1adeaebeb834af6617a732ae270"
     },
     "stlite/polars-1.24.0-cp39-abi3-emscripten_3_1_58_wasm32.whl": {
       "checksum": "0a1c989319b5989c80dc16d1afbc2b9c"
@@ -693,49 +761,52 @@
       "checksum": "0fda45101e5d1bd2c97de605bacb7a2b"
     },
     "tests/__pycache__/test_app_helper.cpython-310-pytest-8.3.5.pyc": {
-      "checksum": "c3b6ed3901af36cf131b9d264f107c55"
+      "checksum": "bc801dc06d13a61bf221d776d4f86026"
     },
     "tests/__pycache__/test_helper.cpython-310-pytest-8.3.5.pyc": {
-      "checksum": "8f24affff93f6a6f3731c836e11dd0ae"
+      "checksum": "0255bc8023a8f36e76457ce78075cff4"
     },
     "tests/__pycache__/test_metapop.cpython-310-pytest-8.3.5.pyc": {
-      "checksum": "a12e31f82a0dae23ce6374f487c6d9b1"
+      "checksum": "e4f6d983c707ea0897fee180b9ebea78"
     },
     "tests/__pycache__/test_model.cpython-310-pytest-8.3.5.pyc": {
-      "checksum": "64dd2f842f5bbc07ae94366c13c5e2ca"
+      "checksum": "57c81a925edde7a766002359de137f24"
     },
     "tests/__pycache__/test_sim.cpython-310-pytest-8.3.5.pyc": {
       "checksum": "b259178761cfae7750bdcb1dec9f0b6f"
     },
     "tests/__pycache__/test_simulate.cpython-310-pytest-8.3.5.pyc": {
-      "checksum": "f95e9dbc5d0453eb8015ecfba27e7af2"
+      "checksum": "4fe8eca1bbedbf4325f8a1462d8da738"
     },
     "tests/__pycache__/test_vaccine_schedule.cpython-310-pytest-8.3.5.pyc": {
       "checksum": "47dd956d48591282bc58c9ccaf720104"
     },
     "tests/__pycache__/test_vaccine_schedules.cpython-310-pytest-8.3.5.pyc": {
-      "checksum": "28214a8339f30c62508537f105dc32ef"
+      "checksum": "a9014fc5a4bdca68710a0679355568e0"
     },
     "tests/test_app.py": {
       "checksum": "1b9271b2d525d6d55cc5a9110193cbf3"
     },
     "tests/test_app_helper.py": {
-      "checksum": "e3620ce8c4c644da98030c357e8f8075"
+      "checksum": "d68943aab6f6becca344fec7154e2244"
     },
     "tests/test_config.yaml": {
       "checksum": "4daaae58e95abfcb75b66a29370fa458"
     },
     "tests/test_helper.py": {
-      "checksum": "792f46740a968c1328126e743e4ced21"
+      "checksum": "64f9472febe1875106f6cde29a180404"
     },
-    "tests/test_metapop.py": {
-      "checksum": "72ac2155c7346b0ad49cfc7ed73d161e"
+    "tests/test_model.py": {
+      "checksum": "3f2d85a02d9d5bbd1e0af139039b6e5a"
     },
     "tests/test_onepop_config.yaml": {
       "checksum": "fd0799713e4103d3fafb3ac8203ed22c"
     },
     "tests/test_simulate.py": {
       "checksum": "533dd8167b090fdeb8cffbdd518ba1e2"
+    },
+    "tests/test_vaccine_schedules.py": {
+      "checksum": "1b0f47370d390f415acc4078ba2109f7"
     }
   }
 }
