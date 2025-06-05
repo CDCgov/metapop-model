@@ -29,7 +29,7 @@ from .helper import (
     rescale_beta_matrix,
     time_to_rate,
     vaccinate_groups,
-)  # depends on nothing
+)  # depends on version
 from .model import (
     Ind,
     SEIRModel,
