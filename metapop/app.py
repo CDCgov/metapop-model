@@ -736,6 +736,7 @@ def app(replicates=20):
         combined_results, edited_intervention_parms2["IHR"], hosp_rng
     )
 
+    # This function will always return false until scipy is included and ks_2samp can be run
     no_scenario_difference = totals_same_by_ks(combined_results, scenario_names)
 
     if interventions == "Off":
@@ -770,6 +771,8 @@ def app(replicates=20):
             f"in a population of size {edited_parms2['pop_sizes'][0]} "
             f"with baseline immunity of {round(edited_parms2['initial_vaccine_coverage'][0] * 100)}%."
         )
+
+        # Always false until scipy is included in the project.
         if no_scenario_difference:
             st.warning(
                 "The two scenarios are statistically indistinguishable based on a 2 sample KS test. "

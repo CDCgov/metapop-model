@@ -7,7 +7,8 @@ import griddler
 import griddler.griddle
 import numpy as np
 import polars as pl
-import scipy.stats as stats
+
+# import scipy.stats as stats
 import streamlit as st
 
 # import what's needed from other metapop modules
@@ -1465,6 +1466,11 @@ def totals_same_by_ks(
     ].to_numpy()
 
     # Perform KS test
-    _, p_value = stats.ks_2samp(scenario_0, scenario_1)
+    # If uncommenting this line - be sure to remove skip conditions of respective pytests in test_app_hellper.py
+    # _, p_value = stats.ks_2samp(scenario_0, scenario_1)
+    p_value = 0.0
+    if p_value > 0.0:
+        print(scenario_0)
+        print(scenario_1)
 
     return p_value > p_threshold
