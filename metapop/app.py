@@ -553,7 +553,10 @@ def app(replicates=20):
         pre_rash_isolation_adherance_pct = int(pre_rash_isolation_adherance * 100)
         isolation_adherance_pct = int(isolation_adherance * 100)
         mean_doses_administered = round(
-            results2.filter(pl.col("t") == edited_intervention_parms2["t_array"][-1]).select("X").mean().item()
+            results2.filter(pl.col("t") == edited_intervention_parms2["t_array"][-1])
+            .select("X")
+            .mean()
+            .item()
         )
         title = alt.TitleParams(
             "Outcome Comparison by Scenario",
