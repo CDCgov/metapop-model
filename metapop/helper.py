@@ -527,13 +527,19 @@ def get_metapop_info():
     Returns:
         dict: A dictionary containing metadata on the metapopulation model.
     """
+    # get version info from version.py
+    try:
+        version = __version__
+    except Exception:
+        version = "unknown"
+
     # commit info from git
     commit = os.popen("git rev-parse HEAD").read().strip().split("\n")[-1][0:7]
 
     info = {
         "name": "Measles Metapopulation Model",
         "description": "A model simulating measles transmission in a metapopulation with public health interventions.",
-        "version": __version__,  # version from version.py
+        "version": version,  # version from version.py
         "commit": commit,
         "url": "https://github.com/cdcent/metapop-model",
     }
