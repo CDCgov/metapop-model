@@ -111,8 +111,7 @@ def app(replicates=20):
         )
         st.header(
             "Model Inputs",
-            help="Enter the population size, baseline immunity, and number of people "
-            "initially infected with measles in a community. ",
+            help="",
         )
 
         widget_types = (
