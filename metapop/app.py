@@ -223,8 +223,8 @@ def app(replicates=20):
         edited_parms1 = set_parms_to_zero(
             edited_parms,
             [
-                "pre_rash_isolation_reduction",
-                "isolation_reduction",
+                "pre_rash_isolation_adherence",
+                "isolation_adherence",
                 "total_vaccine_uptake_doses",
             ],
         )
@@ -232,11 +232,11 @@ def app(replicates=20):
             edited_parms1["total_vaccine_uptake_doses"] == 0
         ), "Total vaccine uptake doses should be 0 for the no intervention scenario"
         assert (
-            edited_parms1["pre_rash_isolation_reduction"] == 0
-        ), "Pre-rash isolation reduction should be 0 for the no intervention scenario"
+            edited_parms1["pre_rash_isolation_adherence"] == 0
+        ), "Pre-rash isolation adherence should be 0 for the no intervention scenario"
         assert (
-            edited_parms1["isolation_reduction"] == 0
-        ), "Isolation reduction should be 0 for the no intervention scenario"
+            edited_parms1["isolation_adherence"] == 0
+        ), "Isolation adherence should be 0 for the no intervention scenario"
 
         col_intervention = st.columns(1)[0]
 
@@ -315,8 +315,18 @@ def app(replicates=20):
             # shared advanced parameters to scenario 1
             edited_advanced_parms1 = edited_parms1
             for key in advanced_ordered_keys:
-                edited_advanced_parms1[key] = edited_advanced_parms2[key]
+                if key not in ("pre_rash_isolation_adherence", "isolation_adherence"):
+                    edited_advanced_parms1[key] = edited_advanced_parms2[key]
 
+        assert (
+            edited_advanced_parms1["total_vaccine_uptake_doses"] == 0
+        ), "Total vaccine uptake doses should be 0 for the no intervention scenario"
+        assert (
+            edited_advanced_parms1["pre_rash_isolation_adherence"] == 0
+        ), "Pre-rash isolation adherence should be 0 for the no intervention scenario"
+        assert (
+            edited_advanced_parms1["isolation_adherence"] == 0
+        ), "Isolation adherence should be 0 for the no intervention scenario"
         # Add an About this app section to the sidebar
         info = get_metapop_info()
         st.header("About this app")
@@ -395,7 +405,6 @@ def app(replicates=20):
 
     updated_parms1 = edited_intervention_parms1.copy()
     updated_parms2 = edited_intervention_parms2.copy()
-
     scenario1 = [updated_parms1]
     scenario2 = [updated_parms2]
 
@@ -542,16 +551,16 @@ def app(replicates=20):
 
     # create chart title, depending on whether interventions are on/off
     if interventions == "On":
-        pre_rash_isolation_adherance = 0
-        isolation_adherance = 0
+        pre_rash_isolation_adherence = 0
+        isolation_adherence = 0
         if edited_intervention_parms2["pre_rash_isolation_on"]:
-            pre_rash_isolation_adherance = edited_intervention_parms2[
+            pre_rash_isolation_adherence = edited_intervention_parms2[
                 "pre_rash_isolation_adherence"
             ]
         if edited_intervention_parms2["isolation_on"]:
-            isolation_adherance = edited_intervention_parms2["isolation_adherence"]
-        pre_rash_isolation_adherance_pct = int(pre_rash_isolation_adherance * 100)
-        isolation_adherance_pct = int(isolation_adherance * 100)
+            isolation_adherence = edited_intervention_parms2["isolation_adherence"]
+        pre_rash_isolation_adherence_pct = int(pre_rash_isolation_adherence * 100)
+        isolation_adherence_pct = int(isolation_adherence * 100)
         mean_doses_administered = round(
             results2.filter(pl.col("t") == edited_intervention_parms2["t_array"][-1])
             .select("X")
@@ -562,8 +571,8 @@ def app(replicates=20):
             "Outcome Comparison by Scenario",
             subtitle=[
                 (f"Vaccine campaign: {mean_doses_administered} " "doses administered"),
-                f"Quarantine adherence: {pre_rash_isolation_adherance_pct}%",
-                f"Isolation adherence: {isolation_adherance_pct}%",
+                f"Quarantine adherence: {pre_rash_isolation_adherence_pct}%",
+                f"Isolation adherence: {isolation_adherence_pct}%",
             ],
             subtitleColor="#808080",
         )
@@ -679,23 +688,23 @@ def app(replicates=20):
         flexible_callout(
             (
                 "No Interventions:<br><ul>"
-                "<li> Vaccines administered during campaign: 0</li>"
-                "<li> Adherence to quarantine among pre-symptomatic infectious individuals: 0%</li>"
-                "<li> Adherence to isolation among symptomatic infectious individuals: 0%</li></ul>"
+                f"<li> Vaccines administered during campaign: {int(updated_parms1['total_vaccine_uptake_doses'])}</li>"
+                f"<li> Adherence to quarantine among pre-symptomatic infectious individuals: {int(updated_parms1['pre_rash_isolation_adherence'] * 100)}%</li>"
+                f"<li> Adherence to isolation among symptomatic infectious individuals:  {int(updated_parms1['isolation_adherence'] * 100)}%</li></ul>"
             ),
             background_color="#feeadf",
             font_color="#8f3604",
             container=columns[0],
         )
         if interventions == "On":
-            pre_rash_isolation_adherance = 0
-            isolation_adherance = 0
+            pre_rash_isolation_adherence = 0
+            isolation_adherence = 0
             if edited_intervention_parms2["pre_rash_isolation_on"]:
-                pre_rash_isolation_adherance = edited_intervention_parms2[
+                pre_rash_isolation_adherence = edited_intervention_parms2[
                     "pre_rash_isolation_adherence"
                 ]
             if edited_intervention_parms2["isolation_on"]:
-                isolation_adherance = edited_intervention_parms2["isolation_adherence"]
+                isolation_adherence = edited_intervention_parms2["isolation_adherence"]
 
             callout_text = "Interventions:<br><ul>"
             if (
@@ -705,8 +714,8 @@ def app(replicates=20):
                 callout_text += "<li> Vaccines administered during campaign: 0</li>"
             else:
                 callout_text += f"<li> Vaccines administered during campaign: {mean_doses_administered} between day {min(schedule.keys())} and day {max(schedule.keys())}</li>"
-            callout_text += f"<li> Adherence to quarantine among pre-symptomatic infectious individuals: {int(pre_rash_isolation_adherance * 100)}%</li>"
-            callout_text += f"<li> Adherence to isolation among symptomatic infectious individuals: {int(isolation_adherance * 100)}%</li></ul>"
+            callout_text += f"<li> Adherence to quarantine among pre-symptomatic infectious individuals: {int(pre_rash_isolation_adherence * 100)}%</li>"
+            callout_text += f"<li> Adherence to isolation among symptomatic infectious individuals: {int(isolation_adherence * 100)}%</li></ul>"
 
             flexible_callout(
                 callout_text,
