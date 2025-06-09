@@ -6,7 +6,7 @@ baseline_parameters:
   k_g2: 0.01
   k_21: 0.01
   n_e_compartments: 2    # number of chained E compartments
-  latent_duration: 10.5
+  latent_duration: 11.0
   n_i_compartments: 2    # number of chained I compartments
   infectious_duration: 9.0
   pop_sizes: [15000]    # population sizes
