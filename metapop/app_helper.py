@@ -508,7 +508,7 @@ def app_editors(
         for key in ordered_keys:
             if key not in list_keys:
                 callback = None
-                if key == "isolation_on":
+                if key == "pre_rash_isolation_on":
                     callback = coerce_quarantine_to_isolation(
                         element_keys,
                     )

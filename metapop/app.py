@@ -188,12 +188,17 @@ def app(replicates=20):
 
         # Set parameters for each scenario separately
         # order of parameters in the sidebar
-        ordered_keys = [
-            "isolation_on",
-            "pre_rash_isolation_on",
+        ordered_keys_vax = [
             "total_vaccine_uptake_doses",
             "vaccine_uptake_start_day",
             "vaccine_uptake_duration_days",
+        ]
+
+        ordered_keys_npi = [
+            "isolation_on",
+            "isolation_adherence",
+            "pre_rash_isolation_on",
+            "pre_rash_isolation_adherence",
         ]
         # parameters that are lists or arrays
         list_parameter_keys = []
@@ -237,14 +242,36 @@ def app(replicates=20):
             edited_parms1["isolation_adherence"] == 0
         ), "Isolation adherence should be 0 for the no intervention scenario"
 
-        col_intervention = st.columns(1)[0]
+        col_intervention_vax = st.columns(1)[0]
+
+        # placeholder for text about the vaccine campaign doses and other intervention effects in the siderbar
+        # defining this here allows us to place it above the advanced options section
+        col_intervention_text = st.columns(1)[0]
+
+        col_intervention_npi = st.columns(1)[0]
 
         # For the intervention scenario, user defines values
         edited_parms2 = app_editors(
-            col_intervention,
+            col_intervention_vax,
             "",
             edited_parms,
-            ordered_keys,
+            ordered_keys_vax,
+            list_parameter_keys,
+            show_parameter_mapping,
+            widget_types,
+            min_values,
+            max_values,
+            steps,
+            helpers,
+            formats,
+            keys2,
+        )
+
+        edited_parms2 = app_editors(
+            col_intervention_npi,
+            "",
+            edited_parms2,
+            ordered_keys_npi,
             list_parameter_keys,
             show_parameter_mapping,
             widget_types,
@@ -261,23 +288,16 @@ def app(replicates=20):
             edited_parms1 = rescale_prop_vax(edited_parms1)
             edited_parms2 = rescale_prop_vax(edited_parms2)
 
-        # placeholder for text about the vaccine campaign doses and other intervention effects in the siderbar
-        # defining this here allows us to place it above the advanced options section
-        col_intervention_text = st.columns(1)[0]
-
-        with st.expander("Advanced parameters"):
+        with st.expander("Disease parameters"):
             st.text(
                 "These options allow changes to parameter assumptions including "
-                "measles natural history parameters as well as parameters governing "
-                "intervention efficacy."
+                "measles natural history parameters."
             )
 
             advanced_ordered_keys = [
                 "desired_r0",
                 "latent_duration",
                 "infectious_duration",
-                "pre_rash_isolation_adherence",
-                "isolation_adherence",
                 "IHR",
             ]
 
