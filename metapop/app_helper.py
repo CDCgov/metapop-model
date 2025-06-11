@@ -1382,7 +1382,7 @@ def get_median_trajectory_from_episize(
         results (pl.DataFrame): The simulation results DataFrame from `get_scenario_results`.
 
     Returns:
-        pl.DataFrame: The trajectory of the replicate closest to the median R value.
+        int: The replicate identifier whose final size is closest to the median final size across all replicates in the specified group.
     """
     # Get the maximum time point
     max_t = results["t"].max()
@@ -1405,7 +1405,7 @@ def get_median_trajectory_from_episize(
     )
 
     # Return the trajectory for the closest replicate
-    return results.filter(pl.col("replicate") == closest_replicate)
+    return closest_replicate
 
 
 def get_median_trajectory_from_peak_time(

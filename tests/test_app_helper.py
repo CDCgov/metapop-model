@@ -254,8 +254,8 @@ def test_get_median_from_episize_one_group():
         }
     )
 
-    dummy_traj = get_median_trajectory_from_episize(episize_df)
-    r = dummy_traj["R"].item()
+    dummy_traj_id = get_median_trajectory_from_episize(episize_df)
+    r = episize_df.filter(pl.col("replicate") == dummy_traj_id)["R"].item()
 
     # and equal to the median
     assert r == np.median(
@@ -278,11 +278,14 @@ def test_get_median_from_episize_multiple_groups():
     )
 
     for group in range(2):
-        dummy_traj = get_median_trajectory_from_episize(episize_df, base_group=group)
+        dummy_traj_id = get_median_trajectory_from_episize(episize_df, base_group=group)
 
         # Check that Group 0, the base group, has a median r equal to function output
-        r_group = dummy_traj.filter(pl.col("group") == group)["R"].item()
-        median_group = np.median(episize_df.filter(pl.col("group") == group)["R"])
+        r_group = episize_df.filter(
+            (pl.col("group") == group) & (pl.col("replicate") == dummy_traj_id)
+        )["R"].item()
+
+        median_group = np.median(episize_df.filter((pl.col("group") == group))["R"])
 
         assert (
             r_group == median_group
