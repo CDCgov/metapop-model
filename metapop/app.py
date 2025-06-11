@@ -879,11 +879,20 @@ def app(replicates=20):
             <p style="font-size:14px;">We note that this modeling approach
             makes several simplifying assumptions, including the following:</p>
             <ul>
-            <li style="font-size:14px;">This is a compartmental SVEIR model of
-            a well-mixed population, which means individuals have the same
-            probability of contact with each other. At the county scale, this
-            may underestimate the risk of an outbreak if unvaccinated people
-            are more likely to come into contact with each other.</li>
+            <li style="font-size:14px;">This is a stochastic compartmental
+            SVEIR model of a well-mixed population, which means individuals
+            have the same probability of contact with each other. In larger
+            populations, this may overestimate the size and duration of an
+            outbreak.</li>
+            <li style="font-size:14px;">The MMR vaccine is modeled as an
+            "all-or-nothing" vaccine, meaning that it is perfectly effective
+            for some people (corresponding to the vaccine efficacy parameter,
+            i.e. for 93% of people after 1 dose) and has no efficacy for others.
+            </li>
+            <li style="font-size:14px;">There is no age structure, so baseline
+            immunity accounts for vaccination coverage and immunity over the
+            entire population.</li>
+
 
             <b style="font-size:14px;">Model Parameters</b>
             <ul>
