@@ -208,7 +208,7 @@ def app(replicates=20):
         st.header(
             "Interventions scenario",
             help="The adherence to both isolation and quarantine, "
-            "as well as the vaccine uptake and start time and duration of the vaccine campaign, "
+            "as well as the vaccine uptake and start time and duration of the vaccination campaign, "
             "can be specified.",
         )
         st.text(
@@ -216,7 +216,7 @@ def app(replicates=20):
             "scenario with no active interventions. Interventions can be applied "
             "independently or in combination with each other. "
             "The results are compared to a baseline scenario that does not "
-            "have any vaccine uptake, isolation, or quarantine incorporated."
+            "have a vaccination campaign, nor isolation or quarantine interventions incorporated."
         )
 
         st.text(
