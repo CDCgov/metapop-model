@@ -2,7 +2,6 @@ import os
 
 import numpy as np
 import polars as pl
-import pytest
 import yaml
 
 from metapop.app_helper import *
@@ -386,10 +385,6 @@ def ks_compare(base: list, compared_array: list, expect: bool, threshold: float)
     )
 
 
-@pytest.mark.skip(
-    # importlib.util.find_spec("scipy") is not None,
-    reason="Until scipy is included, totals_same_by_ks set to return always False",
-)
 def test_totals_same_by_ks():
     base = [1, 2, 2, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 5]
     similar = [1, 2, 2, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5]
@@ -404,10 +399,6 @@ def test_totals_same_by_ks():
     ks_compare(base, different, False, 0.05)
 
 
-@pytest.mark.skip(
-    # importlib.util.find_spec("scipy") is not None,
-    reason="Until scipy is included, totals_same_by_ks set to return always False",
-)
 def test_indistinguishable_scenarios():
     # modify to be a single population
     parms = config["baseline_parameters"]
