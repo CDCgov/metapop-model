@@ -514,6 +514,13 @@ def app_editors(
                 if key == "total_vaccine_uptake_doses":
                     st.write("Vaccination Campaign:")
                 if widget_types[key] == "slider":
+                    if key == "isolation_adherence":
+                        disabled_slider = not edited_parms["isolation_on"]
+                    elif key == "pre_rash_isolation_adherence":
+                        disabled_slider = not edited_parms["pre_rash_isolation_on"]
+                    else:
+                        disabled_slider = disabled
+                if widget_types[key] == "slider":
                     value = st.slider(
                         show_parameter_mapping[key],
                         min_value=min_values[key],
@@ -523,7 +530,7 @@ def app_editors(
                         help=helpers[key],
                         format=formats[key],
                         key=element_keys[key],
-                        disabled=disabled,
+                        disabled=disabled_slider,
                     )
                 elif widget_types[key] == "number_input":
                     value = st.number_input(
@@ -808,12 +815,12 @@ def get_helpers(parms=None):
         total_vaccine_uptake_doses="In this model, we administer one dose of the MMR vaccine per person vaccinated during the campaign, with 93% effectiveness as indicated by vaccine studies.",
         vaccinated_group="Population receiving the vaccine",
         isolation_on="If turned on, reduces transmission of symptomatic individuals who adhere to isolation measures (the percentage as selected under “Isolation adherence”) by 100% during the symptomatic period (see Detailed Methods).",
-        isolation_adherence="Percent of symptomatic individuals who follow isolation guidance.",
+        isolation_adherence="Percent of symptomatic individuals who follow isolation guidance when isolation is turned on. To modify this parameter, enable isolation.",
         isolation_reduction="Percent reduction in transmission due to isolation. Only used if isolation is turned on.",
         symptomatic_isolation_start_day="Day symptomatic isolation starts",
         symptomatic_isolation_duration_days="Duration of symptomatic isolation",
         pre_rash_isolation_on="If turned on, reduces transmission of individuals who are exposed but pre-symptomatic and adhere to quarantine measures (the percentage as selected under “Quarantine adherence”) by 60% during the pre-symptomatic period (see Detailed Methods)",
-        pre_rash_isolation_adherence="Percent of pre-symptomatic infectious individuals who follow quarantine guidance.",
+        pre_rash_isolation_adherence="Percent of pre-symptomatic individuals who follow quarantine guidance when quarantine is turned on. To modify this parameter, enable quarantine.",
         pre_rash_isolation_reduction="Percent reduction in transmission due quarantine. Only used if quarantine is turned on.",
         pre_rash_isolation_start_day="Day pre-rash isolation starts",
         pre_rash_isolation_duration_days="Duration of pre-rash isolation",
