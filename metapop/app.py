@@ -290,7 +290,7 @@ def app(replicates=20):
 
         with st.expander("Disease parameters"):
             st.text(
-                "These options allow changes to parameter assumptions including "
+                "These options allow changes to parameter assumptions about "
                 "measles natural history parameters."
             )
 
