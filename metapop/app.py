@@ -846,24 +846,34 @@ def app(replicates=20):
             """
             <p style="font-size:14px;">
             This model examines measles transmission in a population after
-            introduction of measles cases. This is a stochastic SVEIR model,
-            with built-in random variation. We run 200 individual
-            simulations to produce a range of possible outcomes and estimates
-            of associated uncertainty. People who are immune at the beginning
-            of the simulation, either through past vaccination or previous
-            infection, begin in the "Vaccinated" compartment.<br><br>
+            introduction of measles. This is a stochastic SVEIR model,
+            with built-in random variation and all-or-nothing vaccination.
+            We run 100 individual simulations to produce a range of possible
+            outcomes and estimates of associated uncertainty. People who are
+            immune at the beginning of the simulation, either through past
+            vaccination or previous infection, begin in the "Vaccinated"
+            compartment. Individuals who have received the vaccine but are
+            not immune (due to vaccine failure) are tracked in a separate
+            "Vaccinated but Susceptible" compartment, and have the same
+            susceptibility as individuals in the "Susceptible" compartment.
+            <br><br>
 
             <p style="font-size:14px;">
             Users can explore the impact of interventions, including vaccination,
             isolation, and quarantine measures ("Interventions" scenario)
             compared to a baseline scenario without active interventions ("No
-            Interventions". We conduct a two-sample K-S test to determine if the
-            total cases from the "Interventions" scenario differ from the total
-            cases of the "No Interventions" baseline scenario.<br><br>
+            Interventions". When they are implemented, isolation and quarantine
+            measures begin on the same day as the introduced measles cases are
+            identified via rash onset and run for the duration of simulation.
+            The start and end time of the vaccination campaign can be specified.
+            <br><br>
 
             <p style="font-size:14px;">
-            The start and end time of the vaccine campaign
-            can be specified.<br><br>
+
+            We conduct a two-sample K-S test to determine if the
+            total cases from the "Interventions" scenario differ from the total
+            cases of the "No Interventions" baseline scenario and present
+            information if scenario results are indistinguishable.<br><br>
 
             <b style="font-size:14px;">Assumptions</b>
             <p style="font-size:14px;">We note that this modeling approach
