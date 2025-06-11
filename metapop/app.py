@@ -697,8 +697,8 @@ def app(replicates=20):
         "differences between each individual simulation are due to random "
         "variation in contact rates. Bolded lines show the simulation that possessed "
         "the median time of peak prevalence across all epidemic trajectories for "
-        "each scenario. If a vaccine campaign is activated, the time period over "
-        "which vaccines are distributed is shown by gray rectangle."
+        "each scenario. If a vaccination campaign is activated, the time period over "
+        "which vaccines are distributed is shown by gray box."
         "</p>",
         unsafe_allow_html=True,
     )
@@ -706,7 +706,7 @@ def app(replicates=20):
     ### Outbreak Summary Stats
     st.subheader("Simulation summary")
 
-    with st.expander("Show intervention strategy info.", expanded=False):
+    with st.expander("Show intervention strategies", expanded=False):
         columns = st.columns(2)
 
         flexible_callout(
@@ -803,7 +803,7 @@ def app(replicates=20):
             intervention_text += interventions[0]
 
         st.text(
-            f"{intervention_text} decreases total cases by {float(relative_difference):.0f}% "
+            f"{intervention_text} decreases total measles infections by {float(relative_difference):.0f}% "
             f"in a population of size {edited_parms2['pop_sizes'][0]} "
             f"with baseline immunity of {round(edited_parms2['initial_vaccine_coverage'][0] * 100)}%."
         )
@@ -811,8 +811,8 @@ def app(replicates=20):
         # Always false until scipy is included in the project.
         if no_scenario_difference:
             st.warning(
-                "The two scenarios are statistically indistinguishable based on a 2 sample KS test. "
-                "Relative difference is not a reliable metric.",
+                "The two scenarios are statistically indistinguishable based on a 2 sample K-S test. "
+                "In this case, the relative difference is not a reliable metric.",
                 icon="⚠️",
             )
 
