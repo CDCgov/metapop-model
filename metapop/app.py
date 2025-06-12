@@ -332,7 +332,10 @@ def app(replicates=20):
             )
 
             # shared advanced parameters to scenario 1
-            edited_advanced_parms1 = edited_parms1
+            edited_advanced_parms1 = (
+                edited_parms1  # copy the no intervention scenario parameters so far
+            )
+            # copy the non intervention advanced parameters from scenario 2 to scenario 1
             for key in advanced_ordered_keys:
                 if key not in ("pre_rash_isolation_adherence", "isolation_adherence"):
                     edited_advanced_parms1[key] = edited_advanced_parms2[key]
@@ -846,7 +849,7 @@ def app(replicates=20):
             """
             <p style="font-size:14px;">
             This model examines measles transmission in a population after
-            introduction of measles. This is a stochastic SVEIR model,
+            introduction of measles. This is a stochastic compartmental SVEIR model,
             with built-in random variation and all-or-nothing vaccination.
             We run 100 individual simulations to produce a range of possible
             outcomes and estimates of associated uncertainty. People who are
@@ -879,16 +882,18 @@ def app(replicates=20):
             <p style="font-size:14px;">We note that this modeling approach
             makes several simplifying assumptions, including the following:</p>
             <ul>
-            <li style="font-size:14px;">This is a stochastic compartmental
-            SVEIR model of a well-mixed population, which means individuals
-            have the same probability of contact with each other. In larger
-            populations, this may overestimate the size and duration of an
-            outbreak.</li>
+
+            <li style="font-size:14px;">This is a model of a well-mixed population,
+            which means individuals have the same probability of contact with
+            each other. In larger populations, this may overestimate the size
+            and duration of an outbreak.</li>
+
             <li style="font-size:14px;">The MMR vaccine is modeled as an
             "all-or-nothing" vaccine, meaning that it is perfectly effective
             for some people (corresponding to the vaccine efficacy parameter,
             i.e. for 93% of people after 1 dose) and has no efficacy for others.
             </li>
+
             <li style="font-size:14px;">There is no age structure, so baseline
             immunity accounts for vaccination coverage and immunity over the
             entire population.</li>
@@ -897,13 +902,16 @@ def app(replicates=20):
             <b style="font-size:14px;">Model Parameters</b>
             <ul>
             <li style="font-size:14px;"> The basic reproductive number (R<sub>0</sub>),
-            captures contact rates and the probability of infection given contact with an infectious individual
-            . R<sub>0</sub> for measles is generally estimated to be between 12 and 18
-            <a href='https://www.ecdc.europa.eu/en/measles/facts' target='_blank'>[Factsheet about measles]</a>
-            . Communities with higher contact rates — for example populations with higher population density
-            or larger households
-            <a href='https://pmc.ncbi.nlm.nih.gov/articles/PMC8765757/' target='_blank'>[Social contact patterns and implications for infectious disease transmission – a systematic review and meta-analysis of contact surveys | eLife]</a> — may have higher R<sub>0</sub>. The probability of infection given contact with an infectious individuals is very high for measles;
-            the household attack rate is estimated to be 90%
+            captures contact rates and the probability of infection given
+            contact with an infectious individual. R<sub>0</sub> for measles is
+            generally estimated to be between 12 and 18
+            <a href='https://www.ecdc.europa.eu/en/measles/facts' target='_blank'>[Factsheet about measles]</a>.
+            Communities with higher contact rates — for example populations with
+            higher population density or larger households
+            <a href='https://pmc.ncbi.nlm.nih.gov/articles/PMC8765757/' target='_blank'>[Social contact patterns and implications for infectious disease transmission – a systematic review and meta-analysis of contact surveys | eLife]</a>
+            — may have higher R<sub>0</sub>. The probability of infection given
+            contact with an infectious individuals is very high for measles;
+            the household attack rate is estimated to be 90% among unvaccinated contacts
             <a href='https://www.cdc.gov/yellow-book/hcp/travel-associated-infections-diseases/measles-rubeola.html#:~:text=Measles%20is%20among%20the%20most,global%20eradication%20of%20measles%20feasible' target='_blank'>[CDC Yellow Book: Measles (Rubeola)]</a>.
             </li>
 
@@ -913,7 +921,7 @@ def app(replicates=20):
             </li>
 
             <li style="font-size:14px;">The infectious period is generally
-            estimated to be around 9 days
+            estimated to be around 9 days, with an upper bound of 11 days
             <a href='https://www.cdc.gov/measles/hcp/communication-resources/clinical-diagnosis-fact-sheet.html' target='_blank'>[Measles Clinical Diagnosis Fact Sheet | Measles (Rubeola) | CDC]</a>.
             </li>
 
@@ -928,13 +936,21 @@ def app(replicates=20):
             <a href='https://www.cdc.gov/measles/vaccines/index.html?CDC_AA_refVal=https%3A%2F%2Fwww.cdc.gov%2Fvaccines%2Fvpd%2Fmmr%2Fpublic%2Findex.html' target='_blank'>[MMR Vaccine Information]</a>.
             </li>
 
-            <li style="font-size:14px;"> We assume vaccine efficacy for individuals vaccinated prior
-            to the campaign is 97%, the estimate for two doses of MMR
+            <li style="font-size:14px;"> We assume vaccine efficacy for individuals
+            vaccinated prior to the campaign is 97%, the estimate for two doses of MMR
             <a href='https://www.cdc.gov/measles/vaccines/index.html?CDC_AA_refVal=https%3A%2F%2Fwww.cdc.gov%2Fvaccines%2Fvpd%2Fmmr%2Fpublic%2Findex.html' target='_blank'>[MMR Vaccine Information]</a>.
             </li>
 
-            <li style="font-size:14px;"> We assume that both susceptible and exposed individuals who are not yet infectious are eligible to get vaccinated during the vaccine campaign. We also assume that exposed individuals are not yet aware of their exposure status and so they are equally likely to seek vaccination.
-            After vaccination, only susceptible individuals become immune, while exposed individuals remain in the exposed state and continue with infection progression as normal. The number of doses administered may be lower than the number of doses scheduled if by the time of the campaign, the daily dose rate scheduled exceeds the number of individuals eligible.
+            <li style="font-size:14px;"> We assume that both susceptible and
+            exposed individuals who are not yet infectious are eligible to get
+            vaccinated during the vaccine campaign. We also assume that exposed
+            individuals are not yet aware of their exposure status and so they
+            are equally likely to seek vaccination. After vaccination, only
+            susceptible individuals become immune, while exposed individuals
+            remain in the exposed state and continue with infection progression
+            as normal. The number of doses administered may be lower than the
+            number of doses scheduled if by the time of the campaign, the daily
+            dose rate scheduled exceeds the number of individuals eligible.
             </li>
 
 
@@ -945,10 +961,10 @@ def app(replicates=20):
             <li style="font-size:14px;">Isolation when sick is estimated to be
             approximately 75% effective at reducing transmission when comparing
             people who do isolate when sick to people who do not
-            <a href='https://academic.oup.com/cid/article/75/1/152/6424734' target='_blank'>[Impact of Isolation and Exclusion as a Public Health Strategy to Contain Measles Virus Transmission During a Measles Outbreak | Clinical Infectious Diseases | Oxford Academic]</a>
-            . In this model, since isolation starts only at rash onset,
-            isolation reduces transmission by 100% during the second half of the infectious period,
-            leading to a reduction of 50% overall.
+            <a href='https://academic.oup.com/cid/article/75/1/152/6424734' target='_blank'>[Impact of Isolation and Exclusion as a Public Health Strategy to Contain Measles Virus Transmission During a Measles Outbreak | Clinical Infectious Diseases | Oxford Academic]</a>.
+            In this model, since isolation starts only at rash onset, isolation
+            reduces transmission by 100% during the second half of the
+            infectious period, leading to a reduction of 50% overall.
             </li>
 
             <li style="font-size:14px;">
@@ -960,8 +976,8 @@ def app(replicates=20):
             </li>
 
             <li style="font-size:14px;">
-            The infection hospitalization ratio (IHR) has been estimated at 20% in past outbreaks,
-            but we allow users to vary this value between 5% and 25%
+            The infection hospitalization ratio (IHR) has been estimated at 20%
+            in past outbreaks, but we allow users to vary this value between 5% and 25%
             <a href='https://www.cdc.gov/measles/signs-symptoms/index.html' target='blank'>[Measles Symptoms and Complications | Measles (Rubeola) | CDC]</a>.
             </li>
             </ul>
