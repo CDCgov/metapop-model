@@ -872,7 +872,6 @@ def app(replicates=20):
             <br><br>
 
             <p style="font-size:14px;">
-
             We conduct a two-sample K-S test to determine if the
             total cases from the "Interventions" scenario differ from the total
             cases of the "No Interventions" baseline scenario and present
@@ -950,7 +949,7 @@ def app(replicates=20):
             remain in the exposed state and continue with infection progression
             as normal. The number of doses administered may be lower than the
             number of doses scheduled if by the time of the campaign, the daily
-            dose rate scheduled exceeds the number of individuals eligible.
+            dose rate scheduled exceeds the number of individuals eligible for vaccination.
             </li>
 
 
