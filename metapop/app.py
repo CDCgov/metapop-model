@@ -354,6 +354,7 @@ def app(replicates=20):
         st.header("About this app")
         st.caption(f"metapop version: {info['version']}")
         st.caption(f"commit hash: {info['commit']}")
+
         # show the url of the repo
         url = info["url"]
         image_url = (
@@ -366,6 +367,7 @@ def app(replicates=20):
             "</a>",
             unsafe_allow_html=True,
         )
+        st.caption(f"Questions? Contact us: {info['email']}")
 
     #### End of sidebar panel
 

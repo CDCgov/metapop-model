@@ -543,6 +543,7 @@ def get_metapop_info():
         "version": version,  # version from version.py
         "commit": commit,
         "url": "https://github.com/cdcent/metapop-model",
+        "email": "eocevent410@cdc.gov",
     }
 
     return info
