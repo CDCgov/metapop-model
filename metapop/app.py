@@ -866,16 +866,17 @@ def app(replicates=20):
             isolation, and quarantine measures ("Interventions" scenario)
             compared to a baseline scenario without active interventions ("No
             Interventions". When they are implemented, isolation and quarantine
-            measures begin on the same day as the introduced measles cases are
+            measures begin on the same day as the introduced measles infections are
             identified via rash onset and run for the duration of simulation.
             The start and end time of the vaccination campaign can be specified.
             <br><br>
 
             <p style="font-size:14px;">
             We conduct a two-sample K-S test to determine if the
-            total cases from the "Interventions" scenario differ from the total
-            cases of the "No Interventions" baseline scenario and present
-            information if scenario results are indistinguishable.<br><br>
+            total measles infections from the "Interventions" scenario differ
+            from the total measles infections of the "No Interventions" baseline
+            scenario and present information if scenario results are
+            indistinguishable.<br><br>
 
             <b style="font-size:14px;">Assumptions</b>
             <p style="font-size:14px;">We note that this modeling approach
