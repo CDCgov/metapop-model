@@ -439,7 +439,7 @@ def test_indistinguishable_scenarios():
     parms["seed"] = 1234
 
     # Set vaccine doses to be equivalent to 100% of unvaccinated susceptibles as in the app slider
-    parms["total_vaccine_uptake_doses"] = (
+    parms["total_vaccine_uptake_doses"] = int(
         parms["pop_sizes"][0] * (1 - parms["initial_vaccine_coverage"][0])
         - parms["I0"][0]
     )

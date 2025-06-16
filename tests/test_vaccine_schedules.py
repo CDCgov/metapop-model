@@ -1,3 +1,4 @@
+import math
 import os
 
 import yaml
@@ -230,3 +231,56 @@ def test_vaccine_schedule_starting_on_last_day_of_simulation():
     assert schedule == {
         parms["vaccine_uptake_start_day"] + 1: 0
     }, "No vaccines should be administered past the end of simulation"
+
+
+def uneven_doses_per_day(duration: int, doses: int):
+    """
+    Distribute `doses` vaccines across a campagin of `duration` days with assert checks
+
+    Example:
+        If expected doses per day is (25 doses / 10 duration) = 2.5, cumulative doses are
+        2.5, 5.0, 7.5, 10.0, 12.5, 15.0, 17.5, 20.0, 22.5, 25.0
+        With integers using round(), where odd integers round up on 0.5
+        2, 5, 8, 10, 12, 15, 18, 20, 22, 25
+        And delivered doses by day are the floor() or ceil() of the average
+        2, 3, 3, 2,  2,  3,  3,  2,  2,  3
+        With the final schedule being
+        {1: 2, 2: 3, 3: 3, 4: 2, 5: 2, 6: 3, 7: 3, 8: 2, 9: 2, 10: 3}
+    """
+    with open(os.path.join(testdir, "test_config.yaml"), "r") as f:
+        config = yaml.safe_load(f)
+
+    parms = config["baseline_parameters"]
+    # reset scenario so that there are no infections but vaccines should be
+    # distributed unevenly over ten days because the expected doses per day is  not equal to integers.
+
+    parms["I0"] = [0, 0, 0]
+    parms["tf"] = duration
+    parms["vaccine_uptake_start_day"] = 0
+    parms["vaccine_uptake_duration_days"] = duration
+    parms["total_vaccine_uptake_doses"] = doses
+    parms["vaccine_efficacy_1_dose"] = 1
+    parms["vaccine_efficacy_2_dose"] = 1
+    parms["vaccinated_group"] = 2
+
+    parms["t_array"] = get_time_array(parms)
+
+    avg = parms["total_vaccine_uptake_doses"] / parms["vaccine_uptake_duration_days"]
+
+    schedule = build_vax_schedule(parms)
+
+    for i in range(
+        parms["vaccine_uptake_start_day"] + 1,
+        parms["vaccine_uptake_start_day"] + parms["vaccine_uptake_duration_days"],
+    ):
+        assert schedule[i] in [math.floor(avg), math.ceil(avg)]
+    assert sum(schedule.values()) == parms["total_vaccine_uptake_doses"]
+
+
+def test_hi_lo_uneven_doses():
+    # Test greater than one dose per day on average
+    uneven_doses_per_day(duration=10, doses=25)
+    # Test less than one dose per day on average
+    uneven_doses_per_day(duration=10, doses=9)
+    # Test zero doses
+    uneven_doses_per_day(duration=10, doses=0)

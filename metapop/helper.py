@@ -389,6 +389,7 @@ def time_to_rate(duration):
 def build_vax_schedule(parms):
     """
     Build dictionary describing vaccination schedule for group 2
+    Vaccines are distributed evenly during the vaccine campiagn duration (see example)
 
     Args:
         parms (dict): Dictionary containing the parameters, including:
@@ -399,6 +400,22 @@ def build_vax_schedule(parms):
 
     Returns:
         dict: A dictionary with days as keys and doses as values.
+
+    Examples:
+        The expected cumulative doses delivered by day t are calculated from the total doses delivered and campaign duration
+        These expected doses are then rounded to integers and the differences across days are the doses delivered.
+
+        >>> parms = {"vaccine_uptake_start_day": 0, "vaccine_uptake_duration_days": 10, "total_vaccine_uptake_doses": 25, "t_array": np.arange(1,30)}
+        >>> build_vax_schedule(parms)
+        {1: 2, 2: 3, 3: 3, 4: 2, 5: 2, 6: 3, 7: 3, 8: 2, 9: 2, 10: 3}
+
+        In the case of clipped vaccine campaigns, when the end of the simulation occurs before all doses have been delivered,
+        the doses are scheduled as above but cut short and total doses scheduled does not match uptake doses
+
+        >>> parms = {"vaccine_uptake_start_day": 0, "vaccine_uptake_duration_days": 10, "total_vaccine_uptake_doses": 25, "t_array": np.arange(1,6)}
+        >>> build_vax_schedule(parms)
+        {1: 2, 2: 3, 3: 3, 4: 2, 5: 2}
+
     """
     assert (
         "vaccine_uptake_start_day" in parms
@@ -432,30 +449,39 @@ def build_vax_schedule(parms):
 
     vaccine_uptake_days = list(range(start_day, end_day))
 
-    if parms["vaccine_uptake_duration_days"] > 0:
-        doses_per_day = round(
+    if len(vaccine_uptake_days) > 0:
+        # Distribute doses evenly across time by rounding cumulative expected doses and taking difference
+        avg_doses_per_day = (
             parms["total_vaccine_uptake_doses"] / parms["vaccine_uptake_duration_days"]
         )
-    else:
-        doses_per_day = 0
+        expected_cumu_doses = [
+            (d + 1) * avg_doses_per_day for d in range(len(vaccine_uptake_days))
+        ]
+        cumu_doses = [round(dose) for dose in expected_cumu_doses]
 
-    # Create the schedule dictionary
-    schedule = {day: doses_per_day for day in vaccine_uptake_days}
-
-    # if vaccine campaign runs for at least one day, make sure the total number of doses
-    # administered matches the total number of doses specified as available
-    if len(vaccine_uptake_days) > 0:
-        if sum(schedule.values()) != parms["total_vaccine_uptake_doses"]:
-            last_day = vaccine_uptake_days[-1]
-            dose_difference = parms["total_vaccine_uptake_doses"] - sum(
-                schedule.values()
-            )
-            schedule[last_day] += dose_difference
+        doses_per_day = [cumu_doses[0]]
+        if len(cumu_doses) > 1:
+            doses_per_day += [
+                cumu_doses[i + 1] - cumu_doses[i] for i in range(len(cumu_doses) - 1)
+            ]
+        # Create the schedule dictionary
+        schedule = {
+            vaccine_uptake_days[day]: doses_per_day[day]
+            for day in range(len(vaccine_uptake_days))
+        }
 
     # If no days are specified, set the schedule to 0 doses for day the first day of the vaccine schedule as a
     # placeholder rather than an empty dictionary
     else:
-        schedule = {parms["vaccine_uptake_start_day"] + 1: 0}
+        doses_per_day = 0
+        schedule = {end_day: 0}
+
+    # if vaccine campaign runs for the whole duration, assert that the total number of doses
+    # administered matches the total number of doses specified as available
+    # if the vaccine campaign is clipped by the end of the simulation, doses delivered will not match
+    if len(vaccine_uptake_days) == parms["vaccine_uptake_duration_days"]:
+        assert sum(schedule.values()) == parms["total_vaccine_uptake_doses"]
+
     return schedule
 
 
