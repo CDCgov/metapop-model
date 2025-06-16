@@ -17,8 +17,8 @@ $N_A = 1000, N_B = 100, N_C = 100,$ and $k = k_A = k_B = k_C = 10$.
 
 Since $K_{ij}$ must equal $K_{ji}$, defining a matrix $K$ among $z$ populations
 requires $z \choose 2$ constraints. We will denote these constraints as $k_{ij}$
-such that it represents the number of contacts a person in group $j$ has with a
-person in group $i$.
+such that it represents the number of contacts a person in group $j$ has with
+people in group $i$.
 
 For our example we need 3 constraints, so let's define them with respect to the
 smaller populations being the 'from' population:
@@ -70,12 +70,13 @@ this matrix is not symmetric.
 ## New infections generated
 
 Let's start from the example and work to derive a general formula for the
-number of new infections generated in a population at a given time, i.e. $\dot{I_i}$
-in a population $i$ based on the number of infectious individuals present.
+number of new infections generated in a population at a given time, i.e. the
+number of new infections in a population $i$ based on the number of infectious
+individuals present.
 
 Consider here, for the sake of example, that $I_i = [10, 5, 1]$, what is the
-number of infections generated in $A$ from infectious people in $A$,
-$A \rightarrow A$?
+number of infections generated in $A$ from infectious people in $A$
+($A \rightarrow A$)?
 
 In the beginning there are
 $S_A = N_A - I_A - R_A = 1000 - 10 - 0 = 990$ susceptible. Thus, the
@@ -88,18 +89,20 @@ people in $A$ equal to
 
 $$9.6 * 990 / (1000 - 1) = 9.51$$
 
-for a total number of new infections $\dot{I_{AA}}$ in $A$ from $A$, given there
+for a total number of new infections in $A$ from $A$, given there
 are 10 infected individuals, of $95.1$.
 
 In general,
 
-$\dot{I_{ij}} = I_j M_{ij} S_i / (N_i - \delta_{ij})$
+$I_j M_{ij} S_i / (N_i - \delta_{ij})$
 
-where $\delta_{ij} = 1$ if $i = j$ and $0$ otherwise (i.e., the Kronecker delta).
-$\delta_{ij}$ arises because when $i \neq j$ the infected individual is not in
-the group and thus the entire 'to' population would be considered in the denominator.
+is the number of new infections in population $i$ due to infectious people in
+population $j$, where $\delta_{ij} = 1$ if $i = j$ and $0$ otherwise (i.e., the
+Kronecker delta). $\delta_{ij}$ arises because when $i \neq j$ the infected
+individual is not in the group and thus the entire 'to' population would be
+considered in the denominator.
 
-To calculate the total number of new infections in $i$, $\dot{I_i}$, sum over all
+To calculate the total number of new infections in $i$, sum over all
 infectious populations $j$:
 
 $$\sum_j I_j M_{ij} S_i / (N_i - \delta_{ij}) = S_i \sum_j I_j M_{ij} / (N_i - \delta_{ij}).$$
