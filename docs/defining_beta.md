@@ -1,7 +1,3 @@
----
-title: Defining beta
----
-
 # Defining beta from per capita contacts
 
 ## Notation
@@ -9,9 +5,10 @@ title: Defining beta
 Consider populations denoted as $A, B, C, \dots$ with total size denoted
 $N_A, N_B, N_C, \dots$. Individuals in a group have $k_A, k_B, k_C, \dots$
 number of total contacts per day.
-Denote $i$ as population receiving contact and $j$ as the
+Denote $i$ as the population receiving contact and $j$ as the
 population providing contact and $K_{ij}$ as the number of interactions
-among individuals in populations $i$ and $j$.
+among individuals in populations $i$ and $j$. By definition, $K_{ij}$ is
+symmetric, that is, $K_{ij}$ = $K_{ji}$.
 
 For the sake of example, we will consider three populations $A, B, C$ where
 $N_A = 1000, N_B = 100, N_C = 100,$ and $k = k_A = k_B = k_C = 10$.
@@ -40,8 +37,9 @@ C & 200 & 100 & - \\
 \end{matrix}$$
 
 The remaining values can be calculated recognizing that the total number of
-contacts in a population are $k N_j$ and form the margins of our table. In our
-example, $K_{AA} = k N_A - (K_{AB} + K_{AC}) = 10 \times 1000 - (200 + 200) = 9600$,
+contacts for a population are $k_j N_j$ and these values form the margins of
+our table. In our example,
+$K_{AA} = k N_A - (K_{AB} + K_{AC}) = 10 \times 1000 - (200 + 200) = 9600$,
 with $K_{BB}$ and $K_{CC}$ calculated similarly such that:
 
 $$\begin{matrix}
@@ -52,9 +50,9 @@ C & 200 & 100 & 700 & 1000 \\
   & 10000 & 1000 & 1000 & 12000
 \end{matrix}$$
 
-To make the matrix per capita, which we will denote $M$,
+To make the per capita matrix, which we will denote $M$,
 we ensure that the 'to' contacts sum properly
-to our $k$:
+to our $k$ for each population:
 
 $$\begin{matrix}
   & A & B & C \\
@@ -69,32 +67,39 @@ which can be easily interpreted as each person in population $A$ has
 with the other two populations, in this example, equally divided.  As expected,
 this matrix is not symmetric.
 
-## Force of infection
+## New infections generated
 
 Let's start from the example and work to derive a general formula for the
-force of infection.
+number of new infections generated in a population at a given time, i.e. $\dot{I_i}$
+in a population $i$ based on the number of infectious individuals present.
 
-Consider here, for the sake of example, that $I_i = [10, 5, 1]$, what is the force of infection
-for $A \rightarrow A$?
+Consider here, for the sake of example, that $I_i = [10, 5, 1]$, what is the
+number of infections generated in $A$ from infectious people in $A$,
+$A \rightarrow A$?
 
 In the beginning there are
 $S_A = N_A - I_A - R_A = 1000 - 10 - 0 = 990$ susceptible. Thus, the
 probability of one infected person coming in contact with a susceptible person
-is $990 / (1000 - 1)$, the $1$ being the infected individual who is in the
-same population. Each infected person  (like everyone else) has $k = 10$ contacts of which 9.6 are with other $A$'s.  Thus, a single infected person in $A$ provides a FOI to another person in $A$ of
+is $990 / (1000 - 1)$, the $1$ accoutung for the infected individual who is in
+the same population and will not make self-contact nor self-infect. Each infected
+person (like everyone else) has $k = 10$ contacts of which 9.6 are with other $A$'s.
+Thus, a single infected person in $A$ generates on average infections in other
+people in $A$ equal to
 
 $$9.6 * 990 / (1000 - 1) = 9.51$$
 
-for a total ${\rm FOI}_{AA}$, given there are 10 infected individuals, of $95.1$.
+for a total number of new infections $\dot{I_{AA}}$ in $A$ from $A$, given there
+are 10 infected individuals, of $95.1$.
 
 In general,
 
-$${\rm FOI}_{ij} = I_j M_{ij} S_i / (N_i - \delta_{ij})$$
+$\dot{I_{ij}} = I_j M_{ij} S_i / (N_i - \delta_{ij})$
 
 where $\delta_{ij} = 1$ if $i = j$ and $0$ otherwise (i.e., the Kronecker delta).
 $\delta_{ij}$ arises because when $i \neq j$ the infected individual is not in
 the group and thus the entire 'to' population would be considered in the denominator.
 
-To calculate the total FOI to $i$:
+To calculate the total number of new infections in $i$, $\dot{I_i}$, sum over all
+infectious populations $j$:
 
 $$\sum_j I_j M_{ij} S_i / (N_i - \delta_{ij}) = S_i \sum_j I_j M_{ij} / (N_i - \delta_{ij}).$$
