@@ -462,9 +462,9 @@ def app(replicates=20):
         # if no other warning message defined yet, create this one instead
         if warning_message == "":
             warning_message += (
-                "With the selected vaccine campaign parameters, no vaccine doses will be administered during the campaign."
+                "With the selected vaccination campaign parameters, no vaccine doses will be administered during the campaign."
                 " This may happen if the vaccination uptake percentage for the susceptible population is too low or if the campaign duration is zero days."
-                " Please review vaccine campaign parameters to administer at least one dose during the campaign."
+                " Please review vaccination campaign parameters to administer at least one dose during the campaign."
             )
 
     if warning_message != "":
