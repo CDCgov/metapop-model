@@ -15,6 +15,7 @@ from .app_helper import (
 )  # depends on sim
 from .app_with_table import app_with_table  # depends on  app_helper
 from .helper import (
+    Ind,
     build_vax_schedule,
     calculate_beta_factor,
     calculate_foi,
@@ -31,7 +32,6 @@ from .helper import (
     vaccinate_groups,
 )  # depends on version
 from .model import (
-    Ind,
     SEIRModel,
 )  # depends on helper
 from .sim import run_model, simulate, simulate_replicates  # depends on model

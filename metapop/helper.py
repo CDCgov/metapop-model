@@ -1,4 +1,6 @@
 import hashlib
+import os
+from enum import Enum
 
 import numpy as np
 import numpy.linalg as la
@@ -6,6 +8,7 @@ import numpy.linalg as la
 from .version import __git_commit__, __version__
 
 __all__ = [
+    "Ind",
     "get_percapita_contact_matrix",
     "get_r0",
     "rescale_beta_matrix",
@@ -22,6 +25,39 @@ __all__ = [
     "seed_from_string",
     "get_metapop_info",
 ]
+
+
+class Ind(Enum):
+    """
+    Enum for the indices of the compartments in the model.
+    """
+
+    S = 0  # Susceptible
+    V = 1  # Vaccinated
+    SV = 2  # Susceptible and vaccinated
+    E1 = 3  # Exposed, pre-symptomatic
+    E2 = 4  # Exposed, post-symptomatic
+    E1_V = 5  # Exposed, pre-symptomatic, vaccinated
+    E2_V = 6  # Exposed, post-symptomatic, vaccinated
+    I1 = 7  # Infected, symptomatic
+    I2 = 8  # Infected, asymptomatic
+    R = 9  # Recovered
+    Y = 10  # Deaths
+    X = 11  # Other states (e.g., isolated)
+
+    @classmethod
+    def max_value(cls):
+        """
+        Get the maximum value of the Ind class.
+
+        Returns:
+            int: The maximum value of the enum members.
+
+        Example:
+            >>> Ind.max_value()
+            11
+        """
+        return max(item.value for item in cls)
 
 
 def get_percapita_contact_matrix(parms):
@@ -203,7 +239,7 @@ def initialize_population(steps, groups, parms):
             - u (list): The initial state vector for each group.
     """
     # arrays for each state
-    state_arrays = [np.zeros((steps, groups)) for _ in range(12)]
+    state_arrays = [np.zeros((steps, groups)) for _ in range(Ind.max_value() + 1)]
     S, V, SV, E1, E2, E1_V, E2_V, I1, I2, R, Y, X = state_arrays
 
     # set up u vector
@@ -228,12 +264,12 @@ def initialize_population(steps, groups, parms):
             0,  # Y
             0,  # X
         ]
-        u_i[2] = int(
+        u_i[Ind.SV.value] = int(
             parms["pop_sizes"][group] * parms["initial_vaccine_coverage"][group]
-            - u_i[1]
+            - u_i[Ind.V.value]
         )  # SV
 
-        u_i[0] = int(parms["pop_sizes"][group] - np.sum(u_i))  # S
+        u_i[Ind.S.value] = int(parms["pop_sizes"][group] - np.sum(u_i))  # S
         u.append(u_i)
 
     # first time step is initial state

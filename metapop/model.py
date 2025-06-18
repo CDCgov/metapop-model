@@ -1,11 +1,11 @@
 # This file is part of the metapop package. It contains the SEIRModel class
 # implementation
-from enum import Enum
 
 import numpy as np
 
 # import what's needed from other metapop modules
 from .helper import (
+    Ind,
     calculate_foi,
     get_infected,
     rate_to_frac,
@@ -15,6 +15,8 @@ from .helper import (
 # if you want to use methods from metapop in this file under
 # if __name__ == "__main__": you'll need to import them as:
 # from metapop.helper import (
+#     Ind,
+#     get_percapita_contact_matrix,
 #     get_infected,
 #     calculate_foi,
 #     rate_to_frac,
@@ -22,22 +24,8 @@ from .helper import (
 # )
 ### note: this is not recommended use within a file that is imported as a package module, but it can be useful for testing purposes
 
-__all__ = ["Ind", "SEIRModel"]
-
-
-class Ind(Enum):
-    S = 0
-    V = 1
-    SV = 2
-    E1 = 3
-    E2 = 4
-    E1_V = 5
-    E2_V = 6
-    I1 = 7
-    I2 = 8
-    R = 9
-    Y = 10
-    X = 11
+# __all__ = ["Ind", "SEIRModel"]
+__all__ = ["SEIRModel"]
 
 
 class SEIRModel:

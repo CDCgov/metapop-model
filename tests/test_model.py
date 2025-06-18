@@ -5,6 +5,7 @@ import polars as pl
 import yaml
 
 from metapop.helper import (
+    Ind,
     build_vax_schedule,
     construct_beta,
     initialize_population,

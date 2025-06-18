@@ -5,13 +5,14 @@ import polars as pl
 
 # import what's needed from other metapop modules
 from .helper import (
+    Ind,
     build_vax_schedule,
     construct_beta,
     initialize_population,
     seed_from_string,
     time_to_rate,
 )
-from .model import Ind, SEIRModel
+from .model import SEIRModel
 
 # if you want to use methods from metapop in this file under
 # if __name__ == "__main__": you'll need to import them as:
