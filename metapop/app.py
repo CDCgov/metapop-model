@@ -42,6 +42,7 @@ from .app_helper import (
     totals_same_by_ks,
 )
 from .helper import (
+    Ind,
     build_vax_schedule,
     initialize_population,
     seed_from_string,
@@ -434,16 +435,21 @@ def app(replicates=20):
 
     # check the initial population state and see if conditions allow for vaccination to run
     # build population state vectors, first elements are state vectors over time
+
+    # the last element of the first axis is the complete population state vector, "u"
+    # the first element of the 2nd axis is for group 0
+    # the first element of the 3rd axis is for the susceptible population
     initial_states = initialize_population(1, 1, updated_parms2)
 
     # last element returned by initialize_population is the initial state vector
-    u_ind = len(initial_states) - 1
+    u_ind = Ind.max_value() + 1
 
     warning_message = ""
 
+    # check the initial state vector for the population and see if there are any people to vaccinate
     # if there is no one to vaccinate and other interventions are turned off
     if (
-        (initial_states[u_ind][0][0] == 0)
+        (initial_states[u_ind][0][Ind.S.value] == 0)
         and (not scenario2[0]["isolation_on"])
         and (not scenario2[0]["pre_rash_isolation_on"])
     ):
