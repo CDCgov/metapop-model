@@ -190,6 +190,9 @@ def app(replicates=20):
             "well as the number of people initially infected with measles in the population. "
         )
         subheader = ""
+        # this function will return a dictionary of edited scenario parameters
+        # based on user input for parameters shared between all scenarios
+        # this way we can avoid modifying the original default parameters in parms
         edited_parms = app_editors(
             col0,
             subheader,
@@ -222,7 +225,6 @@ def app(replicates=20):
         list_parameter_keys = []
 
         # Scenario parameters
-        # parameters for scenario 1 are not shown
         st.header(
             "Interventions scenario",
             help="The adherence to both isolation and quarantine, "
@@ -240,7 +242,11 @@ def app(replicates=20):
             "When quarantine and isolation are turned on, they are applied to the entire duration of the simulation."
         )
 
+        # Set up separate parameter dictionaries for each scenario using
+        # edited_parms as the base dictionary
+
         # Set scenario 1 (no intervention) parameters to zero for interventions
+        # parameters for the no intervention scenario are not shown
         edited_parms1 = set_parms_to_zero(
             edited_parms,
             [
@@ -263,11 +269,13 @@ def app(replicates=20):
         col_intervention_vax = st.columns(1)[0]
 
         # placeholder for text about the vaccine campaign doses and other intervention effects in the siderbar
-        # defining this here allows us to place it above the advanced options section
+        # defining this here allows us to place it above the isolation and quarantine section
         col_intervention_text = st.columns(1)[0]
         col_intervention_npi = st.columns(1)[0]
 
-        # For the intervention scenario, user defines values
+        # For the intervention scenario, user defines values for the vaccination campaign
+        # use edited_parms as the base dictionary and create edited_parms2 with
+        # user defined inputs from the sidebar - this is what app_editors will return
         edited_parms2 = app_editors(
             col_intervention_vax,
             "",
@@ -283,6 +291,8 @@ def app(replicates=20):
             formats,
             keys2,
         )
+
+        # create a new section for isolation and quarantine inputs for the intervention scenario
         edited_parms2 = app_editors(
             col_intervention_npi,
             "",
