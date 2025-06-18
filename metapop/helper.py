@@ -39,10 +39,10 @@ class Ind(Enum):
     E2 = 4  # Exposed, post-symptomatic
     E1_V = 5  # Exposed, pre-symptomatic, vaccinated
     E2_V = 6  # Exposed, post-symptomatic, vaccinated
-    I1 = 7  # Infected, symptomatic
-    I2 = 8  # Infected, asymptomatic
+    I1 = 7  # Infected and infectious, pre-rash
+    I2 = 8  # Infected and infectious, symptomatic
     R = 9  # Recovered
-    Y = 10  # Deaths
+    Y = 10  # Tracking
     X = 11  # Other states (e.g., isolated)
 
     @classmethod
@@ -246,24 +246,17 @@ def initialize_population(steps, groups, parms):
     u = []
 
     for group in range(groups):
-        u_i = [
-            0,  # S
-            int(
-                parms["pop_sizes"][group]
-                * parms["initial_vaccine_coverage"][group]
-                * parms["vaccine_efficacy_2_dose"]
-            ),  # V
-            0,  # SV
-            0,  # E1
-            0,  # E2
-            0,  # E1_V
-            0,  # E2_V
-            parms["I0"][group],  # I1
-            0,  # I2
-            0,  # R
-            0,  # Y
-            0,  # X
-        ]
+        u_i = [0] * (Ind.max_value() + 1)  # Initialize with zeros
+        # Set initial values for each compartment based on the parameters
+        # other compartments are initialized to 0
+        u_i[Ind.V.value] = int(
+            parms["pop_sizes"][group]
+            * parms["initial_vaccine_coverage"][group]
+            * parms["vaccine_efficacy_2_dose"]
+        )  # V
+        # initial infections are all in the pre-rash compartment
+        u_i[Ind.I1.value] = parms["I0"][group]
+
         u_i[Ind.SV.value] = int(
             parms["pop_sizes"][group] * parms["initial_vaccine_coverage"][group]
             - u_i[Ind.V.value]
