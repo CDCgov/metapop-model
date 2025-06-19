@@ -179,7 +179,7 @@ def test_pop_initialization():
 
     # initial state vector is correct
     assert len(u) == groups
-    assert len(u[0]) == 12  # S V SV E1 E2 E1_V, E2_V I1 I2 R Y X
+    assert len(u[0]) == Ind.max_value() + 1  # S V SV E1 E2 E1_V, E2_V I1 I2 R Y X
     assert u[0][0] == S[0][0]
 
     assert (
@@ -264,11 +264,16 @@ def test_vaccines_administered_on_single_day():
     )
 
     # Initial state for each group: Group 2 has no E or I individuals yet
-    u = [  #  S, V, SV,  E1, E2, E1_V, E2_V, I1, I2, R, Y, X
-        [1000, 0, 0, 100, 50, 0, 0, 0, 0, 0, 0, 0],
-        [700, 0, 60, 40, 0, 0, 0, 0, 0, 0, 0, 0],
-        [600, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    ]
+    u = [[0] * (Ind.max_value() + 1) for _ in range(parms["n_groups"])]
+
+    u[0][Ind.S.value] = 1000
+    u[0][Ind.E1.value] = 100
+    u[0][Ind.E2.value] = 50
+    u[1][Ind.S.value] = 700
+    u[1][Ind.E1.value] = 60
+    u[1][Ind.E2.value] = 40
+    u[2][Ind.S.value] = 600
+
     parms["t_array"] = get_time_array(parms)
     vaccination_uptake_schedule = build_vax_schedule(parms)
 
@@ -299,11 +304,16 @@ def test_active_vaccination():
     }
 
     # Initial state for each group: Group 2 has no E or I individuals yet
-    u = [  #  S, V, SV,  E1,  E2, E1_V, E2_V, I1, I2, R, Y, X
-        [1000, 0, 0, 100, 50, 0, 0, 0, 0, 0, 0, 0],
-        [700, 0, 0, 60, 40, 0, 0, 0, 0, 0, 0, 0],
-        [600, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    ]
+    u = [[0] * (Ind.max_value() + 1) for _ in range(parms["n_groups"])]
+
+    u[0][Ind.S.value] = 1000
+    u[0][Ind.E1.value] = 100
+    u[0][Ind.E2.value] = 50
+    u[1][Ind.S.value] = 700
+    u[1][Ind.E1.value] = 60
+    u[1][Ind.E2.value] = 40
+    u[2][Ind.S.value] = 600
+
     parms["t_array"] = get_time_array(parms)
     vaccination_uptake_schedule = build_vax_schedule(parms)
 
@@ -358,11 +368,15 @@ def test_vaccine_doses_greater_than_population():
     }
 
     # Initial state for each group: Group 2 has no E or I individuals yet
-    u = [  #  S, V, SV,  E1,  E2, E1_V, E2_V, I1, I2, R, Y, X
-        [1000, 0, 0, 100, 50, 0, 0, 0, 0, 0, 0, 0],
-        [700, 0, 0, 60, 40, 0, 0, 0, 0, 0, 0, 0],
-        [600, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    ]
+    u = [[0] * (Ind.max_value() + 1) for _ in range(parms["n_groups"])]
+
+    u[0][Ind.S.value] = 1000
+    u[0][Ind.E1.value] = 100
+    u[0][Ind.E2.value] = 50
+    u[1][Ind.S.value] = 700
+    u[1][Ind.E1.value] = 60
+    u[1][Ind.E2.value] = 40
+    u[2][Ind.S.value] = 600  # Group 2 has 600 susceptibles
 
     initial_S_group_2 = u[parms["vaccinated_group"]][0]
 
@@ -385,6 +399,10 @@ def test_vaccine_doses_greater_than_population():
 
 def test_get_infected():
     # Define the initial state
+    parms = dict(
+        n_groups=2,
+    )
+
     u = [
         [99, 0, 0, 0, 1, 2, 0, 0],  # S V E1 E2 I1 I2 R Y
         [100, 0, 0, 0, 3, 4, 0, 0],  # S V E1 E2 I1 I2 R Y
@@ -628,8 +646,8 @@ def test_run_model_once_with_config():
     )
 
     # Individuals with vaccine
-    SV_initial = (u[0][2], u[1][2], u[2][2])
-    E1_V_initial = (u[0][5], u[1][5], u[2][5])
+    SV_initial = (u[0][Ind.SV.value], u[1][Ind.SV.value], u[2][Ind.SV.value])
+    E1_V_initial = (u[0][Ind.E1_V.value], u[1][Ind.E1_V.value], u[2][Ind.E1_V.value])
 
     # assert the sum of E1_V_initial is 0
     assert sum(E1_V_initial) == 0, "E1_V_initial should be 0"

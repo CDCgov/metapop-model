@@ -1,5 +1,4 @@
 import hashlib
-import os
 from enum import Enum
 
 import numpy as np

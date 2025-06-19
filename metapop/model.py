@@ -24,7 +24,6 @@ from .helper import (
 # )
 ### note: this is not recommended use within a file that is imported as a package module, but it can be useful for testing purposes
 
-# __all__ = ["Ind", "SEIRModel"]
 __all__ = ["SEIRModel"]
 
 

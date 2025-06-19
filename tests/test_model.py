@@ -38,10 +38,11 @@ def test_only_expose_susceptible():
     }
 
     # Initial state for each group
-    u = [
-        [99, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0],  # S V SV E1 E2 E1_V E2_V I1 I2 R Y X
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 100, 0, 0],  # group has no susceptibles
-    ]
+    u = [[0] * (Ind.max_value() + 1) for _ in range(parms["n_groups"])]
+
+    u[0][Ind.S.value] = 99  # Susceptibles in group 0
+    u[0][Ind.I1.value] = 1  # Vaccinated in group 0
+    u[1][Ind.R.value] = 100  # No susceptibles in group 1
 
     # Set time
     t = 1
@@ -90,7 +91,12 @@ def test_aon_vaccine():
     t = parms["t_array"][parms["vaccine_uptake_start_day"]]
 
     # Initial state for each group
-    u = [[690, 300, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0]]
+    u = [[0] * (Ind.max_value() + 1) for _ in range(parms["n_groups"])]
+
+    u[0][Ind.S.value] = 690  # Susceptibles in group 0
+    u[0][Ind.V.value] = 300  # Vaccinated in group 0
+    u[0][Ind.I1.value] = 10  # Infected in group 0
+
     initial_S = u[0][Ind.S.value]
     initial_SV = u[0][Ind.SV.value]
 
@@ -202,8 +208,8 @@ def test_states_updating():
             ) = u[group]
 
         assert (
-            sum(u[0][:-2]) == parms["pop_sizes"][0]
-        ), f"Population size mismatch at time {j}, expected {parms['pop_sizes'][0]}, got {sum(u[0][:-2])}"
+            sum(u[0][: Ind.R.value + 1]) == parms["pop_sizes"][0]
+        ), f"Population size mismatch at time {j}, expected {parms['pop_sizes'][0]}, got {sum(u[0][:Ind.R.value + 1])}"
 
     df = simulate(parms, [42])
 
