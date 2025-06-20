@@ -890,21 +890,44 @@ def app(replicates=20):
             makes several simplifying assumptions, including the following:</p>
             <ul>
 
-            <li style="font-size:14px;">This is a model of a well-mixed population,
-            which means individuals have the same probability of contact with
-            each other. In larger populations, this may overestimate the size
+            <li style="font-size:14px;">This is a homogenous mixing model without age or spatial structure,
+            meaning all individuals have the same probability of contact with
+            each other (also known as a well-mixed population model). In larger populations, this may overestimate the size
             and duration of an outbreak.</li>
 
             <li style="font-size:14px;">The MMR vaccine is modeled as an
             "all-or-nothing" vaccine, meaning that it is perfectly effective
-            for some people (corresponding to the vaccine efficacy parameter,
-            i.e. for 93% of people after 1 dose) and has no efficacy for others.
+            for some people (corresponding to the efficacy for one or two doses of MMR) and has no efficacy for others.
             </li>
 
-            <li style="font-size:14px;">There is no age structure, so baseline
-            immunity accounts for vaccination coverage and immunity over the
-            entire population.</li>
+            <li style="font-size:14px;">To initialize the population with existing immunity, users input a "baseline
+            immunity" value. Because there is no age structure in the model, this value is assumed to
+            account for existing vaccination coverage or prior infection over the entire population. It's assumed that
+            existing vaccination coverage and prior infection result in 97% protection against future infection
+            (the estimated efficacy of two doses of MMR) and this is multiplied by baseline immunity to initialize
+            the size of the Vaccinated population. The remaining 3% of individuals are assumed to lack protection
+            and are initialized into a separate state (Vaccinated but Susceptible).
+            </li>
 
+            <li style="font-size:14px;"> Vaccines administered during the vaccination campaign are
+            assumed to be first doses of MMR. The user-defined vaccination campaign timing is defined by the
+            vaccination start day (days after the initial infection is introduced) and the duration of the campaign (in days).
+            It's assumed that the number of doses administered per day is equal to the total number of doses
+            divided by the duration of the campaign (but may be rounded to the nearest integer value).
+            If the campaign ends after the simulation ends, all remaining doses will be administered on the last day of the simulation.
+            </li>
+
+            <li style="font-size:14px;"> We assume that both susceptible and
+            exposed individuals who are not yet infectious are eligible to get
+            vaccinated during the vaccination campaign. We also assume that exposed
+            individuals are not yet aware of their exposure status and so they
+            are equally likely to seek vaccination. After vaccination, only
+            susceptible individuals become immune, while exposed individuals
+            remain in the exposed state and continue with infection progression
+            as normal. The number of doses administered may be lower than the
+            number of doses scheduled if by the time of the campaign, the daily
+            dose rate scheduled exceeds the number of individuals eligible for vaccination.
+            </li>
 
             <b style="font-size:14px;">Model Parameters</b>
             <ul>
@@ -943,26 +966,9 @@ def app(replicates=20):
             <a href='https://www.cdc.gov/measles/vaccines/index.html?CDC_AA_refVal=https%3A%2F%2Fwww.cdc.gov%2Fvaccines%2Fvpd%2Fmmr%2Fpublic%2Findex.html' target='_blank'>[MMR Vaccine Information]</a>.
             </li>
 
-            <li style="font-size:14px;"> We assume vaccine efficacy for individuals
-            vaccinated prior to the campaign is 97%, the estimate for two doses of MMR
+            <li style="font-size:14px;"> We assume protection against infection for individuals
+            with prior infection or vaccination at the start of the simulation is 97%, the estimate for two doses of MMR
             <a href='https://www.cdc.gov/measles/vaccines/index.html?CDC_AA_refVal=https%3A%2F%2Fwww.cdc.gov%2Fvaccines%2Fvpd%2Fmmr%2Fpublic%2Findex.html' target='_blank'>[MMR Vaccine Information]</a>.
-            </li>
-
-            <li style="font-size:14px;"> We assume that both susceptible and
-            exposed individuals who are not yet infectious are eligible to get
-            vaccinated during the vaccine campaign. We also assume that exposed
-            individuals are not yet aware of their exposure status and so they
-            are equally likely to seek vaccination. After vaccination, only
-            susceptible individuals become immune, while exposed individuals
-            remain in the exposed state and continue with infection progression
-            as normal. The number of doses administered may be lower than the
-            number of doses scheduled if by the time of the campaign, the daily
-            dose rate scheduled exceeds the number of individuals eligible for vaccination.
-            </li>
-
-
-            <li style="font-size:14px;"> Individuals with immunity prior to introduction
-            are assumed to have one or two doses of MMR or have had a prior measles infection.
             </li>
 
             <li style="font-size:14px;">Isolation when sick is estimated to be
