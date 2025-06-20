@@ -209,22 +209,7 @@ def app(replicates=20):
             keys0,
         )
 
-        # --- Scenario Parameters ---
-        ordered_keys_vax = [
-            "total_vaccine_uptake_doses",
-            "vaccine_uptake_start_day",
-            "vaccine_uptake_duration_days",
-        ]
-        ordered_keys_npi = [
-            "isolation_on",
-            "isolation_adherence",
-            "pre_rash_isolation_on",
-            "pre_rash_isolation_adherence",
-        ]
-        # parameters that are lists or arrays
-        list_parameter_keys = []
-
-        # Scenario parameters
+        # Intervention scenario and parameters
         st.header(
             "Interventions scenario",
             help="The adherence to both isolation and quarantine, "
@@ -242,7 +227,27 @@ def app(replicates=20):
             "When quarantine and isolation are turned on, they are applied to the entire duration of the simulation."
         )
 
-        # Set up separate parameter dictionaries for each scenario using
+        # --- Intervention scenario Parameters ---
+
+        # order of vaccination parameters in the sidebar
+        ordered_keys_vax = [
+            "total_vaccine_uptake_doses",
+            "vaccine_uptake_start_day",
+            "vaccine_uptake_duration_days",
+        ]        
+        list_vax_parameter_keys = [] # parameters that are lists or arrays
+
+        # order of non-pharmaceutical intervention (NPI) parameters in the sidebar
+        ordered_keys_npi = [
+            "isolation_on",
+            "isolation_adherence",
+            "pre_rash_isolation_on",
+            "pre_rash_isolation_adherence",
+        ]
+        # parameters that are lists or arrays
+        list_npi_parameter_keys = []
+
+        # Set up separate parameter dictionaries for each scenario using the
         # edited_parms as the base dictionary
 
         # Set scenario 1 (no intervention) parameters to zero for interventions
@@ -281,7 +286,7 @@ def app(replicates=20):
             "",
             edited_parms,
             ordered_keys_vax,
-            list_parameter_keys,
+            list_vax_parameter_keys,
             show_parameter_mapping,
             widget_types,
             min_values,
@@ -298,7 +303,7 @@ def app(replicates=20):
             "",
             edited_parms2,
             ordered_keys_npi,
-            list_parameter_keys,
+            list_npi_parameter_keys,
             show_parameter_mapping,
             widget_types,
             min_values,
@@ -339,7 +344,8 @@ def app(replicates=20):
                 ]
 
             # advanced parameters that are lists or arrays
-            advanced_list_keys = ["k_i"]
+            # advanced_list_keys = ["k_i"]
+            advanced_list_keys = []
 
             # set the parameters for scenario 2
             edited_advanced_parms2 = app_editors(
