@@ -250,8 +250,9 @@ def app(replicates=20):
         # Set up separate parameter dictionaries for each scenario using the
         # edited_parms as the base dictionary
 
-        # Set scenario 1 (no intervention) parameters to zero for interventions
-        # parameters for the no intervention scenario are not shown
+        # For the no intervention scenario, create edited_parms1 as the parameter dictionary
+        # parameters for the no intervention scenario are not shown, but the values are
+        # copied from edited_parms and intervention parameters are set to zero
         edited_parms1 = set_parms_to_zero(
             edited_parms,
             [
@@ -343,12 +344,12 @@ def app(replicates=20):
                     "k_21",
                 ]
 
-            # advanced parameters that are lists or arrays
-            # advanced_list_keys = ["k_i"]
+            # advanced parameters that are lists or arrays - empty for this app
             advanced_list_keys = []
 
             # set the parameters for scenario 2
-            edited_advanced_parms2 = app_editors(
+            # edited_advanced_parms2 = app_editors(
+            edited_parms2 = app_editors(
                 st.container(),
                 "",
                 edited_parms2,
@@ -366,26 +367,38 @@ def app(replicates=20):
             )
 
             # shared advanced parameters to scenario 1
-            edited_advanced_parms1 = (
-                edited_parms1  # copy the no intervention scenario parameters so far
-            )
+            # edited_advanced_parms1 = (
+            #     edited_parms1  # copy the no intervention scenario parameters so far
+            # )
             # copy the non intervention advanced parameters from scenario 2 to scenario 1
             for key in advanced_ordered_keys:
                 if key not in ("pre_rash_isolation_adherence", "isolation_adherence"):
-                    edited_advanced_parms1[key] = edited_advanced_parms2[key]
+                    # edited_advanced_parms1[key] = edited_advanced_parms2[key]
+                    # edited_advanced_parms1[key] = edited_parms2[key]
+                    edited_parms1[key] = edited_parms2[key]
+
+        # assert (
+        #     edited_advanced_parms1["total_vaccine_uptake_doses"] == 0
+        # ), "Total vaccine uptake doses should be 0 for the no intervention scenario"
+        # assert (
+        #     edited_advanced_parms1["pre_rash_isolation_adherence"] == 0
+        # ), "Pre-rash isolation adherence should be 0 for the no intervention scenario"
+        # assert (
+        #     edited_advanced_parms1["isolation_adherence"] == 0
+        # ), "Isolation adherence should be 0 for the no intervention scenario"
 
         # Final assertions for scenario 1
         assert (
-            edited_advanced_parms1["total_vaccine_uptake_doses"] == 0
+            edited_parms1["total_vaccine_uptake_doses"] == 0
         ), "Total vaccine uptake doses should be 0 for the no intervention scenario"
         assert (
-            edited_advanced_parms1["pre_rash_isolation_adherence"] == 0
+            edited_parms1["pre_rash_isolation_adherence"] == 0
         ), "Pre-rash isolation adherence should be 0 for the no intervention scenario"
         assert (
-            edited_advanced_parms1["isolation_adherence"] == 0
+            edited_parms1["isolation_adherence"] == 0
         ), "Isolation adherence should be 0 for the no intervention scenario"
 
-        # --- About Section ---
+        # --- About this app section ---
         info = get_metapop_info()
         st.header("About this app")
         st.caption(f"metapop version: {info['version']}")
@@ -440,16 +453,18 @@ def app(replicates=20):
 
     # Update intervention parameters from widgets
     edited_intervention_parms1 = update_intervention_parameters_from_widget(
-        edited_advanced_parms1
+        # edited_advanced_parms1
+        edited_parms1
     )
     edited_intervention_parms2 = update_intervention_parameters_from_widget(
-        edited_advanced_parms2
+        # edited_advanced_parms2
+        edited_parms2
     )
 
     # Enforce logical constraints on interventions: isolation > quarantine
     if (
-        edited_parms2["pre_rash_isolation_on"] == True
-        and edited_parms2["isolation_on"] == False
+        edited_intervention_parms2["pre_rash_isolation_on"] == True
+        and edited_intervention_parms2["isolation_on"] == False
     ):
         st.error(
             "Isolation must be activated for quarantine to be activated. "
@@ -460,8 +475,8 @@ def app(replicates=20):
     if (
         edited_intervention_parms2["isolation_adherence"]
         < edited_intervention_parms2["pre_rash_isolation_adherence"]
-        and edited_parms2["pre_rash_isolation_on"] == True
-        and edited_parms2["isolation_on"] == True
+        and edited_intervention_parms2["pre_rash_isolation_on"] == True
+        and edited_intervention_parms2["isolation_on"] == True
     ):
         st.error(
             "Isolation adherence should be greater than or equal to quarantine adherence. "
