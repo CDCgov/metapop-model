@@ -487,8 +487,16 @@ def app(replicates=20):
     # Prepare scenario parameter sets
     updated_parms1 = edited_intervention_parms1.copy()
     updated_parms2 = edited_intervention_parms2.copy()
+
     scenario1 = [updated_parms1]
     scenario2 = [updated_parms2]
+    # scenario1 = [edited_intervention_parms1]
+    # scenario2 = [edited_intervention_parms2]
+    # print(type(updated_parms1))
+    # print(type(edited_intervention_parms1))
+
+    # scenario1 = [edited_intervention_parms1]
+    # scenario2 = [edited_intervention_parms2]
 
     # --- Initial Population State and Vaccination Schedule ---
     initial_states = initialize_population(1, 1, updated_parms2)
