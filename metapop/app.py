@@ -374,9 +374,30 @@ def app(replicates=20):
 
         # show the url of the repo
         url = info["url"]
-        image_path = os.path.join(
-            os.path.dirname(__file__), "app_assets", "github-mark.png"
-        )
+
+        # Choose GitHub logo based on Streamlit theme background
+        theme = st.get_option("theme.backgroundColor")
+
+        def is_light_color(hex_color):
+            if not hex_color:
+                return True  # Default to light
+            hex_color = hex_color.lstrip("#")
+            r, g, b = tuple(int(hex_color[i : i + 2], 16) for i in (0, 2, 4))
+            # Perceived luminance formula
+            luminance = 0.299 * r + 0.587 * g + 0.114 * b
+            return luminance > 127
+
+        if is_light_color(theme):
+            image_path = os.path.join(
+                os.path.dirname(__file__), "app_assets", "github-mark-white.png"
+            )
+        else:
+            image_path = os.path.join(
+                os.path.dirname(__file__), "app_assets", "github-mark.png"
+            )
+        # image_path = os.path.join(
+        #     os.path.dirname(__file__), "app_assets", "github-mark.png"
+        # )
         # st.markdown(
         #     f'<a href="{url}" target="_blank">'
         #     f'<img src="{image_url}" width="30" style="vertical-align:middle; margin-right:8px;">'
