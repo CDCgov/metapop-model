@@ -1,6 +1,18 @@
 # flake8: noqa
-# This file is part of the metapop package. It contains the Streamlit app for
-# the metapopulation model
+"""
+Streamlit app for the metapopulation measles outbreak model.
+
+This script provides an interactive web interface for simulating measles outbreaks
+under different intervention scenarios (reactive vaccination, isolation, quarantine).
+Users can adjust model parameters, run stochastic simulations, and visualize results.
+
+Key Features:
+- Sidebar for parameter input and scenario configuration
+- Dynamic charts comparing intervention and no-intervention scenarios
+- Outbreak summary statistics and downloadable results
+- Detailed documentation and assumptions
+"""
+
 import os
 import importlib
 import pandas as pd
@@ -75,10 +87,16 @@ __all__ = [
 
 
 def app(replicates=20):
-    st.set_page_config(layout="wide")
+    """
+    Main Streamlit app function for the measles outbreak simulator.
 
+    Args:
+        replicates (int): Number of simulation replicates to plot for each scenario.
+    """
+    st.set_page_config(layout="wide")
     st.title("Measles Outbreak Simulator")
 
+    # Show development warning if not in production
     if os.environ.get("MODE", "PRODUCTION") == "DEVELOPMENT":
         st.warning(f"Building from dev branch")
 
@@ -88,12 +106,14 @@ def app(replicates=20):
         "size of measles outbreaks following introduction of measles into "
         "a community by comparing scenarios with and without interventions."
     )
-    # get path to the app assets
+
+    # Load default parameters from YAML config
     filepath = os.path.join(
         os.path.dirname(__file__), "app_assets", "onepop_config.yaml"
     )
     parms = read_parameters(filepath)
 
+    # Set up random number generators for plotting and hospitalizations
     plot_rng = np.random.default_rng([parms["seed"], seed_from_string("plot")])
     hosp_rng = np.random.default_rng(
         [parms["seed"], seed_from_string("hospitalizations")]
@@ -101,23 +121,19 @@ def app(replicates=20):
 
     scenario_names = ["No Interventions", "Interventions"]
     show_parameter_mapping = get_show_parameter_mapping(parms)
-
     advanced_parameter_mapping = get_advanced_parameter_mapping()
 
+    # --- Sidebar: Model Inputs and Parameter Editing ---
     with st.sidebar:
         st.text(
             "This tool is meant for use at the beginning of an outbreak at the county level or finer geographic scale. "
             "It is not intended to provide an exact forecast of measles infections in any community. "
             "Hover over the (?) for more information about each parameter."
         )
-        st.header(
-            "Model Inputs",
-            help="",
-        )
+        st.header("Model Inputs")
 
-        widget_types = (
-            get_widget_types()
-        )  # defines the type of widget for each parameter
+        # Get widget types, min/max values, steps, helpers, formats, and keys for widgets
+        widget_types = get_widget_types()
         min_values = dict(pop_sizes=[1000, 100, 100], I0=[1, 0, 0])
         min_values = get_min_values(min_values)
         max_values = dict(
@@ -128,11 +144,11 @@ def app(replicates=20):
         steps = get_step_values()
         helpers = get_helpers()
         formats = get_formats()
-        keys0 = get_widget_idkeys(0)  # keys for the shared parameters
-        keys1 = get_widget_idkeys(1)  # keys for the parameters for scenario 1
-        keys2 = get_widget_idkeys(2)  # keys for the parameters for Interventions
+        keys0 = get_widget_idkeys(0)  # shared parameters
+        keys1 = get_widget_idkeys(1)  # scenario 1
+        keys2 = get_widget_idkeys(2)  # scenario 2
 
-        # some customization of the helper texts in the sidebar
+        # Customize helper texts for clarity
         helpers["I0"][0] = "The model currently has a maximum of 10 initial infections."
         helpers["pop_sizes"][0] = (
             "The model currently has a minimum of 1,000 people and a maximum of 100,000 people. As population sizes get larger, the assumption of a well-mixed population becomes less valid."
@@ -141,11 +157,10 @@ def app(replicates=20):
             "The percent of the population with any immunity against measles, including both through MMR vaccination and through past infection."
         )
 
-        # add a section in the sidebar panel to reset the app
+        # Add a section for a Reset button for all parameters
         col_reset = st.columns(1)[0]
 
-        # define parameters to be shared between scenarios that are shown in the sidebar by default
-        # order of shared parameters in the sidebar
+        # --- Shared Parameters in order of appearance in the app ---
         shared_keys = [
             "I0",
             "pop_sizes",
@@ -169,7 +184,6 @@ def app(replicates=20):
             "Type in a population size and baseline immunity, as "
             "well as the number of people initially infected with measles in the population. "
         )
-
         subheader = ""
         edited_parms = app_editors(
             col0,
@@ -187,14 +201,12 @@ def app(replicates=20):
             keys0,
         )
 
-        # Set parameters for each scenario separately
-        # order of parameters in the sidebar
+        # --- Scenario Parameters ---
         ordered_keys_vax = [
             "total_vaccine_uptake_doses",
             "vaccine_uptake_start_day",
             "vaccine_uptake_duration_days",
         ]
-
         ordered_keys_npi = [
             "isolation_on",
             "isolation_adherence",
@@ -219,12 +231,11 @@ def app(replicates=20):
             "The results are compared to a baseline scenario that does not "
             "have a vaccination campaign, nor isolation or quarantine interventions incorporated."
         )
-
         st.text(
             "When quarantine and isolation are turned on, they are applied to the entire duration of the simulation."
         )
 
-        # For the no intervention scenario, intervention parameters are set to 0
+        # Set scenario 1 (no intervention) parameters to zero for interventions
         edited_parms1 = set_parms_to_zero(
             edited_parms,
             [
@@ -243,12 +254,12 @@ def app(replicates=20):
             edited_parms1["isolation_adherence"] == 0
         ), "Isolation adherence should be 0 for the no intervention scenario"
 
+        # Intervention scenario parameter editors
         col_intervention_vax = st.columns(1)[0]
 
         # placeholder for text about the vaccine campaign doses and other intervention effects in the siderbar
         # defining this here allows us to place it above the advanced options section
         col_intervention_text = st.columns(1)[0]
-
         col_intervention_npi = st.columns(1)[0]
 
         # For the intervention scenario, user defines values
@@ -267,7 +278,6 @@ def app(replicates=20):
             formats,
             keys2,
         )
-
         edited_parms2 = app_editors(
             col_intervention_npi,
             "",
@@ -284,17 +294,19 @@ def app(replicates=20):
             keys2,
         )
 
-        # if total uptake doses is a proportion, scale to a number of doses
+        # This app gives users the ability to specify the proportion of people without prior immunity who will get vaccinated during an active vaccination campaign
+        # The metapop model under the hood takes in a parameter for the number of doses to be administered during the vaccination campaign
+        # Rescale vaccine uptake from a proportion to the number of doses administered during vaccination campaign
         if parms["use_prop_vaccine_uptake"]:
             edited_parms1 = rescale_prop_vax(edited_parms1)
             edited_parms2 = rescale_prop_vax(edited_parms2)
 
+        # --- Disease Parameters ---
         with st.expander("Disease parameters"):
             st.text(
                 "These options allow changes to parameter assumptions about "
                 "measles natural history parameters."
             )
-
             advanced_ordered_keys = [
                 "desired_r0",
                 "latent_duration",
@@ -341,6 +353,7 @@ def app(replicates=20):
                 if key not in ("pre_rash_isolation_adherence", "isolation_adherence"):
                     edited_advanced_parms1[key] = edited_advanced_parms2[key]
 
+        # Final assertions for scenario 1
         assert (
             edited_advanced_parms1["total_vaccine_uptake_doses"] == 0
         ), "Total vaccine uptake doses should be 0 for the no intervention scenario"
@@ -350,7 +363,8 @@ def app(replicates=20):
         assert (
             edited_advanced_parms1["isolation_adherence"] == 0
         ), "Isolation adherence should be 0 for the no intervention scenario"
-        # Add an About this app section to the sidebar
+
+        # --- About Section ---
         info = get_metapop_info()
         st.header("About this app")
         st.caption(f"metapop version: {info['version']}")
@@ -370,10 +384,10 @@ def app(replicates=20):
         )
         st.caption(f"Questions? Contact us: {info['email']}")
 
-    #### End of sidebar panel
+    # --- End of Sidebar ---
 
-    #### Intervention scenarios:
-    # instead of expander, can use st.radio:
+    # --- Scenario Logic ---
+    # Determine if interventions are on or off
     if (
         (
             edited_parms2["total_vaccine_uptake_doses"] == 0
@@ -386,7 +400,7 @@ def app(replicates=20):
     else:
         interventions = "On"
 
-    # before running the model, reset the parameters to their original values if the user clicks the reset button
+    # Reset parameters if reset button is clicked
     with col_reset:
         reset_button = st.button(
             "Reset parameters",
@@ -397,7 +411,7 @@ def app(replicates=20):
             ),
         )
 
-    # set model parameters based on app inputs
+    # Update intervention parameters from widgets
     edited_intervention_parms1 = update_intervention_parameters_from_widget(
         edited_advanced_parms1
     )
@@ -405,7 +419,7 @@ def app(replicates=20):
         edited_advanced_parms2
     )
 
-    ### Dictate that isolation > quarantine
+    # Enforce logical constraints on interventions: isolation > quarantine
     if (
         edited_parms2["pre_rash_isolation_on"] == True
         and edited_parms2["isolation_on"] == False
@@ -428,17 +442,13 @@ def app(replicates=20):
         )
         return
 
+    # Prepare scenario parameter sets
     updated_parms1 = edited_intervention_parms1.copy()
     updated_parms2 = edited_intervention_parms2.copy()
     scenario1 = [updated_parms1]
     scenario2 = [updated_parms2]
 
-    # check the initial population state and see if conditions allow for vaccination to run
-    # build population state vectors, first elements are state vectors over time
-
-    # the last element of the first axis is the complete population state vector, "u"
-    # the first element of the 2nd axis is for group 0
-    # the first element of the 3rd axis is for the susceptible population
+    # --- Initial Population State and Vaccination Schedule ---
     initial_states = initialize_population(1, 1, updated_parms2)
 
     # last element returned by initialize_population is the initial state vector
@@ -446,8 +456,8 @@ def app(replicates=20):
 
     warning_message = ""
 
-    # check the initial state vector for the population and see if there are any people to vaccinate
-    # if there is no one to vaccinate and other interventions are turned off
+    # Warn if no one to vaccinate and no other interventions. This effectively means that there are
+    #  no other  interventions being modeled in the second scenario.
     if (
         (initial_states[u_ind][0][Ind.S.value] == 0)
         and (not scenario2[0]["isolation_on"])
@@ -459,7 +469,7 @@ def app(replicates=20):
             "\n\n"
         )
 
-    # vax schedule for plotting and warning messages to users
+    # Build vaccine schedule and warn if no doses will be administered
     edited_intervention_parms2["t_array"] = get_time_array(edited_intervention_parms2)
     schedule = build_vax_schedule(edited_intervention_parms2)
 
@@ -479,8 +489,7 @@ def app(replicates=20):
             icon="⚠️",
         )
 
-    #### Plot Options:
-    # get the selected outcome from the sidebar
+    # --- Plot Options ---
     outcome_option = st.selectbox(
         "Metric",
         get_outcome_options(),
@@ -488,7 +497,7 @@ def app(replicates=20):
         placeholder="Select an outcome to plot",
     )
 
-    ### Run computations and display results
+    # --- Run Simulations and Display Results ---
     chart_placeholder = st.empty()
 
     # Map the selected option to the outcome variable
@@ -500,48 +509,48 @@ def app(replicates=20):
     results1 = get_scenario_results(scenario1)
     results2 = get_scenario_results(scenario2)
 
-    # Display number of doses administered now that use has finished selecting parameters
+    # Display number of doses administered
     with col_intervention_text:
         st.text(
             f"Total vaccines scheduled to be administered during campaign: {sum(schedule.values())} doses",
             help="This number is calculated based on user input for the percentage of the non-immune population that gets vaccinated during the campaign. If the campaign starts late, the actual number of doses administered may be lower due to there being not enough eligible individuals left to vaccinate.",
         )
 
-    # fullresults for later
+    # Save full results for summary tables
     fullresults1 = results1
     fullresults2 = results2
 
-    # extract groups
+    # Extract unique groups
     groups = results1["group"].unique().to_list()
 
-    # do some processing here to get daily incidence
+    # Add daily incidence columns
     chart_placeholder.text("Adding daily incidence...")
     results1 = add_daily_incidence(results1, groups)
     results2 = add_daily_incidence(results2, groups)
 
-    # create tables with interval results - weekly incidence, weekly cumulative incidence
+    # Get weekly interval results
     interval = 7
-
     chart_placeholder.text("Getting interval results...")
     interval_results1 = get_interval_results(results1, groups, interval)
     interval_results2 = get_interval_results(results2, groups, interval)
 
-    # rename columns for the app
+    # Rename columns for plotting
     app_column_mapping = {f"inc_{interval}": "Winc", "Y": "WCI"}
     interval_results1 = interval_results1.rename(app_column_mapping)
     interval_results2 = interval_results2.rename(app_column_mapping)
 
+    # Default to cumulative daily incidence if outcome not available
     if outcome not in ["Y", "inc", "Winc", "WCI"]:
         print("outcome not available yet, defaulting to Cumulative Daily Incidence")
         outcome = "Y"
 
+    # Prepare data for Altair plots
     if outcome_option in [
         "Daily Incidence",
         "Daily Cumulative Incidence",
     ]:
         alt_results1 = results1
         alt_results2 = results2
-        # min_y, max_y = 0, max(results1[outcome].max(), results2[outcome].max())
         x = "t:Q"
         time_label = "Time (days)"
         vax_start = min(schedule.keys())
@@ -549,7 +558,6 @@ def app(replicates=20):
     elif outcome_option in ["Weekly Incidence", "Weekly Cumulative Incidence"]:
         alt_results1 = interval_results1
         alt_results2 = interval_results2
-        # min_y, max_y = 0, max(interval_results1[outcome].max(), interval_results2[outcome].max())
         x = "interval_t:Q"
         time_label = "Time (weeks)"
         vax_start = min(schedule.keys()) / interval
@@ -559,17 +567,16 @@ def app(replicates=20):
     ave_traj1 = get_median_trajectory_from_peak_time(interval_results1)
     ave_traj2 = get_median_trajectory_from_peak_time(interval_results2)
 
-    # filter results to get the median trajectory for each scenario
+    # Filter for median trajectory results
     ave_results1 = alt_results1.filter(pl.col("replicate") == ave_traj1).with_columns(
         pl.lit(scenario_names[0]).alias("scenario")
     )
     ave_results2 = alt_results2.filter(pl.col("replicate") == ave_traj2).with_columns(
         pl.lit(scenario_names[1]).alias("scenario")
     )
-
     combined_ave_results = ave_results1.vstack(ave_results2)
 
-    # Get smaller subset of results for plotting
+    # Get subset of results for plotting
     alt_results1 = alt_results1.with_columns(
         pl.lit(scenario_names[0]).alias("scenario")
     )
@@ -583,7 +590,8 @@ def app(replicates=20):
         pl.col("replicate").is_in(replicate_inds)
     )
 
-    # create chart title, depending on whether interventions are on/off
+    # --- Build Altair Chart ---
+    # Chart title and subtitle
     if interventions == "On":
         pre_rash_isolation_adherence = 0
         isolation_adherence = 0
@@ -604,7 +612,7 @@ def app(replicates=20):
         title = alt.TitleParams(
             "Outcome Comparison by Scenario",
             subtitle=[
-                (f"Vaccine campaign: {mean_doses_administered} " "doses administered"),
+                (f"Vaccine campaign: {mean_doses_administered} doses administered"),
                 f"Quarantine adherence: {pre_rash_isolation_adherence_pct}%",
                 f"Isolation adherence: {isolation_adherence_pct}%",
             ],
@@ -628,8 +636,8 @@ def app(replicates=20):
                 "scenario",
                 title="Scenario",
                 scale=alt.Scale(
-                    domain=[scenario_names[0], scenario_names[1]],  # Scenarios
-                    range=["#FB7E38", "#0057b7"],  # Corresponding colors (orange, blue)
+                    domain=[scenario_names[0], scenario_names[1]],
+                    range=["#FB7E38", "#0057b7"],
                 ),
             ),
             detail="replicate",
@@ -638,26 +646,26 @@ def app(replicates=20):
         .properties(title=title, width=800, height=400)
     )
 
-    # If vaccines administered > 0, add vax schedule to plot
+    # Add vaccine campaign period as a shaded box if applicable
     if edited_intervention_parms2["total_vaccine_uptake_doses"] > 0:
         vax = (
             alt.Chart(
                 pd.DataFrame(
                     {
-                        "x_start": [vax_start],  # Start of the box
-                        "x_end": [vax_end],  # End of the box
+                        "x_start": [vax_start],
+                        "x_end": [vax_end],
                     }
                 )
             )
             .mark_rect(opacity=0.1, color="grey")
             .encode(
                 x=alt.X("x_start:Q", title=time_label),
-                x2="x_end:Q",  # End position of the box
+                x2="x_end:Q",
             )
         )
-
         chart = chart + vax
 
+    # Add bold line for median trajectory
     ave_line = (
         alt.Chart(combined_ave_results.to_pandas())
         .mark_line(opacity=1.0, strokeWidth=3.0, clip=True)
@@ -668,18 +676,17 @@ def app(replicates=20):
                 "scenario",
                 title="Scenario",
                 scale=alt.Scale(
-                    domain=[scenario_names[0], scenario_names[1]],  # Scenarios
-                    range=["#cf4828", "#20419a"],  # Corresponding colors (red, blue)
+                    domain=[scenario_names[0], scenario_names[1]],
+                    range=["#cf4828", "#20419a"],
                 ),
             ),
             tooltip=["scenario", "t", outcome],
         )
     )
-
     chart = chart + ave_line
 
+    # Add annotation if no interventions are selected
     if interventions == "Off":
-        # Create a text annotation
         annotation = (
             alt.Chart(
                 pd.DataFrame(
@@ -689,16 +696,12 @@ def app(replicates=20):
             .mark_text(align="center", baseline="top", color="grey", fontSize=18)
             .encode(text="text:N", y=alt.value(10))
         )
-
-        # Add the annotation to the chart
         chart = chart + annotation
-    else:
-        chart = chart
 
     chart = chart.properties(padding={"top": 10, "bottom": 30, "left": 30, "right": 40})
     chart_placeholder.altair_chart(chart, use_container_width=True)
 
-    # Text below the chart
+    # --- Chart Description ---
     st.markdown(
         '<p style="font-size:14px;">'
         "Each thin line represents an individual simulation of the stochastic "
@@ -713,12 +716,10 @@ def app(replicates=20):
         unsafe_allow_html=True,
     )
 
-    ### Outbreak Summary Stats
+    # --- Outbreak Summary Stats ---
     st.subheader("Simulation summary")
-
     with st.expander("Show intervention strategies", expanded=False):
         columns = st.columns(2)
-
         flexible_callout(
             (
                 "No Interventions:<br><ul>"
@@ -758,13 +759,13 @@ def app(replicates=20):
                 container=columns[1],
             )
 
+    # Prepare outbreak summary table
     fullresults1 = fullresults1.with_columns(
         pl.lit(scenario_names[0]).alias("Scenario")
     )
     fullresults2 = fullresults2.with_columns(
         pl.lit(scenario_names[1]).alias("Scenario")
     )
-
     combined_results = (
         fullresults2.vstack(fullresults1)
         .with_columns(
@@ -788,7 +789,7 @@ def app(replicates=20):
     if interventions == "Off":
         outbreak_summary = outbreak_summary.select("", scenario_names[0])
 
-    # add highlight of the outbreak summary
+    # Highlight outbreak summary
     if interventions == "On":
         relative_difference = (
             outbreak_summary.filter(pl.col("") == "Infections, mean (95% CI)")
@@ -839,18 +840,16 @@ def app(replicates=20):
         st.markdown(outbreak_summary.to_pandas().to_markdown(index=False))
         csv_buffer = io.StringIO()
         outbreak_summary.to_pandas().to_csv(csv_buffer, index=False)
-
         base64_encoded = base64.b64encode(csv_buffer.getvalue().encode("utf-8")).decode(
             "utf-8"
         )
         time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-
         data_uri = f'<p style="font-size:10px;text-align:right;"><a download="measles-sim-{time}.csv" href="data:text/csv;base64,{base64_encoded}">Download as CSV</a></p>'
         st.markdown(data_uri, unsafe_allow_html=True)
     else:
         st.dataframe(outbreak_summary)
 
-    # add a section on the detailed methods
+    # --- Detailed Methods Section ---
     with st.expander("Detailed methods", expanded=False):
         st.markdown(
             """
