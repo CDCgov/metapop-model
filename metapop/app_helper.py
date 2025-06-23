@@ -1525,7 +1525,7 @@ def img_to_html(img_path, width=30, vertical_align="middle", margin_right=8):
 
 def is_light_color():
     try:
-        theme = st.context.theme
+        theme = st.context.theme.type
     except Exception:
         theme = "light"
     theme = st.context.theme.type

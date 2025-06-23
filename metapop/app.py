@@ -377,9 +377,8 @@ def app(replicates=20):
         # show the url of the repo
         url = info["url"]
 
-        # Choose GitHub logo based on Streamlit theme background
+        # Choose GitHub logo based on Streamlit browser theme
         is_light = is_light_color()
-        print(f"is_light: {is_light}")
         image_path = get_github_logo_path(is_light)
 
         markdown_content = ""
