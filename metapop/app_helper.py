@@ -1524,27 +1524,39 @@ def img_to_html(img_path, width=30, vertical_align="middle", margin_right=8):
 
 
 def is_light_color():
+    """
+    Determine if the current theme is light or dark.
+
+    Returns:
+        bool: True if the theme is light, False if dark. Defaults to True if the theme is not recognized.
+    """
     try:
         theme = st.context.theme.type
     except Exception:
         theme = "light"
     theme = st.context.theme.type
-    print(f"theme: {theme}")
 
     if theme == "light":
         return True
     elif theme == "dark":
         return False
-
     return True  # Default to light if theme is not recognized
 
 
 def get_github_logo_path(is_background_light):
+    """
+    Get the path to the GitHub logo image in app_assets based on the background
+    color theme.
+
+    Args:
+        is_background_light (bool): True if the background is light, False if dark. Defaults to True if theme is not recognized.
+    Returns:
+        str: The path to the GitHub logo image in app_assets.
+    """
     if is_background_light:
         image_path = os.path.join(
             os.path.dirname(__file__), "app_assets", "github-mark.png"
         )
-
     else:
         image_path = os.path.join(
             os.path.dirname(__file__), "app_assets", "github-mark-white.png"
