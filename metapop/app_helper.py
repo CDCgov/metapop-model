@@ -1,6 +1,8 @@
 # This file contains helper functions for the metapop app.
+import base64
 import copy
 import os
+from pathlib import Path
 
 import altair as alt
 import griddler
@@ -56,6 +58,8 @@ __all__ = [
     "get_median_trajectory_from_episize",
     "get_median_trajectory_from_peak_time",
     "totals_same_by_ks",
+    "img_to_bytes",
+    "img_to_html",
 ]
 
 
@@ -1483,3 +1487,36 @@ def totals_same_by_ks(
     _, p_value = stats.ks_2samp(scenario_0, scenario_1)
 
     return p_value > p_threshold
+
+
+def img_to_bytes(img_path):
+    """
+    Convert an image file to a base64 encoded string.
+
+    Args:
+        img_path (str): The path to the image file.
+
+    Returns:
+        str: A base64 encoded string of the image.
+    """
+    img_bytes = Path(img_path).read_bytes()
+    encoded = base64.b64encode(img_bytes).decode()
+
+    return encoded
+
+
+def img_to_html(img_path, width=30, vertical_align="middle", margin_right=8):
+    """
+    Convert an image file to an HTML image tag with base64 encoding.
+
+    Args:
+        img_path (str): The path to the image file.
+
+    Returns:
+        str: An HTML image tag with the base64 encoded image.
+    """
+    encoded = img_to_bytes(img_path)
+    img_html = "<img src='data:image/png;base64, {}' class='img-fluid'>".format(encoded)
+    img_html = f"<img src='data:image/png;base64, {encoded}' width='{width}' style='vertical-align:{vertical_align}; margin-right:{margin_right}px' class='img-fluid'>"
+    return img_html
+

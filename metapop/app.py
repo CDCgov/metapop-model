@@ -52,6 +52,8 @@ from .app_helper import (
     get_median_trajectory_from_episize,
     get_median_trajectory_from_peak_time,
     totals_same_by_ks,
+    img_to_bytes,
+    img_to_html,
 )
 from .helper import (
     Ind,
@@ -372,13 +374,28 @@ def app(replicates=20):
 
         # show the url of the repo
         url = info["url"]
-        image_url = "https://hdpng.com/images/ok-calling-myself-a-developer-would-be-a-stretch-but-still-two-years-ago-i-had-no-clue-what-git-and-github-was-and-how-to-do-a-pr-256.png"
-        # image_url = os.path.join(os.path.dirname(__file__), "app_assets", "github-mark.png")
+        image_path = os.path.join(
+            os.path.dirname(__file__), "app_assets", "github-mark.png"
+        )
+        # st.markdown(
+        #     f'<a href="{url}" target="_blank">'
+        #     f'<img src="{image_url}" width="30" style="vertical-align:middle; margin-right:8px;">'
+        #     "Source code"
+        #     "</a>",
+        #     unsafe_allow_html=True,
+        # )
+
+        # img_bytes = img_to_bytes(image_path)
+
+        markdown_content = ""
+        markdown_content += f'<a href="{url}" target="_blank">'
+        markdown_content += f"{img_to_html(image_path)}"
+        markdown_content += "Source code"
+        markdown_content += "</a>"
+
         st.markdown(
-            f'<a href="{url}" target="_blank">'
-            f'<img src="{image_url}" width="30" style="vertical-align:middle; margin-right:8px;">'
-            "Source code"
-            "</a>",
+            markdown_content,
+            help="GitHub Logo from: https://github.com/logos",
             unsafe_allow_html=True,
         )
         st.caption(f"Questions? Contact us: {info['email']}")
