@@ -380,16 +380,6 @@ def app(replicates=20):
         # Choose GitHub logo based on Streamlit theme background
         is_light = is_light_color()
         print(f"is_light: {is_light}")
-
-        # if is_light:
-        #     image_path = os.path.join(
-        #         os.path.dirname(__file__), "app_assets", "github-mark.png"
-        #     )
-        # else:
-        #     image_path = os.path.join(
-        #         os.path.dirname(__file__), "app_assets", "github-mark-white.png"
-        #     )
-
         image_path = get_github_logo_path(is_light)
 
         markdown_content = ""
