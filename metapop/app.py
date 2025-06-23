@@ -373,6 +373,7 @@ def app(replicates=20):
         # show the url of the repo
         url = info["url"]
         image_url = "https://hdpng.com/images/ok-calling-myself-a-developer-would-be-a-stretch-but-still-two-years-ago-i-had-no-clue-what-git-and-github-was-and-how-to-do-a-pr-256.png"
+        # image_url = os.path.join(os.path.dirname(__file__), "app_assets", "github-mark.png")
         st.markdown(
             f'<a href="{url}" target="_blank">'
             f'<img src="{image_url}" width="30" style="vertical-align:middle; margin-right:8px;">'
