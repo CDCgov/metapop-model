@@ -60,6 +60,8 @@ __all__ = [
     "totals_same_by_ks",
     "img_to_bytes",
     "img_to_html",
+    "is_light_color",
+    "get_github_logo_path",
 ]
 
 
@@ -1520,3 +1522,31 @@ def img_to_html(img_path, width=30, vertical_align="middle", margin_right=8):
     img_html = f"<img src='data:image/png;base64, {encoded}' width='{width}' style='vertical-align:{vertical_align}; margin-right:{margin_right}px' class='img-fluid'>"
     return img_html
 
+
+def is_light_color():
+    try:
+        theme = st.context.theme
+    except Exception:
+        theme = "light"
+    theme = st.context.theme.type
+    print(f"theme: {theme}")
+
+    if theme == "light":
+        return True
+    elif theme == "dark":
+        return False
+
+    return True  # Default to light if theme is not recognized
+
+
+def get_github_logo_path(is_background_light):
+    if is_background_light:
+        image_path = os.path.join(
+            os.path.dirname(__file__), "app_assets", "github-mark.png"
+        )
+
+    else:
+        image_path = os.path.join(
+            os.path.dirname(__file__), "app_assets", "github-mark-white.png"
+        )
+    return image_path

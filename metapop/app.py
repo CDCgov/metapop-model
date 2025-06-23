@@ -54,6 +54,8 @@ from .app_helper import (
     totals_same_by_ks,
     img_to_bytes,
     img_to_html,
+    is_light_color,
+    get_github_logo_path,
 )
 from .helper import (
     Ind,
@@ -376,37 +378,19 @@ def app(replicates=20):
         url = info["url"]
 
         # Choose GitHub logo based on Streamlit theme background
-        theme = st.get_option("theme.backgroundColor")
+        is_light = is_light_color()
+        print(f"is_light: {is_light}")
 
-        def is_light_color(hex_color):
-            if not hex_color:
-                return True  # Default to light
-            hex_color = hex_color.lstrip("#")
-            r, g, b = tuple(int(hex_color[i : i + 2], 16) for i in (0, 2, 4))
-            # Perceived luminance formula
-            luminance = 0.299 * r + 0.587 * g + 0.114 * b
-            return luminance > 127
+        # if is_light:
+        #     image_path = os.path.join(
+        #         os.path.dirname(__file__), "app_assets", "github-mark.png"
+        #     )
+        # else:
+        #     image_path = os.path.join(
+        #         os.path.dirname(__file__), "app_assets", "github-mark-white.png"
+        #     )
 
-        if is_light_color(theme):
-            image_path = os.path.join(
-                os.path.dirname(__file__), "app_assets", "github-mark-white.png"
-            )
-        else:
-            image_path = os.path.join(
-                os.path.dirname(__file__), "app_assets", "github-mark.png"
-            )
-        # image_path = os.path.join(
-        #     os.path.dirname(__file__), "app_assets", "github-mark.png"
-        # )
-        # st.markdown(
-        #     f'<a href="{url}" target="_blank">'
-        #     f'<img src="{image_url}" width="30" style="vertical-align:middle; margin-right:8px;">'
-        #     "Source code"
-        #     "</a>",
-        #     unsafe_allow_html=True,
-        # )
-
-        # img_bytes = img_to_bytes(image_path)
+        image_path = get_github_logo_path(is_light)
 
         markdown_content = ""
         markdown_content += f'<a href="{url}" target="_blank">'
