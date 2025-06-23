@@ -403,13 +403,17 @@ def test_get_infected():
         n_groups=2,
     )
 
-    u = [
-        [99, 0, 0, 0, 1, 2, 0, 0],  # S V E1 E2 I1 I2 R Y
-        [100, 0, 0, 0, 3, 4, 0, 0],  # S V E1 E2 I1 I2 R Y
-    ]
+    u = [[0] * (Ind.max_value() + 1) for _ in range(parms["n_groups"])]
+
+    u[0][Ind.S.value] = 99
+    u[0][Ind.I1.value] = 1
+    u[0][Ind.I2.value] = 2
+    u[1][Ind.S.value] = 100
+    u[1][Ind.I1.value] = 3
+    u[1][Ind.I2.value] = 4
 
     # Define the indices of the I compartments
-    I_indices = [4, 5]
+    I_indices = [Ind.I1.value, Ind.I2.value]
 
     # Define the number of groups
     groups = 2
@@ -442,16 +446,18 @@ def test_symptomatic_isolation():
         "isolation_success": 1.0,
         "pre_rash_isolation_start_day": 400,
         "pre_rash_isolation_duration_days": 100,
+        "n_groups": 2,
     }
 
-    # Initial state for each group: Group 2 has no E or I individuals yet
-    u = [
-        [1000, 0, 0, 0, 100, 100, 0, 0, 0],  # Group 0: S, V, E1, E2, I1, I2, R, Y, X
-        [600, 0, 0, 0, 0, 0, 0, 0, 0],  # Group 2: S, V, E1, E2, I1, I2, R, Y, X
-    ]
+    u = [[0] * (Ind.max_value() + 1) for _ in range(parms["n_groups"])]
+
+    u[0][Ind.S.value] = 1000
+    u[0][Ind.I1.value] = 100
+    u[0][Ind.I2.value] = 100
+    u[1][Ind.S.value] = 1000
 
     # Define the indices of the I compartments
-    I_indices = [4, 5]
+    I_indices = [Ind.I1.value, Ind.I2.value]
 
     # Define the number of groups
     groups = 2
@@ -499,16 +505,19 @@ def test_pre_rash_isolation():
         "pre_rash_isolation_start_day": 10,
         "pre_rash_isolation_duration_days": 1,
         "pre_rash_isolation_success": 1.0,
+        "n_groups": 2,
     }
 
     # Initial state for each group: Group 2 has no E or I individuals yet
-    u = [
-        [1000, 0, 0, 0, 100, 100, 0, 0, 0],  # Group 0: S, V, E1, E2, I1, I2, R, Y, X
-        [600, 0, 0, 0, 0, 0, 0, 0, 0],  # Group 2: S, V, E1, E2, I1, I2, R, Y, X
-    ]
+    u = [[0] * (Ind.max_value() + 1) for _ in range(parms["n_groups"])]
+
+    u[0][Ind.S.value] = 100
+    u[0][Ind.I1.value] = 100
+    u[0][Ind.I2.value] = 100
+    u[1][Ind.S.value] = 600
 
     # Define the indices of the I compartments
-    I_indices = [4, 5]
+    I_indices = [Ind.I1.value, Ind.I2.value]
 
     # Define the number of groups
     groups = 2
@@ -557,16 +566,19 @@ def test_pre_post_isolation():
         "pre_rash_isolation_start_day": 10,
         "pre_rash_isolation_duration_days": 1,
         "pre_rash_isolation_success": 1.0,
+        "n_groups": 2,
     }
 
     # Initial state for each group: Group 2 has no E or I individuals yet
-    u = [
-        [1000, 0, 0, 0, 100, 100, 0, 0, 0],  # Group 0: S, V, E1, E2, I1, I2, R, Y, X
-        [600, 0, 0, 0, 0, 0, 0, 0, 0],  # Group 2: S, V, E1, E2, I1, I2, R, Y, X
-    ]
+    u = [[0] * (Ind.max_value() + 1) for _ in range(parms["n_groups"])]
+
+    u[0][Ind.S.value] = 1000
+    u[0][Ind.I1.value] = 100
+    u[0][Ind.I2.value] = 100
+    u[1][Ind.S.value] = 1000
 
     # Define the indices of the I compartments
-    I_indices = [4, 5]
+    I_indices = [Ind.I1.value, Ind.I2.value]
 
     # Define the number of groups
     groups = 2

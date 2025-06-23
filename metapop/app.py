@@ -913,7 +913,7 @@ def app(replicates=20):
             vaccination start day (days after the initial infection is introduced) and the duration of the campaign (in days).
             It's assumed that the number of doses administered per day is equal to the total number of doses
             divided by the duration of the campaign (but may be rounded to the nearest integer value).
-            If the campaign ends after the simulation ends, all remaining doses will be administered on the last day of the simulation.
+            If the campaign ends after the simulation ends, the vaccination campaign will be shortened to run until the last simulation day while keeping the rate of doses administered per day the same . In this case, the total number of doses scheduled to be administered will not match the vaccination uptake proportion input specified in the sidebar.
             </li>
 
             <li style="font-size:14px;"> We assume that both susceptible and
@@ -966,7 +966,7 @@ def app(replicates=20):
             </li>
 
             <li style="font-size:14px;"> We assume protection against infection for individuals
-            with prior infection or vaccination at the start of the simulation is 97%, the estimate for two doses of MMR
+            with prior infection or vaccination at the start of the simulation is on average 97% for the population, the estimate for two doses of MMR
             <a href='https://www.cdc.gov/measles/vaccines/index.html?CDC_AA_refVal=https%3A%2F%2Fwww.cdc.gov%2Fvaccines%2Fvpd%2Fmmr%2Fpublic%2Findex.html' target='_blank'>[MMR Vaccine Information]</a>.
             </li>
 
