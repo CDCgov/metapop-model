@@ -769,6 +769,7 @@ def app(replicates=20):
     st.subheader("Simulation summary")
     with st.expander("Show intervention strategies", expanded=False):
         columns = st.columns(2)
+        # Create a callout box and text describing the No Interventions scenario
         flexible_callout(
             (
                 "No Interventions:<br><ul>"
@@ -780,15 +781,9 @@ def app(replicates=20):
             font_color="#8f3604",
             container=columns[0],
         )
+        # Create a callout box and text describing the interventions
+        # implemented in the Interventions scenario when it's being displayed (i.e. "On")
         if interventions == "On":
-            pre_rash_isolation_adherence = 0
-            isolation_adherence = 0
-            if edited_parms2["pre_rash_isolation_on"]:
-                pre_rash_isolation_adherence = edited_parms2[
-                    "pre_rash_isolation_adherence"
-                ]
-            if edited_parms2["isolation_on"]:
-                isolation_adherence = edited_parms2["isolation_adherence"]
             callout_text = "Interventions:<br><ul>"
             if (
                 edited_parms2["total_vaccine_uptake_doses"] == 0
@@ -797,8 +792,8 @@ def app(replicates=20):
                 callout_text += "<li> Vaccines administered during campaign: 0</li>"
             else:
                 callout_text += f"<li> Vaccines administered during campaign: {mean_doses_administered} between day {min(schedule.keys())} and day {max(schedule.keys())}</li>"
-            callout_text += f"<li> Adherence to quarantine among pre-symptomatic infectious individuals: {int(pre_rash_isolation_adherence * 100)}%</li>"
-            callout_text += f"<li> Adherence to isolation among symptomatic infectious individuals: {int(isolation_adherence * 100)}%</li></ul>"
+            callout_text += f"<li> Adherence to quarantine among pre-symptomatic infectious individuals: {pre_rash_isolation_adherence_pct}%</li>"
+            callout_text += f"<li> Adherence to isolation among symptomatic infectious individuals: {isolation_adherence_pct}%</li></ul>"
 
             flexible_callout(
                 callout_text,
