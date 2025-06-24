@@ -59,7 +59,7 @@ class SEIRModel:
 
     def exposed(self, u, current_susceptibles, current_vacc_fails, t):
         """
-        Calculate the number of new exposed individuals (E1, E1_V, E2, E2_V)
+        Calculate the number of new exposed individuals (new_E1, new_E1_V, new_E2, new_E2_V)
         based on the current state of the system, the number of susceptible
         individuals, and the number of vaccine failures.
 
@@ -71,11 +71,11 @@ class SEIRModel:
             t                     (int): The current time step.
 
         Returns:
-            tuple: A tuple containing lists of new exposed individuals (E1, E1_V, E2, E2_V)
-                   for each group. E1 represents the number of new exposed individuals moving
-                   from S to E1, E1_V represents the number of new exposed individuals who
+            tuple: A tuple containing lists of new exposed individuals (new_E1, new_E1_V, new_E2, new_E2_V)
+                   for each group. new_E1 represents the number of new exposed individuals moving
+                   from S to E1, new_E1_V represents the number of new exposed individuals who
                    were vaccinated but failed to gain immunity moving from SV to E1_V,
-                   E2 represents the number of individuals moving from E1 to E2, and E2_V
+                   new_E2 represents the number of individuals moving from E1 to E2, and new_E2_V
                    represents the number of vaccinated individuals moving from E1_V to E2_V.
         """
         # Initialize lists to hold new exposed individuals
@@ -123,10 +123,10 @@ class SEIRModel:
 
         Returns:
             tuple: A tuple containing lists of new vaccinated individuals
-                   (V, SV, EV) for each group. V represents the number of
-                   individuals vaccinated, SV represents the number of
+                   (new_V, new_SV, new_EV) for each group. new_V represents the number of
+                   individuals vaccinated, new_SV represents the number of
                    vaccine failures from susceptible individuals who
-                   received vaccination, and EV represents the number of
+                   received vaccination, and new_EV represents the number of
                    exposed individuals who received vaccination but did not
                    mount immunity against the disease.
         """
@@ -147,9 +147,27 @@ class SEIRModel:
         return new_V, new_SV, new_EV
 
     def infectious(self, u):
+        """
+        Calculate the number of new infectious individuals (new_I1, new_I1_V, new_I2)
+        based on the current state of the system and the number of exposed
+        individuals.
+
+        Args:
+            u (list): The state vector of the system.
+        Returns:
+            tuple: A tuple containing lists of new infectious individuals
+                   (new_I1, new_I1_V, new_I2) for each group. new_I1 represents the number of
+                   new infectious individuals moving from E2 to I1, new_I1_V
+                   represents the number of new infectious individuals who were
+                   vaccinated but failed to gain immunity moving from E2_V to I1,
+                   and new_I2 represents the number of individuals moving from I1 to I2.
+                   I1_V is an internal state variable to move people from E2_V to I1,
+                   but it is not used in the model's dynamics nor tracked as output.
+        """
         new_I1 = []
         new_I1_V = []
         new_I2 = []
+
         for group in range(self.groups):
             new_i_frac = rate_to_frac(self.parms["sigma_scaled"])
             new_I1.append(self.rng.binomial(u[group][Ind.E2.value], new_i_frac))
