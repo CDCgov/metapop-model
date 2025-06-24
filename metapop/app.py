@@ -234,8 +234,8 @@ def app(replicates=20):
             "total_vaccine_uptake_doses",
             "vaccine_uptake_start_day",
             "vaccine_uptake_duration_days",
-        ]        
-        list_vax_parameter_keys = [] # parameters that are lists or arrays
+        ]
+        list_vax_parameter_keys = []  # parameters that are lists or arrays
 
         # order of non-pharmaceutical intervention (NPI) parameters in the sidebar
         ordered_keys_npi = [
@@ -386,8 +386,7 @@ def app(replicates=20):
         assert (
             edited_parms1["isolation_adherence"] == 0
         ), "Isolation adherence should be 0 for the no intervention scenario"
-        
-        
+
         # --- About this app section ---
         info = get_metapop_info()
         st.header("About this app")
