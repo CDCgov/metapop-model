@@ -347,8 +347,7 @@ def app(replicates=20):
             # advanced parameters that are lists or arrays - empty for this app
             advanced_list_keys = []
 
-            # set the parameters for scenario 2
-            # edited_advanced_parms2 = app_editors(
+            # set the advanced parameters for scenario 2
             edited_parms2 = app_editors(
                 st.container(),
                 "",
@@ -367,27 +366,17 @@ def app(replicates=20):
             )
 
             # shared advanced parameters to scenario 1
-            # edited_advanced_parms1 = (
-            #     edited_parms1  # copy the no intervention scenario parameters so far
-            # )
             # copy the non intervention advanced parameters from scenario 2 to scenario 1
             for key in advanced_ordered_keys:
+                # do not copy adherence parameters
                 if key not in ("pre_rash_isolation_adherence", "isolation_adherence"):
-                    # edited_advanced_parms1[key] = edited_advanced_parms2[key]
-                    # edited_advanced_parms1[key] = edited_parms2[key]
                     edited_parms1[key] = edited_parms2[key]
-
-        # assert (
-        #     edited_advanced_parms1["total_vaccine_uptake_doses"] == 0
-        # ), "Total vaccine uptake doses should be 0 for the no intervention scenario"
-        # assert (
-        #     edited_advanced_parms1["pre_rash_isolation_adherence"] == 0
-        # ), "Pre-rash isolation adherence should be 0 for the no intervention scenario"
-        # assert (
-        #     edited_advanced_parms1["isolation_adherence"] == 0
-        # ), "Isolation adherence should be 0 for the no intervention scenario"
-
+            for key in advanced_list_keys:
+                # do not copy adherence parameters
+                if key not in ("pre_rash_isolation_adherence", "isolation_adherence"):
+                    edited_parms1[key] = edited_parms2[key]
         # Final assertions for scenario 1
+        # check that the intervention parameters for scenario 1 are still set to zero for interventions
         assert (
             edited_parms1["total_vaccine_uptake_doses"] == 0
         ), "Total vaccine uptake doses should be 0 for the no intervention scenario"
@@ -397,7 +386,8 @@ def app(replicates=20):
         assert (
             edited_parms1["isolation_adherence"] == 0
         ), "Isolation adherence should be 0 for the no intervention scenario"
-
+        
+        
         # --- About this app section ---
         info = get_metapop_info()
         st.header("About this app")
@@ -451,23 +441,13 @@ def app(replicates=20):
             ),
         )
 
-    # set model parameters based on app inputs
+    # set model parameters based on app inputs - this will update internal parameters that are combinations of user inputs
     # these dictionaries will be used to run the model
-    edited_parms1 = update_intervention_parameters_from_widget(
-        # edited_intervention_parms1 = update_intervention_parameters_from_widget(
-        # edited_advanced_parms1
-        edited_parms1
-    )
-    edited_parms2 = update_intervention_parameters_from_widget(
-        # edited_intervention_parms2 = update_intervention_parameters_from_widget(
-        # edited_advanced_parms2
-        edited_parms2
-    )
+    edited_parms1 = update_intervention_parameters_from_widget(edited_parms1)
+    edited_parms2 = update_intervention_parameters_from_widget(edited_parms2)
 
     # Enforce logical constraints on interventions: isolation > quarantine
     if (
-        # edited_intervention_parms2["pre_rash_isolation_on"] == True
-        # and edited_intervention_parms2["isolation_on"] == False
         edited_parms2["pre_rash_isolation_on"] == True
         and edited_parms2["isolation_on"] == False
     ):
@@ -477,11 +457,8 @@ def app(replicates=20):
         )
         return
 
+    ### Dictate that isolation > quarantine
     if (
-        # edited_intervention_parms2["isolation_adherence"]
-        # < edited_intervention_parms2["pre_rash_isolation_adherence"]
-        # and edited_intervention_parms2["pre_rash_isolation_on"] == True
-        # and edited_intervention_parms2["isolation_on"] == True
         edited_parms2["isolation_adherence"]
         < edited_parms2["pre_rash_isolation_adherence"]
         and edited_parms2["pre_rash_isolation_on"] == True
@@ -493,21 +470,9 @@ def app(replicates=20):
         )
         return
 
-    # need to use updated_parms1 and updated_parms2 because t_array is added to the parameters and pygriddler does not like it
-    # updated_parms1 = edited_intervention_parms1.copy()
-    # updated_parms2 = edited_intervention_parms2.copy()
-
-    # scenario1 = [updated_parms1]
-    # scenario2 = [updated_parms2]
-    # scenario1 = [edited_intervention_parms1]
-    # scenario2 = [edited_intervention_parms2]
+    # create two scenarios to run with pygriddler
     scenario1 = [edited_parms1]
     scenario2 = [edited_parms2]
-    # print(type(updated_parms1))
-    # print(type(edited_intervention_parms1))
-
-    # scenario1 = [edited_intervention_parms1]
-    # scenario2 = [edited_intervention_parms2]
 
     # --- Initial Population State and Vaccination Schedule ---
 
@@ -520,7 +485,6 @@ def app(replicates=20):
     initial_states = initialize_population(
         1,
         1,
-        #    edited_intervention_parms2
         edited_parms2,
     )
 
@@ -545,8 +509,6 @@ def app(replicates=20):
     # Build vaccine schedule and warn if no doses will be administered
     # create a parameter dictionary of scenario 2 to calculate and expose the vaccine schedule
     intervention_parms2 = edited_parms2.copy()
-
-    # intervention_parms2 = edited_intervention_parms2.copy()
     intervention_parms2["t_array"] = get_time_array(intervention_parms2)
     schedule = build_vax_schedule(intervention_parms2)
 
@@ -685,14 +647,8 @@ def app(replicates=20):
     if interventions == "On":
         pre_rash_isolation_adherence = 0
         isolation_adherence = 0
-        # if edited_intervention_parms2["pre_rash_isolation_on"]:
         if edited_parms2["pre_rash_isolation_on"]:
-            pre_rash_isolation_adherence = edited_parms2[
-                # pre_rash_isolation_adherence = edited_intervention_parms2[
-                "pre_rash_isolation_adherence"
-            ]
-        # if edited_intervention_parms2["isolation_on"]:
-        # isolation_adherence = edited_intervention_parms2["isolation_adherence"]
+            pre_rash_isolation_adherence = edited_parms2["pre_rash_isolation_adherence"]
         if edited_parms2["isolation_on"]:
             isolation_adherence = edited_parms2["isolation_adherence"]
         pre_rash_isolation_adherence_pct = int(pre_rash_isolation_adherence * 100)
@@ -817,9 +773,6 @@ def app(replicates=20):
         flexible_callout(
             (
                 "No Interventions:<br><ul>"
-                # f"<li> Vaccines administered during campaign: {int(edited_intervention_parms1['total_vaccine_uptake_doses'])}</li>"
-                # f"<li> Adherence to quarantine among pre-symptomatic infectious individuals: {int(edited_intervention_parms1['pre_rash_isolation_adherence'] * 100)}%</li>"
-                # f"<li> Adherence to isolation among symptomatic infectious individuals:  {int(edited_intervention_parms1['isolation_adherence'] * 100)}%</li></ul>"
                 f"<li> Vaccines administered during campaign: {int(edited_parms1['total_vaccine_uptake_doses'])}</li>"
                 f"<li> Adherence to quarantine among pre-symptomatic infectious individuals: {int(edited_parms1['pre_rash_isolation_adherence'] * 100)}%</li>"
                 f"<li> Adherence to isolation among symptomatic infectious individuals:  {int(edited_parms1['isolation_adherence'] * 100)}%</li></ul>"
@@ -831,22 +784,14 @@ def app(replicates=20):
         if interventions == "On":
             pre_rash_isolation_adherence = 0
             isolation_adherence = 0
-            # if edited_intervention_parms2["pre_rash_isolation_on"]:
-            #     pre_rash_isolation_adherence = edited_intervention_parms2[
-            #         "pre_rash_isolation_adherence"
-            #     ]
             if edited_parms2["pre_rash_isolation_on"]:
                 pre_rash_isolation_adherence = edited_parms2[
                     "pre_rash_isolation_adherence"
                 ]
-            # if edited_intervention_parms2["isolation_on"]:
-            #     isolation_adherence = edited_intervention_parms2["isolation_adherence"]
             if edited_parms2["isolation_on"]:
                 isolation_adherence = edited_parms2["isolation_adherence"]
             callout_text = "Interventions:<br><ul>"
             if (
-                # edited_intervention_parms2["total_vaccine_uptake_doses"] == 0
-                # or edited_intervention_parms2["vaccine_uptake_duration_days"] == 0
                 edited_parms2["total_vaccine_uptake_doses"] == 0
                 or edited_parms2["vaccine_uptake_duration_days"] == 0
             ):
@@ -884,7 +829,6 @@ def app(replicates=20):
     )
 
     outbreak_summary = get_table(
-        # combined_results, edited_intervention_parms2["IHR"], hosp_rng
         combined_results,
         edited_parms2["IHR"],
         hosp_rng,
@@ -906,12 +850,6 @@ def app(replicates=20):
 
         intervention_text = f"Adding "
         interventions = []
-        # if edited_intervention_parms2["total_vaccine_uptake_doses"] > 0:
-        #     interventions.append("vaccination")
-        # if edited_intervention_parms2["pre_rash_isolation_success"] > 0:
-        #     interventions.append("quarantine")
-        # if edited_intervention_parms2["isolation_success"] > 0:
-        #     interventions.append("isolation")
         if edited_parms2["total_vaccine_uptake_doses"] > 0:
             interventions.append("vaccination")
         if edited_parms2["pre_rash_isolation_success"] > 0:
