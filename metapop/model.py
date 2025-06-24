@@ -229,6 +229,21 @@ class SEIRModel:
         return updated_susceptibles, updated_failures
 
     def seirmodel(self, u, t):
+        """
+        Run one time step of the SEIR model. This method updates the state vector
+        based on the current state and transitions calculated from the vaccination,
+        exposure, infection, and recovery processes.
+
+        Args:
+            u (list): The state vector of the system.
+            t  (int): The current time step.
+
+        Returns:
+            list of lists: The updated state vector of the system after one time step.
+                           Each element is a list representing the updated state of a group.
+                           Y and X are cumulative counts of infections and vaccinations,
+                           respectively.
+        """
         new_u = []
         s_v, s_sv, e_v = self.vaccinate(u, t)
         current_susceptibles, current_failures = self.get_updated_susceptibles(
