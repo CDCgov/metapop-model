@@ -200,13 +200,17 @@ class SEIRModel:
 
     def get_updated_susceptibles(self, u, new_vaccinated, new_failures):
         """
-        Get the number of susceptibles in each target group based on the new vaccinated individuals.
+        Get the updated number of susceptibles and vaccine failures in each
+        target group based on the new
+        vaccinated individuals and new vaccine failures.
 
         Args:
-            u (list): The state vector of the system.
-            new_vaccinated (list): The number of new vaccinated individuals for each group on this day.
+            u              (list): The state vector of the system.
+            new_vaccinated (list): The current number of new vaccinated individuals for each group.
+            new_failures   (list): The current number of new vaccine failures for each group.
+
         Returns:
-            list: The updated number of susceptibles for each target group to pass on.
+            list: The updated number of susceptibles and vaccine failures for each group to pass on.
         """
         updated_susceptibles = []
         updated_failures = []
