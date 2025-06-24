@@ -154,6 +154,7 @@ class SEIRModel:
 
         Args:
             u (list): The state vector of the system.
+
         Returns:
             tuple: A tuple containing lists of new infectious individuals
                    (new_I1, new_I1_V, new_I2) for each group. new_I1 represents the number of
@@ -178,6 +179,19 @@ class SEIRModel:
         return new_I1, new_I1_V, new_I2
 
     def recovery(self, u, t):
+        """
+        Calculate the number of new recovered individuals (new_R) based on the
+        current state of the system and the number of infectious individuals.
+
+        Args:
+            u (list): The state vector of the system.
+            t  (int): The current time step.
+
+        Returns:
+            list: A list of new recovered individuals (new_R) for each group.
+                  new_R represents the number of individuals moving from I2 to R.
+        """
+
         new_R = []
         for group in range(self.groups):
             new_r_frac = rate_to_frac(self.parms["gamma_scaled"])
@@ -187,6 +201,7 @@ class SEIRModel:
     def get_updated_susceptibles(self, u, new_vaccinated, new_failures):
         """
         Get the number of susceptibles in each target group based on the new vaccinated individuals.
+
         Args:
             u (list): The state vector of the system.
             new_vaccinated (list): The number of new vaccinated individuals for each group on this day.
