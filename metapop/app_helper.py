@@ -39,8 +39,8 @@ __all__ = [
     "get_step_values",
     "get_helpers",
     "get_formats",
-    "get_base_widget_idkeys",
-    "get_widget_idkeys",
+    "get_base_session_state_idkeys",
+    "get_session_state_idkeys",
     "get_parameter_key_for_session_key",
     "reset",
     "get_parms_from_table",
@@ -882,8 +882,8 @@ def get_formats(parms=None):
     return defaults
 
 
-def get_base_widget_idkeys(parms=None):
-    widget_idkeys = dict(
+def get_base_session_state_idkeys(parms=None):
+    ss_idkeys = dict(
         desired_r0="desired_r0",
         k_i=["k_i_0", "k_i_1", "k_i_2"],
         k_g1="k_g1",
@@ -917,22 +917,21 @@ def get_base_widget_idkeys(parms=None):
     )
     if parms is not None and isinstance(parms, dict):
         # update with parms if provided
-        widget_idkeys.update(parms)
-    return widget_idkeys
+        ss_idkeys.update(parms)
+    return ss_idkeys
 
 
-def get_widget_idkeys(widget_no):
-    widget_idkeys = get_base_widget_idkeys()
-    for key, value in widget_idkeys.items():
+def get_session_state_idkeys(widget_no):
+    ss_idkeys = get_base_session_state_idkeys()
+    for key, value in ss_idkeys.items():
         if isinstance(value, list):
-            widget_idkeys[key] = [
-                f"{widget_idkeys[key][i]}_{widget_no}"
-                for i in range(len(widget_idkeys[key]))
+            ss_idkeys[key] = [
+                f"{ss_idkeys[key][i]}_{widget_no}" for i in range(len(ss_idkeys[key]))
             ]
         else:
-            widget_idkeys[key] = f"{widget_idkeys[key]}_{widget_no}"
+            ss_idkeys[key] = f"{ss_idkeys[key]}_{widget_no}"
 
-    return widget_idkeys
+    return ss_idkeys
 
 
 def get_parameter_key_for_session_key(session_key):

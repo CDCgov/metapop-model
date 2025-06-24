@@ -178,9 +178,9 @@ def test_get_formats():
     ), f"Expected latent_duration string format to be {parms['latent_duration']}, but got {formats['latent_duration']}"
 
 
-def test_get_base_widget_idkeys():
-    """Test the get_base_widget_idkeys function."""
-    base_keys = get_base_widget_idkeys()
+def test_get_base_session_state_idkeys():
+    """Test the get_base_session_state_idkeys function."""
+    base_keys = get_base_session_state_idkeys()
     assert isinstance(base_keys, dict), "Expected base keys to be a dictionary"
     expected_k_i = ["k_i_0", "k_i_1", "k_i_2"]
     assert (
@@ -191,22 +191,24 @@ def test_get_base_widget_idkeys():
     parms = dict(
         k_i=["k_i_0", "k_i_1", "k_i_2", "k_i_3", "k_i_4", "k_i_5"],
     )
-    base_keys = get_base_widget_idkeys(parms)
+    base_keys = get_base_session_state_idkeys(parms)
     assert isinstance(base_keys, dict), "Expected base keys to be a dictionary"
     assert (
         base_keys["k_i"] == parms["k_i"]
     ), f"Expected k_i keys to be {parms['k_i']}, but got {base_keys['k_i']}"
 
 
-def test_get_widget_idkeys():
-    """Test the get_widget_idkeys function."""
+def test_get_session_state_idkeys():
+    """Test the get_session_state_idkeys function."""
 
-    widget_idkeys = get_widget_idkeys(5)
-    assert isinstance(widget_idkeys, dict), "Expected widget idkeys to be a dictionary"
+    session_state_idkeys = get_session_state_idkeys(5)
+    assert isinstance(
+        session_state_idkeys, dict
+    ), "Expected session state idkeys to be a dictionary"
     expected_r0 = "desired_r0_5"
     assert (
-        widget_idkeys["desired_r0"] == expected_r0
-    ), f"Expected R0 idkey to be {expected_r0}, but got {widget_idkeys['desired_r0']}"
+        session_state_idkeys["desired_r0"] == expected_r0
+    ), f"Expected R0 idkey to be {expected_r0}, but got {session_state_idkeys['desired_r0']}"
 
 
 def test_rescale_prop_vax():

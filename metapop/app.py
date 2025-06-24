@@ -44,7 +44,8 @@ from .app_helper import (
     get_step_values,
     get_helpers,
     get_formats,
-    get_widget_idkeys,
+    get_session_state_idkeys,
+    # get_widget_idkeys,
     update_intervention_parameters_from_widget,
     reset,
     add_daily_incidence,
@@ -150,30 +151,35 @@ def app(replicates=20):
         helpers = get_helpers()
         formats = get_formats()
 
-        # --- Note on the use of widget id keys ---
+        # --- Note on the use of session state keys ---
 
-        # Widget id keys are defined for each of the shared parameters and the
-        # scenarios parameters. These are used to uniquely identify each
-        # interactive element in the sidebar which allows users to edit
-        # the model parameters used for simulations.
+        # Session state id keys are defined for each of the shared parameters
+        # and the scenarios parameters. These are used to uniquely identify
+        # each interactive element which allows users to edit the model
+        # parameters used for simulations.
 
         # Each interactive element must have its own unique key which gets
-        # passed on to the Streamlit session state.
+        # passed on to the Streamlit session state for tracking.
 
         # By providing these widgets with unique keys, we ensure that the values
         # are correctly associated with the parameters they represent and the
         # values can be reset when the user clicks the reset button. Pressing
-        # the reset results in the parameters being reset to their default values
-        # by looking for these keys in the Streamlit session state.
+        # the reset results in the parameters being reset to their default values.
 
-        # If keys are not used, this means that the parameters will not be
-        # shown and modifiable by users in the sidebar panel. The No Interventions
-        # scenario parameters are not shown in the sidebar panel, so it is
-        # possible that the keys for this scenario are not used.
+        # Each session state key is mapped to a model parameter and the default
+        # value for that parameter in stored in the `parms` dictionary. When the
+        # reset button is clicked, the app finds the original values for all input
+        # elements users can modify and resets the session state value associated
+        # with the session state key.
 
-        keys0 = get_widget_idkeys(0)  # shared parameters
-        keys1 = get_widget_idkeys(1)  # scenario 1
-        keys2 = get_widget_idkeys(2)  # scenario 2
+        # If a set of session state keys are not used, this means that the
+        # parameters will not be shown and modifiable by users in the sidebar panel.
+        # The No Interventions scenario parameters are not shown in the sidebar panel,
+        # so it is possible that the keys for this scenario are not used.
+
+        session_state_keys0 = get_session_state_idkeys(0)  # shared parameters
+        session_state_keys1 = get_session_state_idkeys(1)  # scenario 1
+        session_state_keys2 = get_session_state_idkeys(2)  # scenario 2
 
         # Customize helper texts for clarity
         helpers["I0"][0] = "The model currently has a maximum of 10 initial infections."
@@ -228,7 +234,7 @@ def app(replicates=20):
             steps,
             helpers,
             formats,
-            keys0,
+            session_state_keys0,
         )
 
         # Intervention scenario and parameters
@@ -317,7 +323,7 @@ def app(replicates=20):
             steps,
             helpers,
             formats,
-            keys2,
+            session_state_keys2,
         )
 
         # create a new section for isolation and quarantine inputs for the intervention scenario
@@ -334,7 +340,7 @@ def app(replicates=20):
             steps,
             helpers,
             formats,
-            keys2,
+            session_state_keys2,
         )
 
         # This app gives users the ability to specify the proportion of people without prior immunity who will get vaccinated during an active vaccination campaign
@@ -383,7 +389,7 @@ def app(replicates=20):
                 steps,
                 helpers,
                 formats,
-                keys2,
+                session_state_keys2,
                 disabled=False,
             )
 

@@ -19,9 +19,9 @@ from .app_helper import (
     get_outcome_mapping,
     get_outcome_options,
     get_scenario_results,
+    get_session_state_idkeys,
     get_show_parameter_mapping,
     get_step_values,
-    get_widget_idkeys,
     get_widget_types,
     read_parameters,
     update_intervention_parameters_from_widget,
@@ -59,8 +59,8 @@ def advanced_app(replicates=20):
         steps = get_step_values()
         helpers = get_helpers()
         formats = get_formats()
-        keys1 = get_widget_idkeys(1)
-        keys2 = get_widget_idkeys(2)
+        keys1 = get_session_state_idkeys(1)
+        keys2 = get_session_state_idkeys(2)
 
         # order of parameters in the sidebar
         ordered_keys = [
