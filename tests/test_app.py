@@ -1,6 +1,6 @@
 import streamlit as st
 
-from metapop import advanced_app, app, app_with_table
+from metapop import advanced_app, app
 
 
 def test_app():
@@ -33,23 +33,23 @@ def test_advanced_app():
     st.stop()  # stop the app
 
 
-def test_app_with_table():
-    """Test that the app with table runs without errors."""
-    # assert that the app_with_table is callable
-    assert callable(app_with_table), "app_with_table is not callable"
+# def test_app_with_table():
+#     """Test that the app with table runs without errors."""
+#     # assert that the app_with_table is callable
+#     assert callable(app_with_table), "app_with_table is not callable"
 
-    # Assert that app_with_table() runs without raising an error
-    try:
-        # launch the app with table
-        app_with_table()
-    except Exception as e:
-        print(f"Error occurred while running app_with_table: {e}")
-        raise RuntimeError("An error occurred while running the app with table.") from e
-    st.stop()  # stop the app
+#     # Assert that app_with_table() runs without raising an error
+#     try:
+#         # launch the app with table
+#         app_with_table()
+#     except Exception as e:
+#         print(f"Error occurred while running app_with_table: {e}")
+#         raise RuntimeError("An error occurred while running the app with table.") from e
+#     st.stop()  # stop the app
 
 
 if __name__ == "__main__":
     # Run the tests
     test_app()
     test_advanced_app()
-    test_app_with_table()
+    # test_app_with_table()

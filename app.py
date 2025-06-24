@@ -38,8 +38,8 @@ if __name__ == "__main__":
     if app_version == "one_pop_app":
         import metapop.app as app
 
-    if app_version == "app_with_table":
-        import metapop.app_with_table as app
+    # if app_version == "app_with_table":
+    #     import metapop.app_with_table as app
 
     # Launch the app
     app()
