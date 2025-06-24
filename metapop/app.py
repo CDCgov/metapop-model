@@ -45,7 +45,6 @@ from .app_helper import (
     get_helpers,
     get_formats,
     get_session_state_idkeys,
-    # get_widget_idkeys,
     update_intervention_parameters_from_widget,
     reset,
     add_daily_incidence,
@@ -164,7 +163,7 @@ def app(replicates=20):
         # By providing these widgets with unique keys, we ensure that the values
         # are correctly associated with the parameters they represent and the
         # values can be reset when the user clicks the reset button. Pressing
-        # the reset results in the parameters being reset to their default values.
+        # the reset button results in the parameters being reset to their default values.
 
         # Each session state key is mapped to a model parameter and the default
         # value for that parameter in stored in the `parms` dictionary. When the
