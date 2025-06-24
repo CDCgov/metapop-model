@@ -72,7 +72,11 @@ class SEIRModel:
 
         Returns:
             tuple: A tuple containing lists of new exposed individuals (E1, E1_V, E2, E2_V)
-                   for each group.
+                   for each group. E1 represents the number of new exposed individuals moving
+                   from S to E1, E1_V represents the number of new exposed individuals who
+                   were vaccinated but failed to gain immunity moving from SV to E1_V,
+                   E2 represents the number of individuals moving from E1 to E2, and E2_V
+                   represents the number of vaccinated individuals moving from E1_V to E2_V.
         """
         # Initialize lists to hold new exposed individuals
         new_E1 = []
@@ -108,6 +112,24 @@ class SEIRModel:
         return new_E1, new_E1_V, new_E2, new_E2_V
 
     def vaccinate(self, u, t):
+        """
+        Vaccinate individuals in each group based on the vaccination uptake
+        schedule. Vaccines may fail, resulting in individuals remaining
+        susceptible or becoming exposed but no longer seeking vaccination.
+
+        Args:
+            u (list): The state vector of the system.
+            t  (int): The current time step.
+
+        Returns:
+            tuple: A tuple containing lists of new vaccinated individuals
+                   (V, SV, EV) for each group. V represents the number of
+                   individuals vaccinated, SV represents the number of
+                   vaccine failures from susceptible individuals who
+                   received vaccination, and EV represents the number of
+                   exposed individuals who received vaccination but did not
+                   mount immunity against the disease.
+        """
         new_V = []
         new_SV = []
         new_EV = []
