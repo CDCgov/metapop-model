@@ -34,6 +34,22 @@ __all__ = [
 
 
 def advanced_app(replicates=20):
+    """
+    This is a Streamlit app that illustrates the impact of layering multiple
+    intervention strategies to mitigate a measles outbreak in 3 connected
+    communities. This interactive tool allows users to see the impact of
+    layering 4 interventions: active vaccination campaign, an isolation
+    intervention, a quarantine intervention, and baseline immunity, on the size
+    of measles outbreaks following introduction of measles into different
+    connected communities.
+
+    Args:
+        replicates (int): Number of replicates to plot. Defaults to 20.
+
+    Returns:
+        None: The function runs a Streamlit app and does not return anything.
+
+    """
     st.title("Measles Outbreak Simulator")
     st.text(
         "This interactive tool illustrates the impact of vaccination and isolation on the probability and size of measles outbreaks following introduction of measles into different connected communities."
