@@ -28,6 +28,24 @@ __all__ = ["SEIRModel"]
 
 
 class SEIRModel:
+    """
+    SEIRModel class implements a SEIR model with vaccination, isolation, and
+    quarantine interventions. It simulates the dynamics of susceptible, exposed,
+    infectious, and recovered individuals across multiple groups, taking into
+    account vaccination uptake and failures due to imperfect vaccine efficacy.
+
+    The model tracks the number of individuals in each compartment for each
+    group at each time step. The model also tracks the cumulative number of
+    infections (Y) and vaccinations administered (X) for each group at each
+    time step.
+
+    Attributes:
+        parms              (dict): Parameters for the SEIR model, including transmission rates,
+                                   population sizes, and vaccination parameters.
+        groups              (int): Number of groups in the model.
+        rng (np.random.Generator): Random number generator for stochastic processes.
+    """
+
     def __init__(self, parms, seed):
         self.parms = parms
 
