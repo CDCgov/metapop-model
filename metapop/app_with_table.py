@@ -186,9 +186,17 @@ def app_with_table(replicates=20):
     interval_results2 = get_interval_results(results2, groups, interval)
 
     # rename columns for the app
-    app_column_mapping = {f"inc_{interval}": "Winc", "Y": "WCI"}
+    app_column_mapping = {
+        f"inc_{interval}": "Weekly Incidence",
+        "Y": "Weekly Cumulative Incidence",
+    }
     interval_results1 = interval_results1.rename(app_column_mapping)
     interval_results2 = interval_results2.rename(app_column_mapping)
+
+    # Rename columns in daily results for app display
+    app_column_mapping = {"Y": "Cumulative Incidence"}
+    results1 = results1.rename(app_column_mapping)
+    results2 = results2.rename(app_column_mapping)
 
     # set up the color scale
     domain = [str(i) for i in range(len(groups))]
@@ -203,7 +211,12 @@ def app_with_table(replicates=20):
             "#f78f47",  # orange
         ],
     )
-    if outcome not in ["I", "Y", "inc", "Winc", "WCI"]:
+    if outcome not in [
+        "Cumulative Incidence",
+        "Incidence",
+        "Weekly Incidence",
+        "Weekly Cumulative Incidence",
+    ]:
         print("outcome not available yet, defaulting to Y")
         outcome = "Y"
 

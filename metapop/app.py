@@ -14,6 +14,7 @@ Key Features:
 """
 
 import os
+import copy
 import importlib
 import pandas as pd
 import streamlit as st
@@ -526,9 +527,9 @@ def app(replicates=20):
             help="This number is calculated based on user input for the percentage of the non-immune population that gets vaccinated during the campaign. If the campaign starts late, the actual number of doses administered may be lower due to there being not enough eligible individuals left to vaccinate.",
         )
 
-    # Save full results for summary tables
-    fullresults1 = results1
-    fullresults2 = results2
+    # Save a copy of the full results for summary tables so that results1 and results2 can be modified for visualuzation
+    fullresults1 = copy.deepcopy(results1)
+    fullresults2 = copy.deepcopy(results2)
 
     # Extract unique groups
     groups = results1["group"].unique().to_list()
@@ -545,12 +546,25 @@ def app(replicates=20):
     interval_results2 = get_interval_results(results2, groups, interval)
 
     # Rename columns for plotting
-    app_column_mapping = {f"inc_{interval}": "Winc", "Y": "WCI"}
+    app_column_mapping = {
+        f"inc_{interval}": "Weekly Incidence",
+        "Y": "Weekly Cumulative Incidence",
+    }
     interval_results1 = interval_results1.rename(app_column_mapping)
     interval_results2 = interval_results2.rename(app_column_mapping)
 
+    # Rename columns in daily results for app display after results have been calculated
+    app_column_mapping = {"Y": "Cumulative Incidence"}
+    results1 = results1.rename(app_column_mapping)
+    results2 = results2.rename(app_column_mapping)
+
     # Default to cumulative daily incidence if outcome not available
-    if outcome not in ["Y", "inc", "Winc", "WCI"]:
+    if outcome not in [
+        "Cumulative Incidence",
+        "Incidence",
+        "Weekly Incidence",
+        "Weekly Cumulative Incidence",
+    ]:
         print("outcome not available yet, defaulting to Cumulative Daily Incidence")
         outcome = "Y"
 

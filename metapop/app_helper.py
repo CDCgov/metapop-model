@@ -362,10 +362,10 @@ def get_outcome_mapping():
     """
     # Define the mapping of outcome names to their corresponding codes
     return {
-        "Daily Incidence": "inc",
-        "Daily Cumulative Incidence": "Y",
-        "Weekly Incidence": "Winc",
-        "Weekly Cumulative Incidence": "WCI",
+        "Daily Incidence": "Incidence",
+        "Daily Cumulative Incidence": "Cumulative Incidence",
+        "Weekly Incidence": "Weekly Incidence",
+        "Weekly Cumulative Incidence": "Weekly Cumulative Incidence",
     }
 
 
@@ -1130,7 +1130,7 @@ def add_daily_incidence(results, groups):
         pl.DataFrame: The updated results DataFrame with daily incidence added.
     """
     # add a column for daily incidence
-    results = results.with_columns(pl.lit(None).alias("inc"))
+    results = results.with_columns(pl.lit(None).alias("Incidence"))
     unique_replicates = results.select("replicate").unique().to_series().to_list()
     updated_rows = []
 
@@ -1140,7 +1140,7 @@ def add_daily_incidence(results, groups):
             group_data = tempdf.filter(pl.col("group") == group)
             group_data = group_data.sort("t")
             inc = group_data["Y"] - group_data["Y"].shift(1)
-            group_data = group_data.with_columns(inc.alias("inc"))
+            group_data = group_data.with_columns(inc.alias("Incidence"))
             updated_rows.append(group_data)
 
     results = pl.concat(updated_rows, how="vertical")
@@ -1211,7 +1211,7 @@ def get_interval_results(results, groups, interval=7):
             updated_rows.append(group_data)
     interval_results = pl.concat(updated_rows)
     # drop column inc
-    interval_results = interval_results.drop("inc")
+    interval_results = interval_results.drop("Incidence")
     return interval_results
 
 
