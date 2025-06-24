@@ -854,15 +854,20 @@ def app(replicates=20):
         st.markdown(
             """
             <p style="font-size:14px;">
-            This model examines measles transmission in a population after
-            introduction of measles. This is a stochastic compartmental SVEIR model,
-            with built-in random variation and all-or-nothing vaccination.
-            We run 100 individual simulations to produce a range of possible
-            outcomes and estimates of associated uncertainty. People who are
-            immune at the beginning of the simulation, either through past
-            vaccination or previous infection, begin in the "Vaccinated"
-            compartment. Individuals who have received the vaccine but are
-            not immune (due to vaccine failure) are tracked in a separate
+            This model examines measles transmission in a population after an
+            introduction of measles. This is a stochastic compartmental SVEIR
+            model with all-or-nothing vaccination. Because the model is
+            stochastic, simulations using the same parameters can yield
+            different epidemic outcomes. We therefore run 100 individual
+            simulations to produce a range of possible outcomes and use these
+            simulations to estimate outcome uncertainty for each parameter set.
+            <br><br>
+
+            <p style="font-size:14px;">
+            People who are immune at the beginning of the simulation, either
+            through past vaccination or previous infection, begin in the
+            "Vaccinated" compartment. Individuals who have received the vaccine
+            but are not immune (due to vaccine failure) are tracked in a separate
             "Vaccinated but Susceptible" compartment, and have the same
             susceptibility as individuals in the "Susceptible" compartment.
             <br><br>
