@@ -58,6 +58,23 @@ class SEIRModel:
         self.rng = np.random.default_rng(seed)
 
     def exposed(self, u, current_susceptibles, current_vacc_fails, t):
+        """
+        Calculate the number of new exposed individuals (E1, E1_V, E2, E2_V)
+        based on the current state of the system, the number of susceptible
+        individuals, and the number of vaccine failures.
+
+        Args:
+            u                    (list): The state vector of the system.
+            current_susceptibles (list): The number of susceptible individuals for each group.
+            current_vacc_fails (list)  : The number of vaccinated individuals who failed to gain immunity
+                                         for each group.
+            t                     (int): The current time step.
+
+        Returns:
+            tuple: A tuple containing lists of new exposed individuals (E1, E1_V, E2, E2_V)
+                   for each group.
+        """
+        # Initialize lists to hold new exposed individuals
         new_E1 = []
         new_E1_V = []
         new_E2 = []
