@@ -13,8 +13,6 @@ from .app_helper import (
     get_scenario_results,
     read_parameters,
 )  # depends on sim
-
-# from .app_with_table import app_with_table  # depends on  app_helper
 from .helper import (
     Ind,
     build_vax_schedule,
@@ -65,7 +63,6 @@ __all__ = [
     "read_parameters",
     "app",
     "advanced_app",
-    # "app_with_table",
     "get_metapop_info",
     "__version__",
     "__versiondate__",

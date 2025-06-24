@@ -25,7 +25,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--app_version",
         type=str,
-        choices=["advanced_app", "one_pop_app", "app_with_table"],
+        choices=["advanced_app", "one_pop_app"],
         default="one_pop_app",
         help="Specify the app version to launch. Defaults to 'one_pop_app'.",
     )
@@ -37,9 +37,6 @@ if __name__ == "__main__":
 
     if app_version == "one_pop_app":
         import metapop.app as app
-
-    # if app_version == "app_with_table":
-    #     import metapop.app_with_table as app
 
     # Launch the app
     app()
