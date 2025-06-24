@@ -1,9 +1,8 @@
 """
 Do not edit the name of this file or change its location in the repository.
-See below for more information about how this file is used and why its name and
-location are important.
+See below for more information.
 
-Define and launch metapop apps. This file serves as the entry point for the
+This file defines and launches metapop apps. It serves as the entry point for the
 outbreak simulator application and allows users to select different versions of
 it based on their needs. This includes an advanced app, a one-population app,
 and an app with a table for parameter input. Users running the app locally can
@@ -13,10 +12,10 @@ launch it with this file or use the instructions set up in the Makefile.
 
 This file is named `app.py` and must be located in the root of the repository.
 
-This file must live in the root of the repository in order for the python-rsconnect
-package to find it as deployable content when deploying the app to
-Posit Connect (aka RConnect). This file must also be named `app.py` in order to be
-recognized by python-rsconnect for deployment.
+This file must live in this location in order for the python-rsconnect package
+to find it as deployable content when deploying the app to Posit Connect
+(aka RConnect). This file must also be named `app.py` in order to be recognized
+by python-rsconnect for deployment. Other names or locatios will not work.
 """
 
 if __name__ == "__main__":
