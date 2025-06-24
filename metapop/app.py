@@ -2,9 +2,10 @@
 """
 Streamlit app for the metapopulation measles outbreak model.
 
-This script provides an interactive web interface for simulating measles outbreaks
-under different intervention scenarios (reactive vaccination, isolation, quarantine).
-Users can adjust model parameters, run stochastic simulations, and visualize results.
+This script provides an interactive web interface for simulating measles
+outbreaks in a population under different intervention scenarios (reactive
+vaccination, isolation, quarantine). Users can adjust model parameters,
+run stochastic simulations, and visualize results.
 
 Key Features:
 - Sidebar for parameter input and scenario configuration
@@ -95,8 +96,18 @@ def app(replicates=20):
     """
     Main Streamlit app function for the measles outbreak simulator.
 
+    This is a Streamlit app that illustrates the impact of layering multiple
+    intervention strategies to mitigate a measles outbreak in a single
+    community. This interactive tool allows users to see the impact of
+    layering 4 interventions: active vaccination campaign, an isolation
+    intervention, a quarantine intervention, and baseline immunity, on the size
+    of measles outbreaks following introduction of measles into a community.
+
     Args:
-        replicates (int): Number of simulation replicates to plot for each scenario.
+        replicates (int): Number of simulation replicates to plot for each scenario. Defaults to 20.
+
+    Returns:
+        None: The function runs a Streamlit app and does not return anything.
     """
     st.set_page_config(layout="wide")
     st.title("Measles Outbreak Simulator")

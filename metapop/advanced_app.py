@@ -44,11 +44,10 @@ def advanced_app(replicates=20):
     connected communities.
 
     Args:
-        replicates (int): Number of replicates to plot. Defaults to 20.
+        replicates (int): Number of simulation replicates to plot for each scenario. Defaults to 20.
 
     Returns:
         None: The function runs a Streamlit app and does not return anything.
-
     """
     st.title("Measles Outbreak Simulator")
     st.text(
