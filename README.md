@@ -2,17 +2,17 @@
 
 ⚠️ This is a work in progress
 
-## Model features
+## Package features
 
 * Stochastic SEIRV model
-* Flexible numbers of groups (e.g., age classes or connected populations) that is changeable using the config
+* A model capable of handling flexible numbers of groups (e.g., age classes or connected populations) that is changeable using the config
 * Intervention strategies common for measles: pre-introduction vaccination, active vaccination, and quarantine and isolation of infectious populations
-* An interactive widget built in streamlit
+* Interactive outbreak simulators built in `streamlit` and using the `metapop` package to model transmission dynamics
 
 ## Getting started
 
 * Enable [poetry](https://python-poetry.org/) with `poetry install` and then start a poetry environment by activating the virtual environment: `source $(poetry env info --path)/bin/activate`
-* **Run the app locally** using Streamlit with `make run_app`. To run the advanced app with 3 connected populations, use `make run_advanced_app`.
+* **Run the one population app locally** using Streamlit with `make run_app`. To run the advanced app modeling the transmission dynamics between 3 connected populations, use `make run_advanced_app`. The advanced app is not up to date with all of the latest features in the model and may not yet have all model parameters available for users to modify.
 * Run the example in `scripts/connectivity` exploring the impact of changing connectivity patterns and initial vaccine coverage with `python scripts/connectivity/simulate.py`. This will produce output in the `output` folder. Visualization and summary statistic tables for these results can be made with `Rscript scripts/connectivity/make_plots.R`.
 * We also provide examples exploring other features in the model. The subfolder `scripts/interventions` contains an example exploring the impact of active vaccination and isolation in 3 connected populations. The subfolder `scripts/onepop` contains an example exploring these interventions in a single population.
 
@@ -58,10 +58,10 @@ graph LR
 * As a work in progress, we are working to add functionality that will allow users to give a contact matrix of their choice and model a flexible number of groups that mapped to the contact matrix.
 
 ## Local app
-You can run the app locally using Streamlit with `make run_app`. To run the advanced app with 3 connected populations, use `make run_advanced_app`.
+Users can run an interactive application of the metapop model locally using Streamlit with `make run_app` at the command line. This will launch an application that models transmission dynamics of measles introductions into a single well-mixed (or homogeneous) population. A prototype of this application is available to model the transmission dynamics of 3 connected populations, though it is still in beta mode. To run this version, use `make run_advanced_app` at the command line.
 
 ## Stlite app
-You can run the app in-browser only based on [stlite](https://github.com/whitphx/stlite).  Within the repo, you can load `stlite/index.html` directly in your browser.  To build a sharable version, run `make build_stlite_app` which will create `stlite/measles_sim.html` which can be shared and requires the internet but no access to internal resources nor to a server.  Note that `pygriddler` required removal of `progressbar` for compatibility with `pyodide`/`stlite`.
+You can run the app in-browser only based on [stlite](https://github.com/whitphx/stlite).  Within the repo, you can load `stlite/index.html` directly in your browser.  To build a sharable version of the one population app, run `make build_stlite_app` which will create `stlite/measles_sim.html` which can be shared and requires the internet but no access to internal resources nor to a server.  Note that `pygriddler` required removal of `progressbar` for compatibility with `pyodide`/`stlite`.
 
 ## Project Admin
 * Paige Miller, yub1@cdc.gov (CDC/IOD/ORR/CFA)
