@@ -250,17 +250,17 @@ def construct_beta(parms):
 
 def initialize_population(steps, groups, parms):
     """
-        Initialize the population arrays and the initial state based on the
-        provided parameters.
+    Initialize the population arrays and the initial state based on the
+    provided parameters.
 
-        Args:
-            steps  (int): The number of time steps.
-            groups (int): The number of population groups.
-            parms (dict): A dictionary containing the parameters, including:
-                - pop_sizes                (list or np.array): The population sizes for each group.
-                - initial_vaccine_coverage (list or np.array): The initial vaccine coverage for each group
-                - vaccine_efficacy_2_dose             (float): The vaccine efficacy after two doses.
-                - I0                       (list or np.array): The initial number of infected individuals in each group.
+    Args:
+        steps  (int): The number of time steps.
+        groups (int): The number of population groups.
+        parms (dict): A dictionary containing the parameters, including:
+            - pop_sizes                (list or np.array): The population sizes for each group.
+            - initial_vaccine_coverage (list or np.array): The initial vaccine coverage for each group
+            - vaccine_efficacy_2_dose             (float): The vaccine efficacy after two doses.
+            - I0                       (list or np.array): The initial number of infected individuals in each group.
 
     Returns:
         tuple: A tuple containing the initialized arrays:
@@ -324,7 +324,13 @@ def get_infected(u, I_indices, groups, parms, t):
         u         (list): The state of the system.
         I_indices (list): The indices of the I compartments.
         groups     (int): The number of groups.
-        parms     (dict): Dictionary containing model parameters
+        parms     (dict): A dictionary containing model parameters:
+            - symptomatic_isolation_start_day     (int): The day when symptomatic isolation starts.
+            - symptomatic_isolation_duration_days (int): The duration of symptomatic isolation in days.
+            - pre_rash_isolation_start_day        (int): The day when pre-rash isolation starts.
+            - pre_rash_isolation_duration_days    (int): The duration of pre-rash isolation in days.
+            - isolation_success                 (float): The success rate of isolation.
+            - pre_rash_isolation_success        (float): The success rate of pre-rash isolation.
         t          (int): The current time step.
 
     Returns:

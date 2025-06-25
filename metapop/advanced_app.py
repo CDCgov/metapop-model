@@ -41,8 +41,8 @@ def advanced_app(replicates=20):
     layering 3 active interventions during the outbreak: a vaccination campaign,
     an isolation intervention, and a quarantine intervention, as well as
     baseline immunity in the populations acquired prior to the outbreak. The
-    app simulates the spread of measles following introduction in 3 connected
-    communities and visualizes outbreak size and incidence in the 3 communities
+    app simulates the spread of measles following introduction in the communities
+    and visualizes outbreak size and incidence in the 3 communities
     under different scenarios.
 
     Args:

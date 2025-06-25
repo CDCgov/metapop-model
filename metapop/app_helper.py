@@ -941,7 +941,7 @@ def get_formats(parms=None):
 def get_base_session_state_idkeys(parms=None):
     """
     Get the base session state ID keys for the app parameters. This method
-    returns a dictionary of session state ID keys for the app parameters. 
+    returns a dictionary of session state ID keys for the app parameters.
     If a parms dictionary is provided, it will update the defaults with the
     provided values.
 
@@ -989,15 +989,27 @@ def get_base_session_state_idkeys(parms=None):
     return ss_idkeys
 
 
-def get_session_state_idkeys(widget_no):
+def get_session_state_idkeys(num):
+    """
+    Get the session state ID keys for the app parameters, appending a number
+    to each key to ensure uniqueness across multiple session state widgets
+    with similar parameters.
+
+    Args:
+        num (int): The number to append to each key.
+
+    Returns:
+        dict: A dictionary of session state ID keys for the app parameters with
+        a number appended for uniqueness.
+    """
     ss_idkeys = get_base_session_state_idkeys()
     for key, value in ss_idkeys.items():
         if isinstance(value, list):
             ss_idkeys[key] = [
-                f"{ss_idkeys[key][i]}_{widget_no}" for i in range(len(ss_idkeys[key]))
+                f"{ss_idkeys[key][i]}_{num}" for i in range(len(ss_idkeys[key]))
             ]
         else:
-            ss_idkeys[key] = f"{ss_idkeys[key]}_{widget_no}"
+            ss_idkeys[key] = f"{ss_idkeys[key]}_{num}"
 
     return ss_idkeys
 

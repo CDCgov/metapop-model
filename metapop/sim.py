@@ -151,7 +151,15 @@ def simulate(parms, seed):
     random number generator seed.
 
     Args:
-        parms (dict): A dictionary with model parameters for the simulation.
+        parms (dict): A dictionary with model parameters for the simulation, including:
+            - latent_duration     (float): Duration of the latent period.
+            - infectious_duration (float): Duration of the infectious period.
+            - n_e_compartments      (int): Number of exposed compartments.
+            - n_i_compartments      (int): Number of infectious compartments.
+            - n_groups              (int): Number of groups in the population.
+            - tf                    (int): Total time steps for the simulation.
+            - n_replicates          (int): Number of replicates to run.
+
         seed  (list): A list containing the seed for the random number generator.
 
     Returns:
