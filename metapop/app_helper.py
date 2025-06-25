@@ -656,7 +656,9 @@ def app_editors(
 
 def get_widget_types(widget_types=None):
     """
-    Get the types of widgets for each of the app parameters.
+    Get the types of widgets for each of the app parameters. This method returns
+    a dictionary of widget types for the app parameters. If a widget_types
+    dictionary is provided, it will update the defaults with the provided values.
 
     Args:
         widget_types (dict): Optional widget types dictionary.
@@ -700,7 +702,9 @@ def get_widget_types(widget_types=None):
 
 def get_min_values(parms=None):
     """
-    Get the minimum values for the app parameters.
+    Get the minimum values for the app parameters. This method returns a
+    dictionary of minimum values for the app parameters. If a parms dictionary
+    is provided, it will update the defaults with the provided values.
 
     Args:
         parms (dict): Optional parameters dictionary.
@@ -742,7 +746,9 @@ def get_min_values(parms=None):
 
 def get_max_values(parms=None):
     """
-    Get the maximum values for the app parameters.
+    Get the maximum values for the app parameters. This method returns a
+    dictionary of maximum values for the app parameters. If a parms dictionary
+    is provided, it will update the defaults with the provided values.
 
     Args:
         parms (dict): Optional parameters dictionary.
