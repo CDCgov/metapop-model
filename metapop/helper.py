@@ -423,7 +423,7 @@ def rate_to_frac(rate):
     Calculate the fraction of transitions based on the rate
 
     Args:
-        rate (float): The rate
+        rate (float): The rate parameter for transitions.
 
     Returns:
         float: The fraction that will transition.
@@ -433,13 +433,14 @@ def rate_to_frac(rate):
 
 def time_to_rate(duration):
     """
-    Calculate the rate parameters of transitions based on the length of time in compartment
+    Calculate the rate parameter of a transition based on the mean length of
+    time spent in compartment.
 
     Args:
-        duration (float): The duration of time in compartment
+        duration (float): The mean duration of time in compartment
 
     Returns:
-        float: The rate parameter
+        float: The rate parameter.
     """
     return 1.0 / duration
 
