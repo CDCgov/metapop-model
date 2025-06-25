@@ -76,7 +76,7 @@ def get_time_array(parms):
     Get the time array for the simulation based on the total time and time step.
 
     Args:
-        parms (dict): The parameters dictionary containing 'tf' (total time)
+        parms (dict): The parameters dictionary containing 'tf' (total time).
 
     Returns:
         np.ndarray: An array of time steps.
@@ -106,20 +106,20 @@ def vaccinate_on_day(
     vaccination_uptake_schedule,
 ):
     """
-    Check if vaccination should occur on the current day and update
-    states if so. No other transitions occur in this function.
+    Check if vaccination should occur on the current day and update states if so.
+    No other transitions occur in this function.
 
     Args:
         model: The SEIR model instance.
-        u: The current state of the population.
-        t: The current time step.
-        groups: The number of groups in the population.
-        S, V, SV, E1, E2, E1_V, E2_V, I1, I2, R, Y, X: The population arrays to be updated. Y is a infection counter (counted when they become infectious I1). X is vaccine uptake counter.
-        vaccination_uptake_schedule: A schedule indicating when vaccinations occur.
+        u       (array): The initial state.
+        t_array (array): The time array.
+        steps     (int): The number of time steps.
+        groups    (int): The number of groups.
+        S, V, SV, E1, E2, E1_V, E2_V, I1, I2, R, Y, X: The population arrays to be updated. Y is a infection counter (counted when they become infectious I1). X is vaccination uptake counter.
+        vaccination_uptake_schedule (dict): A schedule indicating when vaccinations occur.
 
     Returns:
         S, V, SV, E1, E2, E1_V, E2_V, I1, I2, R, Y, X, u
-
     """
     if t in vaccination_uptake_schedule:
         new_vaccinated, new_vaccine_failures, new_exposed_vaccinated = model.vaccinate(
