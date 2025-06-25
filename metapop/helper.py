@@ -216,15 +216,15 @@ def construct_beta(parms):
     Construct the scaled beta matrix based on the desired R0.
 
     Args:
-        parms (dict): Dictionary containing the parameters, including:
-            - k_i (float): Total per capita contacts per group.
-            - k_g1 (float): Contacts between the general population and subpopulation 1.
-            - k_g2 (float): Contacts between the general population and subpopulation 2.
-            - k_21 (float): Contacts between subpopulation 1 and subpopulation 2.
-            - gamma (float): The recovery rate.
-            - pop_sizes (list or np.array): The population sizes of each group.
-            - n_i_compartments (int): The number of infectious compartments.
-            - desired_r0 (float): The desired basic reproduction number (R0).
+        parms      (dict): A dictionary containing the parameters, including:
+        k_i       (array): The total number of contacts per person per day for each group.
+        k_g1      (float): The number of contacts from subpop1 to people in the general population.
+        k_g2      (float): The number of contacts from subpop2 to people in the general population.
+        k_21      (float): The number of contacts from subpop1 to people in subpop2.
+        gamma    (float): The recovery rate.
+        pop_sizes (array): The population sizes of each group.
+        n_i_compartments (int): The number of infectious compartments.
+        desired_r0 (float): The desired basic reproduction number (R0).
 
     Returns:
         np.array: The scaled beta matrix.
