@@ -402,6 +402,10 @@ def calculate_foi(beta, I_g, pop_sizes, target_group):
     """
     Calculate the force of infection (FOI) for a target group.
 
+    See [docs/defining_beta.md](https://github.com/cdcent/metapop-model/blob/main/docs/defining_beta.md)
+    for a detailed explanation of how transmission and the force of infection
+    is calculated in this model.
+
     Args:
         beta      (np.array): The contact matrix.
         I_g       (np.array): The number of infected individuals in each group.
@@ -564,9 +568,9 @@ def vaccinate_groups(groups, u, t, vaccination_uptake_schedule, parms):
     Returns:
         np.array: Number of susceptibles successfully vaccinated on that day
                   for each group (only those in vaccinated_group).
-        np.array: Number of susceptibles unsuccessfully vaccinated on that day
-                  for each group (only those in vaccinated_group), individuals
-                  remain susceptible but do not seek vaccination again.
+        np.array: Number of susceptibles vaccinated that result in vaccine failure
+                  on that day for each group (only those in vaccinated_group),
+                  individuals remain susceptible but do not seek vaccination again.
         np.array: Number of doses administered to exposed individuals on that
                   day for each group (only those in vaccinated_group).
     """
