@@ -524,26 +524,31 @@ def app_editors(
     disabled=False,
 ):
     """
-    Create the sidebar for editing parameters.
+    Create the a Streamlit app section allowing users to modify or edit model
+    parameters for a scenario. The section is created within the provided
+    Streamlit element. This method also generates a new copy of the parameters
+    dictionary with user-modified values and returns it.
 
     Args:
-        element (st container object): The Streamlit element to place the sidebar in.
+        element (st container object): The Streamlit element to place the widgets in.
         scenario_name           (str): The name of the scenario.
-        parms                  (dict): The parameters to edit.
-        ordered_keys           (list): An ordered list of the parameters to edit.
-        list_keys              (list): The keys of the parameters that are lists.
-        widget_types           (dict): The types of widgets for the parameters.
+        parms                  (dict): A dictionary of parameters to modify.
+        ordered_keys           (list): An ordered list of the parameters to create widgets for within the Streamlit element.
+        list_keys              (list): The keys of the parameters that have list values.
+        widget_types           (dict): The types of widget or user interface for each parameter.
         show_parameter_mapping (dict): The mapping of parameter names to display names.
         min_values             (dict): The minimum values for the parameters.
         max_values             (dict): The maximum values for the parameters.
         steps                  (dict): The step sizes for the parameters.
         helpers                (dict): The help text for the parameters.
         formats                (dict): The formats for the parameters.
-        element_keys           (dict): The keys for the Streamlit elements.
+        element_keys           (dict): The keys for the Streamlit elements. These are also known as session state keys.
         disabled               (bool): Whether the widgets should be disabled. Defaults to False.
 
     Returns:
-        edited_parms: The edited parameters.
+        edited_parms: A copy of the parms dictionary with user modified values.
+        This method also creates a Streamlit section with widgets for users to
+        modify values for each parameter specified in `ordered_keys`.
     """
     edited_parms = copy.deepcopy(parms)
 
