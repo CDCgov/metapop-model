@@ -196,11 +196,12 @@ def calculate_beta_factor(r0_desired, current_r0):
 
 def get_r0_one_group(k, gamma):
     """
-    Calculate the basic reproduction number (R0) number when there's only one group.
+    Calculate the basic reproduction number (R0) number when there is only one
+    population group.
 
     Args:
-        k (list): Contacts per day (unscaled)
-        gamma (float): The recovery rate.
+        k (list or np.array): Contacts per day (unscaled)
+        gamma        (float): The recovery rate.
 
     Returns:
         float: R0, contacts per day / recovery rate
