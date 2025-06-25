@@ -1326,7 +1326,7 @@ def create_chart(
         height               (int): Height of the chart. Defaults to 300.
 
     Returns:
-            alt.Chart: The Altair chart object.
+        alt.Chart: The Altair chart object.
     """
     chart = (
         alt.Chart(alt_results, title=outcome_option)
@@ -1357,7 +1357,7 @@ def calculate_outbreak_summary(combined_results, threshold):
 
     Args:
         combined_results (pl.DataFrame): The combined results DataFrame.
-        threshold (int): The threshold for filtering replicates.
+        threshold                 (int): The threshold for filtering replicates.
 
     Returns:
         pl.DataFrame: A DataFrame containing the outbreak summary.
@@ -1391,8 +1391,8 @@ def get_table(combined_results, IHR, rng):
 
     Args:
         combined_results (pl.DataFrame): The combined results DataFrame.
-        IHR (float): The infection hospitalization rate.
-        rng (np.random.Generator): Random number generator for binomial sampling.
+        IHR                     (float): The infection hospitalization rate.
+        rng       (np.random.Generator): Random number generator for binomial sampling.
 
     Returns:
         pl.DataFrame: A DataFrame containing the hospitalization summary.
@@ -1464,13 +1464,16 @@ def get_median_trajectory_from_episize(
     results: pl.DataFrame, base_group: int = 0
 ) -> pl.DataFrame:
     """
-    Get the trajectory of the replicate whose final value of R in the `base_group` is closest to the median in that group.
+    Get the trajectory of the replicate whose final value of R in the
+    `base_group` is closest to the median in that group.
 
     Args:
-        results (pl.DataFrame): The simulation results DataFrame from `get_scenario_results`.
+        results (pl.DataFrame): A Polars DataFrame containing simulation results from `get_scenario_results` with columns including 'group', 'replicate', 'I' (infected count), and 't' (time).
+        base_group (int, optional): The group identifier to filter results by. Defaults to 0.
 
     Returns:
-        int: The replicate identifier whose final size is closest to the median final size across all replicates in the specified group.
+        int: The replicate identifier whose final size is closest to the median
+        final size across all replicates in the specified group.
     """
     # Get the maximum time point
     max_t = results["t"].max()
@@ -1500,14 +1503,16 @@ def get_median_trajectory_from_peak_time(
     results: pl.DataFrame, base_group: int = 0
 ) -> int:
     """
-    Selects the replicate whose infection peak timing is closest to the median peak time across all replicates for a given group.
+    Selects the replicate whose infection peak timing is closest to the median
+    peak time across all replicates for a given group.
 
     Args:
-        results (pl.DataFrame): A Polars DataFrame containing simulation results with columns including 'group', 'replicate', 'I' (infected count), and 't' (time).
+        results (pl.DataFrame): A Polars DataFrame containing simulation results from `get_scenario_results` with columns including 'group', 'replicate', 'I' (infected count), and 't' (time).
         base_group (int, optional): The group identifier to filter results by. Defaults to 0.
 
     Returns:
-        int: The replicate identifier whose peak infection time is closest to the median peak time across all replicates in the specified group.
+        int: The replicate identifier whose peak infection time is closest to the
+        median peak time across all replicates in the specified group.
     """
     filtered_results = (
         results.filter(pl.col("group").cast(pl.UInt32) == pl.lit(base_group))
@@ -1537,12 +1542,13 @@ def totals_same_by_ks(
     combined_results: pl.DataFrame, scenario_names: list, p_threshold: float = 0.05
 ) -> bool:
     """
-    Perform a 2 sample Kolmogorov-Smirnov test to compare the total cases between two scenarios.
+    Perform a 2 sample Kolmogorov-Smirnov test to compare the total cases
+    between two scenarios.
 
     Args:
         combined_results (pl.DataFrame): The combined results DataFrame.
-        scenario_names (list): List of scenario name labels created by the simulation.
-        p_threshold (float): The p-value threshold for determining indistinguishable distributions. Default is 0.5.
+        scenario_names           (list): List of scenario name labels created by the simulation.
+        p_threshold             (float): The p-value threshold for determining indistinguishable distributions. Default is 0.5.
         - In general, we want to be selective about when to throw the error, as similar, but different, distributions
             may not reject the null hyppothesis but still be visually different for low sample sizes.
 
