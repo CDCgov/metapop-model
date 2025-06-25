@@ -32,7 +32,7 @@ __all__ = [
 ]
 
 
-# run a single simulation of the SEIR model given a model instance
+# Run a single simulation of the SEIR model given a model instance.
 def run_model(
     model, u, t_array, steps, groups, S, V, SV, E1, E2, E1_V, E2_V, I1, I2, R, Y, X
 ):
@@ -41,11 +41,11 @@ def run_model(
 
     Args:
         model: The SEIR model instance.
-        u: The initial state.
-        t_array: The time array.
-        steps: The number of time steps.
-        groups: The number of groups.
-        S, V, SV, E1, E2, E1_V, E2_V, I1, I2, R, Y, X: The population arrays to be updated. Y is a infection counter (counted when they become infectious I1). X is vaccine uptake counter.
+        u       (array): The initial state.
+        t_array (array): The time array.
+        steps     (int): The number of time steps.
+        groups    (int): The number of groups.
+        S, V, SV, E1, E2, E1_V, E2_V, I1, I2, R, Y, X: The population arrays to be updated. Y is a infection counter (counted when they become infectious I1). X is vaccination uptake counter.
 
     Returns:
         S, V, SV, E1, E2, E1_V, E2_V, I1, I2, R, Y, X, u
