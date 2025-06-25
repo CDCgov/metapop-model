@@ -28,21 +28,35 @@ __all__ = [
 
 class Ind(Enum):
     """
-    Enum for the indices of the compartments in the model.
+    Enum class for the indices of the compartments in the model.
+
+    States:
+        S: Susceptible
+        V: Vaccinated
+        SV: Susceptible and vaccinated
+        E1: Exposed 1 (first stage of exposure)
+        E2: Exposed 2 (second stage of exposure)
+        E1_V: Exposed 1 and vaccinated
+        E2_V: Exposed 2 and vaccinated
+        I1: Infected and infectious, pre-rash
+        I2: Infected and infectious, symptomatic and rash-onset
+        R: Recovered
+        Y: Cumulative incidence for tracking purposes
+        X: Cumulative vaccinations for tracking purposes
     """
 
     S = 0  # Susceptible
     V = 1  # Vaccinated
     SV = 2  # Susceptible and vaccinated
-    E1 = 3  # Exposed 1
-    E2 = 4  # Exposed 2
-    E1_V = 5  # Exposed and vaccinated 1
-    E2_V = 6  # Exposed and vaccinated 2
+    E1 = 3  # Exposed 1, first stage of exposure
+    E2 = 4  # Exposed 2, second stage of exposure
+    E1_V = 5  # Exposed 1 and vaccinated
+    E2_V = 6  # Exposed 2 and vaccinated
     I1 = 7  # Infected and infectious, pre-rash
-    I2 = 8  # Infected and infectious, symptomatic
+    I2 = 8  # Infected and infectious, symptomatic and rash-onset
     R = 9  # Recovered
-    Y = 10  # Tracking
-    X = 11  # Other states (e.g., isolated)
+    Y = 10  # Cumulative incidence for tracking purposes
+    X = 11  # Cumulative vaccinations for tracking purposes
 
     @classmethod
     def max_value(cls):
@@ -61,17 +75,25 @@ class Ind(Enum):
 
 def get_percapita_contact_matrix(parms):
     """
-    Calculate the per capita contact matrix based on the total contacts, average per capita degrees per population, and the population sizes for a 3-group population.
+    Calculate the per capita contact matrix based on the total contacts,
+    average per capita degrees per population, and the population sizes for a
+    3 group population.
 
-    In this model we assume the 3-group population is a general population, subpop1, and subpop2, where subpop1 and subpop2 are smaller than the general population. The matrix is defined by the total per capita degree per group (k_i), the out degree from subpop1 to the general population, the out degree from subpop2 to the general population, and the out degree from subpop1 to subpop2.
+    In this model we assume the 3 group population represents a general
+    population, a subpop1, and a subpop2, where subpop1 and subpop2 are smaller
+    than the general population. The matrix is defined by the total per capita
+    degree per group (k_i), the out degree from subpop1 to the general
+    population, the out degree from subpop2 to the general population, and the
+    out degree from subpop1 to subpop2. See `defining_beta.md` in the docs for
+    a detailed explanation of the per capita contact matrix definition.
 
     Args:
-        parms (dict): Dictionary containing the parameters, including:
-        k_i (float): Contacts total
-        k_g1 (float): contacts general and sub pop 1
-        k_21 (float): contacts between sub pop 1 and 2
-        k_g2 (float): contacts general and sub pop 2
-        pop_sizes (array): population sizes of each group
+        parms      (dict): A dictionary containing the parameters, including:
+        k_i       (array): The total number of contacts per person per day for each group.
+        k_g1      (float): The number of contacts from subpop1 to people in the general population.
+        k_g2      (float): The number of contacts from subpop2 to people in the general population.
+        k_21      (float): The number of contacts from subpop1 to people in subpop2.
+        pop_sizes (array): The population sizes of each group.
 
     Returns:
         np.array: The per capita contact matrix.
