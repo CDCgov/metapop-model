@@ -74,9 +74,9 @@ class SEIRModel:
             tuple: A tuple containing lists of new exposed individuals (new_E1, new_E1_V, new_E2, new_E2_V)
                    for each group. new_E1 represents the number of new exposed individuals moving
                    from S to E1, new_E1_V represents the number of new exposed individuals who
-                   were vaccinated but failed to gain immunity moving from SV to E1_V,
+                   were vaccinated (but failed to gain immunity) moving from SV to E1_V,
                    new_E2 represents the number of individuals moving from E1 to E2, and new_E2_V
-                   represents the number of vaccinated individuals moving from E1_V to E2_V.
+                   represents the number of exposed but vaccinated individuals moving from E1_V to E2_V.
         """
         # Initialize lists to hold new exposed individuals
         new_E1 = []
