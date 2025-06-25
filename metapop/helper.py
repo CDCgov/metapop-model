@@ -33,16 +33,16 @@ class Ind(Enum):
     States:
         S: Susceptible
         V: Vaccinated
-        SV: Susceptible and vaccinated
+        SV: Susceptible and vaccinated with vaccine failure
         E1: Exposed 1 (first stage of exposure)
         E2: Exposed 2 (second stage of exposure)
-        E1_V: Exposed 1 and vaccinated
-        E2_V: Exposed 2 and vaccinated
+        E1_V: Exposed 1 and vaccinated with vaccine failure
+        E2_V: Exposed 2 and vaccinated with vaccine failure
         I1: Infected and infectious, pre-rash
         I2: Infected and infectious, symptomatic and rash-onset
         R: Recovered
-        Y: Cumulative incidence for tracking purposes
-        X: Cumulative vaccinations for tracking purposes
+        Y: Cumulative incidence counter variable
+        X: Cumulative vaccination counter variable
     """
 
     S = 0  # Susceptible
@@ -50,13 +50,13 @@ class Ind(Enum):
     SV = 2  # Susceptible and vaccinated
     E1 = 3  # Exposed 1, first stage of exposure
     E2 = 4  # Exposed 2, second stage of exposure
-    E1_V = 5  # Exposed 1 and vaccinated
-    E2_V = 6  # Exposed 2 and vaccinated
+    E1_V = 5  # Exposed 1 and vaccinated with vaccine failure
+    E2_V = 6  # Exposed 2 and vaccinated with vaccine failture
     I1 = 7  # Infected and infectious, pre-rash
     I2 = 8  # Infected and infectious, symptomatic and rash-onset
     R = 9  # Recovered
-    Y = 10  # Cumulative incidence for tracking purposes
-    X = 11  # Cumulative vaccinations for tracking purposes
+    Y = 10  # Cumulative incidence counter variable
+    X = 11  # Cumulative vaccination counter variable
 
     @classmethod
     def max_value(cls):
@@ -81,11 +81,12 @@ def get_percapita_contact_matrix(parms):
 
     In this model we assume the 3 group population represents a general
     population, a subpop1, and a subpop2, where subpop1 and subpop2 are smaller
-    than the general population. The matrix is defined by the total per capita
-    degree per group (k_i), the out degree from subpop1 to the general
-    population, the out degree from subpop2 to the general population, and the
-    out degree from subpop1 to subpop2. See `defining_beta.md` in the docs for
-    a detailed explanation of the per capita contact matrix definition.
+    than and distinct from the general population. The matrix is defined by the
+    total per capita degree per group (k_i), the out degree from subpop1 to the
+    general population, the out degree from subpop2 to the general population,
+    and the out degree from subpop1 to subpop2. See
+    [docs/defining_beta.md](https://github.com/cdcent/metapop-model/blob/main/docs/defining_beta.md)
+    for a detailed explanation of the per capita contact matrix definition.
 
     Args:
         parms      (dict): A dictionary containing the parameters, including:
