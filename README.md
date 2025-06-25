@@ -22,13 +22,20 @@
 
 * The model has the following compartments:
   * S: Susceptible
-  * E1: Exposed 1
-  * E2: Exposed 2
-  * I1: Infectious 1
-  * I2: Infectious 2
-  * R: Recovered
   * V: Vaccinated
   * SV: Susceptible, but vaccinated
+  * E1: Exposed 1
+  * E2: Exposed 2
+  * E1_V: Exposed 1 and vaccinated
+  * E2_V: Exposed 2 and vaccinated
+  * I1: Infected and infectious, pre-rash
+  * I2: Infected and infectious, symptomatic with rash
+  * R: Recovered
+  * Y: Tracks cumulative infections
+  * X: Tracks cumulative vaccinations administered
+
+We model two exposed compartments and two infectious compartments to reduce variation in the incubation and infectious periods and to facilitate modeling interventions which are deployed at particular times during the infection progression.
+
 
 ```mermaid
 graph LR
@@ -42,12 +49,15 @@ graph LR
     a --> | 2 dose success |g(Vaccinated)
     a --> | 1 dose failure |h(Susceptible, but vaccinated)
     a --> | 2 dose failure |h
-    h --> |FOI| b
+    h --> |FOI| i(Vaccinated Exposed 1)
+    i --> |"$$\frac{\sigma}{2}$$"|j(Vaccinated Exposed 2)
+    j --> |"$$\frac{\sigma}{2}$$"|d
+
 ```
 
 * Modeled interventions:
   * Pre-introduction vaccination: Vaccination of susceptible individuals before the introduction of the disease. This is modeled as a proportion of the population that is vaccinated with 2 doses of MMR vaccine. Users can specify the efficacy of 2 doses of MMR vaccine; current data put this estimate at 97% efficacy [(Measles (Rubeola) Factsheet | CDC)](https://www.cdc.gov/measles/vaccines/index.html?CDC_AA_refVal=https%3A%2F%2Fwww.cdc.gov%2Fvaccines%2Fvpd%2Fmmr%2Fpublic%2Findex.html).
-  * Active vaccination: Vaccination of susceptible individuals after the introduction of the disease. This is modeled as a proportion of the population that is vaccinated with 1 dose of MMR vaccine. Users can specify the timing of the vaccination campaign and the proportion of the population that is vaccinated. Users can also specify the efficacy of 1 dose of MMR vaccine; current data put this estimate at 93% efficacy [(Measles (Rubeola) Factsheet | CDC)](https://www.cdc.gov/measles/vaccines/index.html?CDC_AA_refVal=https%3A%2F%2Fwww.cdc.gov%2Fvaccines%2Fvpd%2Fmmr%2Fpublic%2Findex.html)
+  * Active vaccination: Vaccination of susceptible individuals after the introduction of the disease. This is modeled as a proportion of the susceptible population that is vaccinated with 1 dose of MMR vaccine over the vaccination campaign. Users can specify the timing of the vaccination campaign and the proportion of the susceptible population that is vaccinated. Users can also specify the efficacy of 1 dose of MMR vaccine; current data put this estimate at 93% efficacy [(Measles (Rubeola) Factsheet | CDC)](https://www.cdc.gov/measles/vaccines/index.html?CDC_AA_refVal=https%3A%2F%2Fwww.cdc.gov%2Fvaccines%2Fvpd%2Fmmr%2Fpublic%2Findex.html). We assume that people will get vaccinated once in the active vaccination campaign, but the vaccination may not be successful in conferring immunity. By tracking them, we can model these dynamics more accurately and model the administration of vaccines only to people who have not yet received a vaccine. We assume that both susceptible and exposed individuals who are not yet infectious are eligible to get vaccinated during the vaccination campaign. We also assume that exposed individuals are not yet aware of their exposure status and so they are equally likely to seek vaccination. After vaccination, only susceptible individuals may become immune, and we allow for the possibility of vaccine failure (SV). Exposed individuals remain in the exposed state and continue with infection progression as normal. The number of doses administered may be lower than the number of doses scheduled if by the time of the campaign, the daily dose rate scheduled exceeds the number of individuals eligible for vaccination or if the vaccination schedule extends beyond the simulation.
   * Quarantine and isolation: Quarantine is modeled as a proportion of pre-symptomatic infectious individuals that are isolated. Isolation is modeled as a proportion of symptomatic infectious individuals that are isolated. Users can specify the timing of the quarantine and isolation campaigns and the proportion of the population that is quarantined or isolated. Users can also specify the efficacy of quarantine and isolation.
 
 ## Running with a flexible number of compartments
@@ -67,7 +77,6 @@ You can run the app in-browser only based on [stlite](https://github.com/whitphx
 * Paige Miller, yub1@cdc.gov (CDC/IOD/ORR/CFA)
 * Theresa Sheets, utg8@cdc.gov (CDC/IOD/ORR/CFA)
 * Will Koval, ad71@cdc.gov (CDC/IOD/ORR/CFA)
-* Beau Bruce, lue7@cdc.gov (CDC/IOD/ORR/CFA)
 * Dina Mistry, uqx8@cdc.gov (CDC/IOD/ORR/CFA)
 * Beau B. Bruce, lue7@cdc.gov (CDC/IOD/ORR/CFA) for the [stlite](https://github.com/whitphx/stlite) version
 

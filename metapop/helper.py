@@ -34,10 +34,10 @@ class Ind(Enum):
     S = 0  # Susceptible
     V = 1  # Vaccinated
     SV = 2  # Susceptible and vaccinated
-    E1 = 3  # Exposed, pre-symptomatic
-    E2 = 4  # Exposed, post-symptomatic
-    E1_V = 5  # Exposed, pre-symptomatic, vaccinated
-    E2_V = 6  # Exposed, post-symptomatic, vaccinated
+    E1 = 3  # Exposed 1
+    E2 = 4  # Exposed 2
+    E1_V = 5  # Exposed and vaccinated 1
+    E2_V = 6  # Exposed and vaccinated 2
     I1 = 7  # Infected and infectious, pre-rash
     I2 = 8  # Infected and infectious, symptomatic
     R = 9  # Recovered
