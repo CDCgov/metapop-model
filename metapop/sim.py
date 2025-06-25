@@ -146,6 +146,18 @@ def vaccinate_on_day(
 
 
 def simulate(parms, seed):
+    """
+    Run a single simulation of the SEIR model with the given parameters and
+    random number generator seed.
+
+    Args:
+        parms (dict): A dictionary with model parameters for the simulation.
+        seed  (list): A list containing the seed for the random number generator.
+
+    Returns:
+        pl.DataFrame: A polars DataFrame containing the simulation results.
+    """
+
     #### Set up rate params
     parms["sigma"] = time_to_rate(parms["latent_duration"])
     parms["gamma"] = time_to_rate(parms["infectious_duration"])
@@ -228,10 +240,12 @@ def simulate_replicates(parameter_sets, simulate_fn=simulate):
     Runs multiple replicates of the SEIR model for a grid of parameter sets.
     A unique seed is generated for each replicated based on a base seed,
     a stable hash of the parameter set, and the replicate index.
+
     Args:
         parameter_sets (Sequence[dict]): A sequence containing the parameters for the simulation.
-            Parameter sets must include 'n_replicates' and 'seed'.
+                                         Parameter sets must include 'n_replicates' and 'seed'.
         simulate_fn (function): The function to run the simulation. Defaults to `simulate`.
+
     Returns:
         inner_simulate_replicates (function): A function that takes a parameter set and returns the simulation results.
     """
