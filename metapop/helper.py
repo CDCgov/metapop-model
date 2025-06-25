@@ -216,15 +216,15 @@ def construct_beta(parms):
     Construct the scaled beta matrix based on the desired R0.
 
     Args:
-        parms      (dict): A dictionary containing the parameters, including:
-        k_i       (array): The total number of contacts per person per day for each group.
-        k_g1      (float): The number of contacts from subpop1 to people in the general population.
-        k_g2      (float): The number of contacts from subpop2 to people in the general population.
-        k_21      (float): The number of contacts from subpop1 to people in subpop2.
-        gamma    (float): The recovery rate.
-        pop_sizes (array): The population sizes of each group.
+        parms           (dict): A dictionary containing the parameters, including:
+        k_i            (array): The total number of contacts per person per day for each group.
+        k_g1           (float): The number of contacts from subpop1 to people in the general population.
+        k_g2           (float): The number of contacts from subpop2 to people in the general population.
+        k_21           (float): The number of contacts from subpop1 to people in subpop2.
+        gamma          (float): The recovery rate.
+        pop_sizes      (array): The population sizes of each group.
         n_i_compartments (int): The number of infectious compartments.
-        desired_r0 (float): The desired basic reproduction number (R0).
+        desired_r0     (float): The desired basic reproduction number (R0).
 
     Returns:
         np.array: The scaled beta matrix.
@@ -249,12 +249,17 @@ def construct_beta(parms):
 
 def initialize_population(steps, groups, parms):
     """
-        Initialize the population arrays and the initial state based on the provided parameters.
+        Initialize the population arrays and the initial state based on the
+        provided parameters.
 
         Args:
-            steps (int): Number of time steps.
-            groups (int): Number of groups.
-            parms (dict): Dictionary containing the parameters, including "N", "initial_vaccine_coverage", "vaccine_efficacy_2_dose" and "I0".
+            steps                                 (int): The number of time steps.
+            groups                                (int): The number of population groups.
+            parms                                (dict): A dictionary containing the parameters, including:
+            pop_sizes                (list or np.array): The population sizes for each group.
+            initial_vaccine_coverage (list or np.array): The initial vaccine coverage for each group
+            vaccine_efficacy_2_dose             (float): The vaccine efficacy after two doses.
+            I0                       (list or np.array): The initial number of infected individuals in each group.
 
     Returns:
         tuple: A tuple containing the initialized arrays:
