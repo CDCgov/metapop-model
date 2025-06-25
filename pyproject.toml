@@ -7,6 +7,7 @@ authors = [
     "Theresa Sheets <utg8@cdc.gov>",
     "Will Koval <ad71@cdc.gov>",
     "Beau B. Bruce <lue7@cdc.gov>",
+    "Kate Hudson <ryl8@cdc.gov>",
     "Dina Mistry <uqx8@cdc.gov>",
 ]
 readme = "README.md"
@@ -42,8 +43,9 @@ authors = [
     { name = "Paige Miller", email = "yub1@cdc.gov" },
     { name = "Theresa Sheets", email = "utg8@cdc.gov" },
     { name = "Will Koval", email = "ad71@cdc.gov" },
-    { name = "Dina Mistry", email = "uqx8@cdc.gov" },
+    { name = "Kate Hudson", email = "ryl8@cdc.gov"},
     { name = "Beau B. Bruce", email = "lue7@cdc.gov" },
+    { name = "Dina Mistry", email = "uqx8@cdc.gov" },
 ]
 readme = "README.md"
 
