@@ -1040,8 +1040,14 @@ def get_parameter_key_for_session_key(session_key):
 
 def coerce_quarantine_to_isolation(element_keys):
     """
-    Callback function for isolation on
-    If isolation is turned off, quarantine is coerced to be off as well
+    Callback function for isolation_on. If isolation is turned off,
+    quarantine is coerced to be off as well.
+
+    Args:
+        element_keys (dict): A dictionary containing the keys for the Streamlit elements.
+
+    Returns:
+        None
     """
     if element_keys["isolation_on"] not in st.session_state:
         st.session_state[element_keys["isolation_on"]] = False
