@@ -1004,6 +1004,33 @@ def app(replicates=20):
             dose rate scheduled exceeds the number of individuals eligible for vaccination.
             </li>
 
+            <li style="font-size:14px;"> Following the incubation period,
+            we assume that infected individuals first enter a pre-rash infectious state
+            before developing a rash and entering a separate infectious state defined by rash onset.
+            We assume that the duration of time spent in each of these two states is the same,
+            with a mean of 4.5 days each.
+            </li>
+
+            <li style="font-size:14px;"> To incorporate quarantine measures based on
+            potential exposure to infectious individuals,
+            we model quarantine as a reduction in transmission from individuals in the pre-rash
+            onset, infectious compartment. Specifically, we assume that a proportion of these
+            individuals have their transmission potential fully reduced to zero.
+            We assume isolation acts in a similar fashion to reduce transmission of infectious individuals
+            that have a rash.
+            The proportion of individuals whose transmission is reduced to zero by
+            quarantine or isolation is defined by the adherence parameters
+            in the sidebar and multiplied by the efficacy of each of these interventions, given
+            in the Parameters section below.
+            </li>
+
+            <li style="font-size:14px;"> If individuals quarantine prior to rash onset, it's assumed
+            that they will also isolate on rash onset. Thus, the model is constrained such that
+            the proportion of individuals adhering to quarantine is less than or equal
+            to the proportion of individuals adhering (and that isolation must be used for quarantine
+            to be used).
+            </li>
+
             <b style="font-size:14px;">Model Parameters</b>
             <ul>
             <li style="font-size:14px;"> The basic reproductive number (R<sub>0</sub>),
