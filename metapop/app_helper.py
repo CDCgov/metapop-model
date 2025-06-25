@@ -479,6 +479,23 @@ def set_parms_to_zero(parms, keys_to_set):
 
 
 def rescale_prop_vax(edited_parms):
+    """
+    This function rescales the total vaccine uptake doses from a percentage
+    to an absolute number based on the based on the population sizes,
+    initial vaccine coverage, total vaccine uptake doses, and the initial
+    number of infections or introductions. This method is used to translate
+    user inputs for the total vaccine uptake doses into a value type which the
+    metapop model expects to use for scenario specification.
+
+    Args:
+        edited_parms (dict): A dictionary of model parameters containing
+                             population sizes, initial vaccine coverage,
+                             total vaccine uptake doses, and the initial
+                             number of infections or introductions.
+    Returns:
+        dict: An updated model parameters dictionary with rescaled total
+        vaccine uptake doses.
+    """
     pop_sizes = np.array(edited_parms["pop_sizes"])
     initial_vaccine_coverage = np.array(edited_parms["initial_vaccine_coverage"])
     prop_vaccine_uptake_doses = edited_parms["total_vaccine_uptake_doses"] / 100.0
