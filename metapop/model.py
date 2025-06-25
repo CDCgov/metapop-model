@@ -36,8 +36,8 @@ class SEIRModel:
 
     The model tracks the number of individuals in each compartment for each
     group at each time step. The model also tracks the cumulative number of
-    infections (Y) and vaccinations administered (X) for each group at each
-    time step.
+    infections (Y) and the cumulative number of vaccinations administered (X)
+    for each group at each time step.
 
     Attributes:
         parms              (dict): Parameters for the SEIR model, including transmission rates,
@@ -117,18 +117,24 @@ class SEIRModel:
         schedule. Vaccines may fail, resulting in individuals remaining
         susceptible or becoming exposed but no longer seeking vaccination.
 
+        Vaccinations are modeled as an all-or-nothing process, where individuals
+        either receive the vaccine and gain immunity or fail to gain immunity
+        and remain susceptible to infection. Vaccine failures are based on
+        a vaccine efficacy parameter.
+
         Args:
             u (list): The state vector of the system.
             t  (int): The current time step.
 
         Returns:
             tuple: A tuple containing lists of new vaccinated individuals
-                   (new_V, new_SV, new_EV) for each group. new_V represents the number of
-                   individuals vaccinated, new_SV represents the number of
-                   vaccine failures from susceptible individuals who
-                   received vaccination, and new_EV represents the number of
+                   (new_V, new_SV, new_EV) for each group. new_V represents the
+                   number of new vaccinated individuals who acquire immunity,
+                   new_SV represents the number of new vaccine failures from
+                   susceptible individuals who received vaccination but did not
+                   acquire immunity, and new_EV represents the number of new
                    exposed individuals who received vaccination but did not
-                   mount immunity against the disease.
+                   acquire immunity.
         """
         new_V = []
         new_SV = []
@@ -234,14 +240,24 @@ class SEIRModel:
         based on the current state and transitions calculated from the vaccination,
         exposure, infection, and recovery processes.
 
-        The model moves individuals in each group through different health states using compartments:
-        susceptible (S), vaccinated (V), susceptible and vaccinated (i.e., vaccine failures) (SV),
-        exposed 1 (E1), exposed 1 and vaccinated (E1_V), exposed 2 (E2),
-        exposed 2 and vaccinated (E2_V), infected and infectious 1 (pre-rash state) (I1),
-        infected and infectious 1 (pre-rash) and vaccinated (I1_V),
-        infected and infectious (symptomatic with rash-onset) (I2),
-        and recovered (R). It also tracks the cumulative number of infections (Y)
-        and vaccinations (X) for each group.
+        The model moves individuals in each group through different health states
+        using compartments:
+
+        - susceptible (S)
+        - vaccinated and acquired immunity (V)
+        - susceptible and vaccinated (i.e., vaccine failures) (SV)
+        - exposed 1 (E1)
+        - exposed 2 (E2)
+        - exposed 1 and vaccinated with vaccine failure (E1_V)
+        - exposed 2 and vaccinated with vaccine failure (E2_V)
+        - infected and infectious 1 (pre-rash state) (I1),
+        - infected and infectious (symptomatic with rash-onset) (I2),
+        - recovered (R).
+
+        It also tracks the cumulative number of infections (Y)
+        and the cumulative number of vaccinations administered (X) for each group.
+
+        See the documentation for each transition process for more details.
 
         Args:
             u (list): The state vector of the system.
