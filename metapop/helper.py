@@ -447,11 +447,11 @@ def time_to_rate(duration):
 
 def build_vax_schedule(parms):
     """
-    Build dictionary describing vaccination schedule for group 2
+    Build dictionary describing vaccination schedule for the vaccinated_group.
     Vaccines are distributed evenly during the vaccine campiagn duration (see example)
 
     Args:
-        parms (dict): Dictionary containing the parameters, including:
+        parms (dict): A dictionary containing the parameters, including:
             - vaccine_uptake_start_day (int): The day the vaccination campaign starts.
             - vaccine_uptake_duration_days (int): The duration of the vaccination campaign.
             - total_vaccine_uptake_doses (int): The total number of vaccine doses available.
@@ -461,15 +461,17 @@ def build_vax_schedule(parms):
         dict: A dictionary with days as keys and doses as values.
 
     Examples:
-        The expected cumulative doses delivered by day t are calculated from the total doses delivered and campaign duration
-        These expected doses are then rounded to integers and the differences across days are the doses delivered.
+        The expected cumulative doses delivered by day t are calculated from the
+        total doses delivered and campaign duration. These expected doses are
+        then rounded to integers and the differences across days are the doses delivered.
 
         >>> parms = {"vaccine_uptake_start_day": 0, "vaccine_uptake_duration_days": 10, "total_vaccine_uptake_doses": 25, "t_array": np.arange(1,30)}
         >>> build_vax_schedule(parms)
         {1: 2, 2: 3, 3: 3, 4: 2, 5: 2, 6: 3, 7: 3, 8: 2, 9: 2, 10: 3}
 
-        In the case of clipped vaccine campaigns, when the end of the simulation occurs before all doses have been delivered,
-        the doses are scheduled as above but cut short and total doses scheduled does not match uptake doses
+        In the case of clipped vaccine campaigns, when the end of the simulation
+        occurs before all doses have been delivered, the doses are scheduled as
+        above but cut short and total doses scheduled does not match uptake doses.
 
         >>> parms = {"vaccine_uptake_start_day": 0, "vaccine_uptake_duration_days": 10, "total_vaccine_uptake_doses": 25, "t_array": np.arange(1,6)}
         >>> build_vax_schedule(parms)
