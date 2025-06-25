@@ -1059,13 +1059,14 @@ def coerce_quarantine_to_isolation(element_keys):
 
 def update_intervention_parameters_from_widget(parms):
     """
-    Update the model parameters for interventions based on the values in the session state.
+    Update the model parameters for interventions based on the values in the
+    session state. Modifies the input dictionary `parms` in place.
 
     Args:
         parms (dict): The original parameters dictionary.
 
     Returns:
-        dict: The updated parameters dictionary.
+        dict: The `parms` dictionary with updated values in place.
     """
     # symptomatic isolation
     if parms["isolation_on"]:
