@@ -99,9 +99,12 @@ def app(replicates=20):
     This is a Streamlit app that illustrates the impact of layering multiple
     intervention strategies to mitigate a measles outbreak in a single
     community. This interactive tool allows users to see the impact of
-    layering 4 interventions: active vaccination campaign, an isolation
-    intervention, a quarantine intervention, and baseline immunity, on the size
-    of measles outbreaks following introduction of measles into a community.
+    layering 3 active intervention during the outbreak: a vaccination campaign,
+    an isolation intervention, and a quarantine intervention, as well as
+    a baseline immunity level in the population acquired prior to the outbreak.
+    The app simulates the spread of measles following introduction into a
+    single community and visualizes outbreak size and incidence under
+    different scenarios.
 
     Args:
         replicates (int): Number of simulation replicates to plot for each scenario. Defaults to 20.
