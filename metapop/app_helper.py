@@ -1228,7 +1228,7 @@ def get_interval_cumulative_incidence(results, groups, interval=7):
     Args:
         results (pl.DataFrame): The results DataFrame.
         groups          (list): List of group indices.
-        interval         (int): The interval in days.
+        interval         (int): The interval in days. Defaults to 7 for a week.
 
     Returns:
         pl.DataFrame: The updated results DataFrame with interval cumulative incidence added.
@@ -1262,7 +1262,7 @@ def get_interval_results(results, groups, interval=7):
     Args:
         results (pl.DataFrame): The results DataFrame.
         groups          (list): List of group indices.
-        interval         (int): The interval in days
+        interval         (int): The interval in days. Defaults to 7 for a week.
 
     Returns:
          pl.DataFrame: The updated results DataFrame with interval cumulative incidence added.""
