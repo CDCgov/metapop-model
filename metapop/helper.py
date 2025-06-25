@@ -548,19 +548,26 @@ def build_vax_schedule(parms):
 
 def vaccinate_groups(groups, u, t, vaccination_uptake_schedule, parms):
     """
-    Incorporate active vaccination given an uptake schedule, for group 2 only
+    Incorporate active vaccination for the vaccinated_group given a
+    vaccination uptake schedule.
 
     Args:
         groups (int): The number of groups.
         u (list): The state of the system.
-        t: timestep
+        t (int): timestep
         vaccination_uptake_schedule (dict): dictionary with keys of days and values of doses on that day for group 2
         parms (dict): Dictionary containing the parameters, including:
             - vaccinated_group (int): The group to be vaccinated.
             - vaccine_efficacy_1_dose (float): The efficacy of the vaccine after one dose.
+
     Returns:
-        np.array: Number of susceptibles successfully vaccinated on that day for each group (should only be group 2)
-        np.array: Number of susceptibles unsuccessfully vaccinated on that day for each group (should only be group 2), individuals remain susceptible but cannot be vaccinated again
+        np.array: Number of susceptibles successfully vaccinated on that day
+                  for each group (only those in vaccinated_group).
+        np.array: Number of susceptibles unsuccessfully vaccinated on that day
+                  for each group (only those in vaccinated_group), individuals
+                  remain susceptible but do not seek vaccination again.
+        np.array: Number of doses administered to exposed individuals on that
+                  day for each group (only those in vaccinated_group).
     """
     new_vaccinated = np.zeros(groups, dtype=int)
     new_failures = np.zeros(groups, dtype=int)
@@ -596,9 +603,11 @@ def vaccinate_groups(groups, u, t, vaccination_uptake_schedule, parms):
 
 def seed_from_string(string):
     """
-    Generate a stable seed from a string
+    Generate a stable seed from a string.
+
     Args:
         string (str): The input string to generate the seed from.
+
     Returns:
         int: A stable seed derived from the input string.
     """
