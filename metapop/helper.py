@@ -471,7 +471,7 @@ def build_vax_schedule(parms):
 
         In the case of clipped vaccine campaigns, when the end of the simulation
         occurs before all doses have been delivered, the doses are scheduled as
-        above but cut short and total doses scheduled does not match uptake doses.
+        above but the campaign is cut short and total doses scheduled does not match delivered doses.
 
         >>> parms = {"vaccine_uptake_start_day": 0, "vaccine_uptake_duration_days": 10, "total_vaccine_uptake_doses": 25, "t_array": np.arange(1,6)}
         >>> build_vax_schedule(parms)
