@@ -68,10 +68,11 @@ __all__ = [
 ### Methods to simulate the model for the app ###
 def get_scenario_results(parms):
     """
-    Run simulations for a grid set of parameters and return the combined results Dataframe.
+    Run simulations for a grid set of parameters and return the combined
+    results Dataframe.
 
     Args:
-        parms (list): List of dictionaries containing model parameters.
+        parms        (list): List of dictionaries containing model parameters.
         scenario_name (str): Name of the scenario to run.
 
     Returns:
@@ -111,8 +112,11 @@ def read_parameters(filepath="scripts/app/app_config.yaml"):
     """
     Read parameters from a YAML file and return the first set of parameters.
 
+    Args:
+        filepath (str): Path to the YAML file containing the model parameters.
+
     Returns:
-        dict: Dictionary of parameters for the metapopulation model.
+        dict: A dictionary of parameters for the metapopulation model.
     """
     parameter_sets = griddler.griddle.read(filepath)
     parms = parameter_sets[0]
@@ -126,7 +130,8 @@ def get_default_full_parameters():
     input.
 
     Returns:
-        pl.DataFrame: DataFrame containing the default parameters and their values for two scenarios.
+        pl.DataFrame: DataFrame containing the default parameters and their
+        values for two scenarios.
     """
     # read in parms, some of which are lists
     filepath = os.path.join(os.path.dirname(__file__), "app_assets", "app_config.yaml")
@@ -162,7 +167,8 @@ def get_default_show_parameters_table():
     scenarios that can be updated by the user through other methods.
 
     Returns:
-        pl.DataFrame: DataFrame containing the default parameters and their values for two scenarios.
+        pl.DataFrame: DataFrame containing the default parameters and their
+        values for two scenarios.
     """
 
     full_defaults = get_default_full_parameters()
@@ -247,6 +253,10 @@ def get_advanced_parameters_table():
 def get_show_parameter_mapping(parms=None):
     """
     Get a mapping of parameter names to their display names.
+
+    Args:
+        parms (dict, optional): A dictionary of parameters. If provided, it will
+            adjust the display names based on the number of groups specified.
 
     Returns:
         dict: A dictionary mapping parameter names to their display names.
