@@ -141,15 +141,17 @@ def get_percapita_contact_matrix(parms):
 
 def get_r0(beta_matrix, gamma, pop_sizes):
     """
-    Calculate the basic reproduction number (R0) matrix and return its spectral radius when the beta matrix is at least a 2x2 array.
+    Calculate the basic reproduction number (R0) matrix and return its spectral
+    radius when the beta matrix is at least a 2x2 array.
 
     Args:
-        beta_matrix (np.array): The transmission rate matrix.
-        gamma (float): The recovery rate.
+        beta_matrix       (np.array): The transmission rate matrix.
+        gamma                (float): The recovery rate.
         pop_sizes (list or np.array): The population sizes of each group.
 
     Returns:
-        float: The spectral radius of the R0 matrix, representing the basic reproduction number.
+        float: The spectral radius of the R0 matrix, representing the basic
+        reproduction number.
     """
 
     # Calculate the R matrix with row-wise multiplication
