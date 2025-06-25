@@ -170,7 +170,7 @@ def rescale_beta_matrix(unscaled_beta, factor):
 
     Args:
         unscaled_beta (np.array): The original transmission rate matrix.
-        factor (float): The factor by which to rescale the beta matrix.
+        factor           (float): The factor by which to rescale the beta matrix.
 
     Returns:
         np.array: The rescaled transmission rate matrix.
