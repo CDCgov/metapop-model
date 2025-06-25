@@ -368,7 +368,8 @@ def get_outcome_mapping():
     Get a mapping of outcome names to their corresponding codes.
 
     Returns:
-        dict: A dictionary mapping outcome names to their corresponding output column name.
+        dict: A dictionary mapping outcome names to their corresponding output
+        column name.
     """
     # Define the mapping of outcome names to their corresponding codes
     return {
@@ -385,10 +386,10 @@ def get_list_keys(parms):
     Get the keys of parameters that have list values.
 
     Args:
-        parms (dict): The parameters dictionary.
+        parms (dict): A dictionary of model parameters.
 
     Returns:
-        list: The keys of the parameters that have lists values.
+        list: The keys of the parameters dictionary that have list values.
     """
     list_keys = [key for key, value in parms.items() if isinstance(value, list)]
     # Sort to ensure deterministic order
@@ -398,7 +399,8 @@ def get_list_keys(parms):
 
 def get_keys_in_list(parms, updated_parms):
     """
-    Get the expanded keys of parameters from updated_parms that map to keys that have list values in the parms dictionary.
+    Get the expanded keys of parameters from updated_parms that map to keys
+    that have list values in the parms dictionary.
 
     Args:
         parms         (dict): The original parameters dictionary.
@@ -457,10 +459,20 @@ def repack_list_parameters(parms, updated_parms, keys_in_list):
 
 
 ### Set given parameters to zero ###
-def set_parms_to_zero(parms, parms_to_set):
+def set_parms_to_zero(parms, keys_to_set):
+    """
+    Set specified parameters in the given dictionary to zero.
+
+    Args:
+        parms (dict): The original parameters dictionary.
+        keys_to_set (list): A list of parameter keys to set to zero.
+
+    Returns:
+        dict: A new dictionary with the specified parameters set to zero.
+    """
     edited_parms = copy.deepcopy(parms)
 
-    for key in parms_to_set:
+    for key in keys_to_set:
         edited_parms[key] = 0.0
 
     return edited_parms
