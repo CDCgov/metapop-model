@@ -184,13 +184,12 @@ def calculate_beta_factor(r0_desired, current_r0):
     Calculate the scaling factor for the beta matrix to achieve a desired R0.
 
     Args:
-        r0_desired (float): The desired basic reproduction number (R0) from parms file.
+        r0_desired (float): The desired basic reproduction number (R0).
         current_r0 (float): The current basic reproduction number (R0).
 
     Returns:
         float: The scaling factor for the beta matrix to get desired R0.
     """
-
     factor = r0_desired / current_r0
     return factor
 
