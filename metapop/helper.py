@@ -315,14 +315,16 @@ def initialize_population(steps, groups, parms):
 
 def get_infected(u, I_indices, groups, parms, t):
     """
-    Calculate the number of infected individuals for each group. If there is only one infected compartment, n_i_compartments=1, then return I for each group
+    Calculate the number of infected individuals for each group.
+    If there is only one infected compartment, n_i_compartments = 1,
+    then return I for each group.
 
     Args:
-        u (list): The state of the system.
+        u         (list): The state of the system.
         I_indices (list): The indices of the I compartments.
-        groups (int): The number of groups.
-        parms (dict): Dictionary containing model parameters
-        t (int): The current time step.
+        groups     (int): The number of groups.
+        parms     (dict): Dictionary containing model parameters
+        t          (int): The current time step.
 
     Returns:
         np.array: An array of the number of infected individuals for each group.
@@ -400,10 +402,10 @@ def calculate_foi(beta, I_g, pop_sizes, target_group):
     Calculate the force of infection (FOI) for a target group.
 
     Args:
-        beta (np.array): The contact matrix.
-        I_g (np.array): The number of infected individuals in each group.
+        beta      (np.array): The contact matrix.
+        I_g       (np.array): The number of infected individuals in each group.
         pop_sizes (np.array): The population sizes of each group.
-        target_group (int): The target group index.
+        target_group   (int): The target group index.
 
     Returns:
         float: The force of infection for the target group.
