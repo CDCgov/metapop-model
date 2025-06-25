@@ -790,7 +790,9 @@ def get_max_values(parms=None):
 
 def get_step_values(parms=None):
     """
-    Get the step or increment values for the app parameters.
+    Get the step or increment values for the app parameters. This method returns a
+    dictionary of step values for the app parameters. If a parms dictionary is
+    provided, it will update the defaults with the provided values.
 
     Args:
         parms (dict): Optional parameters dictionary.
@@ -832,7 +834,9 @@ def get_step_values(parms=None):
 
 def get_helpers(parms=None):
     """
-    Get the help text for the app parameters.
+    Get the help text for the app parameters. This method returns a dictionary of help
+    text for the app parameters. If a parms dictionary is provided, it will update the
+    defaults with the provided values.
 
     Args:
         parms (dict): Optional parameters dictionary.
@@ -892,7 +896,9 @@ def get_helpers(parms=None):
 
 def get_formats(parms=None):
     """
-    Get the formats for the app parameters.
+    Get the formats for the app parameters. This method returns a dictionary of
+    formats for the app parameters. If a parms dictionary is provided, it will
+    update the defaults with the provided values.
 
     Args:
         parms (dict): Optional parameters dictionary.
