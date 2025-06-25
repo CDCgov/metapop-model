@@ -234,6 +234,15 @@ class SEIRModel:
         based on the current state and transitions calculated from the vaccination,
         exposure, infection, and recovery processes.
 
+        The model moves individuals in each group through different health states using compartments:
+        susceptible (S), vaccinated (V), susceptible and vaccinated (i.e., vaccine failures) (SV),
+        exposed 1 (E1), exposed 1 and vaccinated (E1_V), exposed 2 (E2),
+        exposed 2 and vaccinated (E2_V), infected and infectious 1 (pre-rash state) (I1),
+        infected and infectious 1 (pre-rash) and vaccinated (I1_V),
+        infected and infectious (symptomatic with rash-onset) (I2),
+        and recovered (R). It also tracks the cumulative number of infections (Y)
+        and vaccinations (X) for each group.
+
         Args:
             u (list): The state vector of the system.
             t  (int): The current time step.
@@ -241,7 +250,7 @@ class SEIRModel:
         Returns:
             list of lists: The updated state vector of the system after one time step.
                            Each element is a list representing the updated state of a group.
-                           Y and X are cumulative counts of infections and vaccinations,
+                           Y and X are cumulative counts of infections and vaccinations for each group,
                            respectively.
         """
         new_u = []
