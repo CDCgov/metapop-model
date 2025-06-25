@@ -1593,6 +1593,9 @@ def img_to_html(img_path, width=30, vertical_align="middle", margin_right=8):
 
     Args:
         img_path (str): The path to the image file.
+        width (int): The width of the image in pixels. Defaults to 30.
+        vertical_align (str): The vertical alignment of the image. Defaults to "middle".
+        margin_right (int): The right margin in pixels. Defaults to 8.
 
     Returns:
         str: An HTML image tag with the base64 encoded image.
@@ -1608,7 +1611,8 @@ def is_light_color():
     Determine if the current theme is light or dark.
 
     Returns:
-        bool: True if the theme is light, False if dark. Defaults to True if the theme is not recognized.
+        bool: True if the theme is light, False if dark. Defaults to True if
+        the theme is not recognized.
     """
     try:
         theme = st.context.theme.type
@@ -1630,6 +1634,7 @@ def get_github_logo_path(is_background_light):
 
     Args:
         is_background_light (bool): True if the background is light, False if dark. Defaults to True if theme is not recognized.
+
     Returns:
         str: The path to the GitHub logo image in app_assets.
     """
