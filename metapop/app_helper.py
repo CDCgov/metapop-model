@@ -939,6 +939,18 @@ def get_formats(parms=None):
 
 
 def get_base_session_state_idkeys(parms=None):
+    """
+    Get the base session state ID keys for the app parameters. This method
+    returns a dictionary of session state ID keys for the app parameters. 
+    If a parms dictionary is provided, it will update the defaults with the
+    provided values.
+
+    Args:
+        parms (dict): Optional parameters dictionary.
+
+    Returns:
+        dict: A dictionary of session state ID keys for the app parameters.
+    """
     ss_idkeys = dict(
         desired_r0="desired_r0",
         k_i=["k_i_0", "k_i_1", "k_i_2"],
