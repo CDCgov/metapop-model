@@ -90,11 +90,11 @@ def get_percapita_contact_matrix(parms):
 
     Args:
         parms      (dict): A dictionary containing the parameters, including:
-        k_i       (array): The total number of contacts per person per day for each group.
-        k_g1      (float): The number of contacts from subpop1 to people in the general population.
-        k_g2      (float): The number of contacts from subpop2 to people in the general population.
-        k_21      (float): The number of contacts from subpop1 to people in subpop2.
-        pop_sizes (array): The population sizes of each group.
+            - k_i       (array): The total number of contacts per person per day for each group.
+            - k_g1      (float): The number of contacts from subpop1 to people in the general population.
+            - k_g2      (float): The number of contacts from subpop2 to people in the general population.
+            - k_21      (float): The number of contacts from subpop1 to people in subpop2.
+            - pop_sizes (array): The population sizes of each group.
 
     Returns:
         np.array: The per capita contact matrix.
@@ -218,14 +218,14 @@ def construct_beta(parms):
 
     Args:
         parms           (dict): A dictionary containing the parameters, including:
-        k_i            (array): The total number of contacts per person per day for each group.
-        k_g1           (float): The number of contacts from subpop1 to people in the general population.
-        k_g2           (float): The number of contacts from subpop2 to people in the general population.
-        k_21           (float): The number of contacts from subpop1 to people in subpop2.
-        gamma          (float): The recovery rate.
-        pop_sizes      (array): The population sizes of each group.
-        n_i_compartments (int): The number of infectious compartments.
-        desired_r0     (float): The desired basic reproduction number (R0).
+            - k_i            (array): The total number of contacts per person per day for each group.
+            - k_g1           (float): The number of contacts from subpop1 to people in the general population.
+            - k_g2           (float): The number of contacts from subpop2 to people in the general population.
+            - k_21           (float): The number of contacts from subpop1 to people in subpop2.
+            - gamma          (float): The recovery rate.
+            - pop_sizes      (array): The population sizes of each group.
+            - n_i_compartments (int): The number of infectious compartments.
+            - desired_r0     (float): The desired basic reproduction number (R0).
 
     Returns:
         np.array: The scaled beta matrix.
@@ -254,13 +254,13 @@ def initialize_population(steps, groups, parms):
         provided parameters.
 
         Args:
-            steps                                 (int): The number of time steps.
-            groups                                (int): The number of population groups.
-            parms                                (dict): A dictionary containing the parameters, including:
-            pop_sizes                (list or np.array): The population sizes for each group.
-            initial_vaccine_coverage (list or np.array): The initial vaccine coverage for each group
-            vaccine_efficacy_2_dose             (float): The vaccine efficacy after two doses.
-            I0                       (list or np.array): The initial number of infected individuals in each group.
+            steps  (int): The number of time steps.
+            groups (int): The number of population groups.
+            parms (dict): A dictionary containing the parameters, including:
+                - pop_sizes                (list or np.array): The population sizes for each group.
+                - initial_vaccine_coverage (list or np.array): The initial vaccine coverage for each group
+                - vaccine_efficacy_2_dose             (float): The vaccine efficacy after two doses.
+                - I0                       (list or np.array): The initial number of infected individuals in each group.
 
     Returns:
         tuple: A tuple containing the initialized arrays:
@@ -453,10 +453,10 @@ def build_vax_schedule(parms):
 
     Args:
         parms (dict): A dictionary containing the parameters, including:
-            - vaccine_uptake_start_day (int): The day the vaccination campaign starts.
+            - vaccine_uptake_start_day     (int): The day the vaccination campaign starts.
             - vaccine_uptake_duration_days (int): The duration of the vaccination campaign.
-            - total_vaccine_uptake_doses (int): The total number of vaccine doses available.
-            - t_array (list): The array of time steps in the model.
+            - total_vaccine_uptake_doses   (int): The total number of vaccine doses available.
+            - t_array                     (list): The array of time steps in the model.
 
     Returns:
         dict: A dictionary with days as keys and doses as values.
@@ -553,12 +553,12 @@ def vaccinate_groups(groups, u, t, vaccination_uptake_schedule, parms):
     vaccination uptake schedule.
 
     Args:
-        groups (int): The number of groups.
-        u (list): The state of the system.
-        t (int): timestep
+        groups                       (int): The number of groups.
+        u                           (list): The state of the system.
+        t                            (int): timestep
         vaccination_uptake_schedule (dict): dictionary with keys of days and values of doses on that day for group 2
-        parms (dict): Dictionary containing the parameters, including:
-            - vaccinated_group (int): The group to be vaccinated.
+        parms                       (dict): Dictionary containing the parameters, including:
+            - vaccinated_group          (int): The group to be vaccinated.
             - vaccine_efficacy_1_dose (float): The efficacy of the vaccine after one dose.
 
     Returns:
