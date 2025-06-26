@@ -1046,7 +1046,6 @@ def app(replicates=20):
             </li>
 
             <b style="font-size:14px;">Model Parameters</b>
-            <ul>
             <li style="font-size:14px;"> The basic reproductive number (R<sub>0</sub>),
             captures contact rates and the probability of infection given
             contact with an infectious individual. R<sub>0</sub> for measles is
