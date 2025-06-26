@@ -14,7 +14,7 @@ baseline_parameters:
   initial_vaccine_coverage: [0.80]
   vaccine_efficacy_2_dose: 0.97
   vaccine_efficacy_1_dose: 0.93
-  vaccine_uptake_start_day: 6
+  vaccine_uptake_start_day: 7
   vaccine_uptake_duration_days: 21
   use_prop_vaccine_uptake: true      # if true for the app,
   total_vaccine_uptake_doses: 20.0   # then prop unvax that get vax, else absolute number of doses
