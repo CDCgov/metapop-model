@@ -1,2 +1,2 @@
-# request review from code owners for workflow files
-.github/workflows/ @dinacmistry @k88hudson-cfa
+# These rules apply to the production branch
+@dinacmistry @k88hudson-cfa
