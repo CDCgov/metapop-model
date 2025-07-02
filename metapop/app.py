@@ -130,7 +130,14 @@ def app(replicates=20):
     filepath = os.path.join(
         os.path.dirname(__file__), "app_assets", "onepop_config.yaml"
     )
+
+    # Info about the this app (version, date, commit)
+    info = get_metapop_info()
+
     parms = read_parameters(filepath)
+
+    # Ensures that the cache gets invalidated when code changes
+    parms["cache_key"] = info["commit"]
 
     # Set up random number generators for plotting and hospitalizations
     plot_rng = np.random.default_rng([parms["seed"], seed_from_string("plot")])
@@ -429,7 +436,6 @@ def app(replicates=20):
         ), "Isolation adherence should be 0 for the no intervention scenario"
 
         # --- About this app section ---
-        info = get_metapop_info()
         st.header("About this app")
         st.caption(f"metapop version: {info['version']}")
         st.caption(f"commit hash: {info['commit']}")
@@ -585,8 +591,10 @@ def app(replicates=20):
 
     # run the model with the updated parameters
     chart_placeholder.text("Running scenarios...")
-    results1 = get_scenario_results(scenario1)
-    results2 = get_scenario_results(scenario2)
+
+    use_cache = os.environ.get("USE_CACHE", "true").strip().lower() == "true"
+    results1 = get_scenario_results(scenario1, use_cache)
+    results2 = get_scenario_results(scenario2, use_cache)
 
     # Display number of doses administered
     with col_intervention_text:

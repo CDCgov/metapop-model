@@ -22,6 +22,7 @@ from .sim import simulate_replicates
 
 __all__ = [
     "get_scenario_results",
+    "get_scenario_results_cached",
     "read_parameters",
     "get_default_full_parameters",
     "get_default_show_parameters_table",
@@ -64,9 +65,16 @@ __all__ = [
     "get_github_logo_path",
 ]
 
+CACHE_TTL = 60 * 60 * 24 * 7  # 1 week in seconds
+
+
+@st.cache_data(show_spinner=False, ttl=CACHE_TTL, max_entries=20)
+def get_scenario_results_cached(parms):
+    return get_scenario_results(parms)
+
 
 ### Methods to simulate the model for the app ###
-def get_scenario_results(parms):
+def get_scenario_results(parms, use_cache=False):
     """
     Run simulations for a grid set of parameters and return the combined
     results Dataframe.
@@ -78,6 +86,9 @@ def get_scenario_results(parms):
     Returns:
 
     """
+    if use_cache:
+        return get_scenario_results_cached(parms)
+
     results = simulate_replicates(parms)
     # cast group to string
     results = results.with_columns(pl.col("group").cast(pl.Utf8))
