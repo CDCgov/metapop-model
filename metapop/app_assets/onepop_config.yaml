@@ -22,12 +22,12 @@ baseline_parameters:
   isolation_on: false
   isolation_adherence: 0.5
   isolation_reduction: 1.0 # resulting in 50% reduction in overal transmisison due to isolation
-  symptomatic_isolation_start_day: 0
+  symptomatic_isolation_start_day: 7
   symptomatic_isolation_duration_days: 365
   pre_rash_isolation_on: false
   pre_rash_isolation_adherence: 0.5
   pre_rash_isolation_reduction: 0.60
-  pre_rash_isolation_start_day: 0
+  pre_rash_isolation_start_day: 7
   pre_rash_isolation_duration_days: 365
   IHR: 0.15 # Infection Hospitalization Rate
   tf: 365        # total time modeled

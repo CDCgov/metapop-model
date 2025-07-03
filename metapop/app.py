@@ -260,7 +260,7 @@ def app(replicates=20):
         # Intervention scenario and parameters
         st.header(
             "Interventions scenario",
-            help="The adherence to both isolation and quarantine, "
+            help="The adherence, duration, and start time of both isolation and quarantine interventions, "
             "as well as the vaccine uptake and start time and duration of the vaccination campaign, "
             "can be specified.",
         )
@@ -270,9 +270,6 @@ def app(replicates=20):
             "independently or in combination with each other. "
             "The results are compared to a baseline scenario that does not "
             "have a vaccination campaign, nor isolation or quarantine interventions incorporated."
-        )
-        st.text(
-            "When quarantine and isolation are turned on, they are applied to the entire duration of the simulation."
         )
 
         # --- Intervention scenario Parameters ---
@@ -289,8 +286,12 @@ def app(replicates=20):
         ordered_keys_npi = [
             "isolation_on",
             "isolation_adherence",
+            "symptomatic_isolation_start_day",
+            "symptomatic_isolation_duration_days",
             "pre_rash_isolation_on",
             "pre_rash_isolation_adherence",
+            "pre_rash_isolation_start_day",
+            "pre_rash_isolation_duration_days",
         ]
         # parameters that are lists or arrays
         list_npi_parameter_keys = []
@@ -701,6 +702,23 @@ def app(replicates=20):
             isolation_adherence = edited_parms2["isolation_adherence"]
         pre_rash_isolation_adherence_pct = int(pre_rash_isolation_adherence * 100)
         isolation_adherence_pct = int(isolation_adherence * 100)
+
+        pre_rash_isolation_end_day = (
+            edited_parms2["pre_rash_isolation_start_day"]
+            + edited_parms2["pre_rash_isolation_duration_days"]
+        )
+        pre_rash_isolation_end_day = min(
+            edited_parms2["tf"], pre_rash_isolation_end_day
+        )
+
+        symptomatic_isolation_end_day = (
+            edited_parms2["symptomatic_isolation_start_day"]
+            + edited_parms2["symptomatic_isolation_duration_days"]
+        )
+        symptomatic_isolation_end_day = min(
+            edited_parms2["tf"], symptomatic_isolation_end_day
+        )
+
         mean_doses_administered = round(
             results2.filter(pl.col("t") == results2["t"].max())
             .select("X")
@@ -841,8 +859,16 @@ def app(replicates=20):
                 callout_text += "<li> Vaccines administered during campaign: 0</li>"
             else:
                 callout_text += f"<li> Vaccines administered during campaign: {mean_doses_administered} between day {min(schedule.keys())} and day {max(schedule.keys())}</li>"
-            callout_text += f"<li> Adherence to quarantine among pre-symptomatic infectious individuals: {pre_rash_isolation_adherence_pct}%</li>"
-            callout_text += f"<li> Adherence to isolation among symptomatic infectious individuals: {isolation_adherence_pct}%</li></ul>"
+            callout_text += f"<li> Adherence to quarantine among pre-symptomatic infectious individuals: {pre_rash_isolation_adherence_pct}%"
+            if pre_rash_isolation_adherence_pct > 0:
+                callout_text += f" from day {edited_parms2['pre_rash_isolation_start_day']+1} through day {pre_rash_isolation_end_day}</li>"
+            else:
+                callout_text += "</li>"
+            callout_text += f"<li> Adherence to isolation among symptomatic infectious individuals: {isolation_adherence_pct}%"
+            if isolation_adherence_pct > 0:
+                callout_text += f" from day {edited_parms2['symptomatic_isolation_start_day']+1} through day {symptomatic_isolation_end_day}</li></ul>"
+            else:
+                callout_text += "</li></ul>"
 
             flexible_callout(
                 callout_text,
@@ -969,10 +995,10 @@ def app(replicates=20):
             Users can explore the impact of interventions, including vaccination,
             isolation, and quarantine measures ("Interventions" scenario)
             compared to a baseline scenario without active interventions ("No
-            Interventions". When they are implemented, isolation and quarantine
-            measures begin on the same day as the introduced measles infections are
-            identified via rash onset and run for the duration of simulation.
-            The start and end time of the vaccination campaign can be specified.
+            Interventions". The start day and duration of all three intervention
+            measures (isolation, quarantine, and vaccination) can be specified by
+            the user. By default, these interventions begin one week after
+            measles introduction and last through the rest of the simulation.
             <br><br>
 
             <p style="font-size:14px;">
