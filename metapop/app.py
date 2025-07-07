@@ -836,7 +836,7 @@ def app(replicates=20):
 
     # --- Outbreak Summary Stats ---
     st.subheader("Simulation summary")
-    with st.expander("Show intervention strategies", expanded=False):
+    with st.expander("Show intervention strategies", expanded=True):
         columns = st.columns(2)
         # Create a callout box and text describing the No Interventions scenario
         flexible_callout(
