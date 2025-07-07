@@ -165,6 +165,8 @@ def app(replicates=20):
         max_values = dict(
             initial_vaccine_coverage=[0.99, 0.99, 0.99],
             vaccine_uptake_start_day=364,
+            pre_rash_isolation_start_day=364,
+            symptomatic_isolation_start_day=364,
         )
         max_values = get_max_values(max_values)
         steps = get_step_values()
