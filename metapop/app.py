@@ -1120,9 +1120,14 @@ def app(replicates=20):
             Users can explore the impact of interventions, including vaccination,
             isolation, and quarantine measures ("Interventions" scenario)
             compared to a baseline scenario without active interventions ("No
-            Interventions". The start day and duration of all three intervention
-            measures (isolation, quarantine, and vaccination) can be specified by
-            the user.
+            Interventions"). The start day and duration of all three
+            intervention measures (isolation, quarantine, and vaccination) can
+            be specified by the user. By default, these interventions begin one
+            week after measles introduction and last through the rest of the
+            simulation. Interventions can start up to 180 days or approximately
+            6 months after the introduction of measles in the community, and
+            the duration of interventions can be up to 365 days or the entire
+            simulation time.
             </p>
 
             <p style="font-size:14px;">
@@ -1155,134 +1160,186 @@ def app(replicates=20):
             makes several simplifying assumptions, including the following:</p>
             <ul>
 
-            <li style="font-size:14px;">This is a homogenous mixing model without age or spatial structure,
+            <li style="font-size:14px;">
+            This is a homogenous mixing model without age or spatial structure,
             meaning all individuals have the same probability of contact with
-            each other (also known as a well-mixed population model). In larger populations, this may overestimate the size
-            and duration of an outbreak.</li>
-
-            <li style="font-size:14px;">The MMR vaccine is modeled as an
-            "all-or-nothing" vaccine, meaning that it is perfectly effective
-            for some people (corresponding to the efficacy for one or two doses of MMR) and has no efficacy for others.
+            each other (also known as a well-mixed population model). In larger
+            populations, this may overestimate the size and duration of an
+            outbreak.
             </li>
 
-            <li style="font-size:14px;">To initialize the population with existing immunity, users input a "baseline
-            immunity" value. Because there is no age structure in the model, this value is assumed to
-            account for existing vaccination coverage or prior infection over the entire population. It's assumed that
-            existing vaccination coverage and prior infection result in 97% protection against future infection
-            (the estimated efficacy of two doses of MMR) and this is multiplied by baseline immunity to initialize
-            the size of the Vaccinated population. The remaining 3% of individuals are assumed to lack protection
-            and are initialized into a separate state (Vaccinated but Susceptible).
+            <li style="font-size:14px;">
+            The MMR vaccine is modeled as an "all-or-nothing" vaccine, meaning
+            that it is perfectly effective for some people (corresponding to
+            the efficacy for one or two doses of MMR) and has no efficacy for
+            others.
             </li>
 
-            <li style="font-size:14px;"> Vaccines administered during the vaccination campaign are
-            assumed to be first doses of MMR. The user-defined vaccination campaign timing is defined by the
-            vaccination start day (days after the initial infection is introduced) and the duration of the campaign (in days).
-            It's assumed that the number of doses administered per day is equal to the total number of doses
-            divided by the duration of the campaign (but may be rounded to the nearest integer value).
-            If the campaign ends after the simulation ends, the vaccination campaign will be shortened to run until the last simulation day while keeping the rate of doses administered per day the same . In this case, the total number of doses scheduled to be administered will not match the vaccination uptake proportion input specified in the sidebar.
+            <li style="font-size:14px;">
+            To initialize the population with existing immunity, users input a
+            "baseline immunity" value. Because there is no age structure in the
+            model, this value is assumed to account for existing vaccination
+            coverage or prior infection over the entire population. It's assumed
+            that existing vaccination coverage and prior infection result in 97%
+            protection against future infection (the estimated efficacy of two
+            doses of MMR) and this is multiplied by baseline immunity to
+            initialize the size of the Vaccinated population. The remaining 3%
+            of individuals are assumed to lack protection and are initialized
+            into a separate state (Vaccinated but Susceptible).
             </li>
 
-            <li style="font-size:14px;"> We assume that both susceptible and
-            exposed individuals who are not yet infectious are eligible to get
-            vaccinated during the vaccination campaign. We also assume that exposed
-            individuals are not yet aware of their exposure status and so they
-            are equally likely to seek vaccination. After vaccination, only
-            susceptible individuals become immune, while exposed individuals
-            remain in the exposed state and continue with infection progression
-            as normal. The number of doses administered may be lower than the
-            number of doses scheduled if by the time of the campaign, the daily
-            dose rate scheduled exceeds the number of individuals eligible for vaccination.
+            <li style="font-size:14px;">
+            Vaccines administered during the vaccination campaign are assumed to
+            be first doses of MMR. The user-defined vaccination campaign timing
+            is defined by the vaccination start day (days after the initial
+            infection is introduced) and the duration of the campaign (in days).
+            It's assumed that the number of doses administered per day is equal
+            to the total number of doses divided by the duration of the campaign
+            (but may be rounded to the nearest integer value). If the campaign
+            ends after the simulation ends, the vaccination campaign will be
+            shortened to run until the last simulation day while keeping the
+            rate of doses administered per day the same. In this case, the total
+            number of doses scheduled to be administered will not match the
+            vaccination uptake proportion input specified in the sidebar.
             </li>
 
-            <li style="font-size:14px;"> Following the incubation period,
-            we assume that infected individuals first enter a pre-rash infectious state
-            before developing a rash and entering a separate infectious state defined by rash onset.
-            We assume that the duration of time spent in each of these two states is the same,
-            with a mean of 4.5 days each.
+            <li style="font-size:14px;">
+            We assume that both susceptible and exposed individuals who are not
+            yet infectious are eligible to get vaccinated during the vaccination
+            campaign. We also assume that exposed individuals are not yet aware
+            of their exposure status and so they are equally likely to seek
+            vaccination. After vaccination, only susceptible individuals become
+            immune, while exposed individuals remain in the exposed state and
+            continue with infection progression as normal. The number of doses
+            administered may be lower than the number of doses scheduled if by
+            the time of the campaign, the daily dose rate scheduled exceeds the
+            number of individuals eligible for vaccination.
             </li>
 
-            <li style="font-size:14px;"> To incorporate quarantine measures based on
-            potential exposure to infectious individuals,
-            we model quarantine as a reduction in transmission from individuals in the pre-rash
-            onset, infectious compartment. Specifically, we assume that a proportion of these
+            <li style="font-size:14px;">
+            Following the incubation period, we assume that infected individuals
+            first enter a pre-rash infectious state before developing a rash and
+            entering a separate infectious state defined by rash onset. We
+            assume that the duration of time spent in each of these two states
+            is the same. For example, when the infectious period is 9 days, the
+            duration of tie spent in each of the two infectious states is on
+            average 4.5 days.
+            </li>
+
+            <li style="font-size:14px;">
+            To incorporate quarantine measures based on potential exposure to
+            infectious individuals, we model quarantine as a reduction in
+            transmission from individuals in the pre-rash onset, infectious
+            compartment. Specifically, we assume that a proportion of these
             individuals have their transmission potential fully reduced to zero.
-            We assume isolation acts in a similar fashion to reduce transmission of infectious individuals
-            that have a rash.
-            The proportion of individuals whose transmission is reduced to zero by
-            quarantine or isolation is defined by the adherence parameters
-            in the sidebar and multiplied by the efficacy of each of these interventions, given
-            in the Parameters section below.
+            We assume isolation acts in a similar fashion to reduce transmission
+            of infectious individuals that have a rash. The proportion of
+            individuals whose transmission is reduced to zero by quarantine or
+            isolation is defined by the adherence parameters in the sidebar and
+            multiplied by the efficacy of each of these interventions, given in
+            the Parameters section below.
             </li>
 
-            <li style="font-size:14px;"> If individuals quarantine prior to rash onset, it's assumed
-            that they will also isolate on rash onset. Thus, the model is constrained such that
-            the proportion of individuals adhering to quarantine is less than or equal
-            to the proportion of individuals adhering (and that isolation must be used for quarantine
-            to be used).
+            <li style="font-size:14px;">
+            If individuals quarantine prior to rash onset, it's assumed that
+            they will also isolate on rash onset. Thus, the model is constrained
+            such that the proportion of individuals adhering to quarantine is
+            less than or equal to the proportion of individuals adhering (and
+            that isolation must be used for quarantine to be used).
             </li>
 
             <b style="font-size:14px;">Model Parameters</b>
-            <li style="font-size:14px;"> The basic reproductive number (R<sub>0</sub>),
-            captures contact rates and the probability of infection given
-            contact with an infectious individual. R<sub>0</sub> for measles is
-            generally estimated to be between 12 and 18
-            <a href='https://www.ecdc.europa.eu/en/measles/facts' target='_blank'>[Factsheet about measles]</a>.
-            Communities with higher contact rates — for example populations with
-            higher population density or larger households
-            <a href='https://pmc.ncbi.nlm.nih.gov/articles/PMC8765757/' target='_blank'>[Social contact patterns and implications for infectious disease transmission – a systematic review and meta-analysis of contact surveys | eLife]</a>
-            — may have higher R<sub>0</sub>. The probability of infection given
-            contact with an infectious individuals is very high for measles;
-            the household attack rate is estimated to be 90% among unvaccinated contacts
-            <a href='https://www.cdc.gov/yellow-book/hcp/travel-associated-infections-diseases/measles-rubeola.html#:~:text=Measles%20is%20among%20the%20most,global%20eradication%20of%20measles%20feasible' target='_blank'>[CDC Yellow Book: Measles (Rubeola)]</a>.
+            <li style="font-size:14px;">
+            The basic reproductive number (R<sub>0</sub>), captures contact
+            rates and the probability of infection given contact with an
+            infectious individual. R<sub>0</sub> for measles is generally
+            estimated to be between 12 and 18
+            <a href='https://www.ecdc.europa.eu/en/measles/facts'
+            target='_blank'>[Factsheet about measles]</a>. Communities with
+            higher contact rates — for example populations with higher
+            population density or larger households
+            <a href='https://pmc.ncbi.nlm.nih.gov/articles/PMC8765757/'
+            target='_blank'>[Social contact patterns and implications for
+            infectious disease transmission – a systematic review and
+            meta-analysis of contact surveys | eLife]</a> — may have higher
+            R<sub>0</sub>. The probability of infection given contact with an
+            infectious individuals is very high for measles; the household
+            attack rate is estimated to be 90% among unvaccinated contacts
+            <a href='https://www.cdc.gov/yellow-book/hcp/travel-associated-infections-diseases/measles-rubeola.html#:~:text=Measles%20is%20among%20the%20most,global%20eradication%20of%20measles%20feasible'
+            target='_blank'>[CDC Yellow Book: Measles (Rubeola)]</a>.
             </li>
 
-            <li style="font-size:14px;">The latent period is generally
-            estimated to be around 11 days
-            <a href='https://www.cdc.gov/measles/hcp/communication-resources/clinical-diagnosis-fact-sheet.html' target='_blank'>[Measles Clinical Diagnosis Fact Sheet | Measles (Rubeola) | CDC]</a>.
+            <li style="font-size:14px;">
+            The latent period is generally estimated to be around 11 days
+            <a href='https://www.cdc.gov/measles/hcp/communication-resources/clinical-diagnosis-fact-sheet.html'
+            target='_blank'>[Measles Clinical Diagnosis Fact Sheet | Measles
+            (Rubeola) | CDC]</a>.
             </li>
 
-            <li style="font-size:14px;">The infectious period is generally
-            estimated to be around 9 days, with an upper bound of 11 days
-            <a href='https://www.cdc.gov/measles/hcp/communication-resources/clinical-diagnosis-fact-sheet.html' target='_blank'>[Measles Clinical Diagnosis Fact Sheet | Measles (Rubeola) | CDC]</a>.
+            <li style="font-size:14px;">
+            The infectious period is generally estimated to be around 9 days,
+            with an upper bound of 11 days
+            <a href='https://www.cdc.gov/measles/hcp/communication-resources/clinical-diagnosis-fact-sheet.html'
+            target='_blank'>[Measles Clinical Diagnosis Fact Sheet | Measles
+            (Rubeola) | CDC]</a>.
             </li>
 
-            <li style="font-size:14px;">Measles rash onset is generally
-            estimated to be on day 5 of this infectious period
-            <a href='https://www.cdc.gov/measles/hcp/communication-resources/clinical-diagnosis-fact-sheet.html' target='_blank'>[Measles Clinical Diagnosis Fact Sheet | Measles (Rubeola) | CDC]</a>.
-            In this model, isolation when sick is assumed to start halfway through the infectious period.
+            <li style="font-size:14px;">
+            Measles rash onset is generally estimated to be on day 5 of this
+            infectious period
+            <a href='https://www.cdc.gov/measles/hcp/communication-resources/clinical-diagnosis-fact-sheet.html'
+            target='_blank'>[Measles Clinical Diagnosis Fact Sheet | Measles
+            (Rubeola) | CDC]</a>. In this model, isolation when sick is assumed
+            to start halfway through the infectious period.
             </li>
 
-            <li style="font-size:14px;"> We assume vaccine efficacy for individuals
-            vaccinated during the campaign is 93%, the estimate for one dose of MMR
-            <a href='https://www.cdc.gov/measles/vaccines/index.html?CDC_AA_refVal=https%3A%2F%2Fwww.cdc.gov%2Fvaccines%2Fvpd%2Fmmr%2Fpublic%2Findex.html' target='_blank'>[MMR Vaccine Information]</a>.
+            <li style="font-size:14px;">
+            We assume vaccine efficacy for individuals vaccinated during the
+            campaign is 93%, the estimate for one dose of MMR
+            <a href='https://www.cdc.gov/measles/vaccines/index.html?CDC_AA_refVal=https%3A%2F%2Fwww.cdc.gov%2Fvaccines%2Fvpd%2Fmmr%2Fpublic%2Findex.html'
+            target='_blank'>[MMR Vaccine Information]</a>.
             </li>
 
-            <li style="font-size:14px;"> We assume protection against infection for individuals
-            with prior infection or vaccination at the start of the simulation is on average 97% for the population, the estimate for two doses of MMR
-            <a href='https://www.cdc.gov/measles/vaccines/index.html?CDC_AA_refVal=https%3A%2F%2Fwww.cdc.gov%2Fvaccines%2Fvpd%2Fmmr%2Fpublic%2Findex.html' target='_blank'>[MMR Vaccine Information]</a>.
+            <li style="font-size:14px;">
+            We assume protection against infection for individuals with prior
+            infection or vaccination at the start of the simulation is on
+            average 97% for the population, the estimate for two doses of MMR
+            <a href='https://www.cdc.gov/measles/vaccines/index.html?CDC_AA_refVal=https%3A%2F%2Fwww.cdc.gov%2Fvaccines%2Fvpd%2Fmmr%2Fpublic%2Findex.html'
+            target='_blank'>[MMR Vaccine Information]</a>.
             </li>
 
-            <li style="font-size:14px;">Isolation when sick is estimated to be
-            approximately 75% effective at reducing transmission when comparing
-            people who do isolate when sick to people who do not
-            <a href='https://academic.oup.com/cid/article/75/1/152/6424734' target='_blank'>[Impact of Isolation and Exclusion as a Public Health Strategy to Contain Measles Virus Transmission During a Measles Outbreak | Clinical Infectious Diseases | Oxford Academic]</a>.
-            In this model, since isolation starts only at rash onset, isolation
-            reduces transmission by 100% during the second half of the
+            <li style="font-size:14px;">
+            Isolation when sick is estimated to be approximately 75% effective
+            at reducing transmission when comparing people who do isolate when
+            sick to people who do not
+            <a href='https://academic.oup.com/cid/article/75/1/152/6424734'
+            target='_blank'>[Impact of Isolation and Exclusion as a Public
+            Health Strategy to Contain Measles Virus Transmission During a
+            Measles Outbreak | Clinical Infectious Diseases | Oxford Academic]
+            </a>. In this model, since isolation starts only at rash onset,
+            isolation reduces transmission by 100% during the second half of the
             infectious period, leading to a reduction of 50% overall.
             </li>
 
             <li style="font-size:14px;">
-            Quarantine for people who are unvaccinated but have been
-            exposed is estimated to be 44-76% effective at reducing transmission
-            when comparing those who do quarantine to those who do not.
-            We assume a 60% reduction in transmission, which is the mean of this range.
-            <a href='https://academic.oup.com/cid/article/75/1/152/6424734' target='_blank'>[Impact of Isolation and Exclusion as a Public Health Strategy to Contain Measles Virus Transmission During a Measles Outbreak | Clinical Infectious Diseases | Oxford Academic]</a>
+            Quarantine for people who are unvaccinated but have been exposed is
+            estimated to be 44-76% effective at reducing transmission when
+            comparing those who do quarantine to those who do not. We assume a
+            60% reduction in transmission, which is the mean of this range.
+            <a href='https://academic.oup.com/cid/article/75/1/152/6424734'
+            target='_blank'>[Impact of Isolation and Exclusion as a Public
+            Health Strategy to Contain Measles Virus Transmission During a
+            Measles Outbreak | Clinical Infectious Diseases | Oxford Academic]
+            </a>
             </li>
 
             <li style="font-size:14px;">
             The infection hospitalization ratio (IHR) has been estimated at 20%
-            in past outbreaks, but we allow users to vary this value between 5% and 25%
-            <a href='https://www.cdc.gov/measles/signs-symptoms/index.html' target='blank'>[Measles Symptoms and Complications | Measles (Rubeola) | CDC]</a>.
+            in past outbreaks, but we allow users to vary this value between 5%
+            and 25%
+            <a href='https://www.cdc.gov/measles/signs-symptoms/index.html'
+            target='blank'>[Measles Symptoms and Complications | Measles
+            (Rubeola) | CDC]</a>.
             </li>
             </ul>
             </p>
