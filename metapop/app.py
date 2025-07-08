@@ -822,8 +822,24 @@ def app(replicates=20):
                 ),
             )
         )
+        vaxbox = (
+            alt.Chart(
+                pd.DataFrame(
+                    {
+                        "x_start": [vax_start],
+                        "x_end": [vax_end],
+                    }
+                )
+            )
+            .mark_rect(opacity=0.1, color="#20419a")
+            .encode(
+                x=alt.X("x_start:Q"),
+                x2="x_end:Q",
+            )
+        )
 
-        chart = chart + vax1 + vax2
+
+        chart = chart + vax1 + vax2 + vaxbox
 
     # Add bold line for median trajectory
     ave_line = (
