@@ -845,8 +845,6 @@ def app(replicates=20):
     )
     chart = chart + ave_line
 
-    
-
     # Add annotation if no interventions are selected
     if interventions == "Off":
         annotation = (
