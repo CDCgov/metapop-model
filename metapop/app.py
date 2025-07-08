@@ -781,22 +781,6 @@ def app(replicates=20):
 
     # If vaccines administered > 0, add vax schedule to plot
     if edited_parms2["total_vaccine_uptake_doses"] > 0:
-        end_time1 = ""
-        end_time2 = ""
-        if time_label_short == ": week ":
-            vax_start_float = vax_start
-            vax_end_float = vax_end
-            vax_start_round = np.floor(vax_start)
-            vax_end_round = np.floor(vax_end)
-            vax_start_float = vax_start_float - vax_start_round
-            vax_end_float = vax_end_float - vax_end_round
-            vax_start_days = int(vax_start_float * 7)
-            vax_end_days = int(vax_end_float * 7)
-            if vax_start_float != 0:
-                end_time1 = ", day " + str(vax_start_days)
-            if vax_end_float != 0:
-                end_time2 = ", day " + str(vax_end_days)
-
         vax1 = (
             alt.Chart(
                 pd.DataFrame(
@@ -811,8 +795,7 @@ def app(replicates=20):
                 tooltip=alt.value(
                     "Vaccine Campaign Start"
                     + time_label_short
-                    + str(int(vax_start))
-                    + end_time1
+                    + str(round(vax_start, 2))
                 ),
             )
         )
@@ -828,33 +811,19 @@ def app(replicates=20):
             .mark_rule(color="#20419a", strokeDash=[3, 5])
             .encode(
                 x=alt.X("x_end:Q"),  # End position of the box
+                color=alt.Color(
+                    title="Vaccine Campaign",
+                    scale=alt.Scale(
+                        range=["#20419a"],
+                    ),
+                ),
                 tooltip=alt.value(
-                    "Vaccine Campaign End"
-                    + time_label_short
-                    + str(int(vax_end))
-                    + end_time2
+                    "Vaccine Campaign End" + time_label_short + str(round(vax_end, 2))
                 ),
             )
         )
 
-        vaxbox = (
-            alt.Chart(
-                pd.DataFrame(
-                    {
-                        "x_start": [vax_start],
-                        "x_end": [vax_end],
-                    }
-                )
-            )
-            .mark_rect(opacity=0.1, color="#20419a")
-            .encode(
-                x=alt.X("x_start:Q"),
-                x2="x_end:Q",
-                tooltip=alt.value(None),
-            )
-        )
-
-        chart = chart + vax1 + vax2 + vaxbox
+        chart = chart + vax1 + vax2
 
     # Add bold line for median trajectory
     ave_line = (
@@ -875,6 +844,8 @@ def app(replicates=20):
         )
     )
     chart = chart + ave_line
+
+    
 
     # Add annotation if no interventions are selected
     if interventions == "Off":
