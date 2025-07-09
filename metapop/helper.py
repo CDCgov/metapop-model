@@ -283,7 +283,7 @@ def initialize_population(steps, groups, parms):
             * parms["initial_vaccine_coverage"][group]
             * parms["vaccine_efficacy_2_dose"]
         )  # V
-        # initial infections are all in the pre-rash compartment
+        # introductions are all in the pre-rash compartment
         u_i[Ind.I1.value] = parms["I0"][group]
 
         u_i[Ind.SV.value] = int(

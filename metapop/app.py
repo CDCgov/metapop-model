@@ -204,7 +204,9 @@ def app(replicates=20):
         session_state_keys2 = get_session_state_idkeys(2)  # scenario 2
 
         # Customize helper texts for clarity
-        helpers["I0"][0] = "The model currently has a maximum of 10 initial infections."
+        helpers["I0"][0] = (
+            "The model allows for a maximum of 10 infections introduced in the population."
+        )
         helpers["pop_sizes"][0] = (
             "The model currently has a minimum of 1,000 people and a maximum of 100,000 people. As population sizes get larger, the assumption of a well-mixed population becomes less valid."
         )

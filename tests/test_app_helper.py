@@ -217,7 +217,7 @@ def test_rescale_prop_vax():
     parms = {
         "pop_sizes": 100,  # Population sizes for 3 groups
         "initial_vaccine_coverage": 0.89,  # Initial vaccine coverage for each group
-        "I0": 1,  # Initial infections for each group
+        "I0": 1,  # Introduced infections for each group
         "total_vaccine_uptake_doses": 0.5,  # Proportional vaccine uptake in percentage
     }
 

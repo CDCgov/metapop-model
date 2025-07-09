@@ -289,9 +289,9 @@ def get_show_parameter_mapping(parms=None):
         pop_sizes_0="Size of large population",
         pop_sizes_1="Size of small population 1",
         pop_sizes_2="Size of small population 2",
-        I0_0="Initial infections in large population",
-        I0_1="Initial infections in small population 1",
-        I0_2="Initial infections in small population 2",
+        I0_0="Infections introduced in the large population",
+        I0_1="Infections introduced in small population 1",
+        I0_2="Infections introduced in small population 2",
         # vaccine_uptake = "Enable vaccine uptake",
         total_vaccine_uptake_doses="Percent of people without prior immunity that get vaccinated",
         vaccine_uptake_start_day="Start of vaccination campaign (days after introduction)",
@@ -318,7 +318,7 @@ def get_show_parameter_mapping(parms=None):
     if parms is not None and isinstance(parms, dict):
         if parms["n_groups"] == 1:
             show_mapping["pop_sizes_0"] = "Population Size"
-            show_mapping["I0_0"] = "Initial infections"
+            show_mapping["I0_0"] = "Infections introduced"
             show_mapping["initial_vaccine_coverage_0"] = "Baseline immunity"
 
     return show_mapping
@@ -881,9 +881,9 @@ def get_helpers(parms=None):
         latent_duration="The number of days from when a person is infected to when they become infectious.",
         infectious_duration="The number of days a person who is infected with measles is infectious. For measles, rash onset is halfway through the infectious period.",
         I0=[
-            "Initial infections in large population",
-            "Initial infections in small population 1",
-            "Initial infections in small population 2",
+            "Introductions in large population",
+            "Introductions in small population 1",
+            "Introductions in small population 2",
         ],
         initial_vaccine_coverage=[
             "Baseline immunity in large population",

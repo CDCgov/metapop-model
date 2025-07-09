@@ -173,7 +173,7 @@ def test_pop_initialization():
         atol=1e-8,
     )
 
-    # initial infections
+    # Introduced infections
     assert I1[0][0] == parms["I0"][0]
     assert I1[0][1] == parms["I0"][1]
 
