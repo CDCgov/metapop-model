@@ -890,19 +890,19 @@ def get_helpers(parms=None):
             "Baseline immunity in small population 1",
             "Baseline immunity in small population 2",
         ],
-        vaccine_uptake_start_day="Number of days after introduction until the vaccination campaign starts (for example, 0 days corresponds to day 1 in the model when infections are imported to the community; 99 days after corresponds to day 100). Defaults to day 8 (1 week after measles importation), assuming that most communities take at least few days to roll out a vaccination campaign.",
+        vaccine_uptake_start_day="Number of days after introduction until the vaccination campaign starts (for example, 4 days corresponds to day 5 in the model when introduced infections have rash onset, on average). Defaults to 11 days (1 week after introduced infections have rash onset on average), assuming that most communities take at least a week to roll out a vaccination campaign.",
         vaccine_uptake_duration_days="The vaccine doses are distributed evenly throughout the specified duration of time (i.e., the same number of vaccines will be distributed on each day). If the duration results in the vaccine campaign ending after the last simulation day (day 365), the campaign will end on the last simulation day and remaining doses are administered on that day.",
         total_vaccine_uptake_doses="In this model, we administer one dose of the MMR vaccine per person vaccinated during the campaign, with 93% effectiveness as indicated by vaccine studies.",
         vaccinated_group="Population receiving the vaccine",
         isolation_on="If turned on, reduces transmission of symptomatic individuals who adhere to isolation measures (the percentage as selected under “Isolation adherence”) by 100% during the symptomatic period (see Detailed Methods).",
         isolation_adherence="Percent of symptomatic individuals who follow isolation guidance. Only used if isolation is turned on. To modify this parameter, enable isolation.",
         isolation_reduction="Percent reduction in transmission due to isolation. Only used if isolation is turned on.",
-        symptomatic_isolation_start_day="Number of days after introduction until the isolation intervention starts. Only used if isolation is turned on. Defaults to day 8 (1 week after measles importation), assuming that most communities will begin isolation practices alongside the vaccination campaign.",
+        symptomatic_isolation_start_day="Number of days after introduction until the isolation intervention starts (for example, 4 days corresponds to day 5 in the model when introduced infections have rash onset, on average). Defaults to 11 days (1 week after introduced infections have rash onset on average), assuming that most communities take at least a week to begin isolation, alongside the vaccination campaign.",
         symptomatic_isolation_duration_days="Duration of symptomatic isolation intervention. After the isolation intervention duration ends, all infectious individuals will resume normal contact with others. Only used if isolation is turned on.",
         pre_rash_isolation_on="If turned on, reduces transmission of individuals who are exposed but pre-symptomatic and adhere to quarantine measures (the percentage as selected under “Quarantine adherence”) by 60% during the pre-symptomatic period (see Detailed Methods)",
         pre_rash_isolation_adherence="Percent of pre-symptomatic individuals who follow quarantine guidance.  Only used if quarantine is turned on. To modify this parameter, enable quarantine and isolation.",
         pre_rash_isolation_reduction="Percent reduction in transmission due quarantine. Only used if quarantine is turned on.",
-        pre_rash_isolation_start_day="Number of days after introduction until the quarantine intervention starts. Only used if quarantine is turned on. Defaults to day 8 (1 week after measles importation), assuming that most communities will begin quarantine practices alongside the vaccination campaign",
+        pre_rash_isolation_start_day="Number of days after introduction until the quarantine intervention starts (for example, 4 days corresponds to day 5 in the model when introduced infections have rash onset, on average). Only used if quarantine is turned on. Defaults to 11 days (1 week after introduced infections have rash onset on average), assuming that most communities take at least a week to begin quarantine, alongside the vaccination campaign.",
         pre_rash_isolation_duration_days="Duration of quarantine intervention. After the quarantine intervention duration, all exposed individuals will resume normal contact with others. Only used if quarantine is turned on.",
         tf="Number of time steps to simulate",
         IHR="Proportion of infected individuals who are hospitalized",
@@ -1573,7 +1573,7 @@ def totals_same_by_ks(
     combined_results: pl.DataFrame, scenario_names: list, p_threshold: float = 0.05
 ) -> bool:
     """
-    Perform a 2 sample Kolmogorov-Smirnov test to compare the total cases
+    Perform a 2 sample Kolmogorov-Smirnov test to compare the total infections
     between two scenarios.
 
     Args:
@@ -1588,7 +1588,7 @@ def totals_same_by_ks(
         - A value of 0.05 would reject the null hyptohesis that the two distributions are independent samples of the same distribution
         - Higher threshold values will increase the confidence that the two distirbutions are identical.
     """
-    # Get total cases for each scenario
+    # Get total infections for each scenario
     scenario_0 = combined_results.filter(pl.col("Scenario") == scenario_names[0])[
         "Total"
     ].to_numpy()

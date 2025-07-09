@@ -160,7 +160,13 @@ def app(replicates=20):
 
         # Get widget types, min/max values, steps, helpers, formats, and keys for widgets
         widget_types = get_widget_types()
-        min_values = dict(pop_sizes=[1000, 100, 100], I0=[1, 0, 0])
+        min_values = dict(
+            pop_sizes=[1000, 100, 100],
+            I0=[1, 0, 0],
+            vaccine_uptake_start_day=4,
+            symptomatic_isolation_start_day=4,
+            pre_rash_isolation_start_day=4,
+        )
         min_values = get_min_values(min_values)
         max_values = dict(
             initial_vaccine_coverage=[0.99, 0.99, 0.99],
@@ -273,7 +279,9 @@ def app(replicates=20):
             "scenario with no active interventions. Interventions can be applied "
             "independently or in combination with each other. "
             "The results are compared to a baseline scenario that does not "
-            "have a vaccination campaign, nor isolation or quarantine interventions incorporated."
+            "have a vaccination campaign, nor isolation or quarantine interventions incorporated. "
+            "In this model, day 1 corresponds to when infected people are introduced into the community and day 5 is the average day of rash onset "
+            "for introduced infections (see Detailed Methods). "
         )
 
         # --- Intervention scenario Parameters ---
@@ -608,7 +616,7 @@ def app(replicates=20):
             help="This number is calculated based on user input for the percentage of the non-immune population that gets vaccinated during the campaign. If the campaign starts late, the actual number of doses administered may be lower due to there being not enough eligible individuals left to vaccinate.",
         )
 
-    # Save a copy of the full results for summary tables so that results1 and results2 can be modified for visualuzation
+    # Save a copy of the full results for summary tables so that results1 and results2 can be modified for visualization
     fullresults1 = copy.deepcopy(results1)
     fullresults2 = copy.deepcopy(results2)
 
@@ -824,8 +832,11 @@ def app(replicates=20):
     # --- Chart Description ---
     st.markdown(
         '<p style="font-size:14px;">'
-        "Each thin line represents an individual simulation of the stochastic "
-        "model. All simulations within a given scenario (i.e., shown with "
+        "Each thin line represents counts of new daily or weekly infections "
+        "from an individual simulation of the stochastic model. "
+        "Introduced infections arrive in the community on day 1 and have an average rash onset "
+        "time on day 5, the first day at which interventions can begin. "
+        "All simulations within a given scenario (i.e., shown with "
         "the same color) are run under the same set of parameters, and "
         "differences between each individual simulation are due to random "
         "variation in contact rates. Bolded lines show the simulation that possessed "
@@ -845,8 +856,8 @@ def app(replicates=20):
             (
                 "No Interventions:<br><ul>"
                 f"<li> Vaccines administered during campaign: {int(edited_parms1['total_vaccine_uptake_doses'])}</li>"
-                f"<li> Adherence to quarantine among pre-symptomatic infectious individuals: {int(edited_parms1['pre_rash_isolation_adherence'] * 100)}%</li>"
-                f"<li> Adherence to isolation among symptomatic infectious individuals:  {int(edited_parms1['isolation_adherence'] * 100)}%</li></ul>"
+                f"<li> Adherence to isolation among symptomatic infectious individuals:  {int(edited_parms1['isolation_adherence'] * 100)}%</li>"
+                f"<li> Adherence to quarantine among pre-symptomatic infectious individuals: {int(edited_parms1['pre_rash_isolation_adherence'] * 100)}%</li></ul>"
             ),
             background_color="#feeadf",
             font_color="#8f3604",
@@ -862,17 +873,27 @@ def app(replicates=20):
             ):
                 callout_text += "<li> Vaccines administered during campaign: 0</li>"
             else:
-                callout_text += f"<li> Vaccines administered during campaign: {mean_doses_administered} between day {min(schedule.keys())} and day {max(schedule.keys())}</li>"
-            callout_text += f"<li> Adherence to quarantine among pre-symptomatic infectious individuals: {pre_rash_isolation_adherence_pct}%"
-            if pre_rash_isolation_adherence_pct > 0:
-                callout_text += f" from day {edited_parms2['pre_rash_isolation_start_day']+1} through day {pre_rash_isolation_end_day}</li>"
-            else:
-                callout_text += "</li>"
+                callout_text += (
+                    f"<li> Vaccines administered during campaign: {mean_doses_administered} "
+                    f"between day {min(schedule.keys())} and day {max(schedule.keys())}</li>"
+                )
             callout_text += f"<li> Adherence to isolation among symptomatic infectious individuals: {isolation_adherence_pct}%"
             if isolation_adherence_pct > 0:
-                callout_text += f" from day {edited_parms2['symptomatic_isolation_start_day']+1} through day {symptomatic_isolation_end_day}</li></ul>"
+                callout_text += (
+                    f" from day {edited_parms2['symptomatic_isolation_start_day']+1} "
+                    f"through day {symptomatic_isolation_end_day}</li>"
+                )
             else:
-                callout_text += "</li></ul>"
+                callout_text += "</li>"
+            callout_text += f"<li> Adherence to quarantine among pre-symptomatic infectious individuals: {pre_rash_isolation_adherence_pct}%"
+            if pre_rash_isolation_adherence_pct > 0:
+                callout_text += (
+                    f" from day {edited_parms2['pre_rash_isolation_start_day']+1} "
+                    f"through day {pre_rash_isolation_end_day}</li>"
+                )
+            else:
+                callout_text += "</li>"
+            callout_text += f"<i>All intervention start times are relative to when infections are introduced into the community (day 1). The minimum intervention start time is day 5 (when introduced infections have rash onset, on average).</i>"
 
             flexible_callout(
                 callout_text,
@@ -880,7 +901,6 @@ def app(replicates=20):
                 font_color="#001833",
                 container=columns[1],
             )
-
     # Prepare outbreak summary table
     fullresults1 = fullresults1.with_columns(
         pl.lit(scenario_names[0]).alias("Scenario")
@@ -984,6 +1004,7 @@ def app(replicates=20):
             different epidemic outcomes. We therefore run 100 individual
             simulations to produce a range of possible outcomes and use these
             simulations to estimate outcome uncertainty for each parameter set.
+
             <br><br>
 
             <p style="font-size:14px;">
@@ -1001,8 +1022,17 @@ def app(replicates=20):
             compared to a baseline scenario without active interventions ("No
             Interventions". The start day and duration of all three intervention
             measures (isolation, quarantine, and vaccination) can be specified by
-            the user. By default, these interventions begin one week after
-            measles introduction and last through the rest of the simulation.
+            the user.
+            <br><br>
+
+            <p style="font-size:14px;">
+            In this model, day 1 corresponds to when infections arrive in the community.
+            Introduced infections are assumed to arrive in their pre-rash infectious stage and are modeled to become symptomatic, on average, 4 days later on day 5.
+            In this model day 5 is the earliest day most communities would be aware of measles cases
+            and begin public health interventions. By default, we assume communities likely take at least a
+            week to detect cases and coordinate campaigns to respond to an outbreak, so the
+            default start day for each intervention is 11 days after the infections are
+            introduced to the community (day 12).
             <br><br>
 
             <p style="font-size:14px;">
@@ -1010,7 +1040,13 @@ def app(replicates=20):
             total measles infections from the "Interventions" scenario differ
             from the total measles infections of the "No Interventions" baseline
             scenario and present information if scenario results are
-            indistinguishable.<br><br>
+            indistinguishable.
+            <br><br>
+
+            <p style="font-size:14px;">
+            This model does not account for case ascertainment of infections,
+            which may vary over time during an outbreak.
+            <br><br>
 
             <b style="font-size:14px;">Assumptions</b>
             <p style="font-size:14px;">We note that this modeling approach
