@@ -779,6 +779,8 @@ def app(replicates=20):
         .properties(title=title, width=800, height=400)
     )
 
+    vaccination_campaign_color = "#961c4d"
+
     # If vaccines administered > 0, add vax schedule to plot
     if edited_parms2["total_vaccine_uptake_doses"] > 0:
         vax1 = (
@@ -789,7 +791,7 @@ def app(replicates=20):
                     }
                 )
             )
-            .mark_rule(color="#20419a", strokeDash=[3, 5])
+            .mark_rule(color=vaccination_campaign_color, strokeDash=[3, 5])
             .encode(
                 x=alt.X("x_start:Q"),
                 tooltip=alt.value(
@@ -808,7 +810,7 @@ def app(replicates=20):
                     }
                 )
             )
-            .mark_rule(color="#20419a", strokeDash=[3, 5])
+            .mark_rule(color=vaccination_campaign_color, strokeDash=[3, 5])
             .encode(
                 x=alt.X("x_end:Q"),  # End position of the box
                 color=alt.Color(
@@ -823,7 +825,24 @@ def app(replicates=20):
             )
         )
 
-        chart = chart + vax1 + vax2
+        vaxbox = (
+            alt.Chart(
+                pd.DataFrame(
+                    {
+                        "x_start": [vax_start],
+                        "x_end": [vax_end],
+                    }
+                )
+            )
+            .mark_rect(opacity=0.1, color=vaccination_campaign_color)
+            .encode(
+                x=alt.X("x_start:Q"),
+                x2="x_end:Q",
+                tooltip=alt.value(None),
+            )
+        )
+
+        chart = chart + vax1 + vax2 + vaxbox
 
     # Add bold line for median trajectory
     ave_line = (
@@ -876,7 +895,7 @@ def app(replicates=20):
         "variation in contact rates. Bolded lines show the simulation that possessed "
         "the median time of peak prevalence across all epidemic trajectories for "
         "each scenario. If a vaccination campaign is activated, the time period over "
-        "which vaccines are distributed is shown by two dashed blue lines. The model does not account "
+        "which vaccines are distributed is shown by a shaded window between two dashed lines. The model does not account "
         "for case ascertainment, so the number of new rash onsets represents the true number of infections "
         "in the population. "
         "</p>",
