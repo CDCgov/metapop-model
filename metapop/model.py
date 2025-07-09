@@ -291,7 +291,7 @@ class SEIRModel:
             new_I1 = I1 + e2v_i1[group] + e2_i1[group] - i1_i2[group]
             new_I2 = I2 + i1_i2[group] - i2_r[group]
             new_R = R + i2_r[group]
-            new_Y = Y + sv_e1v[group] + s_e1[group]
+            new_Y = Y + i1_i2[group]
             new_X = X + s_sv[group] + s_v[group] + e_v[group]
             new_u.append(
                 [

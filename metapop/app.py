@@ -832,7 +832,7 @@ def app(replicates=20):
     # --- Chart Description ---
     st.markdown(
         '<p style="font-size:14px;">'
-        "Each thin line represents counts of new daily or weekly infections "
+        "Each thin line represents counts of new daily or weekly rash onsets "
         "from an individual simulation of the stochastic model. "
         "Introduced infections arrive in the community on day 1 and have an average rash onset "
         "time on day 5, the first day at which interventions can begin. "
@@ -1026,13 +1026,11 @@ def app(replicates=20):
             <br><br>
 
             <p style="font-size:14px;">
-            In this model, day 1 corresponds to when infections arrive in the community.
-            Introduced infections are assumed to arrive in their pre-rash infectious stage and are modeled to become symptomatic, on average, 4 days later on day 5.
+            In this model, day 1 corresponds to when introduced infections arrive in the community.
+            Introduced infections are assumed to arrive in their pre-rash infectious stage and are
+            modeled to become symptomatic, on average, 4 days later on day 5.
             In this model day 5 is the earliest day most communities would be aware of measles cases
-            and begin public health interventions. By default, we assume communities likely take at least a
-            week to detect cases and coordinate campaigns to respond to an outbreak, so the
-            default start day for each intervention is 11 days after the infections are
-            introduced to the community (day 12).
+            and begin public health interventions.
             <br><br>
 
             <p style="font-size:14px;">
