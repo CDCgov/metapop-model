@@ -76,12 +76,22 @@ You can run the app in-browser only based on [stlite](https://github.com/whitphx
 ## Project Admin
 * Dina Mistry, uqx8@cdc.gov (CDC/IOD/ORR/CFA)
 * Paige Miller, yub1@cdc.gov (CDC/IOD/ORR/CFA)
-* Beau B. Bruce, lue7@cdc.gov (CDC/IOD/ORR/CFA) for the [stlite](https://github.com/whitphx/stlite) version
+* Kate Hudson, ryl8@cdc.gov (CDC/IOD/ORR/CFA)
 
-## Contributors
+## Additional Developers
 * Theresa Sheets, utg8@cdc.gov (CDC/IOD/ORR/CFA)
 * Will Koval, ad71@cdc.gov (CDC/IOD/ORR/CFA)
-* Kate Hudson, ryl8@cdc.gov (CDC/IOD/ORR/CFA)
+* Beau B. Bruce, lue7@cdc.gov (CDC/IOD/ORR/CFA) for the [stlite](https://github.com/whitphx/stlite) version
+
+## Other Contributors
+* Inga Holmdahl
+* Rebecca Kahn
+* Matt Biggerstaff
+* Rachel Slayton
+* Paul Gustanaduy
+* Gil Sharon
+* Scott Oleson
+
 
 ## General Disclaimer
 This repository was created for use by CDC programs to collaborate on public health related projects in support of the [CDC mission](https://www.cdc.gov/about/organization/mission.htm).  GitHub is not hosted by the CDC, but is a third party website used by CDC and its partners to share information and collaborate on software. CDC use of GitHub does not imply an endorsement of any one particular service, product, or enterprise.
