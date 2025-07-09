@@ -779,7 +779,8 @@ def app(replicates=20):
         .properties(title=title, width=800, height=400)
     )
 
-    vaccination_campaign_color = "#961c4d"
+    # vaccination_campaign_color = "#961c4d"
+    vaccination_campaign_color = "#209a79"
 
     # If vaccines administered > 0, add vax schedule to plot
     if edited_parms2["total_vaccine_uptake_doses"] > 0:
@@ -834,7 +835,7 @@ def app(replicates=20):
                     }
                 )
             )
-            .mark_rect(opacity=0.1, color=vaccination_campaign_color)
+            .mark_rect(opacity=0.25, color=vaccination_campaign_color)
             .encode(
                 x=alt.X("x_start:Q"),
                 x2="x_end:Q",
