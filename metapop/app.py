@@ -842,7 +842,9 @@ def app(replicates=20):
         "variation in contact rates. Bolded lines show the simulation that possessed "
         "the median time of peak prevalence across all epidemic trajectories for "
         "each scenario. If a vaccination campaign is activated, the time period over "
-        "which vaccines are distributed is shown by gray box."
+        "which vaccines are distributed is shown by gray box. The model does not account "
+        "for case ascertainment, so the number of new rash onsets represents the true number of infections "
+        "in the population. "
         "</p>",
         unsafe_allow_html=True,
     )
