@@ -5,7 +5,7 @@ import griddler.griddle
 import polars as pl
 import polars.selectors as cs
 
-from metapop import simulate
+from metapop import simulate_replicates
 
 if __name__ == "__main__":
     # setup output directory
@@ -15,7 +15,7 @@ if __name__ == "__main__":
     # Baseline + isolation -> 8
     parameter_sets = griddler.griddle.read("scripts/comparison/comparison_config.yaml")
 
-    results_all = griddler.run_squash(griddler.replicated(simulate), parameter_sets)
+    results_all = simulate_replicates(parameter_sets)
 
     results_all = results_all.with_columns(
         pl.col("initial_vaccine_coverage").list.get(0).alias("initial_vaccine_coverage")
