@@ -761,7 +761,9 @@ def app(replicates=20):
     # base Altair chart
     chart = alt.Chart(combined_alt_results).encode(x=alt.X(x, title=time_label))
 
-    vaccine_campaign_color = "209a79"
+    no_intervention_color = "#fb7e38"  # orange
+    intervention_color = "#20419a"  # blue
+    vaccine_campaign_color = "#209a79"
 
     trajectories = (
         chart.mark_line(opacity=0.35, strokeWidth=0.75, clip=True)
@@ -773,9 +775,10 @@ def app(replicates=20):
                 title="Scenario",
                 scale=alt.Scale(
                     domain=[scenario_names[0], scenario_names[1]],
-                    # range=["#FB7E38", "#0057b7"],
-                    range=["green", "goldenrod"],
+                    range=[no_intervention_color, intervention_color],
+                    # range=["green", "goldenrod"],
                 ),
+                legend=None,
             ),
             detail="replicate",
             # tooltip=["scenario", "t", outcome],
@@ -813,9 +816,13 @@ def app(replicates=20):
             title="Scenario",
             scale=alt.Scale(
                 domain=[scenario_names[0], scenario_names[1]],
-                range=["#cf4828", "#20419a"],
+                range=[
+                    no_intervention_color,
+                    intervention_color,
+                    # "#cf4828", "#20419a"
+                ],
             ),
-            legend=None,
+            # legend=None,
         ),
         # tooltip=["scenario", "t", outcome],
     )
@@ -836,8 +843,8 @@ def app(replicates=20):
         vax_window = (
             alt.Chart(vax_df)
             .mark_rect(
-                opacity=0.12,
-                color=f"#{vaccine_campaign_color}",
+                opacity=0.35,
+                color=vaccine_campaign_color,
             )
             .encode(
                 x=alt.X("x_start:Q", title=time_label),
@@ -847,7 +854,7 @@ def app(replicates=20):
                     legend=alt.Legend(title="Vaccine Campaign"),
                     scale=alt.Scale(
                         domain=["Vaccine campaign period"],
-                        range=[f"#{vaccine_campaign_color}"],
+                        range=[vaccine_campaign_color],
                     ),
                 ),
             )
@@ -862,7 +869,7 @@ def app(replicates=20):
         vax_lines = (
             alt.Chart(vax_lines_df)
             .mark_rule(
-                color=f"#{vaccine_campaign_color}",
+                color=vaccine_campaign_color,
                 strokeDash=[6, 4],
                 strokeWidth=2,
             )
