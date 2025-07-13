@@ -786,27 +786,6 @@ def app(replicates=20):
         .properties(title=title, width=800, height=400)
     )
 
-    # chart = (
-    #     alt.Chart(combined_alt_results)
-    #     .mark_line(opacity=0.3, strokeWidth=0.75, clip=True)
-    #     .encode(
-    #         x=alt.X(x, title=time_label),
-    #         y=alt.Y(outcome, title=outcome_option),
-    #         color=alt.Color(
-    #             "scenario",
-    #             title="Scenario",
-    #             scale=alt.Scale(
-    #                 domain=[scenario_names[0], scenario_names[1]],
-    #                 # range=["#FB7E38", "#0057b7"],
-    #                 range=["purple", "goldenrod"],
-    #             ),
-    #         ),
-    #         detail="replicate",
-    #         tooltip=["scenario", "t", outcome],
-    #     )
-    #     .properties(title=title, width=800, height=400)
-    # )
-
     #  Add bold line for median trajectory
     ave_chart = alt.Chart(combined_ave_results).encode(x=alt.X(x, title=time_label))
     ave_line = ave_chart.mark_line(opacity=1.0, strokeWidth=3.0, clip=True).encode(
@@ -826,8 +805,6 @@ def app(replicates=20):
         ),
         # tooltip=["scenario", "t", outcome],
     )
-
-    # chart = chart + ave_line
 
     # Add vaccine campaign period as a shaded box if applicable
     if edited_parms2["total_vaccine_uptake_doses"] > 0:
@@ -879,63 +856,37 @@ def app(replicates=20):
             )
         )
         vax = vax_window + vax_lines
-        # chart = chart + vax
+    else:
+        # If no vaccine campaign, set vax to an empty chart
+        vax = (
+            alt.Chart(pd.DataFrame({"x": []}))
+            .mark_line()
+            .encode(x=alt.X("x:Q", title=time_label))
+        )
 
-    # # Add vaccine campaign period as a shaded box if applicable
-    # if edited_parms2["total_vaccine_uptake_doses"] > 0:
-    #     vax = (
-    #         alt.Chart(
-    #             pd.DataFrame(
-    #                 {
-    #                     "x_start": [vax_start],
-    #                     "x_end": [vax_end],
-    #                 }
-    #             )
-    #         )
-    #         .mark_rect(opacity=0.1, color="grey")
-    #         .encode(
-    #             x=alt.X("x_start:Q", title=time_label),
-    #             x2="x_end:Q",
-    #         )
-    #     )
-    #     chart = chart + vax
-
-    # #  Add bold line for median trajectory
-    # combined_ave_results
-    # ave_line = (
-    #     alt.Chart(combined_ave_results.to_pandas())
-    #     .mark_line(opacity=1.0, strokeWidth=3.0, clip=True)
-    #     .encode(
-    #         x=alt.X(x, title=time_label),
-    #         y=alt.Y(outcome, title=outcome_option),
-    #         color=alt.Color(
-    #             "scenario",
-    #             title="Scenario",
-    #             scale=alt.Scale(
-    #                 domain=[scenario_names[0], scenario_names[1]],
-    #                 range=["#cf4828", "#20419a"],
-    #             ),
-    #         ),
-    #         tooltip=["scenario", "t", outcome],
-    #     )
-    # )
-    # chart = chart + ave_line
-
-    # # Add annotation if no interventions are selected
-    # if interventions == "Off":
-    #     annotation = (
-    #         alt.Chart(
-    #             pd.DataFrame(
-    #                 {"text": ["Use at least one intervention to compare scenarios"]}
-    #             )
-    #         )
-    #         .mark_text(align="center", baseline="top", color="grey", fontSize=18)
-    #         .encode(text="text:N", y=alt.value(10))
-    #     )
-    #     chart = chart + annotation
+    # Add annotation if no interventions are selected
+    if interventions == "Off":
+        annotation = (
+            alt.Chart(
+                pd.DataFrame(
+                    {"text": ["Use at least one intervention to compare scenarios"]}
+                )
+            )
+            .mark_text(align="center", baseline="top", color="grey", fontSize=18)
+            .encode(text="text:N", y=alt.value(10))
+        )
+    else:
+        # Add annotation for the vaccine campaign period
+        annotation = (
+            alt.Chart(pd.DataFrame({"text": [""]}))
+            .mark_text(align="center", baseline="top", color="grey", fontSize=18)
+            .encode(text="text:N", y=alt.value(10))
+        )
 
     # chart = chart.properties(padding={"top": 10, "bottom": 30, "left": 30, "right": 40})
-    layer = alt.layer(trajectories, ave_line, vax).resolve_scale(color="independent")
+    layer = alt.layer(trajectories, ave_line, vax, annotation).resolve_scale(
+        color="independent"
+    )
     chart_placeholder.altair_chart(layer, use_container_width=True)
 
     # --- Chart Description ---
