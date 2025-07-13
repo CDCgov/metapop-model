@@ -868,17 +868,7 @@ def app(replicates=20):
             )
             .encode(
                 x=alt.X("x:Q", title=time_label),
-                color=alt.Color(
-                    "Intervention:N",
-                    legend=alt.Legend(title="Vaccine Campaign"),
-                    scale=alt.Scale(
-                        domain=["Vaccine campaign start", "Vaccine campaign end"],
-                        range=[
-                            f"#{vaccine_campaign_color}",
-                            f"#{vaccine_campaign_color}",
-                        ],
-                    ),
-                ),
+                # Remove color encoding to avoid legend entry
             )
         )
         vax = vax_window + vax_lines
