@@ -1158,9 +1158,9 @@ def app(replicates=20):
             <b style="font-size:14px;">Assumptions</b>
             <p style="font-size:14px;">We note that this modeling approach
             makes several simplifying assumptions, including the following:</p>
-            <ul>
+            <ul style="margin-bottom: 20px;">
 
-            <li style="font-size:14px;">
+            <li style="font-size:14px; margin-bottom: 10px;">
             This is a homogenous mixing model without age or spatial structure,
             meaning all individuals have the same probability of contact with
             each other (also known as a well-mixed population model). In larger
@@ -1168,14 +1168,14 @@ def app(replicates=20):
             outbreak.
             </li>
 
-            <li style="font-size:14px;">
+            <li style="font-size:14px; margin-bottom: 10px;">
             The MMR vaccine is modeled as an "all-or-nothing" vaccine, meaning
             that it is perfectly effective for some people (corresponding to
             the efficacy for one or two doses of MMR) and has no efficacy for
             others.
             </li>
 
-            <li style="font-size:14px;">
+            <li style="font-size:14px; margin-bottom: 10px;">
             To initialize the population with existing immunity, users input a
             "baseline immunity" value. Because there is no age structure in the
             model, this value is assumed to account for existing vaccination
@@ -1188,7 +1188,7 @@ def app(replicates=20):
             into a separate state (Vaccinated but Susceptible).
             </li>
 
-            <li style="font-size:14px;">
+            <li style="font-size:14px; margin-bottom: 10px;">
             Vaccines administered during the vaccination campaign are assumed to
             be first doses of MMR. The user-defined vaccination campaign timing
             is defined by the vaccination start day (days after the initial
@@ -1203,7 +1203,7 @@ def app(replicates=20):
             vaccination uptake proportion input specified in the sidebar.
             </li>
 
-            <li style="font-size:14px;">
+            <li style="font-size:14px; margin-bottom: 10px;">
             We assume that both susceptible and exposed individuals who are not
             yet infectious are eligible to get vaccinated during the vaccination
             campaign. We also assume that exposed individuals are not yet aware
@@ -1216,7 +1216,7 @@ def app(replicates=20):
             number of individuals eligible for vaccination.
             </li>
 
-            <li style="font-size:14px;">
+            <li style="font-size:14px; margin-bottom: 10px;">
             Following the incubation period, we assume that infected individuals
             first enter a pre-rash infectious state before developing a rash and
             entering a separate infectious state defined by rash onset. We
@@ -1226,7 +1226,7 @@ def app(replicates=20):
             average 4.5 days.
             </li>
 
-            <li style="font-size:14px;">
+            <li style="font-size:14px; margin-bottom: 10px;">
             To incorporate quarantine measures based on potential exposure to
             infectious individuals, we model quarantine as a reduction in
             transmission from individuals in the pre-rash onset, infectious
@@ -1240,7 +1240,7 @@ def app(replicates=20):
             the Parameters section below.
             </li>
 
-            <li style="font-size:14px;">
+            <li style="font-size:14px; margin-bottom: 10px;">
             If individuals quarantine prior to rash onset, it's assumed that
             they will also isolate on rash onset. Thus, the model is constrained
             such that the proportion of individuals adhering to quarantine is
@@ -1249,7 +1249,7 @@ def app(replicates=20):
             </li>
 
             <b style="font-size:14px;">Model Parameters</b>
-            <li style="font-size:14px;">
+            <li style="font-size:14px; margin-bottom: 10px;">
             The basic reproductive number (R<sub>0</sub>), captures contact
             rates and the probability of infection given contact with an
             infectious individual. R<sub>0</sub> for measles is generally
@@ -1269,14 +1269,14 @@ def app(replicates=20):
             target='_blank'>[CDC Yellow Book: Measles (Rubeola)]</a>.
             </li>
 
-            <li style="font-size:14px;">
+            <li style="font-size:14px; margin-bottom: 10px;">
             The latent period is generally estimated to be around 11 days
             <a href='https://www.cdc.gov/measles/hcp/communication-resources/clinical-diagnosis-fact-sheet.html'
             target='_blank'>[Measles Clinical Diagnosis Fact Sheet | Measles
             (Rubeola) | CDC]</a>.
             </li>
 
-            <li style="font-size:14px;">
+            <li style="font-size:14px; margin-bottom: 10px;">
             The infectious period is generally estimated to be around 9 days,
             with an upper bound of 11 days
             <a href='https://www.cdc.gov/measles/hcp/communication-resources/clinical-diagnosis-fact-sheet.html'
@@ -1284,7 +1284,7 @@ def app(replicates=20):
             (Rubeola) | CDC]</a>.
             </li>
 
-            <li style="font-size:14px;">
+            <li style="font-size:14px; margin-bottom: 10px;">
             Measles rash onset is generally estimated to be on day 5 of this
             infectious period
             <a href='https://www.cdc.gov/measles/hcp/communication-resources/clinical-diagnosis-fact-sheet.html'
@@ -1293,14 +1293,14 @@ def app(replicates=20):
             to start halfway through the infectious period.
             </li>
 
-            <li style="font-size:14px;">
+            <li style="font-size:14px; margin-bottom: 10px;">
             We assume vaccine efficacy for individuals vaccinated during the
             campaign is 93%, the estimate for one dose of MMR
             <a href='https://www.cdc.gov/measles/vaccines/index.html?CDC_AA_refVal=https%3A%2F%2Fwww.cdc.gov%2Fvaccines%2Fvpd%2Fmmr%2Fpublic%2Findex.html'
             target='_blank'>[MMR Vaccine Information]</a>.
             </li>
 
-            <li style="font-size:14px;">
+            <li style="font-size:14px; margin-bottom: 10px;">
             We assume protection against infection for individuals with prior
             infection or vaccination at the start of the simulation is on
             average 97% for the population, the estimate for two doses of MMR
@@ -1308,7 +1308,7 @@ def app(replicates=20):
             target='_blank'>[MMR Vaccine Information]</a>.
             </li>
 
-            <li style="font-size:14px;">
+            <li style="font-size:14px; margin-bottom: 10px;">
             Isolation when sick is estimated to be approximately 75% effective
             at reducing transmission when comparing people who do isolate when
             sick to people who do not
@@ -1321,7 +1321,7 @@ def app(replicates=20):
             infectious period, leading to a reduction of 50% overall.
             </li>
 
-            <li style="font-size:14px;">
+            <li style="font-size:14px; margin-bottom: 10px;">
             Quarantine for people who are unvaccinated but have been exposed is
             estimated to be 44-76% effective at reducing transmission when
             comparing those who do quarantine to those who do not. We assume a
@@ -1333,7 +1333,7 @@ def app(replicates=20):
             </a>
             </li>
 
-            <li style="font-size:14px;">
+            <li style="font-size:14px; margin-bottom: 10px;">
             The infection hospitalization ratio (IHR) has been estimated at 20%
             in past outbreaks, but we allow users to vary this value between 5%
             and 25%
