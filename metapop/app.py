@@ -832,7 +832,7 @@ def app(replicates=20):
                 "Intervention": ["Vaccine campaign period"],
             }
         )
-        # Transparent window for campaign period
+        # Transparent window for campaign period, with legend label
         vax_window = (
             alt.Chart(vax_df)
             .mark_rect(
@@ -842,6 +842,14 @@ def app(replicates=20):
             .encode(
                 x=alt.X("x_start:Q", title=time_label),
                 x2="x_end:Q",
+                color=alt.Color(
+                    "Intervention:N",
+                    legend=alt.Legend(title="Vaccine Campaign"),
+                    scale=alt.Scale(
+                        domain=["Vaccine campaign period"],
+                        range=[f"#{vaccine_campaign_color}"],
+                    ),
+                ),
             )
         )
         # Vertical lines for campaign start/end
