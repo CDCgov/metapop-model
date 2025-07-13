@@ -669,7 +669,6 @@ def app(replicates=20):
         alt_results2 = results2
         x = "t:Q"
         time_label = "Time (days)"
-        time_label_short = " (day): "
         vax_start = min(schedule.keys())
         vax_end = max(schedule.keys())
     elif outcome_option in ["Weekly Incidence", "Weekly Cumulative Incidence"]:
@@ -677,7 +676,6 @@ def app(replicates=20):
         alt_results2 = interval_results2
         x = "interval_t:Q"
         time_label = "Time (weeks)"
-        time_label_short = ": week "
         vax_start = min(schedule.keys()) / interval
         vax_end = max(schedule.keys()) / interval
 
@@ -759,129 +757,181 @@ def app(replicates=20):
         title = "No Intervention Scenario"
 
     chart_placeholder.text("Building charts...")
-    chart = (
-        alt.Chart(combined_alt_results)
-        .mark_line(opacity=0.3, strokeWidth=0.75, clip=True)
+
+    # base Altair chart
+    chart = alt.Chart(combined_alt_results).encode(x=alt.X(x, title=time_label))
+
+    vaccine_campaign_color = "209a79"
+
+    trajectories = (
+        chart.mark_line(opacity=0.35, strokeWidth=0.75, clip=True)
         .encode(
-            x=alt.X(x, title=time_label),
+            # x=alt.X(x, title=time_label),
             y=alt.Y(outcome, title=outcome_option),
             color=alt.Color(
                 "scenario",
                 title="Scenario",
                 scale=alt.Scale(
                     domain=[scenario_names[0], scenario_names[1]],
-                    range=["#FB7E38", "#0057b7"],
+                    # range=["#FB7E38", "#0057b7"],
+                    range=["green", "goldenrod"],
                 ),
             ),
             detail="replicate",
-            tooltip=alt.value(None),
+            # tooltip=["scenario", "t", outcome],
         )
         .properties(title=title, width=800, height=400)
     )
 
-    # vaccination_campaign_color = "#961c4d"
-    vaccination_campaign_color = "#209a79"
+    # chart = (
+    #     alt.Chart(combined_alt_results)
+    #     .mark_line(opacity=0.3, strokeWidth=0.75, clip=True)
+    #     .encode(
+    #         x=alt.X(x, title=time_label),
+    #         y=alt.Y(outcome, title=outcome_option),
+    #         color=alt.Color(
+    #             "scenario",
+    #             title="Scenario",
+    #             scale=alt.Scale(
+    #                 domain=[scenario_names[0], scenario_names[1]],
+    #                 # range=["#FB7E38", "#0057b7"],
+    #                 range=["purple", "goldenrod"],
+    #             ),
+    #         ),
+    #         detail="replicate",
+    #         tooltip=["scenario", "t", outcome],
+    #     )
+    #     .properties(title=title, width=800, height=400)
+    # )
 
-    # If vaccines administered > 0, add vax schedule to plot
+    #  Add bold line for median trajectory
+    ave_chart = alt.Chart(combined_ave_results).encode(x=alt.X(x, title=time_label))
+    ave_line = ave_chart.mark_line(opacity=1.0, strokeWidth=3.0, clip=True).encode(
+        y=alt.Y(outcome, title=outcome_option),
+        color=alt.Color(
+            "scenario",
+            title="Scenario",
+            scale=alt.Scale(
+                domain=[scenario_names[0], scenario_names[1]],
+                range=["#cf4828", "#20419a"],
+            ),
+            legend=None,
+        ),
+        # tooltip=["scenario", "t", outcome],
+    )
+
+    # chart = chart + ave_line
+
+    # Add vaccine campaign period as a shaded box if applicable
     if edited_parms2["total_vaccine_uptake_doses"] > 0:
-        vax1 = (
-            alt.Chart(
-                pd.DataFrame(
-                    {
-                        "x_start": [vax_start],  # Start of the box
-                    }
-                )
+        # Draw two vertical dashed lines for the start and end of the vaccine campaign
+        vax_df = pd.DataFrame(
+            {
+                "x_start": [vax_start],
+                "x_end": [vax_end],
+                "Intervention": ["Vaccine campaign period"],
+            }
+        )
+        # Transparent window for campaign period
+        vax_window = (
+            alt.Chart(vax_df)
+            .mark_rect(
+                opacity=0.12,
+                color=f"#{vaccine_campaign_color}",
             )
-            .mark_rule(color=vaccination_campaign_color, strokeDash=[3, 5])
             .encode(
-                x=alt.X("x_start:Q"),
-                tooltip=alt.value(
-                    "Vaccine Campaign Start"
-                    + time_label_short
-                    + str(round(vax_start, 2))
-                ),
+                x=alt.X("x_start:Q", title=time_label),
+                x2="x_end:Q",
             )
         )
-
-        vax2 = (
-            alt.Chart(
-                pd.DataFrame(
-                    {
-                        "x_end": [vax_end],  # End of the box
-                    }
-                )
+        # Vertical lines for campaign start/end
+        vax_lines_df = pd.DataFrame(
+            {
+                "x": [vax_start, vax_end],
+                "Intervention": ["Vaccine campaign start", "Vaccine campaign end"],
+            }
+        )
+        vax_lines = (
+            alt.Chart(vax_lines_df)
+            .mark_rule(
+                color=f"#{vaccine_campaign_color}",
+                strokeDash=[6, 4],
+                strokeWidth=2,
             )
-            .mark_rule(color=vaccination_campaign_color, strokeDash=[3, 5])
             .encode(
-                x=alt.X("x_end:Q"),  # End position of the box
+                x=alt.X("x:Q", title=time_label),
                 color=alt.Color(
-                    title="Vaccine Campaign",
+                    "Intervention:N",
+                    legend=alt.Legend(title="Vaccine Campaign"),
                     scale=alt.Scale(
-                        range=["#20419a"],
+                        domain=["Vaccine campaign start", "Vaccine campaign end"],
+                        range=[
+                            f"#{vaccine_campaign_color}",
+                            f"#{vaccine_campaign_color}",
+                        ],
                     ),
                 ),
-                tooltip=alt.value(
-                    "Vaccine Campaign End" + time_label_short + str(round(vax_end, 2))
-                ),
             )
         )
+        vax = vax_window + vax_lines
+        # chart = chart + vax
 
-        vaxbox = (
-            alt.Chart(
-                pd.DataFrame(
-                    {
-                        "x_start": [vax_start],
-                        "x_end": [vax_end],
-                    }
-                )
-            )
-            .mark_rect(opacity=0.25, color=vaccination_campaign_color)
-            .encode(
-                x=alt.X("x_start:Q"),
-                x2="x_end:Q",
-                tooltip=alt.value(None),
-            )
-        )
+    # # Add vaccine campaign period as a shaded box if applicable
+    # if edited_parms2["total_vaccine_uptake_doses"] > 0:
+    #     vax = (
+    #         alt.Chart(
+    #             pd.DataFrame(
+    #                 {
+    #                     "x_start": [vax_start],
+    #                     "x_end": [vax_end],
+    #                 }
+    #             )
+    #         )
+    #         .mark_rect(opacity=0.1, color="grey")
+    #         .encode(
+    #             x=alt.X("x_start:Q", title=time_label),
+    #             x2="x_end:Q",
+    #         )
+    #     )
+    #     chart = chart + vax
 
-        chart = chart + vax1 + vax2 + vaxbox
+    # #  Add bold line for median trajectory
+    # combined_ave_results
+    # ave_line = (
+    #     alt.Chart(combined_ave_results.to_pandas())
+    #     .mark_line(opacity=1.0, strokeWidth=3.0, clip=True)
+    #     .encode(
+    #         x=alt.X(x, title=time_label),
+    #         y=alt.Y(outcome, title=outcome_option),
+    #         color=alt.Color(
+    #             "scenario",
+    #             title="Scenario",
+    #             scale=alt.Scale(
+    #                 domain=[scenario_names[0], scenario_names[1]],
+    #                 range=["#cf4828", "#20419a"],
+    #             ),
+    #         ),
+    #         tooltip=["scenario", "t", outcome],
+    #     )
+    # )
+    # chart = chart + ave_line
 
-    # Add bold line for median trajectory
-    ave_line = (
-        alt.Chart(combined_ave_results.to_pandas())
-        .mark_line(opacity=1.0, strokeWidth=3.0, clip=True)
-        .encode(
-            x=alt.X(x, title=time_label),
-            y=alt.Y(outcome, title=outcome_option),
-            color=alt.Color(
-                "scenario",
-                title="Scenario",
-                scale=alt.Scale(
-                    domain=[scenario_names[0], scenario_names[1]],
-                    range=["#cf4828", "#20419a"],
-                ),
-            ),
-            tooltip=alt.value(None),
-        )
-    )
-    chart = chart + ave_line
+    # # Add annotation if no interventions are selected
+    # if interventions == "Off":
+    #     annotation = (
+    #         alt.Chart(
+    #             pd.DataFrame(
+    #                 {"text": ["Use at least one intervention to compare scenarios"]}
+    #             )
+    #         )
+    #         .mark_text(align="center", baseline="top", color="grey", fontSize=18)
+    #         .encode(text="text:N", y=alt.value(10))
+    #     )
+    #     chart = chart + annotation
 
-    
-
-    # Add annotation if no interventions are selected
-    if interventions == "Off":
-        annotation = (
-            alt.Chart(
-                pd.DataFrame(
-                    {"text": ["Use at least one intervention to compare scenarios"]}
-                )
-            )
-            .mark_text(align="center", baseline="top", color="grey", fontSize=18)
-            .encode(text="text:N", y=alt.value(10))
-        )
-        chart = chart + annotation
-
-    chart = chart.properties(padding={"top": 10, "bottom": 30, "left": 30, "right": 40})
-    chart_placeholder.altair_chart(chart, use_container_width=True)
+    # chart = chart.properties(padding={"top": 10, "bottom": 30, "left": 30, "right": 40})
+    layer = alt.layer(trajectories, ave_line, vax).resolve_scale(color="independent")
+    chart_placeholder.altair_chart(layer, use_container_width=True)
 
     # --- Chart Description ---
     st.markdown(
