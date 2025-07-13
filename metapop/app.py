@@ -1111,9 +1111,9 @@ def app(replicates=20):
             People who are immune at the beginning of the simulation, either
             through past vaccination or previous infection, begin in the
             "Vaccinated" compartment. Individuals who have received the vaccine
-            but are not immune (due to vaccine failure) are tracked in a separate
-            "Vaccinated but Susceptible" compartment, and have the same
-            susceptibility as individuals in the "Susceptible" compartment.
+            but are not immune (due to vaccine failure) are tracked in a
+            separate "Vaccinated but Susceptible" compartment, and have the
+            same susceptibility as individuals in the "Susceptible" compartment.
             </p>
 
             <p style="font-size:14px;">
