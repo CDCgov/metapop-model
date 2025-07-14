@@ -63,6 +63,7 @@ __all__ = [
     "img_to_html",
     "is_light_color",
     "get_github_logo_path",
+    "relative_difference",
 ]
 
 CACHE_TTL = 60 * 60 * 24 * 7  # 1 week in seconds
@@ -1454,6 +1455,22 @@ def get_table(combined_results, IHR, rng):
             ),
         )
     )
+    scenarios = ["No Interventions", "Interventions"]
+
+    # Specify `identifier="replicate"` to make strictly one-to-one difference comparisons
+    totalinf_reldiff = relative_difference(
+        combined_results,
+        col_name="Total",
+        group_values=scenarios,
+        identifier="replicate",
+    )
+
+    hosp_reldiff = relative_difference(
+        combined_results,
+        col_name="Hospitalizations",
+        group_values=scenarios,
+        identifier="replicate",
+    )
 
     # mean and 95% credible interval for infections and hospitalizations
     summary_stats = (
@@ -1484,7 +1501,7 @@ def get_table(combined_results, IHR, rng):
                 f"{summary_stats['inf_mean'][1]:.0f} ({summary_stats['inf_ci_low'][1]:.0f} - {summary_stats['inf_ci_high'][1]:.0f})"
             ],
             "Relative Difference (%)": [
-                f"{((summary_stats['inf_mean'][0] - summary_stats['inf_mean'][1]) / summary_stats['inf_mean'][0] * 100):.0f}"
+                f"{totalinf_reldiff[1]:.0f}% ({totalinf_reldiff[0]:.0f} - {totalinf_reldiff[2]:.0f})"
             ],
         }
     )
@@ -1498,7 +1515,7 @@ def get_table(combined_results, IHR, rng):
                 f"{summary_stats['hosp_mean'][1]:.0f} ({summary_stats['hosp_ci_low'][1]:.0f} - {summary_stats['hosp_ci_high'][1]:.0f})"
             ],
             "Relative Difference (%)": [
-                f"{((summary_stats['hosp_mean'][0] - summary_stats['hosp_mean'][1]) / summary_stats['hosp_mean'][0] * 100):.0f}"
+                f"{hosp_reldiff[1]:.0f}% ({hosp_reldiff[0]:.0f} - {hosp_reldiff[2]:.0f})"
             ],
         }
     )  # join the two tables
@@ -1694,3 +1711,85 @@ def get_github_logo_path(is_background_light):
             os.path.dirname(__file__), "app_assets", "github-mark-white.png"
         )
     return image_path
+
+
+def relative_difference(
+    data: pl.DataFrame,
+    col_name: str,
+    group_values: list,
+    group_col_name: str = "Scenario",
+    identifier: str = None,
+):
+    """
+    Function to bootstrap relative differences between two groups in a Polars DataFrame.
+    Relative differences are calculated from the values in `col_name` for the two groups specified in `group_values`.
+    The first element of `group_values` is considered the base group, and the second element is the comparison group.
+    The relative difference is calculated pairwise for each possible combination of the two groups, which do not have to be the same length.
+    The mean relative difference and confidence interval of the relative difference distirbution are then returned.
+
+    Args:
+        data (pl.DataFrame): The input DataFrame containing the data.
+        col_name (str): The name of the column for which to compute relative differences.
+        group_values (list): A list containing two unique values from the group column to compare.
+        group_col_name (str): The name of the column that contains the group values. Defaults to "Scenario".
+        identifier (str): The name of the column that contains the identifier for one-to-one mapping of pairwise comparisons
+            - If the identifier is set to the default of None, then the complete pairwise comparisons are conducted.
+
+    Returns:
+        tuple: An ordered tuple containing the
+            (0): lower bound (2.5th percentile),
+            (1): mean, and
+            (2): upper bound (97.5th percentile) of the relative differences.
+    """
+
+    assert len(group_values) == 2
+
+    # If specified, pariwsie comparison by each group matched along an index identifier column value
+    # For the function get_table, "replicate" is used to pair intervention an dno intervention scenarios
+    if identifier is not None:
+        diff_data = (
+            data.filter(pl.col(group_col_name).is_in(group_values))
+            .pivot(group_col_name, index=identifier, values=col_name)
+            .filter(
+                pl.col(group_values[0]).is_not_null()
+                & pl.col(group_values[1]).is_not_null()
+            )  # trim to base values that have a matching comparison
+            .with_columns(
+                (
+                    pl.lit(100)
+                    * (pl.col(group_values[0]) - pl.col(group_values[1]))
+                    /
+                    # Scale by base group mean to avoid divide by zero and avoid overweighting negative differences on small base values
+                    (pl.mean(group_values[0]))
+                ).alias("reldiff")
+            )
+        )
+        if diff_data.is_empty():
+            raise ValueError(
+                f"No matching comparisons based on column {identifier}. Check input data frame or try running with all pairwise comparisons instead."
+            )
+
+        lwr = diff_data.select(pl.quantile("reldiff", quantile=0.025)).item()
+        mean = diff_data.select(pl.mean("reldiff")).item()
+        upr = diff_data.select(pl.quantile("reldiff", quantile=0.975)).item()
+
+    # Pairwise comparison bootstrapped across all possible combinations
+    else:
+        # Filter the data for the two groups
+        base_df = data.filter(pl.col(group_col_name) == pl.lit(group_values[0]))
+        compare_df = data.filter(pl.col(group_col_name) == pl.lit(group_values[1]))
+
+        # Compute relative differences using broadcasting
+        base_vals = base_df[col_name].to_numpy()
+        compare_vals = compare_df[col_name].to_numpy()
+        diffs = base_vals[:, None] - compare_vals
+
+        # Scale to mean instead of each base to avoid overweighting negative differences on small base values
+        rel_diffs = [100 * diff / np.mean(base_vals) for diff in diffs]
+
+        # Flatten the array and compute statistics
+        lwr = np.quantile(rel_diffs, 0.025)
+        mean = np.mean(rel_diffs)
+        upr = np.quantile(rel_diffs, 0.975)
+
+    return (lwr, mean, upr)

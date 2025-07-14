@@ -1003,7 +1003,8 @@ def app(replicates=20):
         relative_difference = (
             outbreak_summary.filter(pl.col("") == "Infections, mean (95% CI)")
             .select("Relative Difference (%)")
-            .to_numpy()[0][0]
+            .item()
+            .split("%")[0]
         )
 
         intervention_text = f"Adding "
@@ -1022,7 +1023,7 @@ def app(replicates=20):
             intervention_text += interventions[0]
 
         st.text(
-            f"{intervention_text} decreases total measles infections by {float(relative_difference):.0f}% "
+            f"{intervention_text} decreases total measles infections by {relative_difference}% "
             f"in a population of size {edited_parms2['pop_sizes'][0]} "
             f"with baseline immunity of {round(edited_parms2['initial_vaccine_coverage'][0] * 100)}%."
         )
@@ -1099,7 +1100,11 @@ def app(replicates=20):
             <br><br>
 
             <p style="font-size:14px;">
-            We conduct a two-sample K-S test to determine if the
+            We show the estimated difference between total infection in both
+            scenarios relative to the mean values from the no intervention
+            scenario and round to the nearest integer percentage, doing the
+            same for total hospitalizations.
+            We then conduct a two-sample K-S test to determine if the
             total measles infections from the "Interventions" scenario differ
             from the total measles infections of the "No Interventions" baseline
             scenario and present information if scenario results are
