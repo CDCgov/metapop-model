@@ -669,6 +669,7 @@ def app(replicates=20):
         alt_results2 = results2
         x = "t:Q"
         time_label = "Time (days)"
+        time_label_short = " (day): "
         vax_start = min(schedule.keys())
         vax_end = max(schedule.keys())
     elif outcome_option in ["Weekly Incidence", "Weekly Cumulative Incidence"]:
@@ -676,6 +677,7 @@ def app(replicates=20):
         alt_results2 = interval_results2
         x = "interval_t:Q"
         time_label = "Time (weeks)"
+        time_label_short = ": week "
         vax_start = min(schedule.keys()) / interval
         vax_end = max(schedule.keys()) / interval
 
@@ -772,14 +774,70 @@ def app(replicates=20):
                 ),
             ),
             detail="replicate",
-            tooltip=["scenario", "t", outcome],
+            tooltip=alt.value(None),
         )
         .properties(title=title, width=800, height=400)
     )
 
-    # Add vaccine campaign period as a shaded box if applicable
+    # If vaccines administered > 0, add vax schedule to plot
     if edited_parms2["total_vaccine_uptake_doses"] > 0:
-        vax = (
+        end_time1 = ""
+        end_time2 = ""
+        if time_label_short == ": week ":
+            vax_start_float = vax_start
+            vax_end_float = vax_end
+            vax_start_round = np.floor(vax_start)
+            vax_end_round = np.floor(vax_end)
+            vax_start_float = vax_start_float - vax_start_round
+            vax_end_float = vax_end_float - vax_end_round
+            vax_start_days = int(vax_start_float * 7)
+            vax_end_days = int(vax_end_float * 7)
+            if vax_start_float != 0:
+                end_time1 = ", day " + str(vax_start_days)
+            if vax_end_float != 0:
+                end_time2 = ", day " + str(vax_end_days)
+
+        vax1 = (
+            alt.Chart(
+                pd.DataFrame(
+                    {
+                        "x_start": [vax_start],  # Start of the box
+                    }
+                )
+            )
+            .mark_rule(color="#20419a", strokeDash=[3, 5])
+            .encode(
+                x=alt.X("x_start:Q"),
+                tooltip=alt.value(
+                    "Vaccine Campaign Start"
+                    + time_label_short
+                    + str(int(vax_start))
+                    + end_time1
+                ),
+            )
+        )
+
+        vax2 = (
+            alt.Chart(
+                pd.DataFrame(
+                    {
+                        "x_end": [vax_end],  # End of the box
+                    }
+                )
+            )
+            .mark_rule(color="#20419a", strokeDash=[3, 5])
+            .encode(
+                x=alt.X("x_end:Q"),  # End position of the box
+                tooltip=alt.value(
+                    "Vaccine Campaign End"
+                    + time_label_short
+                    + str(int(vax_end))
+                    + end_time2
+                ),
+            )
+        )
+
+        vaxbox = (
             alt.Chart(
                 pd.DataFrame(
                     {
@@ -788,13 +846,15 @@ def app(replicates=20):
                     }
                 )
             )
-            .mark_rect(opacity=0.1, color="grey")
+            .mark_rect(opacity=0.1, color="#20419a")
             .encode(
-                x=alt.X("x_start:Q", title=time_label),
+                x=alt.X("x_start:Q"),
                 x2="x_end:Q",
+                tooltip=alt.value(None),
             )
         )
-        chart = chart + vax
+
+        chart = chart + vax1 + vax2 + vaxbox
 
     # Add bold line for median trajectory
     ave_line = (
@@ -811,7 +871,7 @@ def app(replicates=20):
                     range=["#cf4828", "#20419a"],
                 ),
             ),
-            tooltip=["scenario", "t", outcome],
+            tooltip=alt.value(None),
         )
     )
     chart = chart + ave_line
@@ -845,7 +905,7 @@ def app(replicates=20):
         "variation in contact rates. Bolded lines show the simulation that possessed "
         "the median time of peak prevalence across all epidemic trajectories for "
         "each scenario. If a vaccination campaign is activated, the time period over "
-        "which vaccines are distributed is shown by gray box. The model does not account "
+        "which vaccines are distributed is shown by two dashed blue lines.. The model does not account "
         "for case ascertainment, so the number of new rash onsets represents the true number of infections "
         "in the population. "
         "</p>",
