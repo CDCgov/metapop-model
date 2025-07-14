@@ -762,8 +762,10 @@ def app(replicates=20):
     chart = alt.Chart(combined_alt_results).encode(x=alt.X(x, title=time_label))
 
     no_intervention_color = "#fb7e38"  # orange
-    intervention_color = "#20419a"  # blue
-    vaccine_campaign_color = "#ffe100"  # yellow
+    # intervention_color = "#20419a"  # blue
+    intervention_color = "#0057b7"  # blue
+    # vaccine_campaign_color = "#ffe100"  # yellow
+    vaccine_campaign_color = "#209a79"
 
     trajectories = (
         chart.mark_line(opacity=0.35, strokeWidth=0.75, clip=True)
@@ -814,8 +816,10 @@ def app(replicates=20):
         vax_window = (
             alt.Chart(vax_df)
             .mark_rect(
-                opacity=0.25,
+                opacity=0.33,
                 color=vaccine_campaign_color,
+                stroke=vaccine_campaign_color,
+                strokeWidth=1.5,
             )
             .encode(
                 x=alt.X("x_start:Q", title=time_label),
@@ -877,11 +881,8 @@ def app(replicates=20):
             .encode(text="text:N", y=alt.value(10))
         )
 
-    # chart = chart.properties(padding={"top": 10, "bottom": 30, "left": 30, "right": 40})
-    layer = (
-        alt.layer(vax, trajectories, ave_line, annotation)
-        .resolve_scale(color="independent")
-        .properties(padding={"top": 10, "bottom": 30, "left": 30, "right": 40})
+    layer = alt.layer(vax, trajectories, ave_line, annotation).resolve_scale(
+        color="independent"
     )
     chart_placeholder.altair_chart(layer, use_container_width=True)
 
