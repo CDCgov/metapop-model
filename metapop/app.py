@@ -170,9 +170,9 @@ def app(replicates=20):
         min_values = dict(
             pop_sizes=[1000, 100, 100],
             I0=[1, 0, 0],
-            vaccine_uptake_start_day=4,
-            symptomatic_isolation_start_day=4,
-            pre_rash_isolation_start_day=4,
+            vaccine_uptake_start_day=5,
+            symptomatic_isolation_start_day=5,
+            pre_rash_isolation_start_day=5,
         )
         min_values = get_min_values(min_values)
         max_values = dict(
@@ -1171,7 +1171,7 @@ def app(replicates=20):
             symptomatic, on average, halfway through their infectious period.
             For example, if the infectious period is 9 days, then introduced
             infections are assumed to develop a rash and become symptomatic,
-            on average, 4.5 days after introduction or approximately on day 5
+            on average, 4.5 days after introduction or approximately on day 6
             (at earliest). In this model, the first day of rash onset is
             the earliest day most communities would be aware of measles cases
             and begin public health interventions.
