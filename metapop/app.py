@@ -768,7 +768,6 @@ def app(replicates=20):
     trajectories = (
         chart.mark_line(opacity=0.35, strokeWidth=0.75, clip=True)
         .encode(
-            # x=alt.X(x, title=time_label),
             y=alt.Y(outcome, title=outcome_option),
             color=alt.Color(
                 "scenario",
@@ -776,12 +775,10 @@ def app(replicates=20):
                 scale=alt.Scale(
                     domain=[scenario_names[0], scenario_names[1]],
                     range=[no_intervention_color, intervention_color],
-                    # range=["green", "goldenrod"],
                 ),
                 legend=None,
             ),
             detail="replicate",
-            # tooltip=["scenario", "t", outcome],
         )
         .properties(title=title, width=800, height=400)
     )
@@ -798,12 +795,9 @@ def app(replicates=20):
                 range=[
                     no_intervention_color,
                     intervention_color,
-                    # "#cf4828", "#20419a"
                 ],
             ),
-            # legend=None,
         ),
-        # tooltip=["scenario", "t", outcome],
     )
 
     # Add vaccine campaign period as a shaded box if applicable
@@ -1067,8 +1061,7 @@ def app(replicates=20):
             different epidemic outcomes. We therefore run 100 individual
             simulations to produce a range of possible outcomes and use these
             simulations to estimate outcome uncertainty for each parameter set.
-
-            <br><br>
+            </p>
 
             <p style="font-size:14px;">
             People who are immune at the beginning of the simulation, either
@@ -1077,7 +1070,7 @@ def app(replicates=20):
             but are not immune (due to vaccine failure) are tracked in a separate
             "Vaccinated but Susceptible" compartment, and have the same
             susceptibility as individuals in the "Susceptible" compartment.
-            <br><br>
+            </p>
 
             <p style="font-size:14px;">
             Users can explore the impact of interventions, including vaccination,
@@ -1086,7 +1079,7 @@ def app(replicates=20):
             Interventions". The start day and duration of all three intervention
             measures (isolation, quarantine, and vaccination) can be specified by
             the user.
-            <br><br>
+            </p>
 
             <p style="font-size:14px;">
             In this model, day 1 corresponds to when introduced infections arrive in the community.
@@ -1094,7 +1087,7 @@ def app(replicates=20):
             modeled to become symptomatic, on average, 4 days later on day 5.
             In this model day 5 is the earliest day most communities would be aware of measles cases
             and begin public health interventions.
-            <br><br>
+            </p>
 
             <p style="font-size:14px;">
             We show the estimated difference between total infection in both
@@ -1106,12 +1099,12 @@ def app(replicates=20):
             from the total measles infections of the "No Interventions" baseline
             scenario and present information if scenario results are
             indistinguishable.
-            <br><br>
+            </p>
 
             <p style="font-size:14px;">
             This model does not account for case ascertainment of infections,
             which may vary over time during an outbreak.
-            <br><br>
+            </p>
 
             <b style="font-size:14px;">Assumptions</b>
             <p style="font-size:14px;">We note that this modeling approach
