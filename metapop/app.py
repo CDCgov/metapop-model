@@ -456,7 +456,7 @@ def app(replicates=20):
             "independently or in combination with each other. "
             "The results are compared to a baseline scenario that does not "
             "have a vaccination campaign, nor isolation or quarantine interventions incorporated. "
-            f"In this model, day 1 corresponds to when infected people are introduced into the community and day {np.ceil(edited_parms2['infectious_duration']/2 + 1):.0f} is the average day of rash onset "
+            f"In this model, day 1 corresponds to when infected people are introduced into the community and day {np.round(edited_parms2['infectious_duration']/2 + 1):.0f} is the average day of rash onset "
             "for introduced infections (see Detailed Methods). "
             # )
         )
@@ -963,7 +963,7 @@ def app(replicates=20):
         "Each thin line represents counts of new daily or weekly rash onsets "
         "from an individual simulation of the stochastic model. "
         "Introduced infections arrive in the community on day 1 and have an average rash onset "
-        f"time on day {np.ceil(edited_parms2['infectious_duration']/2 + 1):.0f}, the first day at which interventions can begin. "
+        f"time on day {np.round(edited_parms2['infectious_duration']/2 + 1):.0f}, the first day at which interventions can begin. "
         "All simulations within a given scenario (i.e., shown with "
         "the same color) are run under the same set of parameters, and "
         "differences between each individual simulation are due to random "
@@ -1126,7 +1126,7 @@ def app(replicates=20):
     # --- Detailed Methods Section ---
     with st.expander("Detailed methods", expanded=False):
         st.markdown(
-            """
+            f"""
             <p style="font-size:14px;">
             This model examines measles transmission in a population after an
             introduction of measles. This is a stochastic compartmental SVEIR
@@ -1169,9 +1169,12 @@ def app(replicates=20):
             arrive in the community. Introduced infections are assumed to
             arrive in their pre-rash infectious stage and are modeled to become
             symptomatic, on average, halfway through their infectious period.
-            For example, if the infectious period is 9 days, then introduced
+            For example, if the infectious period is
+            {edited_parms2['infectious_duration']} days, then introduced
             infections are assumed to develop a rash and become symptomatic,
-            on average, 4.5 days after introduction or approximately on day 6
+            on average, {edited_parms2['infectious_duration']/2:.1f} days
+            after introduction or approximately on day
+            {np.round(edited_parms2['infectious_duration']/2 + 1):.0f}
             (at earliest). In this model, the first day of rash onset is
             the earliest day most communities would be aware of measles cases
             and begin public health interventions.
@@ -1264,8 +1267,9 @@ def app(replicates=20):
             developing a rash and entering a separate infectious state defined
             by rash onset. We assume that the duration of time spent in each of
             these two states is the same. For example, when the infectious
-            period is 9 days, the duration of time spent in each of the two
-            infectious states is on average 4.5 days.
+            period is {edited_parms2['infectious_duration']} days, the duration
+            of time spent in each of the two infectious states is on average
+            {edited_parms2['infectious_duration']/2:.1f} days.
             </li>
 
             <li style="font-size:14px; margin-bottom: 10px;">
