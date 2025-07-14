@@ -897,6 +897,12 @@ def app(replicates=20):
             .encode(x=alt.X("x:Q", title=time_label))
         )
 
+        dummy_vax_window = (
+            alt.Chart(pd.DataFrame({"x": []}))
+            .mark_line()
+            .encode(x=alt.X("x:Q", title=time_label))
+        )
+
     # Add annotation if no interventions are selected
     if interventions == "Off":
         annotation = (
