@@ -763,12 +763,10 @@ def app(replicates=20):
 
     no_intervention_color = "#fb7e38"  # orange
     intervention_color = "#0057b7"  # blue
-    # vaccine_campaign_color = "#ffe100"  # yellow
-    vaccine_campaign_color = "#0088ff"
-    # vaccine_campaign_color = "#909090"  # grey
+    vaccine_campaign_color = "#909090"  # grey
 
     trajectories = (
-        chart.mark_line(opacity=0.35, strokeWidth=0.85, clip=True)
+        chart.mark_line(opacity=0.35, strokeWidth=1.0, clip=True)
         .encode(
             y=alt.Y(outcome, title=outcome_option),
             color=alt.Color(
@@ -787,7 +785,7 @@ def app(replicates=20):
 
     #  Add bold line for median trajectory
     ave_chart = alt.Chart(combined_ave_results).encode(x=alt.X(x, title=time_label))
-    ave_line = ave_chart.mark_line(opacity=1.0, strokeWidth=3.0, clip=True).encode(
+    ave_line = ave_chart.mark_line(opacity=1.0, strokeWidth=4.0, clip=True).encode(
         y=alt.Y(outcome, title=outcome_option),
         color=alt.Color(
             "scenario",
@@ -817,7 +815,7 @@ def app(replicates=20):
         vax_window = (
             alt.Chart(vax_df)
             .mark_rect(
-                opacity=0.25,
+                opacity=0.2,
                 color=vaccine_campaign_color,
                 stroke=vaccine_campaign_color,
                 strokeWidth=1.5,
@@ -854,7 +852,7 @@ def app(replicates=20):
         dummy_vax_window = (
             alt.Chart(dummy_vax_df)
             .mark_rect(
-                opacity=0.5,
+                opacity=0.75,
                 color=vaccine_campaign_color,
                 strokeWidth=1.5,
             )
