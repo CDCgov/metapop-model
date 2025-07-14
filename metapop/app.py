@@ -763,7 +763,7 @@ def app(replicates=20):
 
     no_intervention_color = "#fb7e38"  # orange
     intervention_color = "#20419a"  # blue
-    vaccine_campaign_color = "#209a79"
+    vaccine_campaign_color = "#ffe100"  # yellow
 
     trajectories = (
         chart.mark_line(opacity=0.35, strokeWidth=0.75, clip=True)
@@ -814,7 +814,7 @@ def app(replicates=20):
         vax_window = (
             alt.Chart(vax_df)
             .mark_rect(
-                opacity=0.35,
+                opacity=0.25,
                 color=vaccine_campaign_color,
             )
             .encode(
@@ -878,8 +878,10 @@ def app(replicates=20):
         )
 
     # chart = chart.properties(padding={"top": 10, "bottom": 30, "left": 30, "right": 40})
-    layer = alt.layer(trajectories, ave_line, vax, annotation).resolve_scale(
-        color="independent"
+    layer = (
+        alt.layer(vax, trajectories, ave_line, annotation)
+        .resolve_scale(color="independent")
+        .properties(padding={"top": 10, "bottom": 30, "left": 30, "right": 40})
     )
     chart_placeholder.altair_chart(layer, use_container_width=True)
 
