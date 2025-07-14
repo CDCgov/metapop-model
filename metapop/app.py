@@ -1127,7 +1127,10 @@ def app(replicates=20):
             simulation. Interventions can start up to 180 days or approximately
             6 months after the introduction of measles in the community, and
             the duration of interventions can be up to 365 days or the entire
-            simulation time.
+            simulation time. After 180 days, interventions will not be
+            effective in reducing the size of most measles outbreaks and this
+            tool is designed to model the impact of timely interventions within
+            communities.
             </p>
 
             <p style="font-size:14px;">
