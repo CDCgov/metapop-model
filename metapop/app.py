@@ -1131,10 +1131,11 @@ def app(replicates=20):
             </p>
 
             <p style="font-size:14px;">
-            In this model, day 1 corresponds to when introduced infections arrive in the community.
-            Introduced infections are assumed to arrive in their pre-rash infectious stage and are
-            modeled to become symptomatic, on average, 4 days later on day 5.
-            In this model day 5 is the earliest day most communities would be aware of measles cases
+            In this model, day 1 corresponds to when introduced infections
+            arrive in the community. Introduced infections are assumed to arrive
+            in their pre-rash infectious stage and are modeled to become
+            symptomatic, on average, 4 days later on day 5. In this model day 5
+            is the earliest day most communities would be aware of measles cases
             and begin public health interventions.
             </p>
 
