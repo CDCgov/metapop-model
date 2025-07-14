@@ -815,7 +815,7 @@ def app(replicates=20):
         vax_window = (
             alt.Chart(vax_df)
             .mark_rect(
-                opacity=0.2,
+                opacity=0.18,
                 color=vaccine_campaign_color,
                 stroke=vaccine_campaign_color,
                 strokeWidth=1.5,
@@ -825,7 +825,6 @@ def app(replicates=20):
                 x2="x_end:Q",
                 color=alt.Color(
                     "Intervention:N",
-                    # legend=alt.Legend(title="Vaccine Campaign"),
                     legend=None,
                     scale=alt.Scale(
                         domain=["Vaccine campaign period"],
@@ -852,7 +851,7 @@ def app(replicates=20):
         dummy_vax_window = (
             alt.Chart(dummy_vax_df)
             .mark_rect(
-                opacity=0.75,
+                opacity=0.8,
                 color=vaccine_campaign_color,
                 strokeWidth=1.5,
             )
@@ -918,7 +917,7 @@ def app(replicates=20):
         )
 
     layer = alt.layer(
-        dummy_vax_window, vax, trajectories, ave_line, annotation
+        vax, trajectories, ave_line, dummy_vax_window, annotation
     ).resolve_scale(color="independent")
     chart_placeholder.altair_chart(layer, use_container_width=True)
 
