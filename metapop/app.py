@@ -170,9 +170,9 @@ def app(replicates=20):
         min_values = dict(
             pop_sizes=[1000, 100, 100],
             I0=[1, 0, 0],
-            vaccine_uptake_start_day=5,
-            symptomatic_isolation_start_day=5,
-            pre_rash_isolation_start_day=5,
+            vaccine_uptake_start_day=0,
+            symptomatic_isolation_start_day=0,
+            pre_rash_isolation_start_day=0,
         )
         min_values = get_min_values(min_values)
         max_values = dict(
