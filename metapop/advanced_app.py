@@ -84,6 +84,7 @@ def advanced_app(replicates=20):
             "pop_sizes",
             "I0",
             "initial_vaccine_coverage",
+            "vaccine_uptake",
             "total_vaccine_uptake_doses",
             "vaccine_uptake_start_day",
             "vaccine_uptake_duration_days",

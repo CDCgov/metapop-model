@@ -10,6 +10,7 @@ baseline_parameters:
   infectious_duration: 9.0
   pop_sizes: [40000, 5000, 5000]    # population sizes
   I0: [0, 5, 0]     # initially infected
+  vaccine_uptake: false
   vaccine_uptake_start_day: 7
   vaccine_uptake_duration_days: 0
   total_vaccine_uptake_doses: 0.0 # number of doses

@@ -292,7 +292,7 @@ def get_show_parameter_mapping(parms=None):
         I0_0="Infections introduced in the large population",
         I0_1="Infections introduced in small population 1",
         I0_2="Infections introduced in small population 2",
-        # vaccine_uptake = "Enable vaccine uptake",
+        vaccine_uptake="Enable vaccination campaign",
         total_vaccine_uptake_doses="Percent of people without prior immunity that get vaccinated",
         vaccine_uptake_start_day="Start of vaccination campaign (days after introduction)",
         vaccine_uptake_duration_days="Duration of vaccination campaign (days)",
@@ -573,10 +573,14 @@ def app_editors(
                     callback = coerce_quarantine_to_isolation(
                         element_keys,
                     )
-                if key == "total_vaccine_uptake_doses":
-                    st.write("Vaccination Campaign:")
                 if widget_types[key] == "slider":
                     if key in [
+                        "total_vaccine_uptake_doses",
+                        "vaccine_uptake_start_day",
+                        "vaccine_uptake_duration_days",
+                    ]:
+                        disabled_slider = not edited_parms["vaccine_uptake"]
+                    elif key in [
                         "isolation_adherence",
                         "symptomatic_isolation_start_day",
                         "symptomatic_isolation_duration_days",
@@ -615,6 +619,10 @@ def app_editors(
                         disabled=disabled,
                     )
                 elif widget_types[key] == "toggle":
+                    if key == "isolation_on":
+                        toggle_on = True
+                    else:
+                        toggle_on = False
                     if key == "pre_rash_isolation_on":
                         # if isolation is not on, pre-rash isolation cannot be turned on
                         disabled_toggle = not edited_parms["isolation_on"]
@@ -622,7 +630,7 @@ def app_editors(
                         disabled_toggle = disabled
                     value = st.toggle(
                         show_parameter_mapping[key],
-                        value=False,
+                        value=toggle_on,
                         help=helpers[key],
                         key=element_keys[key],
                         disabled=disabled_toggle,
@@ -696,6 +704,7 @@ def get_widget_types(widget_types=None):
         infectious_duration="slider",
         I0="number_input",
         initial_vaccine_coverage="number_input",
+        vaccine_uptake="toggle",
         vaccine_uptake_start_day="slider",
         vaccine_uptake_duration_days="slider",
         total_vaccine_uptake_doses="slider",
@@ -890,7 +899,8 @@ def get_helpers(parms=None):
             "Baseline immunity in small population 1",
             "Baseline immunity in small population 2",
         ],
-        vaccine_uptake_start_day="Number of days after introduction until the vaccination campaign starts (for example, 4 days corresponds to day 5 in the model when introduced infections have rash onset, on average). Defaults to 4 days (when introduced infections have rash onset on average).",
+        vaccine_uptake="If turned on, initiates a vaccination campaign. The percent of unvaccinated individuals to receive a dose and duration of the campaign to distribute those doses are specified in the slider below.",
+        vaccine_uptake_start_day="Number of days after introduction until the vaccination campaign starts (for example, 4 days corresponds to day 5 in the model when introduced infections have rash onset, on average). Defaults to 11 days (1 week after introduced infections have rash onset on average).",
         vaccine_uptake_duration_days="The vaccine doses are distributed evenly throughout the specified duration of time (i.e., the same number of vaccines will be distributed on each day). If the duration results in the vaccine campaign ending after the last simulation day (day 365), the campaign will end on the last simulation day and remaining doses are administered on that day.",
         total_vaccine_uptake_doses="In this model, we administer one dose of the MMR vaccine per person vaccinated during the campaign, with 93% effectiveness as indicated by vaccine studies.",
         vaccinated_group="Population receiving the vaccine",
@@ -985,6 +995,7 @@ def get_base_session_state_idkeys(parms=None):
             "initial_vaccine_coverage_1",
             "initial_vaccine_coverage_2",
         ],
+        vaccine_uptake="vaccine_uptake",
         vaccine_uptake_start_day="vaccine_uptake_start_day",
         vaccine_uptake_duration_days="vaccine_uptake_duration_days",
         total_vaccine_uptake_doses="total_vaccine_uptake_doses",
@@ -1116,6 +1127,9 @@ def update_intervention_parameters_from_widget(parms):
     else:
         parms["pre_rash_isolation_success"] = 0.0
 
+    if not parms["vaccine_uptake"]:
+        parms["total_vaccine_uptake_doses"] = 0
+
     if parms["vaccine_uptake_duration_days"] == 0:
         parms["total_vaccine_uptake_doses"] = 0
 
@@ -1148,6 +1162,8 @@ def reset(defaults, widget_types):
         if widget_types[key] == "toggle":
             value = False
 
+        if key == "isolation_on":
+            value = True
         # set the session state value to the default value
         st.session_state[session_key] = value
 

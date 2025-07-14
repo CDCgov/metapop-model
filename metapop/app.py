@@ -288,6 +288,7 @@ def app(replicates=20):
 
         # order of vaccination parameters in the sidebar
         ordered_keys_vax = [
+            "vaccine_uptake",
             "total_vaccine_uptake_doses",
             "vaccine_uptake_start_day",
             "vaccine_uptake_duration_days",
@@ -556,6 +557,7 @@ def app(replicates=20):
     #  no other  interventions being modeled in the second scenario.
     if (
         (initial_states[u_ind][0][Ind.S.value] == 0)
+        and (not scenario2[0]["vaccine_uptake"])
         and (not scenario2[0]["isolation_on"])
         and (not scenario2[0]["pre_rash_isolation_on"])
     ):
@@ -572,7 +574,7 @@ def app(replicates=20):
     schedule = build_vax_schedule(intervention_parms2)
 
     # if doses are zero, warn the user
-    if sum(schedule.values()) == 0:
+    if sum(schedule.values()) == 0 and scenario2[0]["vaccine_uptake"]:
         # if no other warning message defined yet, create this one instead
         if warning_message == "":
             warning_message += (
@@ -610,11 +612,12 @@ def app(replicates=20):
     results2 = get_scenario_results(scenario2, use_cache)
 
     # Display number of doses administered
-    with col_intervention_text:
-        st.text(
-            f"Total vaccines scheduled to be administered during campaign: {sum(schedule.values())} doses",
-            help="This number is calculated based on user input for the percentage of the non-immune population that gets vaccinated during the campaign. If the campaign starts late, the actual number of doses administered may be lower due to there being not enough eligible individuals left to vaccinate.",
-        )
+    if scenario2[0]["vaccine_uptake"]:
+        with col_intervention_text:
+            st.text(
+                f"Total vaccines scheduled to be administered during campaign: {sum(schedule.values())} doses",
+                help="This number is calculated based on user input for the percentage of the non-immune population that gets vaccinated during the campaign. If the campaign starts late, the actual number of doses administered may be lower due to there being not enough eligible individuals left to vaccinate.",
+            )
 
     # Save a copy of the full results for summary tables so that results1 and results2 can be modified for visualization
     fullresults1 = copy.deepcopy(results1)
