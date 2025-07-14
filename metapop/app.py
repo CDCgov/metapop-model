@@ -762,13 +762,13 @@ def app(replicates=20):
     chart = alt.Chart(combined_alt_results).encode(x=alt.X(x, title=time_label))
 
     no_intervention_color = "#fb7e38"  # orange
-    # intervention_color = "#20419a"  # blue
     intervention_color = "#0057b7"  # blue
     # vaccine_campaign_color = "#ffe100"  # yellow
-    vaccine_campaign_color = "#209a79"
+    vaccine_campaign_color = "#0088ff"
+    # vaccine_campaign_color = "#909090"  # grey
 
     trajectories = (
-        chart.mark_line(opacity=0.35, strokeWidth=0.75, clip=True)
+        chart.mark_line(opacity=0.35, strokeWidth=0.85, clip=True)
         .encode(
             y=alt.Y(outcome, title=outcome_option),
             color=alt.Color(
@@ -812,13 +812,50 @@ def app(replicates=20):
                 "Intervention": ["Vaccine campaign period"],
             }
         )
+
         # Transparent window for campaign period, with legend label
         vax_window = (
             alt.Chart(vax_df)
             .mark_rect(
-                opacity=0.33,
+                opacity=0.25,
                 color=vaccine_campaign_color,
                 stroke=vaccine_campaign_color,
+                strokeWidth=1.5,
+            )
+            .encode(
+                x=alt.X("x_start:Q", title=time_label),
+                x2="x_end:Q",
+                color=alt.Color(
+                    "Intervention:N",
+                    # legend=alt.Legend(title="Vaccine Campaign"),
+                    legend=None,
+                    scale=alt.Scale(
+                        domain=["Vaccine campaign period"],
+                        range=[vaccine_campaign_color],
+                    ),
+                ),
+            )
+        )
+        # Create a dummy DataFrame to be used so that the vaccine window is
+        # shown in the legend but the color associated does not have the same
+        # opacity as the shaded window and instead is a bit darker
+        # streamlit and altair do not allow for a legend entry to have a
+        # different opacity than the actual mark, so we create a dummy DataFrame
+        # with the same color as the vaccine campaign window but with no data
+        # to be used in the legend
+        dummy_vax_df = pd.DataFrame(
+            {
+                "x_start": [np.nan],
+                "x_end": [np.nan],
+                "Intervention": ["Vaccine campaign period"],
+            }
+        )
+
+        dummy_vax_window = (
+            alt.Chart(dummy_vax_df)
+            .mark_rect(
+                opacity=0.5,
+                color=vaccine_campaign_color,
                 strokeWidth=1.5,
             )
             .encode(
@@ -834,6 +871,7 @@ def app(replicates=20):
                 ),
             )
         )
+
         # Vertical lines for campaign start/end
         vax_lines_df = pd.DataFrame(
             {
@@ -881,9 +919,9 @@ def app(replicates=20):
             .encode(text="text:N", y=alt.value(10))
         )
 
-    layer = alt.layer(vax, trajectories, ave_line, annotation).resolve_scale(
-        color="independent"
-    )
+    layer = alt.layer(
+        dummy_vax_window, vax, trajectories, ave_line, annotation
+    ).resolve_scale(color="independent")
     chart_placeholder.altair_chart(layer, use_container_width=True)
 
     # --- Chart Description ---
