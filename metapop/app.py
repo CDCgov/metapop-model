@@ -1113,45 +1113,45 @@ def app(replicates=20):
             "Vaccinated" compartment. Individuals who have received the vaccine
             but are not immune (due to vaccine failure) are tracked in a
             separate "Vaccinated but Susceptible" compartment, and have the
-            same susceptibility as individuals in the "Susceptible" compartment.
+            same susceptibility as individuals in the "Susceptible"
+            compartment.
             </p>
 
             <p style="font-size:14px;">
-            Users can explore the impact of interventions, including vaccination,
-            isolation, and quarantine measures ("Interventions" scenario)
-            compared to a baseline scenario without active interventions ("No
-            Interventions"). The start day and duration of all three
-            intervention measures (isolation, quarantine, and vaccination) can
-            be specified by the user. By default, these interventions begin one
-            week after measles introduction and last through the rest of the
-            simulation. Interventions can start up to 180 days or approximately
-            6 months after the introduction of measles in the community, and
-            the duration of interventions can be up to 365 days or the entire
-            simulation time. After 180 days, interventions will not be
-            effective in reducing the size of most measles outbreaks and this
-            tool is designed to model the impact of timely interventions within
-            communities.
+            Users can explore the impact of interventions, including
+            vaccination, isolation, and quarantine measures ("Interventions"
+            scenario) compared to a baseline scenario without active
+            interventions ("No Interventions"). The start day and duration of
+            all three intervention measures (isolation, quarantine, and
+            vaccination) can be specified by the user. By default, these
+            interventions begin one week after measles introduction and last
+            through the rest of the simulation. Interventions can start up to
+            180 days or approximately 6 months after the introduction of
+            measles in the community, and the duration of interventions can be
+            up to 365 days or the entire simulation time. After 180 days,
+            interventions will not be effective in reducing the size of most
+            measles outbreaks and this tool is designed to model the impact of
+            timely interventions within communities.
             </p>
 
             <p style="font-size:14px;">
             In this model, day 1 corresponds to when introduced infections
-            arrive in the community. Introduced infections are assumed to arrive
-            in their pre-rash infectious stage and are modeled to become
+            arrive in the community. Introduced infections are assumed to
+            arrive in their pre-rash infectious stage and are modeled to become
             symptomatic, on average, 4 days later on day 5. In this model day 5
-            is the earliest day most communities would be aware of measles cases
-            and begin public health interventions.
+            is the earliest day most communities would be aware of measles
+            cases and begin public health interventions.
             </p>
 
             <p style="font-size:14px;">
             We show the estimated difference between total infection in both
             scenarios relative to the mean values from the no intervention
             scenario and round to the nearest integer percentage, doing the
-            same for total hospitalizations.
-            We then conduct a two-sample K-S test to determine if the
-            total measles infections from the "Interventions" scenario differ
-            from the total measles infections of the "No Interventions" baseline
-            scenario and present information if scenario results are
-            indistinguishable.
+            same for total hospitalizations. We then conduct a two-sample K-S
+            test to determine if the total measles infections from the
+            "Interventions" scenario differ from the total measles infections
+            of the "No Interventions" baseline scenario and present information
+            if scenario results are indistinguishable.
             </p>
 
             <p style="font-size:14px;">
@@ -1167,9 +1167,9 @@ def app(replicates=20):
             <li style="font-size:14px; margin-bottom: 10px;">
             This is a homogenous mixing model without age or spatial structure,
             meaning all individuals have the same probability of contact with
-            each other (also known as a well-mixed population model). In larger
-            populations, this may overestimate the size and duration of an
-            outbreak.
+            each other (also known as a well-mixed population model). In
+            larger populations, this may overestimate the size and duration of
+            an outbreak.
             </li>
 
             <li style="font-size:14px; margin-bottom: 10px;">
@@ -1183,51 +1183,53 @@ def app(replicates=20):
             To initialize the population with existing immunity, users input a
             "baseline immunity" value. Because there is no age structure in the
             model, this value is assumed to account for existing vaccination
-            coverage or prior infection over the entire population. It's assumed
-            that existing vaccination coverage and prior infection result in 97%
-            protection against future infection (the estimated efficacy of two
-            doses of MMR) and this is multiplied by baseline immunity to
-            initialize the size of the Vaccinated population. The remaining 3%
-            of individuals are assumed to lack protection and are initialized
-            into a separate state (Vaccinated but Susceptible).
+            coverage or prior infection over the entire population. It's
+            assumed that existing vaccination coverage and prior infection
+            result in 97% protection against future infection (the estimated
+            efficacy of two doses of MMR) and this is multiplied by baseline
+            immunity to initialize the size of the Vaccinated population. The
+            remaining 3% of individuals are assumed to lack protection and are
+            initialized into a separate state (Vaccinated but Susceptible).
             </li>
 
             <li style="font-size:14px; margin-bottom: 10px;">
-            Vaccines administered during the vaccination campaign are assumed to
-            be first doses of MMR. The user-defined vaccination campaign timing
-            is defined by the vaccination start day (days after the initial
-            infection is introduced) and the duration of the campaign (in days).
-            It's assumed that the number of doses administered per day is equal
-            to the total number of doses divided by the duration of the campaign
-            (but may be rounded to the nearest integer value). If the campaign
-            ends after the simulation ends, the vaccination campaign will be
-            shortened to run until the last simulation day while keeping the
-            rate of doses administered per day the same. In this case, the total
-            number of doses scheduled to be administered will not match the
-            vaccination uptake proportion input specified in the sidebar.
+            Vaccines administered during the vaccination campaign are assumed
+            to be first doses of MMR. The user-defined vaccination campaign
+            timing is defined by the vaccination start day (days after the
+            initial infection is introduced) and the duration of the campaign
+            (in days). It's assumed that the number of doses administered per
+            day is equal to the total number of doses divided by the duration
+            of the campaign (but may be rounded to the nearest integer value).
+            If the campaign ends after the simulation ends, the vaccination
+            campaign will be shortened to run until the last simulation day
+            while keeping the rate of doses administered per day the same. In
+            this case, the total number of doses scheduled to be administered
+            will not match the vaccination uptake proportion input specified in
+            the sidebar.
             </li>
 
             <li style="font-size:14px; margin-bottom: 10px;">
             We assume that both susceptible and exposed individuals who are not
-            yet infectious are eligible to get vaccinated during the vaccination
-            campaign. We also assume that exposed individuals are not yet aware
-            of their exposure status and so they are equally likely to seek
-            vaccination. After vaccination, only susceptible individuals become
-            immune, while exposed individuals remain in the exposed state and
-            continue with infection progression as normal. The number of doses
-            administered may be lower than the number of doses scheduled if by
-            the time of the campaign, the daily dose rate scheduled exceeds the
-            number of individuals eligible for vaccination.
+            yet infectious are eligible to get vaccinated during the
+            vaccination campaign. We also assume that exposed individuals are
+            not yet aware of their exposure status and so they are equally
+            likely to seek vaccination. After vaccination, only susceptible
+            individuals become immune, while exposed individuals remain in the
+            exposed state and continue with infection progression as normal.
+            The number of doses administered may be lower than the number of
+            doses scheduled if by the time of the campaign, the daily dose
+            rate scheduled exceeds the number of individuals eligible for
+            vaccination.
             </li>
 
             <li style="font-size:14px; margin-bottom: 10px;">
-            Following the incubation period, we assume that infected individuals
-            first enter a pre-rash infectious state before developing a rash and
-            entering a separate infectious state defined by rash onset. We
-            assume that the duration of time spent in each of these two states
-            is the same. For example, when the infectious period is 9 days, the
-            duration of tie spent in each of the two infectious states is on
-            average 4.5 days.
+            Following the incubation period, we assume that infected
+            individuals first enter a pre-rash infectious state before
+            developing a rash and entering a separate infectious state defined
+            by rash onset. We assume that the duration of time spent in each of
+            these two states is the same. For example, when the infectious
+            period is 9 days, the duration of time spent in each of the two
+            infectious states is on average 4.5 days.
             </li>
 
             <li style="font-size:14px; margin-bottom: 10px;">
@@ -1235,21 +1237,22 @@ def app(replicates=20):
             infectious individuals, we model quarantine as a reduction in
             transmission from individuals in the pre-rash onset, infectious
             compartment. Specifically, we assume that a proportion of these
-            individuals have their transmission potential fully reduced to zero.
-            We assume isolation acts in a similar fashion to reduce transmission
-            of infectious individuals that have a rash. The proportion of
-            individuals whose transmission is reduced to zero by quarantine or
-            isolation is defined by the adherence parameters in the sidebar and
-            multiplied by the efficacy of each of these interventions, given in
-            the Parameters section below.
+            individuals have their transmission potential fully reduced to
+            zero. We assume isolation acts in a similar fashion to reduce
+            transmission of infectious individuals that have a rash. The
+            proportion of individuals whose transmission is reduced to zero by
+            quarantine or isolation is defined by the adherence parameters in
+            the sidebar and multiplied by the efficacy of each of these
+            interventions, given in the Parameters section below.
             </li>
 
             <li style="font-size:14px; margin-bottom: 10px;">
             If individuals quarantine prior to rash onset, it's assumed that
-            they will also isolate on rash onset. Thus, the model is constrained
-            such that the proportion of individuals adhering to quarantine is
-            less than or equal to the proportion of individuals adhering (and
-            that isolation must be used for quarantine to be used).
+            they will also isolate on rash onset. Thus, the model is
+            constrained such that the proportion of individuals adhering to
+            quarantine is less than or equal to the proportion of individuals
+            adhering (and that isolation must be used for quarantine to be
+            used).
             </li>
 
             <b style="font-size:14px;">Model Parameters</b>
@@ -1321,8 +1324,8 @@ def app(replicates=20):
             Health Strategy to Contain Measles Virus Transmission During a
             Measles Outbreak | Clinical Infectious Diseases | Oxford Academic]
             </a>. In this model, since isolation starts only at rash onset,
-            isolation reduces transmission by 100% during the second half of the
-            infectious period, leading to a reduction of 50% overall.
+            isolation reduces transmission by 100% during the second half of
+            the infectious period, leading to a reduction of 50% overall.
             </li>
 
             <li style="font-size:14px; margin-bottom: 10px;">
