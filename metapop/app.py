@@ -281,15 +281,20 @@ def app(replicates=20):
             "as well as the vaccine uptake and start time and duration of the vaccination campaign, "
             "can be specified.",
         )
-        st.text(
-            "Choose interventions to simulate and compare with a "
-            "scenario with no active interventions. Interventions can be applied "
-            "independently or in combination with each other. "
-            "The results are compared to a baseline scenario that does not "
-            "have a vaccination campaign, nor isolation or quarantine interventions incorporated. "
-            "In this model, day 1 corresponds to when infected people are introduced into the community and day 5 is the average day of rash onset "
-            "for introduced infections (see Detailed Methods). "
-        )
+        # placeholder for the introduction text about interventions
+        col_intervention_intro = st.columns(1)[0]
+        # # st.text(
+        # intervention_intro = (
+        #     "Choose interventions to simulate and compare with a "
+        #     "scenario with no active interventions. Interventions can be applied "
+        #     "independently or in combination with each other. "
+        #     "The results are compared to a baseline scenario that does not "
+        #     "have a vaccination campaign, nor isolation or quarantine interventions incorporated. "
+        #     f"In this model, day 1 corresponds to when infected people are introduced into the community and day {np.ceil(edited_parms['infectious_duration']/2):.0f} is the average day of rash onset "
+        #     "for introduced infections (see Detailed Methods). "
+        # # )
+        # )
+        # col_intervention_intro.text(intervention_intro)
 
         # --- Intervention scenario Parameters ---
 
@@ -455,6 +460,19 @@ def app(replicates=20):
         assert (
             edited_parms1["isolation_adherence"] == 0
         ), "Isolation adherence should be 0 for the no intervention scenario"
+
+        # st.text(
+        intervention_intro = (
+            "Choose interventions to simulate and compare with a "
+            "scenario with no active interventions. Interventions can be applied "
+            "independently or in combination with each other. "
+            "The results are compared to a baseline scenario that does not "
+            "have a vaccination campaign, nor isolation or quarantine interventions incorporated. "
+            f"In this model, day 1 corresponds to when infected people are introduced into the community and day {np.ceil(edited_parms2['infectious_duration']/2):.0f} is the average day of rash onset "
+            "for introduced infections (see Detailed Methods). "
+            # )
+        )
+        col_intervention_intro.text(intervention_intro)
 
         # --- About this app section ---
         st.header("About this app")
@@ -957,7 +975,7 @@ def app(replicates=20):
         "Each thin line represents counts of new daily or weekly rash onsets "
         "from an individual simulation of the stochastic model. "
         "Introduced infections arrive in the community on day 1 and have an average rash onset "
-        "time on day 5, the first day at which interventions can begin. "
+        f"time on day {np.ceil(edited_parms2['infectious_duration']/2):.0f}, the first day at which interventions can begin. "
         "All simulations within a given scenario (i.e., shown with "
         "the same color) are run under the same set of parameters, and "
         "differences between each individual simulation are due to random "
@@ -1017,7 +1035,7 @@ def app(replicates=20):
                 )
             else:
                 callout_text += "</li>"
-            callout_text += f"</ul><em>All intervention start times are relative to when infections are introduced into the community (day 1). The minimum intervention start time is day 5 (when introduced infections have rash onset, on average).</em>"
+            callout_text += f"</ul><em>All intervention start times are relative to when infections are introduced into the community (day 1). The minimum intervention start time is day {np.round(edited_parms2['infectious_duration']):.0f} (when introduced infections have rash onset, on average).</em>"
 
             flexible_callout(
                 callout_text,
