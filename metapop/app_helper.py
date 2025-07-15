@@ -1651,12 +1651,13 @@ def img_to_bytes(img_path):
     return encoded
 
 
-def img_to_html(img_path, width=30, vertical_align="middle", margin_right=8):
+def img_to_html(img_path, alt, width=30, vertical_align="middle", margin_right=8):
     """
     Convert an image file to an HTML image tag with base64 encoding.
 
     Args:
         img_path (str): The path to the image file.
+        alt (str): Alt text for the image
         width (int): The width of the image in pixels. Defaults to 30.
         vertical_align (str): The vertical alignment of the image. Defaults to "middle".
         margin_right (int): The right margin in pixels. Defaults to 8.
@@ -1665,8 +1666,7 @@ def img_to_html(img_path, width=30, vertical_align="middle", margin_right=8):
         str: An HTML image tag with the base64 encoded image.
     """
     encoded = img_to_bytes(img_path)
-    img_html = "<img src='data:image/png;base64, {}' class='img-fluid'>".format(encoded)
-    img_html = f"<img src='data:image/png;base64, {encoded}' width='{width}' style='vertical-align:{vertical_align}; margin-right:{margin_right}px' class='img-fluid'>"
+    img_html = f"<img alt='{alt}' src='data:image/png;base64, {encoded}' width='{width}' style='vertical-align:{vertical_align}; margin-right:{margin_right}px' class='img-fluid'>"
     return img_html
 
 

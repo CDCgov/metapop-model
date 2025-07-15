@@ -112,7 +112,7 @@ def app(replicates=20):
     Returns:
         None: The function runs a Streamlit app and does not return anything.
     """
-    st.set_page_config(layout="wide")
+    st.set_page_config(page_title="Measles Outbreak Simulator", layout="wide")
     st.title("Measles Outbreak Simulator")
 
     # Show development warning if not in production
@@ -463,7 +463,7 @@ def app(replicates=20):
 
         markdown_content = ""
         markdown_content += f'<a href="{url}" target="_blank">'
-        markdown_content += f"{img_to_html(image_path)}"
+        markdown_content += f'{img_to_html(image_path, "GitHub Logo")}'
         markdown_content += "Source code"
         markdown_content += "</a>"
 
@@ -993,7 +993,7 @@ def app(replicates=20):
                 )
             else:
                 callout_text += "</li>"
-            callout_text += f"<i>All intervention start times are relative to when infections are introduced into the community (day 1). The minimum intervention start time is day 5 (when introduced infections have rash onset, on average).</i>"
+            callout_text += f"</ul><em>All intervention start times are relative to when infections are introduced into the community (day 1). The minimum intervention start time is day 5 (when introduced infections have rash onset, on average).</em>"
 
             flexible_callout(
                 callout_text,
@@ -1159,7 +1159,7 @@ def app(replicates=20):
             which may vary over time during an outbreak.
             </p>
 
-            <b style="font-size:14px;">Assumptions</b>
+            <h5>Assumptions</h5>
             <p style="font-size:14px;">We note that this modeling approach
             makes several simplifying assumptions, including the following:</p>
             <ul style="margin-bottom: 20px;">
@@ -1254,8 +1254,10 @@ def app(replicates=20):
             adhering (and that isolation must be used for quarantine to be
             used).
             </li>
+            </ul>
 
-            <b style="font-size:14px;">Model Parameters</b>
+            <h5>Model Parameters</h5>
+            <ul>
             <li style="font-size:14px; margin-bottom: 10px;">
             The basic reproductive number (R<sub>0</sub>), captures contact
             rates and the probability of infection given contact with an

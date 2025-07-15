@@ -9,10 +9,10 @@ install: poetry.lock
 	(poetry install)
 
 run_app: poetry
-	streamlit run app.py --global.disableWidgetStateDuplicationWarning=True
+	poetry run streamlit run app.py --global.disableWidgetStateDuplicationWarning=True
 
 run_advanced_app: poetry
-	streamlit run app.py -- --app_version advanced_app
+	poetry run streamlit run app.py -- --app_version advanced_app
 
 build_stlite: poetry
 	python -m build
