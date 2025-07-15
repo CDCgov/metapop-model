@@ -456,7 +456,7 @@ def app(replicates=20):
             "The results are compared to a baseline scenario that does not "
             "have a vaccination campaign, nor isolation or quarantine interventions incorporated. "
             "In this model, day 1 corresponds to when infected people are introduced "
-            f"into the community and day {np.floor(edited_parms2['infectious_duration']/2 + 1):.0f}"
+            f"into the community and day {np.floor(edited_parms2['infectious_duration']/2 + 1):.0f} "
             "is the average day of rash onset for introduced infections (see Detailed Methods). "
         )
         col_intervention_intro.text(intervention_intro)
@@ -1169,11 +1169,11 @@ def app(replicates=20):
             arrive in their pre-rash infectious stage and are modeled to become
             symptomatic, on average, halfway through their infectious period.
             For example, if the infectious period is
-            {parms['infectious_duration']} days, then introduced
+            {edited_parms2['infectious_duration']} days, then introduced
             infections are assumed to develop a rash and become symptomatic,
-            on average, {parms['infectious_duration']/2:.1f} days
+            on average, {edited_parms2['infectious_duration']/2:.1f} days
             after introduction or approximately on day
-            {np.floor(parms['infectious_duration']/2 + 1):.0f}. In this
+            {np.floor(edited_parms2['infectious_duration']/2 + 1):.0f}. In this
             model, the first day of rash onset is the earliest day most
             communities would be aware of measles cases and begin public health
             interventions.
