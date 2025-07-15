@@ -786,6 +786,7 @@ def app(replicates=20):
                 legend=None,
             ),
             detail="replicate",
+            tooltip=[],  # Empty tooltip for the trajectories
         )
         .properties(title=title, width=800, height=400)
     )
@@ -805,8 +806,8 @@ def app(replicates=20):
                 ],
             ),
         ),
+        tooltip=[],  # Empty tooltip for the median line
     )
-
     # Add vaccine campaign period as a shaded box if applicable
     if edited_parms2["total_vaccine_uptake_doses"] > 0:
         # Draw two vertical dashed lines for the start and end of the vaccine campaign
@@ -874,6 +875,7 @@ def app(replicates=20):
                         range=[vaccine_campaign_color],
                     ),
                 ),
+                tooltip=[],  # Empty tooltip for the dummy window
             )
         )
 
@@ -894,6 +896,7 @@ def app(replicates=20):
             .encode(
                 x=alt.X("x:Q", title=time_label),
                 # Remove color encoding to avoid legend entry
+                tooltip=[],  # Empty tooltip for the vertical lines
             )
         )
         vax = vax_window + vax_lines
@@ -902,13 +905,19 @@ def app(replicates=20):
         vax = (
             alt.Chart(pd.DataFrame({"x": []}))
             .mark_line()
-            .encode(x=alt.X("x:Q", title=time_label))
+            .encode(
+                x=alt.X("x:Q", title=time_label),
+                tooltip=[],  # Empty tooltip for the empty chart
+            )
         )
 
         dummy_vax_window = (
             alt.Chart(pd.DataFrame({"x": []}))
             .mark_line()
-            .encode(x=alt.X("x:Q", title=time_label))
+            .encode(
+                x=alt.X("x:Q", title=time_label),
+                tooltip=[],  # Empty tooltip for the dummy window
+            )
         )
 
     # Add annotation if no interventions are selected
