@@ -838,6 +838,7 @@ def app(replicates=20):
                         range=[vaccine_campaign_color],
                     ),
                 ),
+                tooltip=[],  # Empty tooltip for the shaded window
             )
         )
         # Create a dummy DataFrame to be used so that the vaccine window is
@@ -858,7 +859,7 @@ def app(replicates=20):
         dummy_vax_window = (
             alt.Chart(dummy_vax_df)
             .mark_rect(
-                opacity=0.8,
+                opacity=0.9,
                 color=vaccine_campaign_color,
                 strokeWidth=1.5,
             )
