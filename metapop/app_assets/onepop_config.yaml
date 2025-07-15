@@ -15,7 +15,7 @@ baseline_parameters:
   vaccine_efficacy_2_dose: 0.97
   vaccine_efficacy_1_dose: 0.93
   vaccine_uptake: false
-  vaccine_uptake_start_day: 5
+  vaccine_uptake_start_day: 4
   vaccine_uptake_duration_days: 21
   use_prop_vaccine_uptake: true      # if true for the app,
   total_vaccine_uptake_doses: 20.0   # then prop unvax that get vax, else absolute number of doses
@@ -23,12 +23,12 @@ baseline_parameters:
   isolation_on: true
   isolation_adherence: 0.5
   isolation_reduction: 1.0 # resulting in 50% reduction in overal transmisison due to isolation
-  symptomatic_isolation_start_day: 5
+  symptomatic_isolation_start_day: 4
   symptomatic_isolation_duration_days: 365
   pre_rash_isolation_on: false
   pre_rash_isolation_adherence: 0.5
   pre_rash_isolation_reduction: 0.60
-  pre_rash_isolation_start_day: 5
+  pre_rash_isolation_start_day: 4
   pre_rash_isolation_duration_days: 365
   IHR: 0.15 # Infection Hospitalization Rate
   tf: 365        # total time modeled

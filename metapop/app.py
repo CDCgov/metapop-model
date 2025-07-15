@@ -449,16 +449,15 @@ def app(replicates=20):
             edited_parms1["isolation_adherence"] == 0
         ), "Isolation adherence should be 0 for the no intervention scenario"
 
-        # st.text(
         intervention_intro = (
             "Choose interventions to simulate and compare with a "
             "scenario with no active interventions. Interventions can be applied "
             "independently or in combination with each other. "
             "The results are compared to a baseline scenario that does not "
             "have a vaccination campaign, nor isolation or quarantine interventions incorporated. "
-            f"In this model, day 1 corresponds to when infected people are introduced into the community and day {np.round(edited_parms2['infectious_duration']/2 + 1):.0f} is the average day of rash onset "
-            "for introduced infections (see Detailed Methods). "
-            # )
+            "In this model, day 1 corresponds to when infected people are introduced "
+            f"into the community and day {np.floor(edited_parms2['infectious_duration']/2 + 1):.0f}"
+            "is the average day of rash onset for introduced infections (see Detailed Methods). "
         )
         col_intervention_intro.text(intervention_intro)
 
@@ -963,7 +962,7 @@ def app(replicates=20):
         "Each thin line represents counts of new daily or weekly rash onsets "
         "from an individual simulation of the stochastic model. "
         "Introduced infections arrive in the community on day 1 and have an average rash onset "
-        f"time on day {np.round(edited_parms2['infectious_duration']/2 + 1):.0f}, the first day at which interventions can begin. "
+        f"time on day {np.floor(edited_parms2['infectious_duration']/2 + 1):.0f}, the first day at which interventions can begin. "
         "All simulations within a given scenario (i.e., shown with "
         "the same color) are run under the same set of parameters, and "
         "differences between each individual simulation are due to random "
@@ -1023,7 +1022,7 @@ def app(replicates=20):
                 )
             else:
                 callout_text += "</li>"
-            callout_text += f"</ul><em>All intervention start times are relative to when infections are introduced into the community (day 1). The minimum intervention start time is day {np.round(edited_parms2['infectious_duration']/2 + 1):.0f} (when introduced infections have rash onset, on average).</em>"
+            callout_text += f"</ul><em>All intervention start times are relative to when infections are introduced into the community (day 1).</em>"
 
             flexible_callout(
                 callout_text,
@@ -1129,10 +1128,10 @@ def app(replicates=20):
             f"""
             <p style="font-size:14px;">
             This model examines measles transmission in a population after an
-            introduction of measles. This is a stochastic compartmental SVEIR
-            model with all-or-nothing vaccination. Because the model is
-            stochastic, simulations using the same parameters can yield
-            different epidemic outcomes. We therefore run 100 individual
+            introduction of measles. This is a stochastic discrete time
+            compartmental SVEIR model with all-or-nothing vaccination. Because
+            the model is stochastic, simulations using the same parameters can
+            yield different epidemic outcomes. We therefore run 100 individual
             simulations to produce a range of possible outcomes and use these
             simulations to estimate outcome uncertainty for each parameter set.
             </p>
@@ -1170,16 +1169,14 @@ def app(replicates=20):
             arrive in their pre-rash infectious stage and are modeled to become
             symptomatic, on average, halfway through their infectious period.
             For example, if the infectious period is
-            {edited_parms2['infectious_duration']} days, then introduced
+            {parms['infectious_duration']} days, then introduced
             infections are assumed to develop a rash and become symptomatic,
-            on average, {edited_parms2['infectious_duration']/2:.1f} days
+            on average, {parms['infectious_duration']/2:.1f} days
             after introduction or approximately on day
-            {np.round(edited_parms2['infectious_duration']/2 + 1):.0f}
-            (at earliest). In this model, the first day of rash onset is
-            the earliest day most communities would be aware of measles cases
-            and begin public health interventions.
-            </p>
-
+            {np.floor(parms['infectious_duration']/2 + 1):.0f}. In this
+            model, the first day of rash onset is the earliest day most
+            communities would be aware of measles cases and begin public health
+            interventions.
             </p>
 
             <p style="font-size:14px;">
