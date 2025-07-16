@@ -1155,8 +1155,9 @@ def app(replicates=20):
             interventions ("No Interventions"). The start day and duration of
             all three intervention measures (isolation, quarantine, and
             vaccination) can be specified by the user. By default, these
-            interventions begin one week after measles introduction and last
-            through the rest of the simulation. Interventions can start up to
+            interventions begin 4 days after measles introduction, when
+            introduced cases would first have rash onset on average given an
+            average infectious period of 9 days. Interventions can start up to
             180 days or approximately 6 months after the introduction of
             measles in the community, and the duration of interventions can be
             up to 365 days or the entire simulation time. After 180 days,
@@ -1175,10 +1176,9 @@ def app(replicates=20):
             infections are assumed to develop a rash and become symptomatic,
             on average, {edited_parms2['infectious_duration']/2:.1f} days
             after introduction or approximately on day
-            {ave_first_rash_onset:.0f}. In this
-            model, the first day of rash onset is the earliest day most
-            communities would be aware of measles cases and begin public health
-            interventions.
+            {ave_first_rash_onset:.0f}. In this model, the first day of rash
+            onset is the earliest day most communities would be aware of
+            measles cases and begin public health interventions.
             </p>
 
             <p style="font-size:14px;">
