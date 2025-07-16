@@ -449,6 +449,8 @@ def app(replicates=20):
             edited_parms1["isolation_adherence"] == 0
         ), "Isolation adherence should be 0 for the no intervention scenario"
 
+        ave_first_rash_onset = np.floor(edited_parms2["infectious_duration"] / 2 + 1)
+
         intervention_intro = (
             "Choose interventions to simulate and compare with a "
             "scenario with no active interventions. Interventions can be applied "
@@ -456,7 +458,7 @@ def app(replicates=20):
             "The results are compared to a baseline scenario that does not "
             "have a vaccination campaign, nor isolation or quarantine interventions incorporated. "
             "In this model, day 1 corresponds to when infected people are introduced "
-            f"into the community and day {np.floor(edited_parms2['infectious_duration']/2 + 1):.0f} "
+            f"into the community and day {ave_first_rash_onset:.0f} "
             "is the average day of rash onset for introduced infections (see Detailed Methods). "
         )
         col_intervention_intro.text(intervention_intro)
@@ -962,7 +964,7 @@ def app(replicates=20):
         "Each thin line represents counts of new daily or weekly rash onsets "
         "from an individual simulation of the stochastic model. "
         "Introduced infections arrive in the community on day 1 and have an average rash onset "
-        f"time on day {np.floor(edited_parms2['infectious_duration']/2 + 1):.0f}, the first day at which interventions can begin. "
+        f"time on day {ave_first_rash_onset:.0f}, the first day at which interventions can begin. "
         "All simulations within a given scenario (i.e., shown with "
         "the same color) are run under the same set of parameters, and "
         "differences between each individual simulation are due to random "
@@ -1173,7 +1175,7 @@ def app(replicates=20):
             infections are assumed to develop a rash and become symptomatic,
             on average, {edited_parms2['infectious_duration']/2:.1f} days
             after introduction or approximately on day
-            {np.floor(edited_parms2['infectious_duration']/2 + 1):.0f}. In this
+            {ave_first_rash_onset:.0f}. In this
             model, the first day of rash onset is the earliest day most
             communities would be aware of measles cases and begin public health
             interventions.
