@@ -873,7 +873,6 @@ def get_helpers(parms=None):
     Returns:
         dict: A dictionary of help text for the app parameters.
     """
-    default_intervention_start_day = 4
     defaults = dict(
         desired_r0="The basic reproductive number captures contact rates and the probability of infection given contact with an infectious individual. Some communities may have higher contact rates—for example, in communities with larger households or higher population density. R0 values for measles are typically estimated to be between 12 and 18 (see Detailed Methods)",
         k_i=[
@@ -902,7 +901,7 @@ def get_helpers(parms=None):
             "Baseline immunity in small population 2",
         ],
         vaccine_uptake="If turned on, initiates a vaccination campaign. The percent of unvaccinated individuals to receive a dose and duration of the campaign to distribute those doses are specified in the slider below.",
-        vaccine_uptake_start_day=f"Number of days after introduction until the vaccination campaign starts. Defaults to {default_intervention_start_day:.0f} days or day 5 in the model (when introduced infections have first rash onset on average with an infectious period of 9 days). Vaccination campaigns can start up to 180 days or approximately 6 months after introduction of measles into the community.",
+        vaccine_uptake_start_day="Number of days after introduction until the vaccination campaign starts. Defaults to 4 days or day 5 in the model (when introduced infections have first rash onset on average with an infectious period of 9 days). Vaccination campaigns can start up to 180 days or approximately 6 months after introduction of measles into the community.",
         vaccine_uptake_duration_days="The vaccine doses are distributed evenly throughout the specified duration of time (i.e., the same number of vaccines will be distributed on each day). If the duration results in the vaccine campaign ending after the last simulation day (day 365), the campaign will end on the last simulation day and remaining doses are administered on that day.",
         total_vaccine_uptake_doses="In this model, we administer one dose of the MMR vaccine per person vaccinated during the campaign, with 93% effectiveness as indicated by vaccine studies.",
         vaccinated_group="Population receiving the vaccine",
