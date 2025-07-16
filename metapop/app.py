@@ -27,6 +27,7 @@ import io
 import sys
 import base64
 import datetime
+import toml
 
 # import what's needed from other metapop modules
 from .app_helper import (
@@ -130,6 +131,12 @@ def app(replicates=20):
     filepath = os.path.join(
         os.path.dirname(__file__), "app_assets", "onepop_config.yaml"
     )
+
+    # Load primary color
+    slpath = os.path.join(os.getcwd(), ".streamlit", "config.toml")
+
+    slconfig = toml.load(slpath)
+    primary_color = slconfig["theme"]["primaryColor"]
 
     # Info about the this app (version, date, commit)
     info = get_metapop_info()
@@ -928,7 +935,7 @@ def app(replicates=20):
                     {"text": ["Use at least one intervention to compare scenarios"]}
                 )
             )
-            .mark_text(align="center", baseline="top", color="grey", fontSize=18)
+            .mark_text(align="center", baseline="top", color=primary_color, fontSize=18)
             .encode(text="text:N", y=alt.value(10))
         )
     else:
