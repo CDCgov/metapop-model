@@ -645,11 +645,17 @@ def app(replicates=20):
     if scenario2[0]["vaccine_uptake"]:
         with col_intervention_text:
             st.text(
-                f"Total vaccines scheduled to be administered during campaign: {sum(schedule.values())} doses",
-                help="This number is calculated based on user input for the percentage of the "
-                "population without prior immunity that is vaccinated during the campaign. "
-                "If the campaign starts after a substantial number of new infections have occurred in the simulation, "
-                "the actual number of doses administered may be lower due to a limited number of non-immune individuals remaining.",
+                "Total vaccines scheduled to be administered during campaign: "
+                f"{sum(schedule.values())} doses",
+                help=(
+                    "This number is calculated based on user input for the "
+                    "percentage of the population without prior immunity that is "
+                    "vaccinated during the campaign. If the campaign starts late "
+                    "after a substantial number of new infections have occurred in "
+                    "the simulation, the actual number of doses administered may be "
+                    "lower due to a limited number of non-immune individuals "
+                    "remaining."
+                ),
             )
 
     # Save a copy of the full results for summary tables so that results1 and results2 can be modified for visualization
