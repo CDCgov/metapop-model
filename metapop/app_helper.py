@@ -874,7 +874,7 @@ def get_helpers(parms=None):
         dict: A dictionary of help text for the app parameters.
     """
     defaults = dict(
-        desired_r0="The basic reproductive number captures contact rates and the probability of infection given contact with an infectious individual. Some communities may have different contact patterns — for example, in communities with larger households or higher population density. R0 values for measles are typically estimated to be between 12 and 18 (see Detailed Methods)",
+        desired_r0=r"The basic reproductive number captures contact rates and the probability of infection given contact with an infectious individual. Some communities may have different contact patterns — for example, in communities with larger households or higher population density. $R_0$ values for measles are typically estimated to be between 12 and 18 (see Detailed Methods)",
         k_i=[
             "Average daily contacts for large population",
             "Average daily contacts for small population 1",
