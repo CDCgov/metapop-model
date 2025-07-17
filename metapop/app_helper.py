@@ -901,7 +901,7 @@ def get_helpers(parms=None):
             "Baseline immunity in small population 2",
         ],
         vaccine_uptake="If turned on, initiates a vaccination campaign. The percent of unvaccinated individuals to receive a dose and duration of the campaign to distribute those doses are specified in the slider below.",
-        vaccine_uptake_start_day="Number of days after introduction until the vaccination campaign starts (for example, 4 days corresponds to day 5, which is 4 days after infections are introduced to the community). Defaults to 4 days, the average time of rash onset for the introduced infections given an infectious period of 9 days. Vaccination campaigns can start up to 180 days or approximately 6 months after introduction to the community.",
+        vaccine_uptake_start_day="Number of days after introduction when the vaccination campaign starts (for example, 4 days corresponds to day 5, which is 4 days after infections are introduced to the community). Defaults to 4 days, the average time of rash onset for the introduced infections given an infectious period of 9 days. Vaccination campaigns can start up to 180 days or approximately 6 months after introduction to the community.",
         vaccine_uptake_duration_days="The model assumes vaccine doses are distributed evenly throughout the duration of the campaign. Vaccination campaigns can last up to 180 days or approximately 6 months.",
         total_vaccine_uptake_doses="In this model, we administer one dose of the MMR vaccine per person vaccinated during the campaign, with 93% effectiveness as indicated by vaccine studies.",
         vaccinated_group="Population receiving the vaccine",
