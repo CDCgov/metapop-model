@@ -164,7 +164,7 @@ def app(replicates=20):
             "This simulator is designed for use in the early stages of an outbreak to "
             "understand the potential impact of isolation, quarantine, and vaccination "
             "on the size of a measles outbreak and is most applicable at the county "
-            "level or finer geographic scale. "
+            "level or smaller geographic scale. "
             "It is not an exact forecast of measles infections in any community. "
             "Hover over the ? icon for more information about each parameter, and "
             "read our Behind the Model to learn more about the modeling methods "
