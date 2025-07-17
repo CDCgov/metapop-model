@@ -650,7 +650,7 @@ def app(replicates=20):
                 help=(
                     "This number is calculated based on user input for the "
                     "percentage of the population without prior immunity that is "
-                    "vaccinated during the campaign. If the campaign starts late "
+                    "vaccinated during the campaign. If the campaign starts "
                     "after a substantial number of new infections have occurred in "
                     "the simulation, the actual number of doses administered may be "
                     "lower due to a limited number of non-immune individuals "
