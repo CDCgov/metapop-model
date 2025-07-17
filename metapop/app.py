@@ -232,15 +232,15 @@ def app(replicates=20):
 
         # --- Shared Parameters in order of appearance in the app ---
         shared_keys = [
-            "I0",
             "pop_sizes",
             "initial_vaccine_coverage",
+            "I0",
         ]
         # shared parameters that are lists
         shared_list_keys = [
-            "I0",
             "pop_sizes",
             "initial_vaccine_coverage",
+            "I0",
         ]
 
         # add a section for the shared parameters in the sidebar panel
