@@ -145,7 +145,7 @@ def test_get_helpers():
     """Test the get_helpers function."""
     helpers = get_helpers()
     assert isinstance(helpers, dict), "Expected helpers to be a dictionary"
-    expected_r0 = "The basic reproductive number captures contact rates and the probability of infection given contact with an infectious individual. Some communities may have higher contact rates—for example, in communities with larger households or higher population density. R0 values for measles are typically estimated to be between 12 and 18 (see Detailed Methods)"
+    expected_r0 = "The basic reproductive number captures contact rates and the probability of infection given contact with an infectious individual. Some communities may have different contact patterns — for example, in communities with larger households or higher population density. R0 values for measles are typically estimated to be between 12 and 18 (see Detailed Methods)"
     assert (
         helpers["desired_r0"] == expected_r0
     ), f"Expected R0 helper to be {expected_r0}, but got {helpers['desired_r0']}"

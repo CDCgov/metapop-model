@@ -334,7 +334,7 @@ def get_advanced_parameter_mapping():
     """
     # Define the mapping of advanced parameter names to display names
     advanced_mapping = dict(
-        desired_r0="R0",
+        desired_r0=r"$R_0$",
         n_groups="Number of groups",
         infectious_duration="Infectious period (days)",
         latent_duration="Latent period (days)",
@@ -874,7 +874,7 @@ def get_helpers(parms=None):
         dict: A dictionary of help text for the app parameters.
     """
     defaults = dict(
-        desired_r0="The basic reproductive number captures contact rates and the probability of infection given contact with an infectious individual. Some communities may have higher contact rates—for example, in communities with larger households or higher population density. R0 values for measles are typically estimated to be between 12 and 18 (see Detailed Methods)",
+        desired_r0="The basic reproductive number captures contact rates and the probability of infection given contact with an infectious individual. Some communities may have different contact patterns — for example, in communities with larger households or higher population density. R0 values for measles are typically estimated to be between 12 and 18 (see Detailed Methods)",
         k_i=[
             "Average daily contacts for large population",
             "Average daily contacts for small population 1",
