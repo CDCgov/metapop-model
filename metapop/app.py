@@ -467,6 +467,7 @@ def app(replicates=20):
             "alone or in combination. "
             "The results are compared to a no intervention scenario with no "
             "isolation, quarantine, or vaccination campaign. "
+            "\n\n"
             "In this model, day 1 corresponds to when infected people are introduced "
             f"into the community. "
         )
