@@ -159,9 +159,12 @@ def app(replicates=20):
     # --- Sidebar: Model Inputs and Parameter Editing ---
     with st.sidebar:
         st.text(
-            "This tool is meant for use at the beginning of an outbreak at the county level or finer geographic scale. "
-            "It is not intended to provide an exact forecast of measles infections in any community. "
-            "Hover over the (?) for more information about each parameter."
+            "This simulator is designed for use in the early stages of an outbreak, to "
+            "understand the potential impact of isolation, quarantine, and vaccination "
+            "on the size of a measles outbreak and is most applicable at the county "
+            "level or finer geographic scale. "
+            "It is not an exact forecast of measles infections in any community. "
+            "Hover over the ? icon for more information about each parameter."
         )
         st.header("Model Inputs")
 
