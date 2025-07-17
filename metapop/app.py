@@ -992,7 +992,7 @@ def app(replicates=20):
         "plotted here. All simulations for a given scenario (i.e., shown with "
         "the same color) are run under the same set of parameters, and "
         "differences between each individual simulation are due to random "
-        "variation in contact rates. "  # Read more about our modeling methods. "
+        "variation in contact rates. Read more about our modeling methods (link to Behind the Model to be added after clearance approval). "
         "Bolded lines show the simulation that closest to the median time of peak prevalence across all epidemic trajectories for "
         "each scenario. If a vaccination campaign is modeled, the time period over "
         "which vaccines are distributed is shown by the shaded box. "
