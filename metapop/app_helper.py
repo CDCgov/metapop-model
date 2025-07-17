@@ -1472,17 +1472,17 @@ def get_table(combined_results, IHR, rng):
         identifier="replicate",
     )
 
-    # mean and 95% credible interval for infections and hospitalizations
+    # median and 95% Prediction Interval for infections and hospitalizations
     summary_stats = (
         combined_results.group_by("Scenario")
         .agg(
             [
                 # Infections
-                pl.col("Total").mean().alias("inf_mean"),
+                pl.col("Total").median().alias("inf_median"),
                 pl.col("Total").quantile(0.025).alias("inf_ci_low"),
                 pl.col("Total").quantile(0.975).alias("inf_ci_high"),
                 # Hospitalizations
-                pl.col("Hospitalizations").mean().alias("hosp_mean"),
+                pl.col("Hospitalizations").median().alias("hosp_median"),
                 pl.col("Hospitalizations").quantile(0.025).alias("hosp_ci_low"),
                 pl.col("Hospitalizations").quantile(0.975).alias("hosp_ci_high"),
             ]
@@ -1493,12 +1493,12 @@ def get_table(combined_results, IHR, rng):
     ## build table for the app
     infections = pl.DataFrame(
         {
-            "": ["Infections, mean (95% CI)"],
-            "No interventions": [
-                f"{summary_stats['inf_mean'][0]:.0f} ({summary_stats['inf_ci_low'][0]:.0f} - {summary_stats['inf_ci_high'][0]:.0f})"
+            "": ["Infections, median (95% prediction interval)"],
+            "No Interventions": [
+                f"{summary_stats['inf_median'][0]:.0f} ({summary_stats['inf_ci_low'][0]:.0f} - {summary_stats['inf_ci_high'][0]:.0f})"
             ],
             "Interventions": [
-                f"{summary_stats['inf_mean'][1]:.0f} ({summary_stats['inf_ci_low'][1]:.0f} - {summary_stats['inf_ci_high'][1]:.0f})"
+                f"{summary_stats['inf_median'][1]:.0f} ({summary_stats['inf_ci_low'][1]:.0f} - {summary_stats['inf_ci_high'][1]:.0f})"
             ],
             "Relative difference (%)": [
                 f"{totalinf_reldiff[1]:.0f}% ({totalinf_reldiff[0]:.0f} - {totalinf_reldiff[2]:.0f})"
@@ -1507,12 +1507,12 @@ def get_table(combined_results, IHR, rng):
     )
     hospitalizations = pl.DataFrame(
         {
-            "": ["Hospitalizations, mean (95% CI)"],
-            "No interventions": [
-                f"{summary_stats['hosp_mean'][0]:.0f} ({summary_stats['hosp_ci_low'][0]:.0f} - {summary_stats['hosp_ci_high'][0]:.0f})"
+            "": ["Hospitalizations, median (95% prediction interval)"],
+            "No Interventions": [
+                f"{summary_stats['hosp_median'][0]:.0f} ({summary_stats['hosp_ci_low'][0]:.0f} - {summary_stats['hosp_ci_high'][0]:.0f})"
             ],
             "Interventions": [
-                f"{summary_stats['hosp_mean'][1]:.0f} ({summary_stats['hosp_ci_low'][1]:.0f} - {summary_stats['hosp_ci_high'][1]:.0f})"
+                f"{summary_stats['hosp_median'][1]:.0f} ({summary_stats['hosp_ci_low'][1]:.0f} - {summary_stats['hosp_ci_high'][1]:.0f})"
             ],
             "Relative difference (%)": [
                 f"{hosp_reldiff[1]:.0f}% ({hosp_reldiff[0]:.0f} - {hosp_reldiff[2]:.0f})"
