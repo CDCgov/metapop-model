@@ -784,7 +784,7 @@ def app(replicates=20):
         elif np.round(dose_per_day) == 1:
             dose_per_day_text = "(equivalent to around 1 dose per day)"
         elif np.round(dose_per_day) < 1:
-            dose_per_day_text = "(equivalent to around <1 dose per day)"
+            dose_per_day_text = "(equivalent to less than 1 dose per day)"
 
         title = alt.TitleParams(
             "Simulated measles epidemic curve with and without public health interventions",
