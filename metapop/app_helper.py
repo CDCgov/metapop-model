@@ -889,7 +889,7 @@ def get_helpers(parms=None):
             "Size of the small population 2",
         ],
         latent_duration="The number of days from when a person is infected to when they become infectious.",
-        infectious_duration="The number of days a person who is infected with measles is infectious. For measles, rash onset is halfway through the infectious period.",
+        infectious_duration="The number of days a person who is infected with measles is infectious. In this model, rash onset occurs halfway through the infectious period on average.",
         I0=[
             "Introductions in large population",
             "Introductions in small population 1",
