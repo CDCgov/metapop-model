@@ -318,8 +318,8 @@ def get_show_parameter_mapping(parms=None):
 
     if parms is not None and isinstance(parms, dict):
         if parms["n_groups"] == 1:
-            show_mapping["pop_sizes_0"] = "Population Size"
-            show_mapping["I0_0"] = "Infections introduced"
+            show_mapping["pop_sizes_0"] = "Population size"
+            show_mapping["I0_0"] = "Initial introductions"
             show_mapping["initial_vaccine_coverage_0"] = "Baseline immunity"
 
     return show_mapping

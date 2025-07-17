@@ -220,13 +220,17 @@ def app(replicates=20):
 
         # Customize helper texts for clarity
         helpers["I0"][0] = (
-            "The model allows for a maximum of 10 infections introduced in the population."
+            "The model currently allows for a maximum of 10 initial introductions in the population. "
+            "This value represents recent importations of people who are infectious transmitting to others at the beginning of the outbreak. "
+            "It is not meant to represent the total number of infections reported in a population to date. "
         )
         helpers["pop_sizes"][0] = (
-            "The model currently has a minimum of 1,000 people and a maximum of 100,000 people. As population sizes get larger, the assumption of a well-mixed population becomes less valid."
+            "The model currently has a minimum of 1,000 people and a maximum of 100,000 people and assumes a well-mixed (homogeneous) population. "
+            "As population sizes get larger, the assumption that everyone in a community is equally likely to interact with "
+            "everyone else in the community becomes less valid and the model might be less appropriate."
         )
         helpers["initial_vaccine_coverage"][0] = (
-            "The percent of the population with any immunity against measles, including both through MMR vaccination and through past infection."
+            "The percent of the population with any prior immunity to measles, including through either MMR vaccination or through past infection."
         )
 
         # Add a section for a Reset button for all parameters
