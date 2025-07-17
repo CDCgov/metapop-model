@@ -166,7 +166,9 @@ def app(replicates=20):
             "on the size of a measles outbreak and is most applicable at the county "
             "level or finer geographic scale. "
             "It is not an exact forecast of measles infections in any community. "
-            "Hover over the ? icon for more information about each parameter."
+            "Hover over the ? icon for more information about each parameter, and "
+            "read our Behind the Model to learn more about the modeling methods "
+            "(link to Behind the Model to be added after clearance approval). "
         )
 
         # Get widget types, min/max values, steps, helpers, formats, and keys for widgets
