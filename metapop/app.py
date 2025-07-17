@@ -166,7 +166,6 @@ def app(replicates=20):
             "It is not an exact forecast of measles infections in any community. "
             "Hover over the ? icon for more information about each parameter."
         )
-        st.header("Model Inputs")
 
         # Get widget types, min/max values, steps, helpers, formats, and keys for widgets
         widget_types = get_widget_types()
@@ -250,7 +249,7 @@ def app(replicates=20):
         col0 = st.columns(1)[0]
 
         col0.subheader(
-            "Shared parameters",
+            "Population characteristics",
         )
 
         col0.text(
