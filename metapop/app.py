@@ -1157,7 +1157,7 @@ def app(replicates=20):
         st.markdown(
             f"""
             For a more detailed description of the methods and parameters used in this model,
-            see our Behind The Model.
+            see our Behind The Model (link to Behind the Model to be added after clearance approval).
             """,
             unsafe_allow_html=True,
         )
