@@ -161,7 +161,7 @@ def app(replicates=20):
     # --- Sidebar: Model Inputs and Parameter Editing ---
     with st.sidebar:
         st.text(
-            "This simulator is designed for use in the early stages of an outbreak, to "
+            "This simulator is designed for use in the early stages of an outbreak to "
             "understand the potential impact of isolation, quarantine, and vaccination "
             "on the size of a measles outbreak and is most applicable at the county "
             "level or finer geographic scale. "
