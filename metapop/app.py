@@ -113,8 +113,8 @@ def app(replicates=20):
     Returns:
         None: The function runs a Streamlit app and does not return anything.
     """
-    st.set_page_config(page_title="Measles Outbreak Simulator", layout="wide")
-    st.title("Measles Outbreak Simulator")
+    st.set_page_config(page_title="CDC Measles Outbreak Simulator", layout="wide")
+    st.title("CDC Measles Outbreak Simulator")
 
     # Show development warning if not in production
     if os.environ.get("MODE", "PRODUCTION") == "DEVELOPMENT":
@@ -994,9 +994,10 @@ def app(replicates=20):
         flexible_callout(
             (
                 "No Interventions:<br><ul>"
-                f"<li> Vaccines administered during campaign: {int(edited_parms1['total_vaccine_uptake_doses'])}</li>"
-                f"<li> Adherence to isolation among symptomatic infectious individuals:  {int(edited_parms1['isolation_adherence'] * 100)}%</li>"
-                f"<li> Adherence to quarantine among pre-symptomatic infectious individuals: {int(edited_parms1['pre_rash_isolation_adherence'] * 100)}%</li></ul>"
+                "<li>In the no intervention scenario, there is no isolation for individuals "
+                "showing measles-specific symptoms, no quarantine of people exposed to "
+                "measles with no evidence of prior immunity, and no vaccination campaign "
+                "for people with no prior immunity.</li></ul>"
             ),
             background_color="#feeadf",
             font_color="#8f3604",
