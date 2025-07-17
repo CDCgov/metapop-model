@@ -284,7 +284,7 @@ def app(replicates=20):
         st.header(
             "Interventions",
             help="The adherence to isolation and quarantine, "
-            "as well as the vaccine uptake and the start time and duration of each intervention "
+            "vaccine uptake, and the start time and duration of each intervention "
             "can be specified.",
         )
         # placeholder for the introduction text about interventions
