@@ -121,10 +121,12 @@ def app(replicates=20):
         st.warning(f"Building from dev branch")
 
     st.text(
-        "This interactive tool illustrates the impact of "
-        "vaccination, isolation, and quarantine measures on the "
-        "size of measles outbreaks following introduction of measles into "
-        "a community by comparing scenarios with and without interventions."
+        "This interactive tool helps public health decision-makers to "
+        "explore the potential impact of three key public health "
+        "interventions - isolation, quarantine, and vaccination - on "
+        "measles outbreaks. A summary of the model and how public health "
+        "interventions can prevent or slow the spread of measles in "
+        "communities is available for download."
     )
 
     # Load default parameters from YAML config
@@ -152,7 +154,7 @@ def app(replicates=20):
         [parms["seed"], seed_from_string("hospitalizations")]
     )
 
-    scenario_names = ["No Interventions", "Interventions"]
+    scenario_names = ["No interventions", "Interventions"]
     show_parameter_mapping = get_show_parameter_mapping(parms)
     advanced_parameter_mapping = get_advanced_parameter_mapping()
 
@@ -211,7 +213,7 @@ def app(replicates=20):
 
         # If a set of session state keys are not used, this means that the
         # parameters will not be shown and modifiable by users in the sidebar panel.
-        # The No Interventions scenario parameters are not shown in the sidebar panel,
+        # The No interventions scenario parameters are not shown in the sidebar panel,
         # so it is possible that the keys for this scenario are not used.
 
         session_state_keys0 = get_session_state_idkeys(0)  # shared parameters
@@ -668,31 +670,31 @@ def app(replicates=20):
 
     # Rename columns for plotting
     app_column_mapping = {
-        f"inc_{interval}": "Weekly Incidence",
-        "Y": "Weekly Cumulative Incidence",
+        f"inc_{interval}": "Weekly incidence",
+        "Y": "Weekly cumulative incidence",
     }
     interval_results1 = interval_results1.rename(app_column_mapping)
     interval_results2 = interval_results2.rename(app_column_mapping)
 
     # Rename columns in daily results for app display after results have been calculated
-    app_column_mapping = {"Y": "Cumulative Incidence"}
+    app_column_mapping = {"Y": "Cumulative incidence"}
     results1 = results1.rename(app_column_mapping)
     results2 = results2.rename(app_column_mapping)
 
     # Default to cumulative daily incidence if outcome not available
     if outcome not in [
-        "Cumulative Incidence",
+        "Cumulative incidence",
         "Incidence",
-        "Weekly Incidence",
-        "Weekly Cumulative Incidence",
+        "Weekly incidence",
+        "Weekly cumulative incidence",
     ]:
-        print("outcome not available yet, defaulting to Cumulative Daily Incidence")
+        print("outcome not available yet, defaulting to 'Daily cumulative incidence'")
         outcome = "Y"
 
     # Prepare data for Altair plots
     if outcome_option in [
-        "Daily Incidence",
-        "Daily Cumulative Incidence",
+        "Daily incidence",
+        "Daily cumulative incidence",
     ]:
         alt_results1 = results1
         alt_results2 = results2
@@ -700,7 +702,7 @@ def app(replicates=20):
         time_label = "Time (days)"
         vax_start = min(schedule.keys())
         vax_end = max(schedule.keys())
-    elif outcome_option in ["Weekly Incidence", "Weekly Cumulative Incidence"]:
+    elif outcome_option in ["Weekly incidence", "Weekly cumulative incidence"]:
         alt_results1 = interval_results1
         alt_results2 = interval_results2
         x = "interval_t:Q"
@@ -770,11 +772,12 @@ def app(replicates=20):
             .item()
         )
         title = alt.TitleParams(
-            "Outcome Comparison by Scenario",
+            "Simulated measles epidemic curve with and without public health interventions",
             subtitle=[
-                (f"Vaccine campaign: {mean_doses_administered} doses administered"),
-                f"Quarantine adherence: {pre_rash_isolation_adherence_pct}%",
+                f"Population size: {edited_parms2['pop_sizes'][0]} people, {edited_parms2['I0'][0]} initial introductions",
+                f"Vaccine campaign: {mean_doses_administered} doses administered",
                 f"Isolation adherence: {isolation_adherence_pct}%",
+                f"Quarantine adherence: {pre_rash_isolation_adherence_pct}%",
             ],
             subtitleColor="#808080",
         )
@@ -783,7 +786,7 @@ def app(replicates=20):
             pl.col("replicate").is_in(replicate_inds)
         )
         combined_ave_results = ave_results1
-        title = "No Intervention Scenario"
+        title = "No intervention scenario"
 
     chart_placeholder.text("Building charts...")
 
@@ -891,7 +894,7 @@ def app(replicates=20):
                 x2="x_end:Q",
                 color=alt.Color(
                     "Intervention:N",
-                    legend=alt.Legend(title="Vaccine Campaign"),
+                    legend=alt.Legend(title="Vaccine campaign"),
                     scale=alt.Scale(
                         domain=["Vaccine campaign period"],
                         range=[vaccine_campaign_color],
@@ -969,19 +972,15 @@ def app(replicates=20):
     # --- Chart Description ---
     st.markdown(
         '<p style="font-size:14px;">'
-        "Each thin line represents counts of new daily or weekly rash onsets "
-        "from an individual simulation of the stochastic model. "
-        "Introduced infections arrive in the community on day 1 and have an average rash onset "
-        f"time on day {ave_first_rash_onset:.0f}, the first day at which interventions can begin. "
-        "All simulations within a given scenario (i.e., shown with "
+        "Each thin line represents an individual simulation. The model runs 100 simulations "
+        "for each scenario to generate results, and 20 randomly selected simulations are "
+        "plotted here. All simulations for a given scenario (i.e., shown with "
         "the same color) are run under the same set of parameters, and "
         "differences between each individual simulation are due to random "
-        "variation in contact rates. Bolded lines show the simulation that possessed "
-        "the median time of peak prevalence across all epidemic trajectories for "
-        "each scenario. If a vaccination campaign is activated, the time period over "
-        "which vaccines are distributed is shown by a shaded window between two dashed lines. The model does not account "
-        "for case ascertainment, so the number of new rash onsets represents the true number of infections "
-        "in the population. "
+        "variation in contact rates. "  # Read more about our modeling methods. "
+        "Bolded lines show the simulation that closest to the median time of peak prevalence across all epidemic trajectories for "
+        "each scenario. If a vaccination campaign is modeled, the time period over "
+        "which vaccines are distributed is shown by the shaded box. "
         "</p>",
         unsafe_allow_html=True,
     )
@@ -990,10 +989,10 @@ def app(replicates=20):
     st.subheader("Simulation summary")
     with st.expander("Show intervention strategies", expanded=True):
         columns = st.columns(2)
-        # Create a callout box and text describing the No Interventions scenario
+        # Create a callout box and text describing the No interventions scenario
         flexible_callout(
             (
-                "No Interventions:<br><ul>"
+                "No interventions:<br><ul>"
                 "<li>In the no intervention scenario, there is no isolation for individuals "
                 "showing measles-specific symptoms, no quarantine of people exposed to "
                 "measles with no evidence of prior immunity, and no vaccination campaign "
@@ -1077,7 +1076,7 @@ def app(replicates=20):
     if interventions == "On":
         relative_difference = (
             outbreak_summary.filter(pl.col("") == "Infections, mean (95% CI)")
-            .select("Relative Difference (%)")
+            .select("Relative difference (%)")
             .item()
             .split("%")[0]
         )
@@ -1111,9 +1110,9 @@ def app(replicates=20):
                 icon="⚠️",
             )
 
-        # if the Relative Difference is NaN, set it to ""
+        # if the Relative difference is NaN, set it to ""
         # outbreak_summary = outbreak_summary.with_columns(
-        #     pl.col("Relative Difference (%)").fill_nan("")
+        #     pl.col("Relative difference (%)").fill_nan("")
         # )
 
     if "pyodide" in sys.modules:
@@ -1161,7 +1160,7 @@ def app(replicates=20):
             Users can explore the impact of interventions, including
             vaccination, isolation, and quarantine measures ("Interventions"
             scenario) compared to a baseline scenario without active
-            interventions ("No Interventions"). The start day and duration of
+            interventions ("No interventions"). The start day and duration of
             all three intervention measures (isolation, quarantine, and
             vaccination) can be specified by the user. By default, these
             interventions begin 4 days after measles introduction, when
@@ -1197,7 +1196,7 @@ def app(replicates=20):
             same for total hospitalizations. We then conduct a two-sample K-S
             test to determine if the total measles infections from the
             "Interventions" scenario differ from the total measles infections
-            of the "No Interventions" baseline scenario and present information
+            of the "No interventions" baseline scenario and present information
             if scenario results are indistinguishable.
             </p>
 

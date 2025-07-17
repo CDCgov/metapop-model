@@ -164,7 +164,7 @@ def get_default_full_parameters():
     defaults = pl.DataFrame(
         {
             "Parameter": keys,
-            "No Interventions": values,
+            "No interventions": values,
             "Interventions": values,
         },
         strict=False,
@@ -190,7 +190,7 @@ def get_default_show_parameters_table():
     )
 
     # replace specific values with integers
-    for key in ["No Interventions", "Interventions"]:
+    for key in ["No interventions", "Interventions"]:
         show_defaults = show_defaults.with_columns(
             pl.when(pl.col(key).str.to_lowercase() == "true")
             .then(1)
@@ -202,7 +202,7 @@ def get_default_show_parameters_table():
 
     # cast to float
     show_defaults = show_defaults.with_columns(
-        pl.col("No Interventions").cast(pl.Float64)
+        pl.col("No interventions").cast(pl.Float64)
     )
     show_defaults = show_defaults.with_columns(pl.col("Interventions").cast(pl.Float64))
 
@@ -230,7 +230,7 @@ def get_advanced_parameters_table():
     )
 
     # replace specific values with integers
-    for key in ["No Interventions", "Interventions"]:
+    for key in ["No interventions", "Interventions"]:
         advanced_defaults = advanced_defaults.with_columns(
             pl.when(pl.col(key).str.to_lowercase() == "true")
             .then(1)
@@ -242,7 +242,7 @@ def get_advanced_parameters_table():
 
     # cast to float
     advanced_defaults = advanced_defaults.with_columns(
-        pl.col("No Interventions").cast(pl.Float64)
+        pl.col("No interventions").cast(pl.Float64)
     )
     advanced_defaults = advanced_defaults.with_columns(
         pl.col("Interventions").cast(pl.Float64)
@@ -355,7 +355,7 @@ def get_advanced_parameter_mapping():
         k_g1="Average degree of small population 1 connecting to large population",
         k_g2="Average degree of small population 2 connecting to large population",
         k_21="Connectivity between smaller populations",
-        IHR="Infection Hospitalization Ratio",
+        IHR="Infection hospitalization ratio",
     )
     return advanced_mapping
 
@@ -368,10 +368,10 @@ def get_outcome_options():
         tuple: A tuple containing the available outcome options.
     """
     return (
-        "Weekly Incidence",
-        "Weekly Cumulative Incidence",
-        "Daily Incidence",
-        "Daily Cumulative Incidence",
+        "Weekly incidence",
+        "Weekly cumulative incidence",
+        "Daily incidence",
+        "Daily cumulative incidence",
     )
 
 
@@ -385,10 +385,10 @@ def get_outcome_mapping():
     """
     # Define the mapping of outcome names to their corresponding codes
     return {
-        "Daily Incidence": "Incidence",
-        "Daily Cumulative Incidence": "Cumulative Incidence",
-        "Weekly Incidence": "Weekly Incidence",
-        "Weekly Cumulative Incidence": "Weekly Cumulative Incidence",
+        "Daily incidence": "Incidence",
+        "Daily cumulative incidence": "Cumulative incidence",
+        "Weekly incidence": "Weekly incidence",
+        "Weekly cumulative incidence": "Weekly cumulative incidence",
     }
 
 
@@ -1187,7 +1187,7 @@ def get_parms_from_table(table, value_col="Scenario 1"):
     # get parameter dictionary from a table
     parms = dict()
     # expect the table to have the following columns
-    # Parameter, No Interventions, Interventions
+    # Parameter, No interventions, Interventions
     for key, value in zip(table["Parameter"].to_list(), table[value_col].to_list()):
         parms[key] = value
     return parms
@@ -1419,7 +1419,7 @@ def calculate_outbreak_summary(combined_results, threshold):
     )
 
     # Ensure both scenarios are present in the summary
-    scenarios = ["No Interventions", "Interventions"]
+    scenarios = ["No interventions", "Interventions"]
     for scenario in scenarios:
         if scenario not in outbreak_summary["Scenario"].to_list():
             # Add missing scenario with outbreaks = 0
@@ -1455,7 +1455,7 @@ def get_table(combined_results, IHR, rng):
             ),
         )
     )
-    scenarios = ["No Interventions", "Interventions"]
+    scenarios = ["No interventions", "Interventions"]
 
     # Specify `identifier="replicate"` to make strictly one-to-one difference comparisons
     totalinf_reldiff = relative_difference(
@@ -1494,13 +1494,13 @@ def get_table(combined_results, IHR, rng):
     infections = pl.DataFrame(
         {
             "": ["Infections, mean (95% CI)"],
-            "No Interventions": [
+            "No interventions": [
                 f"{summary_stats['inf_mean'][0]:.0f} ({summary_stats['inf_ci_low'][0]:.0f} - {summary_stats['inf_ci_high'][0]:.0f})"
             ],
             "Interventions": [
                 f"{summary_stats['inf_mean'][1]:.0f} ({summary_stats['inf_ci_low'][1]:.0f} - {summary_stats['inf_ci_high'][1]:.0f})"
             ],
-            "Relative Difference (%)": [
+            "Relative difference (%)": [
                 f"{totalinf_reldiff[1]:.0f}% ({totalinf_reldiff[0]:.0f} - {totalinf_reldiff[2]:.0f})"
             ],
         }
@@ -1508,13 +1508,13 @@ def get_table(combined_results, IHR, rng):
     hospitalizations = pl.DataFrame(
         {
             "": ["Hospitalizations, mean (95% CI)"],
-            "No Interventions": [
+            "No interventions": [
                 f"{summary_stats['hosp_mean'][0]:.0f} ({summary_stats['hosp_ci_low'][0]:.0f} - {summary_stats['hosp_ci_high'][0]:.0f})"
             ],
             "Interventions": [
                 f"{summary_stats['hosp_mean'][1]:.0f} ({summary_stats['hosp_ci_low'][1]:.0f} - {summary_stats['hosp_ci_high'][1]:.0f})"
             ],
-            "Relative Difference (%)": [
+            "Relative difference (%)": [
                 f"{hosp_reldiff[1]:.0f}% ({hosp_reldiff[0]:.0f} - {hosp_reldiff[2]:.0f})"
             ],
         }
