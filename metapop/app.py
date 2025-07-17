@@ -776,6 +776,16 @@ def app(replicates=20):
         else:
             dose_per_day = 0
 
+        dose_per_day_text = ""
+        if np.round(dose_per_day) > 1:
+            dose_per_day_text = (
+                f"(equivalent to around {np.round(dose_per_day):.0f} doses per day)"
+            )
+        elif np.round(dose_per_day) == 1:
+            dose_per_day_text = "(equivalent to around 1 dose per day)"
+        elif np.round(dose_per_day) < 1:
+            dose_per_day_text = "(equivalent to around <1 dose per day)"
+
         title = alt.TitleParams(
             "Simulated measles epidemic curve with and without public health interventions",
             subtitle=[
@@ -1019,7 +1029,8 @@ def app(replicates=20):
             else:
                 callout_text += (
                     f"<li> Vaccines administered during campaign: {mean_doses_administered} "
-                    f"between day {min(schedule.keys())} and day {max(schedule.keys())} (equivalent to around {dose_per_day:.0f} vaccines per day)</li>"
+                    f"between day {min(schedule.keys())} and day {max(schedule.keys())} "
+                    f"{dose_per_day_text}</li>"
                 )
             callout_text += f"<li> Adherence to isolation among symptomatic infectious individuals: {isolation_adherence_pct}%"
             if isolation_adherence_pct > 0:
