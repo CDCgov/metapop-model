@@ -282,9 +282,9 @@ def app(replicates=20):
 
         # Intervention scenario and parameters
         st.header(
-            "Interventions scenario",
-            help="The adherence, duration, and start time of both isolation and quarantine interventions, "
-            "as well as the vaccine uptake and start time and duration of the vaccination campaign, "
+            "Interventions",
+            help="The adherence to isolation and quarantine, "
+            "as well as the vaccine uptake and the start time and duration of each intervention "
             "can be specified.",
         )
         # placeholder for the introduction text about interventions
@@ -458,14 +458,13 @@ def app(replicates=20):
         ave_first_rash_onset = np.floor(edited_parms2["infectious_duration"] / 2 + 1)
 
         intervention_intro = (
-            "Choose interventions to simulate and compare with a "
+            "Choose interventions to compare with a "
             "scenario with no active interventions. Interventions can be applied "
-            "independently or in combination with each other. "
-            "The results are compared to a baseline scenario that does not "
-            "have a vaccination campaign, nor isolation or quarantine interventions incorporated. "
+            "alone or in combination. "
+            "The results are compared to a no intervention scenario with no "
+            "isolation, quarantine, or vaccination campaign. "
             "In this model, day 1 corresponds to when infected people are introduced "
-            f"into the community and day {ave_first_rash_onset:.0f} "
-            "is the average day of rash onset for introduced infections (see Detailed Methods). "
+            f"into the community. "
         )
         col_intervention_intro.text(intervention_intro)
 
