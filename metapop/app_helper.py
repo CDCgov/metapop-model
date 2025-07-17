@@ -1097,7 +1097,7 @@ def coerce_quarantine_to_isolation(element_keys):
 
     if not st.session_state[element_keys["isolation_on"]]:
         st.session_state[element_keys["pre_rash_isolation_on"]] = False
-        st.write("Quarantine cannot be enabled while isolation is not enabled.")
+        st.write("To enable quarantine, isolation must be enabled.")
 
 
 def update_intervention_parameters_from_widget(parms):
