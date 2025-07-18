@@ -1,6 +1,7 @@
 #####
 # Exclude many data and output file types by default
 poetry.lock
+node_modules/
 
 # Data
 *.csv

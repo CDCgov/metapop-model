@@ -1,4 +1,4 @@
-.PHONY: run_app run_advanced_app
+.PHONY: run_app run_advanced_app extract_text
 
 poetry: poetry.lock install update_version_file
 
@@ -50,3 +50,10 @@ release: poetry requirements manifest
 
 test: poetry
 	poetry run pytest -v
+
+extract_text:
+	@node -v >/dev/null 2>&1 || (echo "Node.js is not installed on Ubuntu run sudo apt install nodejs"; exit 1)
+	@npm -v >/dev/null 2>&1 || (echo "npm is not installed on Ubuntu run sudo apt install npm"; exit 1)
+	@npm list puppeteer >/dev/null 2>&1 || npm install puppeteer
+	@rsvg-convert -v >/dev/null 2>&1 || (echo "rsvg-convert is not installed on Ubuntu run sudo apt install librsvg2-bin"; exit 1)
+	@scripts/autoextract/extract_to_docx.py
