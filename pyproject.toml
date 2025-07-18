@@ -22,7 +22,7 @@ matplotlib = "^3.10.0"
 pytest = "^8.3.4"
 pyarrow = "^19.0.1"
 seaborn = "^0.13.2"
-streamlit = { url = "https://github.com/k88hudson-cfa/streamlit/releases/download/v1.46.1-508.4/streamlit-1.46.1-py3-none-any.whl" }
+streamlit = { url = "https://github.com/k88hudson-cfa/streamlit/releases/download/v1.46.1-508.5/streamlit-1.46.1-py3-none-any.whl" }
 st_flexible_callout_elements = "0.1.0"
 build = "^1.2.2.post1"
 bs4 = "^0.0.2"
