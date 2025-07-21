@@ -160,13 +160,27 @@ def app(replicates=20):
 
     # --- Sidebar: Model Inputs and Parameter Editing ---
     with st.sidebar:
-        st.text(
+        # st.text(
+        #     "This simulator is designed for use in the early stages of an outbreak to "
+        #     "understand the potential impact of isolation, quarantine, and vaccination "
+        #     "on the size of a measles outbreak and is most applicable at the county "
+        #     "level or smaller geographic scale. "
+        #     "It is not an exact forecast of measles infections in any community.\n\n"
+
+        #     ""
+
+        #     "Hover over the ? icon for more information about each parameter, and "
+        #     "read our Behind the Model to learn more about the modeling methods "
+        #     "(link to Behind the Model to be added after clearance approval). "
+        # )
+
+        st.markdown(
             "This simulator is designed for use in the early stages of an outbreak to "
             "understand the potential impact of isolation, quarantine, and vaccination "
             "on the size of a measles outbreak and is most applicable at the county "
             "level or smaller geographic scale. "
-            "It is not an exact forecast of measles infections in any community. "
-            "Hover over the ? icon for more information about each parameter, and "
+            "It is not an exact forecast of measles infections in any community.\n\n"
+            "Hover over the :material/help_outline: icon for more information about each parameter, and "
             "read our Behind the Model to learn more about the modeling methods "
             "(link to Behind the Model to be added after clearance approval). "
         )
