@@ -168,9 +168,9 @@ def app(replicates=20):
             "scale. It is not an exact forecast of measles infections in any "
             "community.\n\n"
             "Hover over the :material/help_outline: icon for more information "
-            "about each parameter, and read our Behind the Model to learn more "
-            "about the modeling methods (link to Behind the Model to be added "
-            "after clearance approval). "
+            "about each parameter, and read our "
+            "[Behind the Model](https://www.cdc.gov/cfa-behind-the-model/php/data-research/interactive-measles-outbreak-simulator.html) to learn more "
+            "about the modeling methods. "
         )
 
         # Get widget types, min/max values, steps, helpers, formats, and keys for widgets
@@ -999,18 +999,20 @@ def app(replicates=20):
 
     # --- Chart Description ---
     st.markdown(
+    (
         '<p style="font-size:14px;">'
         "Each thin line represents an individual simulation. The model runs 100 simulations "
         "for each scenario to generate results, and 20 randomly selected simulations are "
         "plotted here. All simulations for a given scenario (i.e., shown with "
         "the same color) are run under the same set of parameters, and "
         "differences between each individual simulation are due to random "
-        "variation in contact rates. Read more about our modeling methods (link to Behind the Model to be added after clearance approval). "
-        "Bolded lines show the simulation closest to the median time of the outbreak peak across all epidemic trajectories for "
+        'variation in contact rates. Read more about our <a href="https://www.cdc.gov/cfa-behind-the-model/php/data-research/interactive-measles-outbreak-simulator.html" target="_blank">modeling methods</a>. '
+        "Bolded lines show the simulation closest to the median time of peak prevalence across all epidemic trajectories for "
         "each scenario. If a vaccination campaign is modeled, the time period over "
-        "which vaccines are distributed is shown by the shaded box between two dashed lines. "
-        "</p>",
-        unsafe_allow_html=True,
+        "which vaccines are distributed is shown by the shaded box. "
+        "</p>"
+    ),
+    unsafe_allow_html=True,
     )
 
     # --- Outbreak Summary Stats ---
@@ -1172,10 +1174,10 @@ def app(replicates=20):
         st.markdown(
             f"""
             For FAQs and more information about the development of this simulator,
-            please see CDC’s Measles Simulator page (link to the landing page to be added after clearance approval).
+            please see [CDC’s Measles Simulator page](https://www.cdc.gov/cfa-modeling-and-forecasting/measles-outbreak-simulator/index.html).
 
             For a more detailed description of the methods and parameters used in this model,
-            see our Behind the Model (link to Behind the Model to be added after clearance approval).
+            see our [Behind The Model](https://www.cdc.gov/cfa-behind-the-model/php/data-research/interactive-measles-outbreak-simulator.html).
             """,
             unsafe_allow_html=True,
         )
