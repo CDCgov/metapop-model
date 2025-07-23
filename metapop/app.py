@@ -839,7 +839,7 @@ def app(replicates=20):
             detail="replicate",
             tooltip=[],  # Empty tooltip for the trajectories
         )
-        .properties(title=title, width=800, height=400)
+        .properties(title=title, width=800, height=450)
     )
 
     #  Add bold line for median trajectory
@@ -856,6 +856,7 @@ def app(replicates=20):
                     intervention_color,
                 ],
             ),
+            legend=alt.Legend(orient="bottom"),
         ),
         tooltip=[],  # Empty tooltip for the median line
     )
@@ -920,7 +921,7 @@ def app(replicates=20):
                 x2="x_end:Q",
                 color=alt.Color(
                     "Intervention:N",
-                    legend=alt.Legend(title="Vaccine campaign"),
+                    legend=alt.Legend(title="Vaccine campaign", orient="bottom"),
                     scale=alt.Scale(
                         domain=["Vaccine campaign period"],
                         range=[vaccine_campaign_color],
