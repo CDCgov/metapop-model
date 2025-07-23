@@ -783,7 +783,7 @@ def app(replicates=20):
             .item()
         )
         if len(schedule) > 0:
-            dose_per_day = np.sum(list(schedule.values())) / len(schedule)
+            dose_per_day = mean_doses_administered / len(schedule)
         else:
             dose_per_day = 0
 
