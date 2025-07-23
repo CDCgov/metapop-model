@@ -1007,7 +1007,7 @@ def app(replicates=20):
         "variation in contact rates. Read more about our modeling methods (link to Behind the Model to be added after clearance approval). "
         "Bolded lines show the simulation closest to the median time of peak prevalence across all epidemic trajectories for "
         "each scenario. If a vaccination campaign is modeled, the time period over "
-        "which vaccines are distributed is shown by the shaded box. "
+        "which vaccines are distributed is shown by the shaded box between two dashed lines. "
         "</p>",
         unsafe_allow_html=True,
     )
@@ -1039,11 +1039,20 @@ def app(replicates=20):
             ):
                 callout_text += "<li> Vaccines administered during campaign: 0</li>"
             else:
-                callout_text += (
-                    f"<li> Vaccines administered during campaign: {mean_doses_administered} "
-                    f"between day {min(schedule.keys())} and day {max(schedule.keys())} "
-                    f"{dose_per_day_text}</li>"
-                )
+                callout_text += f"<li> Vaccines administered during campaign: {mean_doses_administered} "
+                if len(schedule) > 1:
+                    callout_text += (
+                        f"between day {min(schedule.keys())} and day {max(schedule.keys())} "
+                        f"{dose_per_day_text}</li>"
+                    )
+                elif len(schedule) == 1:
+                    callout_text += f"on day {min(schedule.keys())}</li>"
+
+                # callout_text += (
+                #     f"<li> Vaccines administered during campaign: {mean_doses_administered} "
+                #     f"between day {min(schedule.keys())} and day {max(schedule.keys())} "
+                #     f"{dose_per_day_text}</li>"
+                # )
             callout_text += f"<li> Adherence to isolation among symptomatic infectious individuals: {isolation_adherence_pct}%"
             if isolation_adherence_pct > 0:
                 callout_text += (
