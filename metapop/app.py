@@ -1048,11 +1048,6 @@ def app(replicates=20):
                 elif len(schedule) == 1:
                     callout_text += f"on day {min(schedule.keys())}</li>"
 
-                # callout_text += (
-                #     f"<li> Vaccines administered during campaign: {mean_doses_administered} "
-                #     f"between day {min(schedule.keys())} and day {max(schedule.keys())} "
-                #     f"{dose_per_day_text}</li>"
-                # )
             callout_text += f"<li> Adherence to isolation among symptomatic infectious individuals: {isolation_adherence_pct}%"
             if isolation_adherence_pct > 0:
                 callout_text += (
