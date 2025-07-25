@@ -1177,7 +1177,7 @@ def app(replicates=20):
             please see [CDC’s Measles Simulator page](https://www.cdc.gov/cfa-modeling-and-forecasting/measles-outbreak-simulator/index.html).
 
             For a more detailed description of the methods and parameters used in this model,
-            see our [Behind The Model](https://www.cdc.gov/cfa-behind-the-model/php/data-research/interactive-measles-outbreak-simulator.html).
+            see our [Behind the Model](https://www.cdc.gov/cfa-behind-the-model/php/data-research/interactive-measles-outbreak-simulator.html).
             """,
             unsafe_allow_html=True,
         )
