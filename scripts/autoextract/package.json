@@ -1,0 +1,8 @@
+{
+    "name": "autoextract",
+    "main": "autoextract.js",
+    "type": "module",
+    "dependencies": {
+        "puppeteer": "^24.15.0"
+    }
+}

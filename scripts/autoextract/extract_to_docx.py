@@ -23,7 +23,7 @@ def run_node_extraction(url=None):
     Returns:
         str: HTML content from the extraction
     """
-    node_script = "scripts/autoextract/autoextract.mjs"
+    node_script = "scripts/autoextract/autoextract.js"
 
     # Build command
     cmd = ["node", node_script]
@@ -38,11 +38,13 @@ def run_node_extraction(url=None):
         return result.stdout
 
     except subprocess.CalledProcessError as e:
-        print(f"Error running Node.js script: {e}")
+        print(f"Error running js script: {e}")
         print(f"stderr: {e.stderr}")
         raise
     except FileNotFoundError:
         print("Error: Node.js not found. Please install Node.js first.")
+        print("Install with: npm install -g node")
+        print("Or visit: https://nodejs.org/")
         raise
 
 
