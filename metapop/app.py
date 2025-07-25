@@ -121,11 +121,11 @@ def app(replicates=20):
         st.warning(f"Building from dev branch")
 
     st.text(
-        "This interactive tool helps public health decision-makers to "
+        "This interactive tool helps public health decision-makers "
         "explore the potential impact of three key public health "
-        "interventions - isolation, quarantine, and vaccination - on "
-        "measles outbreaks. A summary of the model and how public health "
-        "interventions can prevent or slow the spread of measles in "
+        "interventions—isolation, quarantine, and vaccination—on "
+        "measles outbreaks. A summary of the model results showing how public health "
+        "interventions may prevent or slow the spread of measles in "
         "communities is available for download."
     )
 
@@ -227,13 +227,14 @@ def app(replicates=20):
         # Customize helper texts for clarity
         helpers["I0"][0] = (
             "The model currently allows for a maximum of 10 initial introductions in the population. "
-            "This value represents recent importations of people who are infectious transmitting to others at the beginning of the outbreak. "
+            "This value represents recent importations of people who are infectious and able to transmit "
+            "the virus to others at the beginning of the outbreak; all are assumed to be introduced and infectious at the same time. "
             "It is not meant to represent the total number of infections reported in a population to date. "
         )
         helpers["pop_sizes"][0] = (
-            "The model currently has a minimum of 1,000 people and a maximum of 100,000 people and assumes a well-mixed (homogeneous) population. "
-            "As population sizes get larger, the assumption that everyone in a community is equally likely to interact with "
-            "everyone else in the community becomes less valid and the model might be less appropriate."
+            "The model currently has a minimum of 1,000 people and a maximum of 100,000 people and assumes a well-mixed (homogeneous) population, "
+            "meaning that all people are equally likely to come into contact. As population sizes get larger, this assumption "
+            "becomes less valid, and the model might be less appropriate."
         )
         helpers["initial_vaccine_coverage"][0] = (
             "The percent of the population with prior immunity to measles, including through either MMR vaccination or through past infection."
@@ -264,7 +265,7 @@ def app(replicates=20):
 
         col0.text(
             "Type in a population size and baseline immunity, as "
-            "well as the number of people initially infected with measles in the population. "
+            "well as the number of initial introductions of measles in the population. "
         )
         subheader = ""
         # this function will return a dictionary of edited scenario parameters
@@ -467,7 +468,7 @@ def app(replicates=20):
             "Choose interventions to compare with a "
             "scenario with no active interventions. Interventions can be applied "
             "alone or in combination. "
-            "The results are compared to a no intervention scenario with no "
+            "The results are compared to a no-intervention scenario with no "
             "isolation, quarantine, or vaccination campaign. "
             "\n\n"
             "In this model, day 1 corresponds to when infected people are introduced "
@@ -656,7 +657,7 @@ def app(replicates=20):
                     "vaccinated during the campaign. If the campaign starts "
                     "after a substantial number of new infections have occurred in "
                     "the simulation, the actual number of doses administered may be "
-                    "lower due to a limited number of non-immune individuals "
+                    "lower due to a limited number of non-immune people "
                     "remaining."
                 ),
             )
@@ -1005,7 +1006,7 @@ def app(replicates=20):
         "the same color) are run under the same set of parameters, and "
         "differences between each individual simulation are due to random "
         "variation in contact rates. Read more about our modeling methods (link to Behind the Model to be added after clearance approval). "
-        "Bolded lines show the simulation closest to the median time of peak prevalence across all epidemic trajectories for "
+        "Bolded lines show the simulation closest to the median time of the outbreak peak across all epidemic trajectories for "
         "each scenario. If a vaccination campaign is modeled, the time period over "
         "which vaccines are distributed is shown by the shaded box between two dashed lines. "
         "</p>",
@@ -1020,10 +1021,10 @@ def app(replicates=20):
         flexible_callout(
             (
                 "No interventions:<br><ul>"
-                "<li>In the no intervention scenario, there is no isolation for individuals "
+                "<li>In the no-intervention scenario, there is no isolation for people "
                 "showing measles-specific symptoms, no quarantine of people exposed to "
                 "measles with no evidence of prior immunity, and no vaccination campaign "
-                "for people with no prior immunity.</li></ul>"
+                "for those with no prior immunity.</li></ul>"
             ),
             background_color="#feeadf",
             font_color="#8f3604",
@@ -1048,7 +1049,7 @@ def app(replicates=20):
                 elif len(schedule) == 1:
                     callout_text += f"on day {min(schedule.keys())}</li>"
 
-            callout_text += f"<li> Adherence to isolation among symptomatic infectious individuals: {isolation_adherence_pct}%"
+            callout_text += f"<li> Adherence to isolation among people who are symptomatic and infectious: {isolation_adherence_pct}%"
             if isolation_adherence_pct > 0:
                 callout_text += (
                     f" from day {edited_parms2['symptomatic_isolation_start_day']+1} "
@@ -1056,7 +1057,7 @@ def app(replicates=20):
                 )
             else:
                 callout_text += "</li>"
-            callout_text += f"<li> Adherence to quarantine among pre-symptomatic infectious individuals: {pre_rash_isolation_adherence_pct}%"
+            callout_text += f"<li> Adherence to quarantine among people who are pre-symptomatic and infectious: {pre_rash_isolation_adherence_pct}%"
             if pre_rash_isolation_adherence_pct > 0:
                 callout_text += (
                     f" from day {edited_parms2['pre_rash_isolation_start_day']+1} "
@@ -1150,7 +1151,7 @@ def app(replicates=20):
         # )
 
     if "pyodide" in sys.modules:
-        # Workaround for stlite not displying st.dataframe correctly in this case.
+        # Workaround for stlite not displaying st.dataframe correctly in this case.
         # Unclear if this is a stlite pyarrow problem (see notes at
         # https://github.com/whitphx/stlite?tab=readme-ov-file#limitations
         # about `st.dataframe()`.)
@@ -1170,8 +1171,11 @@ def app(replicates=20):
     with st.expander("Detailed methods", expanded=False):
         st.markdown(
             f"""
+            For FAQs and more information about the development of this simulator,
+            please see CDC’s Measles Simulator page (link to the landing page to be added after clearance approval).
+
             For a more detailed description of the methods and parameters used in this model,
-            see our Behind The Model (link to Behind the Model to be added after clearance approval).
+            see our Behind the Model (link to Behind the Model to be added after clearance approval).
             """,
             unsafe_allow_html=True,
         )

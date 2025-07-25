@@ -51,7 +51,7 @@ class Ind(Enum):
     E1 = 3  # Exposed 1, first stage of exposure
     E2 = 4  # Exposed 2, second stage of exposure
     E1_V = 5  # Exposed 1 and vaccinated with vaccine failure
-    E2_V = 6  # Exposed 2 and vaccinated with vaccine failture
+    E2_V = 6  # Exposed 2 and vaccinated with vaccine failure
     I1 = 7  # Infected and infectious, pre-rash
     I2 = 8  # Infected and infectious, symptomatic and rash-onset
     R = 9  # Recovered
@@ -459,7 +459,7 @@ def time_to_rate(duration):
 def build_vax_schedule(parms):
     """
     Build dictionary describing vaccination schedule for the vaccinated_group.
-    Vaccines are distributed evenly during the vaccine campiagn duration (see example)
+    Vaccines are distributed evenly during the vaccine campaign duration (see example)
 
     Args:
         parms (dict): A dictionary containing the parameters, including:
@@ -641,7 +641,7 @@ def get_metapop_info():
         "version": __version__,
         "commit": __git_commit__,
         "url": "https://github.com/cdcent/metapop-model",
-        "email": "eocevent410@cdc.gov",
+        "email": "Contact.CFA@cdc.gov",
     }
 
     return info

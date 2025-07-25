@@ -874,7 +874,7 @@ def get_helpers(parms=None):
         dict: A dictionary of help text for the app parameters.
     """
     defaults = dict(
-        desired_r0=r"The basic reproductive number captures contact rates and the probability of infection given contact with an infectious individual. Some communities may have different contact patterns — for example, in communities with larger households or higher population density. $R_0$ values for measles are typically estimated to be between 12 and 18 (see Detailed Methods)",
+        desired_r0=r"The basic reproductive number captures contact rates and the probability of infection given contact with an infectious person. Some communities may have different contact patterns—for example, in communities with larger households or higher population density. $R_0$ values for measles are typically estimated to be between 12 and 18 (see Detailed Methods).",
         k_i=[
             "Average daily contacts for large population",
             "Average daily contacts for small population 1",
@@ -889,7 +889,7 @@ def get_helpers(parms=None):
             "Size of the small population 2",
         ],
         latent_duration="The number of days from when a person is infected to when they become infectious.",
-        infectious_duration="The number of days a person who is infected with measles is infectious. In this model, rash onset occurs halfway through the infectious period on average.",
+        infectious_duration="The total number of days a person who is infected with measles is infectious. In this model, rash onset occurs halfway through the selected infectious period.",
         I0=[
             "Introductions in large population",
             "Introductions in small population 1",
@@ -900,23 +900,23 @@ def get_helpers(parms=None):
             "Baseline immunity in small population 1",
             "Baseline immunity in small population 2",
         ],
-        vaccine_uptake="If turned on, initiates a vaccination campaign. The percent of unvaccinated individuals to receive a dose and duration of the campaign to distribute those doses are specified in the slider below.",
-        vaccine_uptake_start_day="Number of days after introduction when the vaccination campaign starts (for example, “4 days” corresponds to day 5, which is 4 days after infections are introduced to the community). Defaults to 4 days, the average time of rash onset for the introduced infections given an infectious period of 9 days. Vaccination campaigns can start up to 180 days or approximately 6 months after introduction to the community.",
-        vaccine_uptake_duration_days="The model assumes vaccine doses are distributed evenly throughout the duration of the campaign. Vaccination campaigns can last up to 180 days or approximately 6 months.",
+        vaccine_uptake="If turned on, initiates a vaccination campaign. The percent of unvaccinated people to receive a dose and duration of the campaign to distribute those doses are specified in the sliders below.",
+        vaccine_uptake_start_day="Number of days after introduction of infections in the community that the vaccination campaign will start. The default is “4 days” (after introduction), which corresponds to day 5 in the model. Day 5 is the average time of rash onset occurrence for the introduced infections given an infectious period of 9 days, which is assumed to be the first day that measles infections would be identified in the population. Vaccination campaigns can start up to 180 days or approximately 6 months after introduction to the community.",
+        vaccine_uptake_duration_days="The model assumes vaccine doses are distributed at a constant rate for the duration of the campaign. Vaccination campaigns can last up to 180 days or approximately 6 months.",
         total_vaccine_uptake_doses="In this model, we administer one dose of the MMR vaccine per person vaccinated during the campaign, with 93% effectiveness among those vaccinated and an all-or-nothing vaccine.",
         vaccinated_group="Population receiving the vaccine",
-        isolation_on="If turned on, reduces transmission of symptomatic individuals who adhere to isolation measures (the percentage as selected under “Isolation adherence”) by 100% during the symptomatic period (see Detailed Methods).",
-        isolation_adherence="Percent of symptomatic individuals who follow isolation guidance when isolation is turned on. To modify this parameter, enable isolation.",
+        isolation_on="If turned on, reduces transmission by symptomatic people who adhere to isolation measures (the percentage as selected under “Isolation adherence”) by 100% during the symptomatic period. For more information on how isolation is implemented in the model, please see the Behind the Model, linked in Detailed Methods.",
+        isolation_adherence="Percent of symptomatic people who will follow isolation guidance when isolation is turned on. To modify this parameter, enable isolation.",
         isolation_reduction="Percent reduction in transmission due to isolation. Only used if isolation is turned on.",
-        symptomatic_isolation_start_day="Number of days after introduction when the isolation intervention starts (for example, “4 days” corresponds to day 5, which is 4 days after infections are introduced to the community). Defaults to 4 days, the average time of rash onset for the introduced infections given an infectious period of 9 days.",
-        symptomatic_isolation_duration_days="Duration of symptomatic isolation intervention. After the isolation intervention duration ends, all infectious individuals will resume normal contact with others during the symptomatic infectious period. Only used if isolation is turned on.",
-        pre_rash_isolation_on="If turned on, reduces transmission of individuals who are exposed but pre-symptomatic and adhere to quarantine measures (the percentage as selected under “Quarantine adherence”) by 60% during the pre-symptomatic period (see Detailed Methods)",
-        pre_rash_isolation_adherence="Percent of pre-symptomatic individuals who follow quarantine guidance when quarantine is turned on. To modify this parameter, enable quarantine and isolation.",
+        symptomatic_isolation_start_day="Number of days after introduction that the isolation intervention will start. The default is “4 days” (after introduction), which corresponds to day 5 in the model. Day 5 is the average time of rash onset occurrence for the introduced infections given an infectious period of 9 days, which is assumed to be the first day that measles infections would be identified in the population. Isolation can start up to 180 days or approximately 6 months after introduction to the community.",
+        symptomatic_isolation_duration_days="Duration of symptomatic isolation intervention. After the isolation intervention duration ends, all infectious people will resume normal contact with others during the symptomatic infectious period. Only used if isolation is turned on.",
+        pre_rash_isolation_on="If turned on, reduces transmission by people who are exposed but pre-symptomatic and adhere to quarantine measures (the percentage as selected under “Quarantine adherence”) by 60% during the pre-symptomatic period. For more information on how quarantine is implemented in the model, please see the Behind the Model, linked in Detailed Methods.",
+        pre_rash_isolation_adherence="Percent of pre-symptomatic people who will follow quarantine guidance when quarantine is turned on. To modify this parameter, enable quarantine and isolation.",
         pre_rash_isolation_reduction="Percent reduction in transmission due quarantine. Only used if quarantine is turned on.",
-        pre_rash_isolation_start_day="Number of days after introduction when the quarantine intervention starts (for example, “4 days” corresponds to day 5, which is 4 days after infections are introduced to the community). Defaults to 4 days, the average time of rash onset for the introduced infections given an infectious period of 9 days. ",
-        pre_rash_isolation_duration_days="Duration of pre-symptomatic quarantine intervention. After the quarantine intervention duration ends, all infectious individuals will resume normal contact with others during the pre-symptomatic infectious period. Only used if quarantine is turned on.",
+        pre_rash_isolation_start_day="Number of days after introduction that the quarantine intervention will start. The default is “4 days”, which corresponds to day 5 in the model. Day 5 is the average time of rash onset occurrence for the introduced infections given an infectious period of 9 days, which is assumed to be the first day that measles infections would be identified in the population. Quarantine can start up to 180 days or approximately 6 months after introduction to the community.",
+        pre_rash_isolation_duration_days="Duration of pre-symptomatic quarantine intervention. After the quarantine intervention duration ends, all infectious people will resume normal contact with others during the pre-symptomatic infectious period. Only used if quarantine is turned on.",
         tf="Number of time steps to simulate",
-        IHR="Proportion of infected individuals who are hospitalized",
+        IHR="Proportion of infected people who are hospitalized.",
     )
     if parms is not None and isinstance(parms, dict):
         # update with parms if provided
@@ -1446,7 +1446,7 @@ def get_table(combined_results, IHR, rng):
         pl.DataFrame: A DataFrame containing the hospitalization summary.
     """
 
-    # calculate hospitaltizations based on IHR
+    # calculate hospitalizations based on IHR
     combined_results = combined_results.with_columns(
         pl.Series(
             name="Hospitalizations",
@@ -1614,12 +1614,12 @@ def totals_same_by_ks(
         scenario_names           (list): List of scenario name labels created by the simulation.
         p_threshold             (float): The p-value threshold for determining indistinguishable distributions. Default is 0.5.
         - In general, we want to be selective about when to throw the error, as similar, but different, distributions
-            may not reject the null hyppothesis but still be visually different for low sample sizes.
+            may not reject the null hypothesis but still be visually different for low sample sizes.
 
     Returns:
         bool: True if the p-value is greater than the specified threshold, indicating two indistinguishable distributions.
-        - A value of 0.05 would reject the null hyptohesis that the two distributions are independent samples of the same distribution
-        - Higher threshold values will increase the confidence that the two distirbutions are identical.
+        - A value of 0.05 would reject the null hypothesis that the two distributions are independent samples of the same distribution
+        - Higher threshold values will increase the confidence that the two distributions are identical.
     """
     # Get total infections for each scenario
     scenario_0 = combined_results.filter(pl.col("Scenario") == scenario_names[0])[
@@ -1725,7 +1725,7 @@ def relative_difference(
     Relative differences are calculated from the values in `col_name` for the two groups specified in `group_values`.
     The first element of `group_values` is considered the base group, and the second element is the comparison group.
     The relative difference is calculated pairwise for each possible combination of the two groups, which do not have to be the same length.
-    The mean relative difference and confidence interval of the relative difference distirbution are then returned.
+    The mean relative difference and confidence interval of the relative difference distribution are then returned.
 
     Args:
         data (pl.DataFrame): The input DataFrame containing the data.
@@ -1744,7 +1744,7 @@ def relative_difference(
 
     assert len(group_values) == 2
 
-    # If specified, pariwsie comparison by each group matched along an index identifier column value
+    # If specified, pairwise comparison by each group matched along an index identifier column value
     # For the function get_table, "replicate" is used to pair intervention an dno intervention scenarios
     if identifier is not None:
         diff_data = (
