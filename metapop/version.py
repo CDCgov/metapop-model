@@ -5,4 +5,4 @@ __all__ = ["__version__", "__versiondate__", "__git_commit__"]
 
 __version__ = "v1.0.0"
 __versiondate__ = "2025-07-25"
-__git_commit__ = "9a11d6b247d54bd4da3f604bd747d66148a80f76"  # pragma: allowlist secret
+__git_commit__ = "a8c84d87647747eac55975fb213b8a3f2e3b2217"  # pragma: allowlist secret
