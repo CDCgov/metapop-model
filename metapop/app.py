@@ -999,20 +999,20 @@ def app(replicates=20):
 
     # --- Chart Description ---
     st.markdown(
-    (
-        '<p style="font-size:14px;">'
-        "Each thin line represents an individual simulation. The model runs 100 simulations "
-        "for each scenario to generate results, and 20 randomly selected simulations are "
-        "plotted here. All simulations for a given scenario (i.e., shown with "
-        "the same color) are run under the same set of parameters, and "
-        "differences between each individual simulation are due to random "
-        'variation in contact rates. Read more about our <a href="https://www.cdc.gov/cfa-behind-the-model/php/data-research/interactive-measles-outbreak-simulator.html" target="_blank">modeling methods</a>. '
-        "Bolded lines show the simulation closest to the median time of peak prevalence across all epidemic trajectories for "
-        "each scenario. If a vaccination campaign is modeled, the time period over "
-        "which vaccines are distributed is shown by the shaded box. "
-        "</p>"
-    ),
-    unsafe_allow_html=True,
+        (
+            '<p style="font-size:14px;">'
+            "Each thin line represents an individual simulation. The model runs 100 simulations "
+            "for each scenario to generate results, and 20 randomly selected simulations are "
+            "plotted here. All simulations for a given scenario (i.e., shown with "
+            "the same color) are run under the same set of parameters, and "
+            "differences between each individual simulation are due to random "
+            'variation in contact rates. Read more about our <a href="https://www.cdc.gov/cfa-behind-the-model/php/data-research/interactive-measles-outbreak-simulator.html" target="_blank">modeling methods</a>. '
+            "Bolded lines show the simulation closest to the median time of peak prevalence across all epidemic trajectories for "
+            "each scenario. If a vaccination campaign is modeled, the time period over "
+            "which vaccines are distributed is shown by the shaded box. "
+            "</p>"
+        ),
+        unsafe_allow_html=True,
     )
 
     # --- Outbreak Summary Stats ---
