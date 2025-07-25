@@ -718,4 +718,4 @@ def test_get_metapop_info():
     assert isinstance(metadata, dict), "Metadata should be a dictionary"
     assert "version" in metadata, "Metadata should contain 'version' key"
     assert "commit" in metadata, "Metadata should contain 'commit' key"
-    assert metadata["url"] == "https://github.com/cdcent/metapop-model"
+    assert metadata["url"] == "https://github.com/CDCgov/metapop-model"

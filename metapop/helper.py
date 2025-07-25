@@ -640,7 +640,7 @@ def get_metapop_info():
         "description": "A model simulating measles transmission in a metapopulation with public health interventions.",
         "version": __version__,
         "commit": __git_commit__,
-        "url": "https://github.com/cdcent/metapop-model",
+        "url": "https://github.com/CDCgov/metapop-model",
         "email": "Contact.CFA@cdc.gov",
     }
 
