@@ -30,6 +30,7 @@ bs4 = "^0.0.2"
 rsconnect-python = "^1.25.2"
 scipy = "1.14.1"
 pypandoc = "^1.15"
+playwright = "^1.54.0"
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.29.5"
