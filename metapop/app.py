@@ -120,13 +120,21 @@ def app(replicates=20):
     if os.environ.get("MODE", "PRODUCTION") == "DEVELOPMENT":
         st.warning(f"Building from dev branch")
 
-    st.text(
+    ONE_PAGER_PATH = os.environ.get("ONE_PAGER_PATH")
+    one_pager_section_text = ""
+
+    if ONE_PAGER_PATH:
+        one_pager_section_text = (
+            "A summary of the model results showing how public health "
+            "interventions may prevent or slow the spread of measles in "
+            f"communities is [available for download](https://www.cdc.gov/{ONE_PAGER_PATH})."
+        )
+
+    st.markdown(
         "This interactive tool helps public health decision-makers "
         "explore the potential impact of three key public health "
         "interventions—isolation, quarantine, and vaccination—on "
-        "measles outbreaks. A summary of the model results showing how public health "
-        "interventions may prevent or slow the spread of measles in "
-        "communities is available for download."
+        f"measles outbreaks. {one_pager_section_text}"
     )
 
     # Load default parameters from YAML config
