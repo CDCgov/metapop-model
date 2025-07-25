@@ -1494,7 +1494,7 @@ def get_table(combined_results, IHR, rng):
     infections = pl.DataFrame(
         {
             "": ["Infections, median (95% prediction interval)"],
-            "No Interventions": [
+            "No interventions": [
                 f"{summary_stats['inf_median'][0]:.0f} ({summary_stats['inf_ci_low'][0]:.0f} - {summary_stats['inf_ci_high'][0]:.0f})"
             ],
             "Interventions": [
@@ -1508,7 +1508,7 @@ def get_table(combined_results, IHR, rng):
     hospitalizations = pl.DataFrame(
         {
             "": ["Hospitalizations, median (95% prediction interval)"],
-            "No Interventions": [
+            "No interventions": [
                 f"{summary_stats['hosp_median'][0]:.0f} ({summary_stats['hosp_ci_low'][0]:.0f} - {summary_stats['hosp_ci_high'][0]:.0f})"
             ],
             "Interventions": [
