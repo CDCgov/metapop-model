@@ -90,12 +90,14 @@ You can run the app in-browser only based on [stlite](https://github.com/whitphx
 * Dina Mistry
 
 ## Contributors
+* Paul Gastanaduy
 * Matt Biggerstaff
 * Rachel Slayton
 * Gil Sharon
-* Scott Oleson
 * Isaac Ghinai
 * Michael Cima
+* Scott Oleson
+* Prabasaj Paul
 * Danielle Richard
 
 ## General Disclaimer
