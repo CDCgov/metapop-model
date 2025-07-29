@@ -93,11 +93,15 @@ You can run the app in-browser only based on [stlite](https://github.com/whitphx
 * Paul Gastanaduy
 * Matt Biggerstaff
 * Rachel Slayton
-* Gil Sharon
+* Harris Temuri
+* Martin Frigaard
+* Nimeshkumar Patel
+* Prabasaj Paul
 * Isaac Ghinai
 * Michael Cima
+* Sarah Connolly
+* Gil Sharon
 * Scott Oleson
-* Prabasaj Paul
 * Danielle Richard
 
 ## General Disclaimer
