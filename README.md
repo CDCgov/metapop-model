@@ -80,7 +80,7 @@ You can run the app in-browser only based on [stlite](https://github.com/whitphx
 ## Project Admin
 * Paige Miller, yub1@cdc.gov (CDC/IOD/ORR/CFA)
 * Kate Hudson, ryl8@cdc.gov (CDC/IOD/ORR/CFA)
-* Beau B. Bruce, lue7@cdc.gov (CDC/IOD/ORR/CFA) for the [stlite](https://github.com/whitphx/stlite)
+* Beau B. Bruce, lue7@cdc.gov (CDC/IOD/ORR/CFA) for the [stlite](https://github.com/whitphx/stlite) version
 * Dina Mistry, uqx8@cdc.gov (CDC/IOD/ORR/CFA)
 
 ## Authors
