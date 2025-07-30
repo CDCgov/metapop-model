@@ -68,7 +68,7 @@ graph LR
 * As a work in progress, we are working to add functionality that will allow users to give a contact matrix of their choice and model a flexible number of groups that mapped to the contact matrix.
 
 ## CDC simulator link
-For those less familiar with Python, we host an interactive application of the metapop model for a single well-mixed (or homogeneous) population at [https://cdcposit.cdc.gov/measles-simulator](https://cdcposit.cdc.gov/measles-simulator) as CDC's first interactive disease simulator. Check it out and let us know what you think at Contact.CFA@cdc.gov.
+For those less familiar with Python, we host an interactive application of the metapop model for a single well-mixed (or homogeneous) population at [https://cdcposit.cdc.gov/measles-simulator](https://cdcposit.cdc.gov/measles-simulator) as CDC's first interactive disease outbreak simulator. Check it out and let us know what you think at Contact.CFA@cdc.gov. Read our [Behind the Model](https://www.cdc.gov/cfa-behind-the-model/php/data-research/interactive-measles-outbreak-simulator.html) for a more detailed write up of the simulator.
 
 ## Local app
 Users can also run our interactive application of the metapop model locally using Streamlit with `make run_app` at the command line. This will launch an application that models transmission dynamics of measles introductions into a single well-mixed (or homogeneous) population. A prototype of this application is available to model the transmission dynamics of 3 connected populations, though it is still in beta mode. To run this version, use `make run_advanced_app` at the command line.
