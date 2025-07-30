@@ -64,6 +64,7 @@ __all__ = [
     "is_light_color",
     "get_github_logo_path",
     "relative_difference",
+    "render_chart_title",
 ]
 
 CACHE_TTL = 60 * 60 * 24 * 7  # 1 week in seconds
@@ -1711,6 +1712,15 @@ def get_github_logo_path(is_background_light):
             os.path.dirname(__file__), "app_assets", "github-mark-white.png"
         )
     return image_path
+
+
+def render_chart_title(title, subtitle=None):
+    subtitle_html = (
+        f"""<div style="font-size: 0.8em; line-height: 1.1; margin-bottom: 1em;">{subtitle}</div>"""
+        if subtitle
+        else ""
+    )
+    return f"""<h4 style="font-size: inherit; padding:0; line-height: 1.1;margin-bottom: 0.2em;">{title}</h4>{subtitle_html}"""
 
 
 def relative_difference(

@@ -59,6 +59,7 @@ from .app_helper import (
     img_to_html,
     is_light_color,
     get_github_logo_path,
+    render_chart_title,
 )
 from .helper import (
     Ind,
@@ -114,6 +115,7 @@ def app(replicates=20):
         None: The function runs a Streamlit app and does not return anything.
     """
     st.set_page_config(page_title="CDC Measles Outbreak Simulator", layout="wide")
+
     st.title("CDC Measles Outbreak Simulator")
 
     # Show development warning if not in production
@@ -640,6 +642,7 @@ def app(replicates=20):
     )
 
     # --- Run Simulations and Display Results ---
+    chart_title = st.empty()
     chart_placeholder = st.empty()
 
     # Map the selected option to the outcome variable
@@ -806,22 +809,27 @@ def app(replicates=20):
         elif np.round(dose_per_day) < 1:
             dose_per_day_text = "(equivalent to less than 1 dose per day)"
 
-        title = alt.TitleParams(
-            "Simulated measles epidemic curve with and without public health interventions",
-            subtitle=[
-                f"Population size: {edited_parms2['pop_sizes'][0]} people, {edited_parms2['I0'][0]} initial introductions",
-                f"Vaccine campaign: {mean_doses_administered} doses administered",
-                f"Isolation adherence: {isolation_adherence_pct}%",
-                f"Quarantine adherence: {pre_rash_isolation_adherence_pct}%",
-            ],
-            subtitleColor="#808080",
+        chart_title.markdown(
+            render_chart_title(
+                title="Simulated measles epidemic curve with and without public health interventions",
+                subtitle=f"""
+                Population size: {edited_parms2['pop_sizes'][0]} people, {edited_parms2['I0'][0]} initial introductions<br />
+                Vaccine campaign: {mean_doses_administered} doses administered<br />
+                Isolation adherence: {isolation_adherence_pct}%<br />
+                Quarantine adherence: {pre_rash_isolation_adherence_pct}%<br />
+            """,
+            ),
+            unsafe_allow_html=True,
         )
+
     else:
         combined_alt_results = alt_results1.filter(
             pl.col("replicate").is_in(replicate_inds)
         )
         combined_ave_results = ave_results1
-        title = "No intervention scenario"
+        chart_title.markdown(
+            render_chart_title("No intervention scenario"), unsafe_allow_html=True
+        )
 
     chart_placeholder.text("Building charts...")
 
@@ -848,7 +856,7 @@ def app(replicates=20):
             detail="replicate",
             tooltip=[],  # Empty tooltip for the trajectories
         )
-        .properties(title=title, width=800, height=450)
+        .properties(width=800, height=400)
     )
 
     #  Add bold line for median trajectory
@@ -1003,6 +1011,7 @@ def app(replicates=20):
     layer = alt.layer(
         vax, trajectories, ave_line, dummy_vax_window, annotation
     ).resolve_scale(color="independent")
+
     chart_placeholder.altair_chart(layer, use_container_width=True)
 
     # --- Chart Description ---
