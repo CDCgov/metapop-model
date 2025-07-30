@@ -67,11 +67,15 @@ graph LR
 * Similarly for a single population, we can build the model by setting `n_groups: 1`, `popsizes: [5000]` for the population size, `I0: 5`, `k_i: [10]`, etc. In this case, the contact matrix is equivalent to `k_i`.
 * As a work in progress, we are working to add functionality that will allow users to give a contact matrix of their choice and model a flexible number of groups that mapped to the contact matrix.
 
+## CDC simulator link
+For those less familiar with Python, we host an interactive application of the metapop model for a single well-mixed (or homogeneous) population at [https://cdcposit.cdc.gov/measles-simulator](https://cdcposit.cdc.gov/measles-simulator) as CDC's first interative disease simulator. Check it out and let us know what you think at Contact.CFA@cdc.gov.
+
 ## Local app
-Users can run an interactive application of the metapop model locally using Streamlit with `make run_app` at the command line. This will launch an application that models transmission dynamics of measles introductions into a single well-mixed (or homogeneous) population. A prototype of this application is available to model the transmission dynamics of 3 connected populations, though it is still in beta mode. To run this version, use `make run_advanced_app` at the command line.
+Users can also run our interactive application of the metapop model locally using Streamlit with `make run_app` at the command line. This will launch an application that models transmission dynamics of measles introductions into a single well-mixed (or homogeneous) population. A prototype of this application is available to model the transmission dynamics of 3 connected populations, though it is still in beta mode. To run this version, use `make run_advanced_app` at the command line.
 
 ## Stlite app
 You can run the app in-browser only based on [stlite](https://github.com/whitphx/stlite).  Within the repo, you can load `stlite/index.html` directly in your browser.  To build a sharable version of the one population app, run `make build_stlite_app` which will create `stlite/measles_sim.html` which can be shared and requires the internet but no access to internal resources nor to a server.  Note that `pygriddler` required removal of `progressbar` for compatibility with `pyodide`/`stlite`.
+
 
 ## Project Admin
 * Paige Miller, yub1@cdc.gov (CDC/IOD/ORR/CFA)
