@@ -369,10 +369,10 @@ def get_outcome_options():
         tuple: A tuple containing the available outcome options.
     """
     return (
-        "Weekly incidence",
-        "Weekly cumulative incidence",
-        "Daily incidence",
-        "Daily cumulative incidence",
+        "Weekly incident infections",
+        "Weekly cumulative incident infections",
+        "Daily incident infections",
+        "Daily cumulative incident infections",
     )
 
 
@@ -386,10 +386,10 @@ def get_outcome_mapping():
     """
     # Define the mapping of outcome names to their corresponding codes
     return {
-        "Daily incidence": "Incidence",
-        "Daily cumulative incidence": "Cumulative incidence",
-        "Weekly incidence": "Weekly incidence",
-        "Weekly cumulative incidence": "Weekly cumulative incidence",
+        "Weekly incident infections": "Weekly incident infections",
+        "Weekly cumulative incident infections": "Weekly cumulative incident infections",
+        "Daily incident infections": "Daily incident infections",
+        "Daily cumulative incident infections": "Daily cumulative incident infections",
     }
 
 

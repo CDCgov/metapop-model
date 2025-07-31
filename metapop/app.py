@@ -693,31 +693,34 @@ def app(replicates=20):
 
     # Rename columns for plotting
     app_column_mapping = {
-        f"inc_{interval}": "Weekly incidence",
-        "Y": "Weekly cumulative incidence",
+        f"inc_{interval}": "Weekly incident infections",
+        "Y": "Weekly cumulative incident infections",
     }
     interval_results1 = interval_results1.rename(app_column_mapping)
     interval_results2 = interval_results2.rename(app_column_mapping)
 
     # Rename columns in daily results for app display after results have been calculated
-    app_column_mapping = {"Y": "Cumulative incidence"}
+    app_column_mapping = {
+        "Y": "Daily cumulative incident infections",
+        "Incidence": "Daily incident infections",
+    }
     results1 = results1.rename(app_column_mapping)
     results2 = results2.rename(app_column_mapping)
 
     # Default to cumulative daily incidence if outcome not available
     if outcome not in [
-        "Cumulative incidence",
-        "Incidence",
-        "Weekly incidence",
-        "Weekly cumulative incidence",
+        "Weekly incident infections",
+        "Weekly cumulative incident infections",
+        "Daily incident infections",
+        "Daily cumulative incident infections",
     ]:
         print("outcome not available yet, defaulting to 'Daily cumulative incidence'")
         outcome = "Y"
 
     # Prepare data for Altair plots
     if outcome_option in [
-        "Daily incidence",
-        "Daily cumulative incidence",
+        "Daily incident infections",
+        "Daily cumulative incident infections",
     ]:
         alt_results1 = results1
         alt_results2 = results2
@@ -725,7 +728,10 @@ def app(replicates=20):
         time_label = "Time (days)"
         vax_start = min(schedule.keys())
         vax_end = max(schedule.keys())
-    elif outcome_option in ["Weekly incidence", "Weekly cumulative incidence"]:
+    elif outcome_option in [
+        "Weekly incident infections",
+        "Weekly cumulative incident infections",
+    ]:
         alt_results1 = interval_results1
         alt_results2 = interval_results2
         x = "interval_t:Q"
@@ -856,7 +862,7 @@ def app(replicates=20):
             detail="replicate",
             tooltip=[],  # Empty tooltip for the trajectories
         )
-        .properties(width=800, height=400)
+        .properties(width=800, height=500)
     )
 
     #  Add bold line for median trajectory

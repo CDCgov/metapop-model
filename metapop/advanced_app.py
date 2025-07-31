@@ -225,14 +225,17 @@ def advanced_app(replicates=20):
 
     # rename columns for the app
     app_column_mapping = {
-        f"inc_{interval}": "Weekly incidence",
-        "Y": "Weekly cumulative incidence",
+        f"inc_{interval}": "Weekly incident infections",
+        "Y": "Weekly cumulative incident infections",
     }
     interval_results1 = interval_results1.rename(app_column_mapping)
     interval_results2 = interval_results2.rename(app_column_mapping)
 
     # Rename columns in daily results for app display
-    app_column_mapping = {"Y": "Cumulative incidence"}
+    app_column_mapping = {
+        "Y": "Daily cumulative incident infections",
+        "Incidence": "Daily incident infections",
+    }
     results1 = results1.rename(app_column_mapping)
     results2 = results2.rename(app_column_mapping)
 
@@ -250,25 +253,28 @@ def advanced_app(replicates=20):
         ],
     )
     if outcome not in [
-        "Cumulative incidence",
-        "Incidence",
-        "Weekly incidence",
-        "Weekly cumulative incidence",
+        "Daily cumulative incident infections",
+        "Daily incident infections",
+        "Weekly incident infections",
+        "Weekly cumulative incident infections",
     ]:
         print("outcome not available yet, defaulting to Cumulative Daily incidence")
         outcome = "Y"
 
     if outcome_option in [
         "Daily Infections",
-        "Daily incidence",
-        "Daily cumulative incidence",
+        "Daily incident infections",
+        "Daily cumulative incident infections",
     ]:
         alt_results1 = results1
         alt_results2 = results2
         min_y, max_y = 0, max(results1[outcome].max(), results2[outcome].max())
         x = "t:Q"
         time_label = "Time (days)"
-    elif outcome_option in ["Weekly incidence", "Weekly cumulative incidence"]:
+    elif outcome_option in [
+        "Weekly incident infections",
+        "Weekly cumulative incident infections",
+    ]:
         alt_results1 = interval_results1
         alt_results2 = interval_results2
         min_y, max_y = (
