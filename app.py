@@ -21,13 +21,24 @@ by python-rsconnect for deployment. Other names or locatios will not work.
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(description="Launch the metapop app.")
+    parser = argparse.ArgumentParser(
+        description="""Launch the metapop app.""",
+    )
     parser.add_argument(
         "--app_version",
         type=str,
         choices=["advanced_app", "one_pop_app"],
         default="one_pop_app",
         help="Specify the app version to launch. Defaults to 'one_pop_app'.",
+    )
+    parser.add_argument(
+        "--config_file",
+        type=str,
+        # note that the defaults are hardcoded in the metapop/advanced_app.py and metapop/app.py files
+        help="""Path to the app configuration file. Defaults to
+                'metapop/app_assets/one_pop_config.yaml' for
+                one_pop_app or 'metapop/app_assets/app_config.yaml'
+                for advanced_app.""",
     )
     args = parser.parse_args()
     app_version = args.app_version
@@ -39,4 +50,7 @@ if __name__ == "__main__":
         import metapop.app as app
 
     # Launch the app
-    app()
+    if not args.config_file:
+        app()
+    else:
+        app(config_file=args.config_file)

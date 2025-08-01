@@ -1,0 +1,44 @@
+baseline_parameters:
+  n_groups: 3    # general, subpop1, subpop2
+  desired_r0: 12.0
+  k_i: [10., 10., 10.]
+  k_g1: 0.1
+  k_g2: 0.01
+  n_e_compartments: 2    # number of chained E compartments
+  latent_duration: 11.0
+  n_i_compartments: 2    # number of chained I compartments
+  infectious_duration: 9.0
+  pop_sizes: [40000, 5000, 5000]    # population sizes
+  I0: [0, 5, 0]     # initially infected
+  vaccine_uptake: false
+  vaccine_uptake_start_day: 7
+  vaccine_uptake_duration_days: 0
+  total_vaccine_uptake_doses: 0.0 # number of doses
+  vaccinated_group: 2
+  vaccine_efficacy_2_dose: 0.97
+  vaccine_efficacy_1_dose: 0.93
+  isolation_on: true
+  isolation_adherence: 0.5
+  isolation_reduction: 1.0 # informed by 2017 Minnesota study
+  symptomatic_isolation_start_day: 365
+  symptomatic_isolation_duration_days: 365
+  pre_rash_isolation_on: false
+  pre_rash_isolation_adherence: 0.5
+  pre_rash_isolation_reduction: 0.6
+  pre_rash_isolation_start_day: 365
+  pre_rash_isolation_duration_days: 0
+  IHR: 0.2 # Infection Hospitalization Rate
+  tf: 365        # total time modeled
+  n_replicates: 20
+  seed: 123
+
+grid_parameters:
+  initial_coverage_scenario: ['low', 'medium', 'optimistic']
+  k_21: [0.01, 0.1]
+nested_parameters:
+  - initial_coverage_scenario: 'low'
+    initial_vaccine_coverage: [0.95, 0.80, 0.80]
+  - initial_coverage_scenario: 'medium'
+    initial_vaccine_coverage: [0.95, 0.80, 0.90]
+  - initial_coverage_scenario: 'optimistic'
+    initial_vaccine_coverage: [0.95, 0.80, 0.95]

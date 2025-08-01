@@ -33,7 +33,12 @@ __all__ = [
 ]
 
 
-def advanced_app(display_n_replicates=20):
+def advanced_app(
+    display_n_replicates=20,
+    config_file=os.path.join(
+        os.path.dirname(__file__), "app_assets", "app_config.yaml"
+    ),
+):
     """
     This is a Streamlit app that illustrates the impact of layering multiple
     intervention strategies to mitigate a measles outbreak in 3 connected
@@ -55,8 +60,8 @@ def advanced_app(display_n_replicates=20):
     st.text(
         "This interactive tool illustrates the impact of vaccination and isolation on the probability and size of measles outbreaks following introduction of measles into different connected communities."
     )
-    filepath = os.path.join(os.path.dirname(__file__), "app_assets", "app_config.yaml")
-    parms = read_parameters(filepath)
+
+    parms = read_parameters(config_file)
     plot_rng = np.random.default_rng([parms["seed"], seed_from_string("plot")])
 
     show_parameter_mapping = get_show_parameter_mapping()

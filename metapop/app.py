@@ -94,7 +94,12 @@ __all__ = [
 ]
 
 
-def app(display_n_replicates=20):
+def app(
+    display_n_replicates=20,
+    config_file=os.path.join(
+        os.path.dirname(__file__), "app_assets", "one_pop_config.yaml"
+    ),
+):
     """
     Main Streamlit app function for the measles outbreak simulator.
 
@@ -153,7 +158,8 @@ def app(display_n_replicates=20):
     # Info about the this app (version, date, commit)
     info = get_metapop_info()
 
-    parms = read_parameters(filepath)
+    # Load default parameters from YAML config
+    parms = read_parameters(config_file)
 
     # Ensures that the cache gets invalidated when code changes
     parms["cache_key"] = info["commit"]
