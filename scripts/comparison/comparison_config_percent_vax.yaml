@@ -1,0 +1,132 @@
+baseline_parameters:
+  n_groups: 1    # general, subpop1, subpop2
+  desired_r0: 12.0
+  k_i: [10.]
+  k_g1: 0.1
+  k_g2: 0.01
+  k_21: 0.01
+  n_e_compartments: 2    # number of chained E compartments
+  latent_duration: 10.5
+  n_i_compartments: 2    # number of chained I compartments
+  infectious_duration: 9.0
+  pop_sizes: [15000]    # population sizes
+  I0: [5]     # initially infected
+  vaccine_efficacy_2_dose: 0.97
+  vaccine_efficacy_1_dose: 0.93
+  vaccine_uptake_duration_days: 21 # duration of vaccine uptake campaign
+  symptomatic_isolation_duration_days: 365
+  isolation_success: 0.50 # isolation_adherance(0.5)*isolation_reduction (1.0)
+  pre_rash_isolation_success: 0.3 #quarantine_adherance(0.5)*reduction(0.6)
+  pre_rash_isolation_duration_days: 365
+  vaccinated_group: 0
+  IHR: 0.15 #infection hospitalization rate
+  tf: 365        # total time modeled
+  n_replicates: 1000
+  seed: 123
+
+grid_parameters:
+  intervention_scenario: ['none80', 'isolation_only80', 'isolation_and_quarantine80', 'all_interventions80',
+                          'none85', 'isolation_only85', 'isolation_and_quarantine85', 'all_interventions85',
+                          'none90', 'isolation_only90', 'isolation_and_quarantine90', 'all_interventions90',
+                          'none95', 'isolation_only95', 'isolation_and_quarantine95', 'all_interventions95']
+
+nested_parameters:
+  - intervention_scenario: 'none80'
+    initial_vaccine_coverage: [0.80]
+    symptomatic_isolation_start_day: 400
+    pre_rash_isolation_start_day: 400
+    total_vaccine_uptake_doses: 0
+    vaccine_uptake_start_day: 4
+  - intervention_scenario: 'isolation_only80'
+    initial_vaccine_coverage: [0.80]
+    symptomatic_isolation_start_day: 4
+    pre_rash_isolation_start_day: 400
+    total_vaccine_uptake_doses: 0
+    vaccine_uptake_start_day: 4
+  - intervention_scenario: 'isolation_and_quarantine80'
+    initial_vaccine_coverage: [0.80]
+    symptomatic_isolation_start_day: 4
+    pre_rash_isolation_start_day: 4
+    total_vaccine_uptake_doses: 0
+    vaccine_uptake_start_day: 4
+  - intervention_scenario: 'all_interventions80'
+    initial_vaccine_coverage: [0.80]
+    symptomatic_isolation_start_day: 4
+    pre_rash_isolation_start_day: 4
+    total_vaccine_uptake_doses: 1500
+    vaccine_uptake_start_day: 4
+
+  - intervention_scenario: 'none85'
+    initial_vaccine_coverage: [0.85]
+    symptomatic_isolation_start_day: 400
+    pre_rash_isolation_start_day: 400
+    total_vaccine_uptake_doses: 0
+    vaccine_uptake_start_day: 4
+  - intervention_scenario: 'isolation_only85'
+    initial_vaccine_coverage: [0.85]
+    symptomatic_isolation_start_day: 4
+    pre_rash_isolation_start_day: 400
+    total_vaccine_uptake_doses: 0
+    vaccine_uptake_start_day: 4
+  - intervention_scenario: 'isolation_and_quarantine85'
+    initial_vaccine_coverage: [0.85]
+    symptomatic_isolation_start_day: 4
+    pre_rash_isolation_start_day: 4
+    total_vaccine_uptake_doses: 0
+    vaccine_uptake_start_day: 4
+  - intervention_scenario: 'all_interventions85'
+    initial_vaccine_coverage: [0.85]
+    symptomatic_isolation_start_day: 4
+    pre_rash_isolation_start_day: 4
+    total_vaccine_uptake_doses: 1125
+    vaccine_uptake_start_day: 4
+
+  - intervention_scenario: 'none90'
+    initial_vaccine_coverage: [0.90]
+    symptomatic_isolation_start_day: 400
+    pre_rash_isolation_start_day: 400
+    total_vaccine_uptake_doses: 0
+    vaccine_uptake_start_day: 4
+  - intervention_scenario: 'isolation_only90'
+    initial_vaccine_coverage: [0.90]
+    symptomatic_isolation_start_day: 4
+    pre_rash_isolation_start_day: 400
+    total_vaccine_uptake_doses: 0
+    vaccine_uptake_start_day: 4
+  - intervention_scenario: 'isolation_and_quarantine90'
+    initial_vaccine_coverage: [0.90]
+    symptomatic_isolation_start_day: 4
+    pre_rash_isolation_start_day: 4
+    total_vaccine_uptake_doses: 0
+    vaccine_uptake_start_day: 4
+  - intervention_scenario: 'all_interventions90'
+    initial_vaccine_coverage: [0.90]
+    symptomatic_isolation_start_day: 4
+    pre_rash_isolation_start_day: 4
+    total_vaccine_uptake_doses: 750
+    vaccine_uptake_start_day: 4
+
+  - intervention_scenario: 'none95'
+    initial_vaccine_coverage: [0.95]
+    symptomatic_isolation_start_day: 400
+    pre_rash_isolation_start_day: 400
+    total_vaccine_uptake_doses: 0
+    vaccine_uptake_start_day: 4
+  - intervention_scenario: 'isolation_only95'
+    initial_vaccine_coverage: [0.95]
+    symptomatic_isolation_start_day: 4
+    pre_rash_isolation_start_day: 400
+    total_vaccine_uptake_doses: 0
+    vaccine_uptake_start_day: 4
+  - intervention_scenario: 'isolation_and_quarantine95'
+    initial_vaccine_coverage: [0.95]
+    symptomatic_isolation_start_day: 4
+    pre_rash_isolation_start_day: 4
+    total_vaccine_uptake_doses: 0
+    vaccine_uptake_start_day: 4
+  - intervention_scenario: 'all_interventions95'
+    initial_vaccine_coverage: [0.95]
+    symptomatic_isolation_start_day: 4
+    pre_rash_isolation_start_day: 4
+    total_vaccine_uptake_doses: 375
+    vaccine_uptake_start_day: 4
