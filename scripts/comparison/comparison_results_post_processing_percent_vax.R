@@ -22,7 +22,7 @@ final_results <- results |>
     lower_incidence = quantile(Y, 0.05),
     incidence = median(Y),
     upper_hospitalizations = quantile(hospitalizations, 0.95),
-    lower_hospitalizations = quantile(Y, 0.05),
+    lower_hospitalizations = quantile(hospitalizations, 0.05),
     hospitalizations = median(hospitalizations)
   ) |>
   ungroup()
