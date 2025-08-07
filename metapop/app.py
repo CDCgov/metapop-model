@@ -1136,7 +1136,7 @@ def app(replicates=20):
             outbreak_summary.filter(
                 pl.col("") == "Infections, median (95% prediction interval)"
             )
-            .select("Relative difference (%)")
+            .select("Bootstrapped relative difference (%)")
             .item()
             .split("%")[0]
         )
@@ -1169,11 +1169,6 @@ def app(replicates=20):
                 "In this case, the relative difference is not a reliable metric.",
                 icon="⚠️",
             )
-
-        # if the Relative difference is NaN, set it to ""
-        # outbreak_summary = outbreak_summary.with_columns(
-        #     pl.col("Relative difference (%)").fill_nan("")
-        # )
 
     if "pyodide" in sys.modules:
         # Workaround for stlite not displaying st.dataframe correctly in this case.

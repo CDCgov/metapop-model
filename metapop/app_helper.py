@@ -1501,7 +1501,7 @@ def get_table(combined_results, IHR, rng):
             "Interventions": [
                 f"{summary_stats['inf_median'][1]:.0f} ({summary_stats['inf_ci_low'][1]:.0f} - {summary_stats['inf_ci_high'][1]:.0f})"
             ],
-            "Relative difference (%)": [
+            "Bootstrapped relative difference (%)": [
                 f"{totalinf_reldiff[1]:.0f}% ({totalinf_reldiff[0]:.0f} - {totalinf_reldiff[2]:.0f})"
             ],
         }
@@ -1515,7 +1515,7 @@ def get_table(combined_results, IHR, rng):
             "Interventions": [
                 f"{summary_stats['hosp_median'][1]:.0f} ({summary_stats['hosp_ci_low'][1]:.0f} - {summary_stats['hosp_ci_high'][1]:.0f})"
             ],
-            "Relative difference (%)": [
+            "Bootstrapped relative difference (%)": [
                 f"{hosp_reldiff[1]:.0f}% ({hosp_reldiff[0]:.0f} - {hosp_reldiff[2]:.0f})"
             ],
         }
@@ -1735,7 +1735,7 @@ def relative_difference(
     Relative differences are calculated from the values in `col_name` for the two groups specified in `group_values`.
     The first element of `group_values` is considered the base group, and the second element is the comparison group.
     The relative difference is calculated pairwise for each possible combination of the two groups, which do not have to be the same length.
-    The mean relative difference and confidence interval of the relative difference distribution are then returned.
+    The median relative difference and confidence interval of the relative difference distribution are then returned.
 
     Args:
         data (pl.DataFrame): The input DataFrame containing the data.
@@ -1748,14 +1748,14 @@ def relative_difference(
     Returns:
         tuple: An ordered tuple containing the
             (0): lower bound (2.5th percentile),
-            (1): mean, and
+            (1): median, and
             (2): upper bound (97.5th percentile) of the relative differences.
     """
 
     assert len(group_values) == 2
 
     # If specified, pairwise comparison by each group matched along an index identifier column value
-    # For the function get_table, "replicate" is used to pair intervention an dno intervention scenarios
+    # For the function get_table, "replicate" is used to pair intervention and no intervention scenarios
     if identifier is not None:
         diff_data = (
             data.filter(pl.col(group_col_name).is_in(group_values))
@@ -1769,8 +1769,8 @@ def relative_difference(
                     pl.lit(100)
                     * (pl.col(group_values[0]) - pl.col(group_values[1]))
                     /
-                    # Scale by base group mean to avoid divide by zero and avoid overweighting negative differences on small base values
-                    (pl.mean(group_values[0]))
+                    # Scale by base group median to avoid divide by zero and avoid overweighting negative differences on small base values
+                    (pl.median(group_values[0]))
                 ).alias("reldiff")
             )
         )
@@ -1780,7 +1780,7 @@ def relative_difference(
             )
 
         lwr = diff_data.select(pl.quantile("reldiff", quantile=0.025)).item()
-        mean = diff_data.select(pl.mean("reldiff")).item()
+        median = diff_data.select(pl.median("reldiff")).item()
         upr = diff_data.select(pl.quantile("reldiff", quantile=0.975)).item()
 
     # Pairwise comparison bootstrapped across all possible combinations
@@ -1794,12 +1794,12 @@ def relative_difference(
         compare_vals = compare_df[col_name].to_numpy()
         diffs = base_vals[:, None] - compare_vals
 
-        # Scale to mean instead of each base to avoid overweighting negative differences on small base values
-        rel_diffs = [100 * diff / np.mean(base_vals) for diff in diffs]
+        # Scale to median instead of each base to avoid overweighting negative differences on small base values
+        rel_diffs = [100 * diff / np.median(base_vals) for diff in diffs]
 
         # Flatten the array and compute statistics
         lwr = np.quantile(rel_diffs, 0.025)
-        mean = np.mean(rel_diffs)
+        median = np.median(rel_diffs)
         upr = np.quantile(rel_diffs, 0.975)
 
-    return (lwr, mean, upr)
+    return (lwr, median, upr)
