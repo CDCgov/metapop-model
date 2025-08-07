@@ -18,11 +18,11 @@ final_results <- results |>
   group_by(Scenario, initial_vaccine_coverage) |>
   mutate(hospitalizations = rbinom(n(), Y, IHR)) |>
   summarise(
-    upper_incidence = quantile(Y, 0.95),
-    lower_incidence = quantile(Y, 0.05),
+    upper_incidence = quantile(Y, 0.975),
+    lower_incidence = quantile(Y, 0.025),
     incidence = median(Y),
-    upper_hospitalizations = quantile(hospitalizations, 0.95),
-    lower_hospitalizations = quantile(hospitalizations, 0.05),
+    upper_hospitalizations = quantile(hospitalizations, 0.975),
+    lower_hospitalizations = quantile(hospitalizations, 0.025),
     hospitalizations = median(hospitalizations)
   ) |>
   ungroup()
