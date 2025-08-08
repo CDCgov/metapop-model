@@ -1,7 +1,6 @@
 name: Mirror to cdcgov github org
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - production
@@ -34,4 +33,4 @@ jobs:
           git config --global user.name 'github-automation'
           git config --global user.email 'noreply@github.com'
           # Force-pushing to ensure the CDCgov repository mirrors the production branch exactly.
-          git push https://github.com/CDCgov/metapop-model.git production:main -f
+          git push https:///x-access-token:${{ env.GH_TOKEN }}@github.com/CDCgov/metapop-model.git production:main -f
