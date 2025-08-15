@@ -33,7 +33,7 @@ __all__ = [
 ]
 
 
-def advanced_app(replicates=20):
+def advanced_app(display_n_replicates=20):
     """
     This is a Streamlit app that illustrates the impact of layering multiple
     intervention strategies to mitigate a measles outbreak in 3 connected
@@ -46,7 +46,7 @@ def advanced_app(replicates=20):
     under different scenarios.
 
     Args:
-        replicates (int): Number of simulation replicates to plot for each scenario. Defaults to 20.
+        display_n_replicates (int): Number of simulation replicates to plot for each scenario. Defaults to 20.
 
     Returns:
         None: The function runs a Streamlit app and does not return anything.
@@ -286,7 +286,7 @@ def advanced_app(replicates=20):
 
     # filter for a sample of replicates
     replicate_inds = plot_rng.choice(
-        results1["replicate"].unique().to_numpy(), replicates, replace=False
+        results1["replicate"].unique().to_numpy(), display_n_replicates, replace=False
     )
     alt_results1 = alt_results1.filter(pl.col("replicate").is_in(replicate_inds))
     alt_results2 = alt_results2.filter(pl.col("replicate").is_in(replicate_inds))

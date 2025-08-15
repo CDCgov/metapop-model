@@ -94,7 +94,7 @@ __all__ = [
 ]
 
 
-def app(replicates=20):
+def app(display_n_replicates=20):
     """
     Main Streamlit app function for the measles outbreak simulator.
 
@@ -109,7 +109,7 @@ def app(replicates=20):
     different scenarios.
 
     Args:
-        replicates (int): Number of simulation replicates to plot for each scenario. Defaults to 20.
+        display_n_replicates (int): Number of simulation replicates to plot for each scenario. Defaults to 20.
 
     Returns:
         None: The function runs a Streamlit app and does not return anything.
@@ -760,7 +760,7 @@ def app(replicates=20):
         pl.lit(scenario_names[1]).alias("scenario")
     )
     replicate_inds = plot_rng.choice(
-        results1["replicate"].unique().to_numpy(), replicates, replace=False
+        results1["replicate"].unique().to_numpy(), display_n_replicates, replace=False
     )
     combined_alt_results = alt_results1.vstack(alt_results2).filter(
         pl.col("replicate").is_in(replicate_inds)
