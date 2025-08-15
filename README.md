@@ -14,7 +14,7 @@
 * Enable [poetry](https://python-poetry.org/) with `poetry install` and then start a poetry environment by activating the virtual environment: `source $(poetry env info --path)/bin/activate`
 * **Run the one population app locally** using Streamlit with `make run_app`. To run the advanced app modeling the transmission dynamics between 3 connected populations, use `make run_advanced_app`. The advanced app is not up to date with all of the latest features in the model and may not yet have all model parameters available for users to modify.
 * Run the example in `scripts/connectivity` exploring the impact of changing connectivity patterns and initial vaccine coverage with `python scripts/connectivity/simulate.py`. This will produce output in the `output` folder. Visualization and summary statistic tables for these results can be made with `Rscript scripts/connectivity/make_plots.R`.
-* We also provide examples exploring other features in the model. The subfolder `scripts/interventions` contains an example exploring the impact of active vaccination and isolation in 3 connected populations. The subfolder `scripts/onepop` contains an example exploring these interventions in a single population.
+* We also provide examples exploring other features in the model. The subfolder `scripts/interventions` contains an example exploring the impact of active vaccination and isolation in 3 connected populations. The subfolder `scripts/one_pop` contains an example exploring these interventions in a single population.
 
 ## Model details
 

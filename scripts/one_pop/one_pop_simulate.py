@@ -9,10 +9,10 @@ from metapop import simulate_replicates
 if __name__ == "__main__":
     # setup output directory
     os.makedirs("output", exist_ok=True)
-    output_dir = "output/onepop"
+    output_dir = "output/one_pop"
     os.makedirs(output_dir, exist_ok=True)
 
-    parameter_sets = griddler.griddle.read("scripts/onepop/onepop_config.yaml")
+    parameter_sets = griddler.griddle.read("scripts/one_pop/one_pop_config.yaml")
     results_all = simulate_replicates(parameter_sets)
     results = results_all.select(
         cs.by_name(

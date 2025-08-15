@@ -11,7 +11,7 @@ from metapop.helper import *
 if __name__ == "__main__":
     # one population example
     print("one population example")
-    parameter_sets = griddler.griddle.read("scripts/onepop/onepop_config.yaml")
+    parameter_sets = griddler.griddle.read("scripts/one_pop/one_pop_config.yaml")
     parms = parameter_sets[0]
     parms["k_i"] = np.array(parms["k_i"]).reshape((1,))
     parms["gamma"] = 1.0 / parms["infectious_duration"]

@@ -141,7 +141,7 @@ def app(replicates=20):
 
     # Load default parameters from YAML config
     filepath = os.path.join(
-        os.path.dirname(__file__), "app_assets", "onepop_config.yaml"
+        os.path.dirname(__file__), "app_assets", "one_pop_config.yaml"
     )
 
     # Load primary color
