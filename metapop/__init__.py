@@ -8,6 +8,13 @@
 # import and will produce errors. for clarity, we name the dependencies of each
 # module in the comments here beside the module import
 from .advanced_app import advanced_app  # depends on app_helper
+from .analyzer import (
+    add_daily_incidence_scenario,
+    add_week_column,
+    create_filename,
+    create_intervention_summary_table,
+    trim_string_column,
+)
 from .app import app  # depends on app_helper
 from .app_helper import (
     get_scenario_results,
@@ -67,4 +74,9 @@ __all__ = [
     "__version__",
     "__versiondate__",
     "__git_commit__",
+    "create_filename",
+    "trim_string_column",
+    "add_daily_incidence_scenario",
+    "add_week_column",
+    "create_intervention_summary_table",
 ]

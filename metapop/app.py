@@ -51,7 +51,6 @@ from .app_helper import (
     reset,
     add_daily_incidence,
     get_interval_results,
-    get_table,
     get_median_trajectory_from_episize,
     get_median_trajectory_from_peak_time,
     totals_same_by_ks,
@@ -67,6 +66,9 @@ from .helper import (
     initialize_population,
     seed_from_string,
     get_metapop_info,
+)
+from .analyzer import (
+    get_table,
 )
 from .sim import get_time_array
 # if you want to use the methods from metapop in this file under

@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 import griddler
 import griddler.griddle
@@ -46,4 +47,8 @@ if __name__ == "__main__":
         )
     )
 
-    results.write_csv(os.path.join(output_dir, "results.csv"))
+    date_str = datetime.now().strftime("%Y%m%d")
+    filename = f"simulation_results_{date_str}.csv"
+    results.write_csv(os.path.join(output_dir, filename))
+
+    ## post processing simulations

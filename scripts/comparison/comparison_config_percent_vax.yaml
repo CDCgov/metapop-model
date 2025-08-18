@@ -54,7 +54,7 @@ nested_parameters:
     initial_vaccine_coverage: [0.80]
     symptomatic_isolation_start_day: 4
     pre_rash_isolation_start_day: 4
-    total_vaccine_uptake_doses: 1500
+    total_vaccine_uptake_doses: 1497
     vaccine_uptake_start_day: 4
 
   - intervention_scenario: 'none85'
@@ -79,7 +79,7 @@ nested_parameters:
     initial_vaccine_coverage: [0.85]
     symptomatic_isolation_start_day: 4
     pre_rash_isolation_start_day: 4
-    total_vaccine_uptake_doses: 1125
+    total_vaccine_uptake_doses: 1122
     vaccine_uptake_start_day: 4
 
   - intervention_scenario: 'none90'
@@ -104,7 +104,7 @@ nested_parameters:
     initial_vaccine_coverage: [0.90]
     symptomatic_isolation_start_day: 4
     pre_rash_isolation_start_day: 4
-    total_vaccine_uptake_doses: 750
+    total_vaccine_uptake_doses: 747
     vaccine_uptake_start_day: 4
 
   - intervention_scenario: 'none95'
@@ -129,11 +129,11 @@ nested_parameters:
     initial_vaccine_coverage: [0.95]
     symptomatic_isolation_start_day: 4
     pre_rash_isolation_start_day: 4
-    total_vaccine_uptake_doses: 375
+    total_vaccine_uptake_doses: 372
     vaccine_uptake_start_day: 4
   - intervention_scenario: 'all_interventions_delay85'
     initial_vaccine_coverage: [0.85]
     symptomatic_isolation_start_day: 25
     pre_rash_isolation_start_day: 25
-    total_vaccine_uptake_doses: 1125
+    total_vaccine_uptake_doses: 1122
     vaccine_uptake_start_day: 25
