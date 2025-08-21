@@ -1447,6 +1447,13 @@ def get_table(combined_results, IHR, rng):
         pl.DataFrame: A DataFrame containing the hospitalization summary.
     """
 
+    # Always evaluate No interventions scenario first to ensure stable results
+    # when only the No interventions scenario is run
+    scenario_order = {"No interventions": 0, "Interventions": 1}
+    combined_results = combined_results.sort(
+        [pl.col("Scenario").replace(scenario_order), pl.col("replicate")]
+    )
+
     # calculate hospitalizations based on IHR
     combined_results = combined_results.with_columns(
         pl.Series(
