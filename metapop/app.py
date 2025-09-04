@@ -254,7 +254,7 @@ def app(
             "becomes less valid, and the model might be less appropriate."
         )
         helpers["initial_vaccine_coverage"][0] = (
-            "The percent of the population with prior immunity to measles, including through either MMR vaccination or through past infection."
+            "The percent of the population with prior immunity to measles, including through either MMR vaccination or through past infection. For help estimating population immunity see Population Immunity Expander directly below."
         )
 
         # Add a section for a Reset button for all parameters
@@ -263,14 +263,14 @@ def app(
         # --- Shared Parameters in order of appearance in the app ---
         shared_keys = [
             "pop_sizes",
-            "initial_vaccine_coverage",
             "I0",
+            "initial_vaccine_coverage",
         ]
         # shared parameters that are lists
         shared_list_keys = [
             "pop_sizes",
-            "initial_vaccine_coverage",
             "I0",
+            "initial_vaccine_coverage",
         ]
 
         # add a section for the shared parameters in the sidebar panel
@@ -303,6 +303,11 @@ def app(
             formats,
             session_state_keys0,
         )
+        with st.expander("Baseline Immunity Calculator"):
+            st.text("Use this calculator to estimate baseline immunity. " \
+            "To populate the values from this calculator in the baseline immunity," \
+            "press the populate button below.")
+            pop_parms, vax_parms = st.columns(2)
 
         # Intervention scenario and parameters
         st.header(
