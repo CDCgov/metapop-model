@@ -305,9 +305,56 @@ def app(
         )
         with st.expander("Baseline Immunity Calculator"):
             st.text("Use this calculator to estimate baseline immunity. " \
-            "To populate the values from this calculator in the baseline immunity," \
+            "To populate the values from this calculator in the baseline immunity, " \
             "press the populate button below.")
+            calculator_keys_pop = ["population_percentages"]
+            calculator_list_keys_pop = ["population_percentages"]
+
+            calculator_keys_vax = ["vaccine_coverages"]
+            calculator_list_keys_vax = ["vaccine_coverages"]
+
             pop_parms, vax_parms = st.columns(2)
+
+        
+            # I think we want to use the app_editor structure to be able to use population from the previous
+
+            edited_pop_parms = app_editors(
+                pop_parms,
+                subheader,
+                parms,
+                calculator_keys_pop,
+                calculator_list_keys_pop,
+                show_parameter_mapping,
+                widget_types,
+                min_values,
+                max_values,
+                steps,
+                helpers,
+                formats,
+                session_state_keys1, # not sure if this is right
+            )
+
+            edited_vax_parms = app_editors(
+                vax_parms,
+                subheader,
+                parms,
+                calculator_keys_vax,
+                calculator_list_keys_vax,
+                show_parameter_mapping,
+                widget_types,
+                min_values,
+                max_values,
+                steps,
+                helpers,
+                formats,
+                session_state_keys1, # not sure if this is right
+            )
+            st.text(
+                "Based on these values, the estimate for baseline immunity is 0.93%" #placeholder
+            )
+            # Add a section to set the baseline immunity using the value from the calculator
+            col_baseline = st.columns(1)[0]
+
 
         # Intervention scenario and parameters
         st.header(
@@ -452,6 +499,7 @@ def app(
                 advanced_ordered_keys,
                 advanced_list_keys,
                 advanced_parameter_mapping,
+
                 widget_types,
                 min_values,
                 max_values,
@@ -551,6 +599,17 @@ def app(
         reset_button = st.button(
             "Reset parameters",
             on_click=reset,
+            args=(
+                parms,
+                widget_types,
+            ),
+        )
+
+    #set baseline parameter if button clicked
+    with col_baseline:
+        baseline_button = st.button(
+            "Set baseline immunity",
+            on_click=reset, #placeholder
             args=(
                 parms,
                 widget_types,
