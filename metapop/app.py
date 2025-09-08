@@ -313,44 +313,78 @@ def app(
             calculator_keys_vax = ["vaccine_coverages"]
             calculator_list_keys_vax = ["vaccine_coverages"]
 
-            pop_parms, vax_parms = st.columns(2)
+            #pop_parms, vax_parms = st.columns(2)
 
         
             # I think we want to use the app_editor structure to be able to use population from the previous
 
-            edited_pop_parms = app_editors(
-                pop_parms,
-                subheader,
-                parms,
-                calculator_keys_pop,
-                calculator_list_keys_pop,
-                show_parameter_mapping,
-                widget_types,
-                min_values,
-                max_values,
-                steps,
-                helpers,
-                formats,
-                session_state_keys1, # not sure if this is right
-            )
+            #edited_pop_parms = app_editors(
+            #    pop_parms,
+            #    subheader,
+            #    parms,
+            #    calculator_keys_pop,
+            #    calculator_list_keys_pop,
+            #    show_parameter_mapping,
+            #    widget_types,
+            #    min_values,
+            #    max_values,
+            #    steps,
+            #    helpers,
+            #    formats,
+            #    session_state_keys1, # not sure if this is right
+            #)
 
-            edited_vax_parms = app_editors(
-                vax_parms,
-                subheader,
-                parms,
-                calculator_keys_vax,
-                calculator_list_keys_vax,
-                show_parameter_mapping,
-                widget_types,
-                min_values,
-                max_values,
-                steps,
-                helpers,
-                formats,
-                session_state_keys1, # not sure if this is right
+            #edited_vax_parms = app_editors(
+            #    vax_parms,
+            #    subheader,
+            #    parms,
+            #    calculator_keys_vax,
+            #    calculator_list_keys_vax,
+            #    show_parameter_mapping,
+            #    widget_types,
+            #    min_values,
+            #    max_values,
+            #    steps,
+            #    helpers,
+            #    formats,
+            #    session_state_keys1, # not sure if this is right
+            #)
+            
+
+            df = pd.DataFrame(
+                [
+                    {"population": "0-5", "percentage": 0.1, "coverage": 0.90},
+                    {"population": "6-25", "percentage": 0.4, "coverage": 0.95}, 
+                    {"population": "25+", "percentage": 0.5, "coverage": 0.99},
+                ]
             )
+            edited_df = st.data_editor(
+                df,
+                column_config={
+                    "population": "Population Age",
+                    "percentage": st.column_config.NumberColumn(
+                        "Percent of population",
+                        help="What percent of the population is in this age group?",
+                        min_value=0.0,
+                        max_value=1.0,
+                        step=0.01,
+                        format="%.2f",
+                    ),
+                    "coverage": st.column_config.NumberColumn(
+                        "Immunity Coverage",
+                        help="What percent of the population is immune in this age group?",
+                        min_value=0.0,
+                        max_value=1.0,
+                        step=0.01,
+                        format="%.2f",
+                    ),
+                },
+                disabled=["population"],
+                hide_index=True,
+            )
+            baseline_immun = edited_df.loc[edited_df["percentage"].idxmax()]["coverage"]
             st.text(
-                "Based on these values, the estimate for baseline immunity is 0.93%" #placeholder
+                f"Based on these values, the estimate for baseline immunity is {baseline_immun}%" #placeholder
             )
             # Add a section to set the baseline immunity using the value from the calculator
             col_baseline = st.columns(1)[0]
