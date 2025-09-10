@@ -77,7 +77,7 @@ Users can also run our interactive application of the metapop model locally usin
 You can run the app in-browser only based on [stlite](https://github.com/whitphx/stlite).  Within the repo, you can load `stlite/index.html` directly in your browser.  To build a sharable version of the one population app, run `make build_stlite_app` which will create `stlite/measles_sim.html` which can be shared and requires the internet but no access to internal resources nor to a server.  Note that `pygriddler` required removal of `progressbar` for compatibility with `pyodide`/`stlite`.
 
 ## Behind the Model
-You can generate the data from the [Behind the Model](https://www.cdc.gov/cfa-behind-the-model/php/data-research/interactive-measles-outbreak-simulator.html) and the [Downloadable Summary](https://www.cdc.gov/measles/downloads/measles-interventions-outbreaks.pdf). Within the repo, you can run `python scripts/comparison/comparison_simulate.py`.
+You can generate the modeling results in our [Behind the Model](https://www.cdc.gov/cfa-behind-the-model/php/data-research/interactive-measles-outbreak-simulator.html) and the [Downloadable Summary] (https://www.cdc.gov/measles/downloads/measles-interventions-outbreaks.pdf) on interventions using methods from this repo. To do so, you can run `python scripts/comparison/comparison_simulate.py`.
 
 
 ## Project Admin
