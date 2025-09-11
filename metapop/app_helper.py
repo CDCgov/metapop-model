@@ -1225,10 +1225,10 @@ def get_baseline_immunity(population, coverage):
     """
 
     immunity_value = (
-        population[0] * coverage[0] / 2
-        + population[0] * coverage[1] / 2
-        + population[1] * coverage[2]
-        + population[2] * coverage[3]
+        population[0] * coverage[0] / 5
+        + population[0] * (coverage[1] + coverage[0]) * 3 / (2 * 5)
+        + +population[1] * (coverage[2] + coverage[1]) / 2
+        + population[2] * (coverage[3] + coverage[2]) / 2
     ) / (100 * 100)
 
     return round(immunity_value, 2)
