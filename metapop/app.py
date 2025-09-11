@@ -354,17 +354,38 @@ def app(
 
             df_pop = pd.DataFrame(
                 [
-                    {"population": "<5", "percentage": 0.056},
-                    {"population": "5-17", "percentage": 0.165},
-                    {"population": "18+", "percentage": 0.779},
+                    {
+                        "population": "<5",
+                        "percentage": 100 * parms["population_percentages"][0],
+                    },
+                    {
+                        "population": "5-17",
+                        "percentage": 100 * parms["population_percentages"][1],
+                    },
+                    {
+                        "population": "18+",
+                        "percentage": 100 * parms["population_percentages"][2],
+                    },
                 ]
             )
             df_coverage = pd.DataFrame(
                 [
-                    {"threshold": "24 months", "coverage": 0.90},
-                    {"threshold": "5 years (kindergarten)", "coverage": 0.92},
-                    {"threshold": "18 years", "coverage": 0.95},
-                    {"threshold": "19+ years", "coverage": 0.95},
+                    {
+                        "threshold": "24 months",
+                        "coverage": 100 * parms["vaccine_coverages"][0],
+                    },
+                    {
+                        "threshold": "5 years (kindergarten)",
+                        "coverage": 100 * parms["vaccine_coverages"][1],
+                    },
+                    {
+                        "threshold": "18 years",
+                        "coverage": 100 * parms["vaccine_coverages"][2],
+                    },
+                    {
+                        "threshold": "19+ years",
+                        "coverage": 100 * parms["vaccine_coverages"][3],
+                    },
                 ]
             )
 
@@ -373,12 +394,12 @@ def app(
                 column_config={
                     "population": "Population Age",
                     "percentage": st.column_config.NumberColumn(
-                        "Percent of population",
+                        "Percent of population (%)",
                         help="What percent of the population is in this age group?",
-                        min_value=0.0,
-                        max_value=1.0,
-                        step=0.01,
-                        format="%.2f",
+                        min_value=0,
+                        max_value=100,
+                        step=0.1,
+                        format="%.1f",
                     ),
                 },
                 disabled=["population"],
@@ -389,21 +410,21 @@ def app(
                 column_config={
                     "threshold": "Age Threshold",
                     "coverage": st.column_config.NumberColumn(
-                        "Immunity Coverage",
+                        "Immunity Coverage(%)",
                         help="What percent of the population is immune by this age?",
-                        min_value=0.0,
-                        max_value=1.0,
-                        step=0.01,
-                        format="%.2f",
+                        min_value=0,
+                        max_value=100,
+                        step=0.1,
+                        format="%.1f",
                     ),
                 },
                 disabled=["population"],
                 hide_index=True,
             )
 
-            baseline_immun = edited_df_coverage["coverage"].max()
+            baseline_immun = edited_df_coverage["coverage"].max() / 100
             st.text(
-                f"Based on these values, the estimate for baseline immunity is {baseline_immun}%"  # placeholder
+                f"Based on these values, the estimate for baseline immunity is {baseline_immun*100}%"  # placeholder
             )
             # Add a section to set the baseline immunity using the value from the calculator
             col_baseline = st.columns(1)[0]
