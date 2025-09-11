@@ -46,6 +46,7 @@ from .app_helper import (
     get_session_state_idkeys,
     update_intervention_parameters_from_widget,
     reset,
+    get_baseline_immunity,
     set_baseline,
     add_daily_incidence,
     get_interval_results,
@@ -410,7 +411,7 @@ def app(
                 column_config={
                     "threshold": "Age Threshold",
                     "coverage": st.column_config.NumberColumn(
-                        "Immunity Coverage(%)",
+                        "Immunity Coverage",
                         help="What percent of the population is immune by this age?",
                         min_value=0,
                         max_value=100,
@@ -422,7 +423,9 @@ def app(
                 hide_index=True,
             )
 
-            baseline_immun = edited_df_coverage["coverage"].max() / 100
+            baseline_immun = get_baseline_immunity(
+                edited_df_pop["percentage"], edited_df_coverage["coverage"]
+            )
             st.text(
                 f"Based on these values, the estimate for baseline immunity is {baseline_immun*100}%"  # placeholder
             )

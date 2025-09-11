@@ -46,6 +46,7 @@ __all__ = [
     "get_session_state_idkeys",
     "get_parameter_key_for_session_key",
     "reset",
+    "get_baseline_immunity",
     "set_baseline",
     "get_parms_from_table",
     "update_parms_from_table",
@@ -1209,6 +1210,28 @@ def reset(defaults, widget_types):
 
     # reset the session state for the app
     st.session_state["reset"] = True
+
+
+def get_baseline_immunity(population, coverage):
+    """
+    Calculate the baseline immunity given the values in the calculator
+
+    Args:
+        population (list): The percent of the population in each goup.
+        coverage (list): The percent of individuals in each group with prior immunity.
+
+    Returns:
+        immunity_value (float): The percent of the population with immunity.
+    """
+
+    immunity_value = (
+        population[0] * coverage[0] / 2
+        + population[0] * coverage[1] / 2
+        + population[1] * coverage[2]
+        + population[2] * coverage[3]
+    ) / (100 * 100)
+
+    return round(immunity_value, 2)
 
 
 def set_baseline(immunity_value):
