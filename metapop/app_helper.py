@@ -46,6 +46,7 @@ __all__ = [
     "get_session_state_idkeys",
     "get_parameter_key_for_session_key",
     "reset",
+    "set_baseline",
     "get_parms_from_table",
     "update_parms_from_table",
     "correct_parameter_types",
@@ -1208,6 +1209,24 @@ def reset(defaults, widget_types):
 
     # reset the session state for the app
     st.session_state["reset"] = True
+
+
+def set_baseline(immunity_value):
+    """
+    Set the session state baseline immunity value to the value calculated by the immunity calculator.
+
+    Args:
+        immunity_value (int): The baseline immunity estimated by the calculator
+
+    Returns: None
+    """
+    for session_key in st.session_state.keys():
+        key, index = get_parameter_key_for_session_key(session_key)
+        if key == "initial_vaccine_coverage":
+            value = immunity_value
+
+            # set the session state value to the default value
+            st.session_state[session_key] = value
 
 
 ### Methods to handle extraction of user inputs and updating parameter dictionaries to send for simulation ##

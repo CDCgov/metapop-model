@@ -46,6 +46,7 @@ from .app_helper import (
     get_session_state_idkeys,
     update_intervention_parameters_from_widget,
     reset,
+    set_baseline,
     add_daily_incidence,
     get_interval_results,
     get_median_trajectory_from_episize,
@@ -353,16 +354,17 @@ def app(
 
             df_pop = pd.DataFrame(
                 [
-                    {"population": "0-5", "percentage": 0.1},
-                    {"population": "6-25", "percentage": 0.4},
-                    {"population": "25+", "percentage": 0.5},
+                    {"population": "<5", "percentage": 0.056},
+                    {"population": "5-17", "percentage": 0.165},
+                    {"population": "18+", "percentage": 0.779},
                 ]
             )
             df_coverage = pd.DataFrame(
                 [
-                    {"population": "0-5", "coverage": 0.90},
-                    {"population": "6-25", "coverage": 0.95},
-                    {"population": "25+", "coverage": 0.99},
+                    {"threshold": "24 months", "coverage": 0.90},
+                    {"threshold": "5 years (kindergarten)", "coverage": 0.92},
+                    {"threshold": "18 years", "coverage": 0.95},
+                    {"threshold": "19+ years", "coverage": 0.95},
                 ]
             )
 
@@ -385,10 +387,10 @@ def app(
             edited_df_coverage = st.data_editor(
                 df_coverage,
                 column_config={
-                    "population": "Population Age",
+                    "threshold": "Age Threshold",
                     "coverage": st.column_config.NumberColumn(
                         "Immunity Coverage",
-                        help="What percent of the population is immune in this age group?",
+                        help="What percent of the population is immune by this age?",
                         min_value=0.0,
                         max_value=1.0,
                         step=0.01,
@@ -399,7 +401,7 @@ def app(
                 hide_index=True,
             )
 
-            baseline_immun = edited_df_pop["percentage"].max()
+            baseline_immun = edited_df_coverage["coverage"].max()
             st.text(
                 f"Based on these values, the estimate for baseline immunity is {baseline_immun}%"  # placeholder
             )
@@ -658,11 +660,8 @@ def app(
     with col_baseline:
         baseline_button = st.button(
             "Set baseline immunity",
-            on_click=reset,  # placeholder
-            args=(
-                parms,
-                widget_types,
-            ),
+            on_click=set_baseline,
+            args=(baseline_immun,),
         )
 
     # set model parameters based on app inputs - this will update internal parameters that are combinations of user inputs
