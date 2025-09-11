@@ -304,21 +304,22 @@ def app(
             session_state_keys0,
         )
         with st.expander("Baseline Immunity Calculator"):
-            st.text("Use this calculator to estimate baseline immunity. " \
-            "To populate the values from this calculator in the baseline immunity, " \
-            "press the populate button below.")
+            st.text(
+                "Use this calculator to estimate baseline immunity. "
+                "To populate the values from this calculator in the baseline immunity, "
+                "press the populate button below."
+            )
             calculator_keys_pop = ["population_percentages"]
             calculator_list_keys_pop = ["population_percentages"]
 
             calculator_keys_vax = ["vaccine_coverages"]
             calculator_list_keys_vax = ["vaccine_coverages"]
 
-            #pop_parms, vax_parms = st.columns(2)
+            # pop_parms, vax_parms = st.columns(2)
 
-        
             # I think we want to use the app_editor structure to be able to use population from the previous
 
-            #edited_pop_parms = app_editors(
+            # edited_pop_parms = app_editors(
             #    pop_parms,
             #    subheader,
             #    parms,
@@ -332,9 +333,9 @@ def app(
             #    helpers,
             #    formats,
             #    session_state_keys1, # not sure if this is right
-            #)
+            # )
 
-            #edited_vax_parms = app_editors(
+            # edited_vax_parms = app_editors(
             #    vax_parms,
             #    subheader,
             #    parms,
@@ -348,18 +349,25 @@ def app(
             #    helpers,
             #    formats,
             #    session_state_keys1, # not sure if this is right
-            #)
-            
+            # )
 
-            df = pd.DataFrame(
+            df_pop = pd.DataFrame(
                 [
-                    {"population": "0-5", "percentage": 0.1, "coverage": 0.90},
-                    {"population": "6-25", "percentage": 0.4, "coverage": 0.95}, 
-                    {"population": "25+", "percentage": 0.5, "coverage": 0.99},
+                    {"population": "0-5", "percentage": 0.1},
+                    {"population": "6-25", "percentage": 0.4},
+                    {"population": "25+", "percentage": 0.5},
                 ]
             )
-            edited_df = st.data_editor(
-                df,
+            df_coverage = pd.DataFrame(
+                [
+                    {"population": "0-5", "coverage": 0.90},
+                    {"population": "6-25", "coverage": 0.95},
+                    {"population": "25+", "coverage": 0.99},
+                ]
+            )
+
+            edited_df_pop = st.data_editor(
+                df_pop,
                 column_config={
                     "population": "Population Age",
                     "percentage": st.column_config.NumberColumn(
@@ -370,6 +378,14 @@ def app(
                         step=0.01,
                         format="%.2f",
                     ),
+                },
+                disabled=["population"],
+                hide_index=True,
+            )
+            edited_df_coverage = st.data_editor(
+                df_coverage,
+                column_config={
+                    "population": "Population Age",
                     "coverage": st.column_config.NumberColumn(
                         "Immunity Coverage",
                         help="What percent of the population is immune in this age group?",
@@ -382,13 +398,13 @@ def app(
                 disabled=["population"],
                 hide_index=True,
             )
-            baseline_immun = edited_df.loc[edited_df["percentage"].idxmax()]["coverage"]
+
+            baseline_immun = edited_df_pop["percentage"].max()
             st.text(
-                f"Based on these values, the estimate for baseline immunity is {baseline_immun}%" #placeholder
+                f"Based on these values, the estimate for baseline immunity is {baseline_immun}%"  # placeholder
             )
             # Add a section to set the baseline immunity using the value from the calculator
             col_baseline = st.columns(1)[0]
-
 
         # Intervention scenario and parameters
         st.header(
@@ -533,7 +549,6 @@ def app(
                 advanced_ordered_keys,
                 advanced_list_keys,
                 advanced_parameter_mapping,
-
                 widget_types,
                 min_values,
                 max_values,
@@ -639,11 +654,11 @@ def app(
             ),
         )
 
-    #set baseline parameter if button clicked
+    # set baseline parameter if button clicked
     with col_baseline:
         baseline_button = st.button(
             "Set baseline immunity",
-            on_click=reset, #placeholder
+            on_click=reset,  # placeholder
             args=(
                 parms,
                 widget_types,

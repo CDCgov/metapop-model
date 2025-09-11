@@ -322,7 +322,6 @@ def get_show_parameter_mapping(parms=None):
         vaccine_coverages_0="Vaccine coverage in first age group",
         vaccine_coverages_1="Vaccine coverage in second age group",
         vaccine_coverages_2="Vaccine coverage in third age group",
-        
     )
 
     if parms is not None and isinstance(parms, dict):
@@ -926,7 +925,7 @@ def get_helpers(parms=None):
             "Percent of population in first age group",
             "Percent of population in second age group",
             "Percent of population in third age group",
-        ], 
+        ],
         vaccine_uptake="If turned on, initiates a vaccination campaign. The percent of unvaccinated people to receive a dose and duration of the campaign to distribute those doses are specified in the sliders below.",
         vaccine_uptake_start_day="Number of days after introduction of infections in the community that the vaccination campaign will start. The default is “4 days” (after introduction), which corresponds to day 5 in the model. Day 5 is the average time of rash onset occurrence for the introduced infections given an infectious period of 9 days, and so is assumed to be the first day that measles infections would be identified in the population. Vaccination campaigns can start up to 180 days or approximately 6 months after introduction to the community.",
         vaccine_uptake_duration_days="The model assumes vaccine doses are distributed at a constant rate for the duration of the campaign. Vaccination campaigns can last up to 180 days or approximately 6 months.",
@@ -1030,7 +1029,7 @@ def get_base_session_state_idkeys(parms=None):
             "vaccine_coverages_1",
             "vaccine_coverages_2",
         ],
-        population_percentages=[ # Should this just use the pop_sizes infrastructure
+        population_percentages=[  # Should this just use the pop_sizes infrastructure
             "population_percentages_0",
             "population_percentages_1",
             "population_percentages_2",
