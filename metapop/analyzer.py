@@ -5,8 +5,6 @@ import warnings
 import numpy as np
 import polars as pl
 
-# from metapop.app_helper import relative_difference
-
 __all__ = [
     "create_filename",
     "trim_string_column",

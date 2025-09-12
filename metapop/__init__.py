@@ -15,7 +15,7 @@ from .analyzer import (
     create_intervention_summary_table,
     relative_difference,
     trim_string_column,
-)  # depends on app_helper
+)
 from .app import app  # depends on app_helper
 from .app_helper import (
     get_scenario_results,
