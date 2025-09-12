@@ -196,39 +196,29 @@ def get_table(combined_results, IHR, rng):
 
 def calculate_outbreak_summary(combined_results, threshold):
     """
-
     Calculate the outbreak summary based on the given threshold.
 
     Args:
-
         combined_results (pl.DataFrame): The combined results DataFrame.
-
         threshold                 (int): The threshold for filtering replicates.
 
     Returns:
-
         pl.DataFrame: A DataFrame containing the outbreak summary.
-
     """
-
     # Filter combined_results for replicates where Total >= threshold
-
     filtered_results = combined_results.filter(pl.col("Total") >= threshold)
 
     # Group by Scenario and count unique replicates
-
     outbreak_summary = filtered_results.group_by("Scenario").agg(
         pl.col("replicate").n_unique().alias("outbreaks")
     )
 
     # Ensure both scenarios are present in the summary
-
     scenarios = ["No interventions", "Interventions"]
 
     for scenario in scenarios:
         if scenario not in outbreak_summary["Scenario"].to_list():
             # Add missing scenario with outbreaks = 0
-
             outbreak_summary = outbreak_summary.vstack(
                 pl.DataFrame({"Scenario": [scenario], "outbreaks": [0]}).with_columns(
                     pl.col("outbreaks").cast(
