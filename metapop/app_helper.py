@@ -61,7 +61,7 @@ __all__ = [
     "img_to_html",
     "is_light_color",
     "get_github_logo_path",
-    "relative_difference",
+    # "relative_difference",
     "render_chart_title",
 ]
 
