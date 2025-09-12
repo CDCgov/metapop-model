@@ -26,9 +26,7 @@ def test_create_filename_base_only():
 
 def test_create_filename_all_parameters():
     """Test filename creation with all parameters."""
-    result = create_filename(
-        "results", date="2025_08_07", suffix="final", format=".json"
-    )
+    result = create_filename("results", date="2025_08_07", suffix="final", fmt=".json")
     assert result == "results_2025_08_07_final.json"
 
 

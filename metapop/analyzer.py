@@ -309,14 +309,14 @@ def create_intervention_summary_table(
     # Save the initial RNG state
     initial_rng_state = rng.bit_generator.state
 
-    # Get unique scenarios (excluding "none" since it's our baseline)
+    # Get unique scenarios (excluding "none" since it's the baseline)
     scenarios = results["intervention_scenario"].unique().to_list()
     available_scenarios = [s for s in scenarios if s != "none"]
 
     # Filter scenario_order to only include scenarios present in the data
     intervention_scenarios = [s for s in scenario_order if s in available_scenarios]
 
-    # Add any scenarios in the data that weren't in our predefined order
+    # Add any scenarios in the data that weren't in the predefined order
     additional_scenarios = [s for s in available_scenarios if s not in scenario_order]
     intervention_scenarios.extend(additional_scenarios)
 
@@ -401,26 +401,26 @@ def create_intervention_summary_table(
 
 
 def create_filename(
-    base_name: str, date: str = "", suffix: str = "", format: str = ".csv"
+    base_name: str, date: str = "", suffix: str = "", fmt: str = ".csv"
 ) -> str:
     """
     Create a filename with optional date and suffix.
 
     Args:
-        base_name: Base filename without extension
-        date: Optional date string to append
-        suffix: Optional suffix to append
-        format: File extension (default: ".csv")
+        base_name (str): Base filename without extension
+        date      (str): Optional date string to append
+        suffix    (str): Optional suffix to append
+        fmt       (str): File extension. Defaults to ".csv"
 
     Returns:
-        Complete filename string
+        str: Complete filename string.
     """
     filename = base_name
     if date:
         filename += f"_{date}"
     if suffix:
         filename += f"_{suffix}"
-    filename += format
+    filename += fmt
     return filename
 
 
