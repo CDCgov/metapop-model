@@ -431,12 +431,12 @@ def trim_string_column(
     Remove specified number of characters from the end of a string column.
 
     Args:
-        df: Polars DataFrame
-        column_name: Name of the string column to trim
-        char_length: Number of characters to remove from end (default: 2)
+        df (pl.DataFrame): The polars DataFrame to modify
+        column_name (str): The name of the string column to trim
+        char_length (int): The number of characters to strip from end. Defaults to 2.
 
     Returns:
-        DataFrame with trimmed string column
+        pl.DataFrame: New pl.DataFrame with trimmed string column
     """
     if char_length <= 0:
         return df
