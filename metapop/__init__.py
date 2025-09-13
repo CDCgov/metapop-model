@@ -13,7 +13,7 @@ from .analyzer import (
     add_week_column,
     create_filename,
     create_intervention_summary_table,
-    relative_difference,
+    get_relative_difference,
     trim_string_column,
 )
 from .app import app  # depends on app_helper
@@ -79,6 +79,6 @@ __all__ = [
     "trim_string_column",
     "add_daily_incidence_scenario",
     "add_week_column",
-    "relative_difference",
+    "get_relative_difference",
     "create_intervention_summary_table",
 ]

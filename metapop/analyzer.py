@@ -10,14 +10,14 @@ __all__ = [
     "trim_string_column",
     "add_daily_incidence_scenario",
     "add_week_column",
-    "relative_difference",
+    "get_relative_difference",
     "get_table",
     "calculate_outbreak_summary",
     "create_intervention_summary_table",
 ]
 
 
-def relative_difference(
+def get_relative_difference(
     data: pl.DataFrame,
     col_name: str,
     group_values: list,
@@ -128,14 +128,14 @@ def get_table(combined_results, IHR, rng):
     scenarios = ["No interventions", "Interventions"]
 
     # Specify `identifier="replicate"` to make strictly one-to-one difference comparisons
-    totalinf_reldiff = relative_difference(
+    totalinf_reldiff = get_relative_difference(
         combined_results,
         col_name="Total",
         group_values=scenarios,
         identifier="replicate",
     )
 
-    hosp_reldiff = relative_difference(
+    hosp_reldiff = get_relative_difference(
         combined_results,
         col_name="Hospitalizations",
         group_values=scenarios,

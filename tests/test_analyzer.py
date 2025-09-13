@@ -10,7 +10,7 @@ from metapop.analyzer import (
     add_week_column,
     create_filename,
     create_intervention_summary_table,
-    relative_difference,
+    get_relative_difference,
     trim_string_column,
 )
 
@@ -246,7 +246,9 @@ def test_relative_difference():
     expected_reldiff = [expected_reldiff_low, expected_reldiff, expected_reldiff_high]
 
     # Test relative_difference for Total column
-    total_reldiff = relative_difference(data, col_name="Total", group_values=scenarios)
+    total_reldiff = get_relative_difference(
+        data, col_name="Total", group_values=scenarios
+    )
     assert (
         len(total_reldiff) == 3
     ), f"Expected total_reldiff to have 3 elements, but got {len(total_reldiff)}"
@@ -269,8 +271,10 @@ def test_relative_difference_against_self():
         }
     )
 
-    # Test relative_difference for Total column
-    total_reldiff = relative_difference(data, col_name="Total", group_values=scenarios)
+    # Test get_relative_difference for Total column
+    total_reldiff = get_relative_difference(
+        data, col_name="Total", group_values=scenarios
+    )
     # lwr should be approximately equal to upr and mean should be approximately zero
     assert total_reldiff[1] == pytest.approx(0.0, rel=1e-6)
     assert -total_reldiff[0] == pytest.approx(total_reldiff[2], rel=1e-6)
@@ -278,7 +282,7 @@ def test_relative_difference_against_self():
 
 def test_relative_difference_assertion():
     with pytest.raises(AssertionError):
-        relative_difference(
+        get_relative_difference(
             pl.DataFrame({"Scenario": ["A", "B", "C"], "Total": [1, 2, 3]}),
             col_name="Total",
             group_values=["A", "B", "C"],
@@ -300,8 +304,8 @@ def test_relative_difference_identifier():
     )
     expected_reldiff = [-5, -5, -5]
 
-    # Test relative_difference for Total column
-    total_reldiff = relative_difference(
+    # Test get_relative_difference for Total column
+    total_reldiff = get_relative_difference(
         data, col_name="Total", group_values=scenarios, identifier="replicate"
     )
     assert (
@@ -332,7 +336,7 @@ def test_relative_difference_identifier_unequal_length():
     expected_reldiff = [-5, -5, -5]
 
     # Test relative_difference for Total column
-    total_reldiff = relative_difference(
+    total_reldiff = get_relative_difference(
         data, col_name="Total", group_values=scenarios, identifier="replicate"
     )
     assert (
@@ -363,8 +367,8 @@ def test_relative_difference_identifier_no_matches():
             }
         )
 
-        # Test relative_difference for Total column
-        relative_difference(
+        # Test get_relative_difference for Total column
+        get_relative_difference(
             data, col_name="Total", group_values=scenarios, identifier="replicate"
         )
 
