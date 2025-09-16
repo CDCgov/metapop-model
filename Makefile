@@ -51,7 +51,7 @@ release: poetry requirements manifest
 test: poetry
 	poetry run pytest -v
 
-extract_text:
+extract_text: poetry
 	@node -v >/dev/null 2>&1 || (echo "Node.js is not installed. On Ubuntu, run 'sudo apt install nodejs'"; exit 1)
 	@npm -v >/dev/null 2>&1 || (echo "npm is not installed. On Ubuntu, run 'sudo apt install npm'"; exit 1)
 	@playwright --version >/dev/null 2>&1 || (echo "Playwright is not installed. On Ubuntu, run 'sudo npx playwright install-deps', 'poetry add playwright', 'poetry playwright install'"; exit 1)
