@@ -179,6 +179,7 @@ async def main():
 
         # Generate output filename with timestamp
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        os.makedirs("output", exist_ok=True)
         output_path = f"output/Measles Simulator Text {timestamp}.docx"
 
         # Convert to Word document
