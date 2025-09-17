@@ -64,7 +64,7 @@ async def extract_html_content(url=None):
         str: HTML content from the extraction
     """
     if not url:
-        url = "https://cdcposit.cdc.gov/measles-simulator/"
+        url = "https://rconnect.edav.cdc.gov/measles-simulator-dev/"
 
     async with async_playwright() as p:
         # Launch browser
