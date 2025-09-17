@@ -63,6 +63,9 @@ async def extract_html_content(url=None):
     Returns:
         str: HTML content from the extraction
     """
+    # By default, extract text from the dev version of the app so that we can
+    # easily extract this text and share with response clearance ahead of
+    # landing it to production
     if not url:
         url = "https://rconnect.edav.cdc.gov/measles-simulator-dev/"
 
