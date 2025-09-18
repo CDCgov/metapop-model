@@ -45,6 +45,7 @@ __all__ = [
     "get_base_session_state_idkeys",
     "get_session_state_idkeys",
     "get_parameter_key_for_session_key",
+    "coerce_calculator", #not sure if this needs to be here
     "reset",
     "get_baseline_immunity",
     "set_baseline",
@@ -302,6 +303,7 @@ def get_show_parameter_mapping(parms=None):
         vaccine_uptake_start_day="Start of vaccination campaign (days after introduction)",
         vaccine_uptake_duration_days="Duration of vaccination campaign (days)",
         vaccinated_group="Vaccinated group",
+        calculator_on= "Turn on Baseline Immunity Calculator",
         isolation_on="Enable isolation",
         isolation_adherence="Isolation adherence",
         isolation_reduction="Reduction in transmission due to isolation",
@@ -580,6 +582,10 @@ def app_editors(
         for key in ordered_keys:
             if key not in list_keys:
                 callback = None
+                if key == "calculator_on":
+                    callback = coerce_calculator(
+                        element_keys,
+                    )
                 if key == "pre_rash_isolation_on":
                     callback = coerce_quarantine_to_isolation(
                         element_keys,
@@ -630,6 +636,10 @@ def app_editors(
                         disabled=disabled,
                     )
                 elif widget_types[key] == "toggle":
+                    if key == "calculator_on":
+                        toggle_on = False
+                    else:
+                        toggle_on = True
                     if key == "isolation_on":
                         toggle_on = True
                     else:
@@ -722,6 +732,7 @@ def get_widget_types(widget_types=None):
         vaccine_uptake_duration_days="slider",
         total_vaccine_uptake_doses="slider",
         vaccinated_group="number_input",
+        calculator_on = "toggle",
         isolation_on="toggle",
         isolation_adherence="slider",
         isolation_reduction="slider",
@@ -933,6 +944,7 @@ def get_helpers(parms=None):
         vaccine_uptake_duration_days="The model assumes vaccine doses are distributed at a constant rate for the duration of the campaign. Vaccination campaigns can last up to 180 days or approximately 6 months.",
         total_vaccine_uptake_doses="In this model, we administer one dose of the MMR vaccine per person vaccinated during the campaign, with 93% effectiveness among those vaccinated and an all-or-nothing vaccine.",
         vaccinated_group="Population receiving the vaccine",
+        calculator_on = "If turned on, use the calculated immunity from the calculator below to simulate. Not that even though there are age values in the calculator, this toggle will not add age structure to the simulation.",
         isolation_on="If turned on, reduces transmission by symptomatic people who adhere to isolation measures (the percentage as selected under “Isolation adherence”) by 100% during the symptomatic period. For more information on how isolation is implemented in the model, please see the Behind the Model, linked in Detailed Methods.",
         isolation_adherence="Percent of symptomatic people who will follow isolation guidance when isolation is turned on. To modify this parameter, enable isolation.",
         isolation_reduction="Percent reduction in transmission due to isolation. Only used if isolation is turned on.",
@@ -1041,6 +1053,7 @@ def get_base_session_state_idkeys(parms=None):
         vaccine_uptake_duration_days="vaccine_uptake_duration_days",
         total_vaccine_uptake_doses="total_vaccine_uptake_doses",
         vaccinated_group="vaccinated_group",
+        calculator_on = "calculator_on",
         isolation_on="isolation_on",
         isolation_adherence="isolation_adherence",
         isolation_reduction="isolation_reduction",
@@ -1139,6 +1152,20 @@ def coerce_quarantine_to_isolation(element_keys):
         st.session_state[element_keys["pre_rash_isolation_on"]] = False
         st.write("To enable quarantine, isolation must be enabled.")
 
+def coerce_calculator(element_keys):
+    """
+    Callback function for calculator_on. If calculator is turned off,
+    use baseline immunity values.
+
+    Args:
+        element_keys (dict): A dictionary containing the keys for the Streamlit elements.
+
+    Returns:
+        None
+    """
+    if st.session_state[element_keys["calculator_on"]]:
+        st.session_state[element_keys["initial_vaccine_coverage"]] = 0
+
 
 def update_intervention_parameters_from_widget(parms):
     """
@@ -1203,8 +1230,12 @@ def reset(defaults, widget_types):
         if widget_types[key] == "toggle":
             value = False
 
+        if key == "calculator_on":
+            value = False
+
         if key == "isolation_on":
             value = True
+
         # set the session state value to the default value
         st.session_state[session_key] = value
 

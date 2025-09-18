@@ -45,6 +45,7 @@ from .app_helper import (
     get_formats,
     get_session_state_idkeys,
     update_intervention_parameters_from_widget,
+    coerce_calculator,
     reset,
     get_baseline_immunity,
     set_baseline,
@@ -266,6 +267,7 @@ def app(
         shared_keys = [
             "pop_sizes",
             "I0",
+            "calculator_on",
             "initial_vaccine_coverage",
         ]
         # shared parameters that are lists
@@ -316,42 +318,6 @@ def app(
 
             calculator_keys_vax = ["vaccine_coverages"]
             calculator_list_keys_vax = ["vaccine_coverages"]
-
-            # pop_parms, vax_parms = st.columns(2)
-
-            # I think we want to use the app_editor structure to be able to use population from the previous
-
-            # edited_pop_parms = app_editors(
-            #    pop_parms,
-            #    subheader,
-            #    parms,
-            #    calculator_keys_pop,
-            #    calculator_list_keys_pop,
-            #    show_parameter_mapping,
-            #    widget_types,
-            #    min_values,
-            #    max_values,
-            #    steps,
-            #    helpers,
-            #    formats,
-            #    session_state_keys1, # not sure if this is right
-            # )
-
-            # edited_vax_parms = app_editors(
-            #    vax_parms,
-            #    subheader,
-            #    parms,
-            #    calculator_keys_vax,
-            #    calculator_list_keys_vax,
-            #    show_parameter_mapping,
-            #    widget_types,
-            #    min_values,
-            #    max_values,
-            #    steps,
-            #    helpers,
-            #    formats,
-            #    session_state_keys1, # not sure if this is right
-            # )
 
             df_pop = pd.DataFrame(
                 [
