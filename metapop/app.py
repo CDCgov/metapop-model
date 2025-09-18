@@ -650,7 +650,7 @@ def app(
             on_click=set_baseline,
             args=(baseline_immun,),
             disabled=not edited_parms["calculator_on"],
-            help = "Click to run simulation using this baseline immunity."
+            help="Click to run simulation using this baseline immunity.",
         )
 
     # set model parameters based on app inputs - this will update internal parameters that are combinations of user inputs
