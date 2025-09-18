@@ -10,6 +10,7 @@ import altair as alt
 import griddler
 import griddler.griddle
 import numpy as np
+import pandas as pd
 import polars as pl
 import scipy.stats as stats
 import streamlit as st
@@ -45,10 +46,10 @@ __all__ = [
     "get_base_session_state_idkeys",
     "get_session_state_idkeys",
     "get_parameter_key_for_session_key",
-    "coerce_calculator",  # not sure if this needs to be here
     "reset",
     "get_baseline_immunity",
     "set_baseline",
+    "make_calculator_tables",
     "get_parms_from_table",
     "update_parms_from_table",
     "correct_parameter_types",
@@ -946,7 +947,7 @@ def get_helpers(parms=None):
         vaccine_uptake_duration_days="The model assumes vaccine doses are distributed at a constant rate for the duration of the campaign. Vaccination campaigns can last up to 180 days or approximately 6 months.",
         total_vaccine_uptake_doses="In this model, we administer one dose of the MMR vaccine per person vaccinated during the campaign, with 93% effectiveness among those vaccinated and an all-or-nothing vaccine.",
         vaccinated_group="Population receiving the vaccine",
-        calculator_on="If turned on, use the calculated immunity from the calculator below to simulate. Not that even though there are age values in the calculator, this toggle will not add age structure to the simulation.",
+        calculator_on="If turned on, use the calculated immunity from the calculator below to simulate. Note that even though there are age values in the calculator, this toggle will not add age structure to the simulation.",
         isolation_on="If turned on, reduces transmission by symptomatic people who adhere to isolation measures (the percentage as selected under “Isolation adherence”) by 100% during the symptomatic period. For more information on how isolation is implemented in the model, please see the Behind the Model, linked in Detailed Methods.",
         isolation_adherence="Percent of symptomatic people who will follow isolation guidance when isolation is turned on. To modify this parameter, enable isolation.",
         isolation_reduction="Percent reduction in transmission due to isolation. Only used if isolation is turned on.",
@@ -1155,7 +1156,7 @@ def coerce_quarantine_to_isolation(element_keys):
         st.write("To enable quarantine, isolation must be enabled.")
 
 
-def coerce_calculator(element_keys):  # not sure if needed
+def coerce_calculator(element_keys):
     """
     Callback function for calculator_on. If calculator is turned off,
     use baseline immunity values.
@@ -1168,9 +1169,8 @@ def coerce_calculator(element_keys):  # not sure if needed
     """
     if element_keys["calculator_on"] not in st.session_state:
         st.session_state[element_keys["calculator_on"]] = False
-
-    # if st.session_state[element_keys["calulator_on"]]:
-    #    st.session_state[element_keys["initial_vaccine_coverage"]]
+    # else:
+    #    st.session_state[element_keys["initial_vaccine_coverage"]].disabled = True
 
 
 def update_intervention_parameters_from_widget(parms):
@@ -1244,7 +1244,8 @@ def reset(defaults, widget_types):
 
         # set the session state value to the default value
         st.session_state[session_key] = value
-
+    # reset the calculator tables
+    # make_calculator_tables(defaults)
     # reset the session state for the app
     st.session_state["reset"] = True
 
@@ -1295,6 +1296,86 @@ def set_baseline(immunity_value):
 
             # set the session state value to the default value
             st.session_state[session_key] = value
+
+
+def make_calculator_tables(parms):
+    df_pop = pd.DataFrame(
+        [
+            {
+                "population": "<5",
+                "percentage": 100 * parms["population_percentages"][0],
+            },
+            {
+                "population": "5-17",
+                "percentage": 100 * parms["population_percentages"][1],
+            },
+            {
+                "population": "18+",
+                "percentage": 100 * parms["population_percentages"][2],
+            },
+        ]
+    )
+    df_coverage = pd.DataFrame(
+        [
+            {
+                "threshold": "24 months",
+                "coverage": 100 * parms["vaccine_coverages"][0],
+            },
+            {
+                "threshold": "5 years (kindergarten)",
+                "coverage": 100 * parms["vaccine_coverages"][1],
+            },
+            {
+                "threshold": "18 years",
+                "coverage": 100 * parms["vaccine_coverages"][2],
+            },
+            {
+                "threshold": "19+ years",
+                "coverage": 100 * parms["vaccine_coverages"][3],
+            },
+        ]
+    )
+    edited_df_pop = st.data_editor(
+        df_pop,
+        column_config={
+            "population": "Population Age",
+            "percentage": st.column_config.NumberColumn(
+                "Percent of population (%)",
+                help="What percent of the population is in this age group?",
+                min_value=0,
+                max_value=100,
+                step=0.1,
+                format="%.1f",
+            ),
+        },
+        disabled=["population"],
+        hide_index=True,
+    )
+    edited_df_coverage = st.data_editor(
+        df_coverage,
+        column_config={
+            "threshold": "Age Threshold",
+            "coverage": st.column_config.NumberColumn(
+                "Immunity Coverage",
+                help="What percent of the population is immune by this age?",
+                min_value=0,
+                max_value=100,
+                step=0.1,
+                format="%.1f",
+            ),
+        },
+        disabled=["population"],
+        hide_index=True,
+    )
+
+    baseline_immun = get_baseline_immunity(
+        edited_df_pop["percentage"], edited_df_coverage["coverage"]
+    )
+    st.text(
+        f"Based on these values, the estimate for baseline immunity is {baseline_immun*100}%"  # placeholder
+    )
+
+    return edited_df_pop, edited_df_coverage, baseline_immun
 
 
 ### Methods to handle extraction of user inputs and updating parameter dictionaries to send for simulation ##

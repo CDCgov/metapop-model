@@ -45,10 +45,10 @@ from .app_helper import (
     get_formats,
     get_session_state_idkeys,
     update_intervention_parameters_from_widget,
-    coerce_calculator,
     reset,
     get_baseline_immunity,
     set_baseline,
+    make_calculator_tables,
     add_daily_incidence,
     get_interval_results,
     get_median_trajectory_from_episize,
@@ -316,82 +316,11 @@ def app(
                 "press the populate button below."
             )
 
-            df_pop = pd.DataFrame(
-                [
-                    {
-                        "population": "<5",
-                        "percentage": 100 * parms["population_percentages"][0],
-                    },
-                    {
-                        "population": "5-17",
-                        "percentage": 100 * parms["population_percentages"][1],
-                    },
-                    {
-                        "population": "18+",
-                        "percentage": 100 * parms["population_percentages"][2],
-                    },
-                ]
-            )
-            df_coverage = pd.DataFrame(
-                [
-                    {
-                        "threshold": "24 months",
-                        "coverage": 100 * parms["vaccine_coverages"][0],
-                    },
-                    {
-                        "threshold": "5 years (kindergarten)",
-                        "coverage": 100 * parms["vaccine_coverages"][1],
-                    },
-                    {
-                        "threshold": "18 years",
-                        "coverage": 100 * parms["vaccine_coverages"][2],
-                    },
-                    {
-                        "threshold": "19+ years",
-                        "coverage": 100 * parms["vaccine_coverages"][3],
-                    },
-                ]
-            )
+            col_pop = st.columns(1)[0]
+            col_cov = st.columns(1)[0]
 
-            edited_df_pop = st.data_editor(
-                df_pop,
-                column_config={
-                    "population": "Population Age",
-                    "percentage": st.column_config.NumberColumn(
-                        "Percent of population (%)",
-                        help="What percent of the population is in this age group?",
-                        min_value=0,
-                        max_value=100,
-                        step=0.1,
-                        format="%.1f",
-                    ),
-                },
-                disabled=["population"],
-                hide_index=True,
-            )
-            edited_df_coverage = st.data_editor(
-                df_coverage,
-                column_config={
-                    "threshold": "Age Threshold",
-                    "coverage": st.column_config.NumberColumn(
-                        "Immunity Coverage",
-                        help="What percent of the population is immune by this age?",
-                        min_value=0,
-                        max_value=100,
-                        step=0.1,
-                        format="%.1f",
-                    ),
-                },
-                disabled=["population"],
-                hide_index=True,
-            )
+            col_pop, col_cov, baseline_immun = make_calculator_tables(parms)
 
-            baseline_immun = get_baseline_immunity(
-                edited_df_pop["percentage"], edited_df_coverage["coverage"]
-            )
-            st.text(
-                f"Based on these values, the estimate for baseline immunity is {baseline_immun*100}%"  # placeholder
-            )
             # Add a section to set the baseline immunity using the value from the calculator
             col_baseline = st.columns(1)[0]
 
@@ -650,7 +579,7 @@ def app(
             on_click=set_baseline,
             args=(baseline_immun,),
             disabled=not edited_parms["calculator_on"],
-            help="Click to run simulation using this baseline immunity.",
+            help="Click to run simulation using this baseline immunity. If this button is disabled, enable it by clicking the toggle above",
         )
 
     # set model parameters based on app inputs - this will update internal parameters that are combinations of user inputs
