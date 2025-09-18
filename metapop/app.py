@@ -307,17 +307,14 @@ def app(
             formats,
             session_state_keys0,
         )
-        with st.expander("Baseline Immunity Calculator"):
+        with st.expander(
+            "Baseline Immunity Calculator", expanded=edited_parms["calculator_on"]
+        ):
             st.text(
                 "Use this calculator to estimate baseline immunity. "
                 "To populate the values from this calculator in the baseline immunity, "
                 "press the populate button below."
             )
-            calculator_keys_pop = ["population_percentages"]
-            calculator_list_keys_pop = ["population_percentages"]
-
-            calculator_keys_vax = ["vaccine_coverages"]
-            calculator_list_keys_vax = ["vaccine_coverages"]
 
             df_pop = pd.DataFrame(
                 [
@@ -652,6 +649,8 @@ def app(
             "Set baseline immunity",
             on_click=set_baseline,
             args=(baseline_immun,),
+            disabled=not edited_parms["calculator_on"],
+            help = "Click to run simulation using this baseline immunity."
         )
 
     # set model parameters based on app inputs - this will update internal parameters that are combinations of user inputs

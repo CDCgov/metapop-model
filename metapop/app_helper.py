@@ -45,7 +45,7 @@ __all__ = [
     "get_base_session_state_idkeys",
     "get_session_state_idkeys",
     "get_parameter_key_for_session_key",
-    "coerce_calculator", #not sure if this needs to be here
+    "coerce_calculator",  # not sure if this needs to be here
     "reset",
     "get_baseline_immunity",
     "set_baseline",
@@ -303,7 +303,7 @@ def get_show_parameter_mapping(parms=None):
         vaccine_uptake_start_day="Start of vaccination campaign (days after introduction)",
         vaccine_uptake_duration_days="Duration of vaccination campaign (days)",
         vaccinated_group="Vaccinated group",
-        calculator_on= "Turn on Baseline Immunity Calculator",
+        calculator_on="Turn on Baseline Immunity Calculator",
         isolation_on="Enable isolation",
         isolation_adherence="Isolation adherence",
         isolation_reduction="Reduction in transmission due to isolation",
@@ -677,6 +677,8 @@ def app_editors(
                         )
                     # else:
                     elif widget_types[key] == "number_input":
+                        if key == "initial_vaccine_coverage":
+                            disabled = edited_parms["calculator_on"]
                         value = st.number_input(
                             show_parameter_mapping[f"{key}_{index}"],
                             min_value=min_values[key][index],
@@ -732,7 +734,7 @@ def get_widget_types(widget_types=None):
         vaccine_uptake_duration_days="slider",
         total_vaccine_uptake_doses="slider",
         vaccinated_group="number_input",
-        calculator_on = "toggle",
+        calculator_on="toggle",
         isolation_on="toggle",
         isolation_adherence="slider",
         isolation_reduction="slider",
@@ -944,7 +946,7 @@ def get_helpers(parms=None):
         vaccine_uptake_duration_days="The model assumes vaccine doses are distributed at a constant rate for the duration of the campaign. Vaccination campaigns can last up to 180 days or approximately 6 months.",
         total_vaccine_uptake_doses="In this model, we administer one dose of the MMR vaccine per person vaccinated during the campaign, with 93% effectiveness among those vaccinated and an all-or-nothing vaccine.",
         vaccinated_group="Population receiving the vaccine",
-        calculator_on = "If turned on, use the calculated immunity from the calculator below to simulate. Not that even though there are age values in the calculator, this toggle will not add age structure to the simulation.",
+        calculator_on="If turned on, use the calculated immunity from the calculator below to simulate. Not that even though there are age values in the calculator, this toggle will not add age structure to the simulation.",
         isolation_on="If turned on, reduces transmission by symptomatic people who adhere to isolation measures (the percentage as selected under “Isolation adherence”) by 100% during the symptomatic period. For more information on how isolation is implemented in the model, please see the Behind the Model, linked in Detailed Methods.",
         isolation_adherence="Percent of symptomatic people who will follow isolation guidance when isolation is turned on. To modify this parameter, enable isolation.",
         isolation_reduction="Percent reduction in transmission due to isolation. Only used if isolation is turned on.",
@@ -1053,7 +1055,7 @@ def get_base_session_state_idkeys(parms=None):
         vaccine_uptake_duration_days="vaccine_uptake_duration_days",
         total_vaccine_uptake_doses="total_vaccine_uptake_doses",
         vaccinated_group="vaccinated_group",
-        calculator_on = "calculator_on",
+        calculator_on="calculator_on",
         isolation_on="isolation_on",
         isolation_adherence="isolation_adherence",
         isolation_reduction="isolation_reduction",
@@ -1152,7 +1154,8 @@ def coerce_quarantine_to_isolation(element_keys):
         st.session_state[element_keys["pre_rash_isolation_on"]] = False
         st.write("To enable quarantine, isolation must be enabled.")
 
-def coerce_calculator(element_keys):
+
+def coerce_calculator(element_keys):  # not sure if needed
     """
     Callback function for calculator_on. If calculator is turned off,
     use baseline immunity values.
@@ -1163,8 +1166,11 @@ def coerce_calculator(element_keys):
     Returns:
         None
     """
-    if st.session_state[element_keys["calculator_on"]]:
-        st.session_state[element_keys["initial_vaccine_coverage"]] = 0
+    if element_keys["calculator_on"] not in st.session_state:
+        st.session_state[element_keys["calculator_on"]] = False
+
+    # if st.session_state[element_keys["calulator_on"]]:
+    #    st.session_state[element_keys["initial_vaccine_coverage"]]
 
 
 def update_intervention_parameters_from_widget(parms):
@@ -1256,10 +1262,18 @@ def get_baseline_immunity(population, coverage):
     """
 
     immunity_value = (
-        population[0] * coverage[0] / 5
-        + population[0] * (coverage[1] + coverage[0]) * 3 / (2 * 5)
-        + +population[1] * (coverage[2] + coverage[1]) / 2
-        + population[2] * (coverage[3] + coverage[2]) / 2
+        # 0-1years
+        population[0] * 0 * 1 / 5
+        +
+        # 1-2years
+        population[0] * coverage[0] / (2 * 5)
+        +
+        # 2-5years
+        +population[0] * (coverage[1] + coverage[0]) * 3 / (2 * 5)
+        # 5-18years
+        + population[1] * (coverage[2] + coverage[1]) / 2
+        # over 18 years
+        + population[2] * (coverage[3])
     ) / (100 * 100)
 
     return round(immunity_value, 2)
