@@ -856,7 +856,7 @@ def app(
             render_chart_title(
                 title="Simulated measles epidemic curve with and without public health interventions",
                 subtitle=f"""
-                Population size: {edited_parms2['pop_sizes'][0]} people, {edited_parms2['I0'][0]} initial introductions<br />
+                Population size: {edited_parms2['pop_sizes'][0]} people, {edited_parms2['I0'][0]} initial introductions, baseline immunity: {edited_parms2["initial_vaccine_coverage"][0]}<br />
                 Vaccine campaign: {mean_doses_administered} doses administered<br />
                 Isolation adherence: {isolation_adherence_pct}%<br />
                 Quarantine adherence: {pre_rash_isolation_adherence_pct}%<br />
