@@ -648,6 +648,16 @@ def app(
             "\n\n"
         )
 
+    # Warn if the immunity calculator is on and baseline immunity hasn't been updated
+    if (edited_parms2["calculator_on"]) and (
+        edited_parms2["initial_vaccine_coverage"][0] != baseline_immun
+    ):
+        warning_message += (
+            "The baseline immunity calculator is toggled on, "
+            "but the baseline immunity has not yet been set from the calculator. "
+            'Either toggle the calculator off, or click the "Set baseline immunity" button in the calculator expander.'
+        )
+
     # Build vaccine schedule and warn if no doses will be administered
     # create a parameter dictionary of scenario 2 to calculate and expose the vaccine schedule
     intervention_parms2 = edited_parms2.copy()
@@ -856,7 +866,7 @@ def app(
             render_chart_title(
                 title="Simulated measles epidemic curve with and without public health interventions",
                 subtitle=f"""
-                Population size: {edited_parms2['pop_sizes'][0]} people, {edited_parms2['I0'][0]} initial introductions, baseline immunity: {edited_parms2["initial_vaccine_coverage"][0]}<br />
+                Population size: {edited_parms2['pop_sizes'][0]} people, {edited_parms2['I0'][0]} initial introductions, baseline immunity: {edited_parms2["initial_vaccine_coverage"][0]*100}%<br />
                 Vaccine campaign: {mean_doses_administered} doses administered<br />
                 Isolation adherence: {isolation_adherence_pct}%<br />
                 Quarantine adherence: {pre_rash_isolation_adherence_pct}%<br />
