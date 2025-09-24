@@ -1371,8 +1371,11 @@ def make_calculator_tables(parms):
     baseline_immun = get_baseline_immunity(
         edited_df_pop["percentage"], edited_df_coverage["coverage"]
     )
+    immunity_text = int(baseline_immun * 100)
+
     st.text(
-        f"Based on these values, the estimate for baseline immunity is {baseline_immun*100}%"  # placeholder
+        f"Based on these values, the estimate for baseline immunity is {immunity_text}%",
+        help="To see more details on this calculation, please see the Behind the Model, linked in Detailed Methods..",
     )
 
     return edited_df_pop, edited_df_coverage, baseline_immun
