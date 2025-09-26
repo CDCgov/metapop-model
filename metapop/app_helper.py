@@ -304,7 +304,7 @@ def get_show_parameter_mapping(parms=None):
         vaccine_uptake_start_day="Start of vaccination campaign (days after introduction)",
         vaccine_uptake_duration_days="Duration of vaccination campaign (days)",
         vaccinated_group="Vaccinated group",
-        calculator_on="Turn on Baseline Immunity Calculator",
+        calculator_on="Enable Baseline Immunity Calculator",
         isolation_on="Enable isolation",
         isolation_adherence="Isolation adherence",
         isolation_reduction="Reduction in transmission due to isolation",
@@ -679,7 +679,8 @@ def app_editors(
                     # else:
                     elif widget_types[key] == "number_input":
                         if key == "initial_vaccine_coverage":
-                            disabled = edited_parms["calculator_on"]
+                            if "calculator_on" in edited_parms:
+                                disabled = edited_parms["calculator_on"]
                         value = st.number_input(
                             show_parameter_mapping[f"{key}_{index}"],
                             min_value=min_values[key][index],
@@ -1263,7 +1264,7 @@ def get_baseline_immunity(population, coverage):
     """
 
     immunity_value = (
-        # 0-1years
+        # 0-1years - no vaccination for infants under 1
         population[0] * 0 * 1 / 5
         +
         # 1-2years
@@ -1299,42 +1300,25 @@ def set_baseline(immunity_value):
 
 
 def make_calculator_tables(parms):
+    immunity_age_groups = parms["calculator_pop_labels"]
+    coverage_age_groups = parms["calculator_coverage_labels"]
+    population_percentages = parms["calculator_pop_sizes"]
+    vaccine_coverages = parms["calculator_coverage_values"]
+
     df_pop = pd.DataFrame(
         [
-            {
-                "population": "<5",
-                "percentage": 100 * parms["population_percentages"][0],
-            },
-            {
-                "population": "5-17",
-                "percentage": 100 * parms["population_percentages"][1],
-            },
-            {
-                "population": "18+",
-                "percentage": 100 * parms["population_percentages"][2],
-            },
+            {"population": age, "percentage": 100 * pct}
+            for age, pct in zip(immunity_age_groups, population_percentages)
         ]
     )
+
     df_coverage = pd.DataFrame(
         [
-            {
-                "threshold": "24 months",
-                "coverage": 100 * parms["vaccine_coverages"][0],
-            },
-            {
-                "threshold": "5 years (kindergarten)",
-                "coverage": 100 * parms["vaccine_coverages"][1],
-            },
-            {
-                "threshold": "18 years",
-                "coverage": 100 * parms["vaccine_coverages"][2],
-            },
-            {
-                "threshold": "19+ years",
-                "coverage": 100 * parms["vaccine_coverages"][3],
-            },
+            {"threshold": age, "coverage": 100 * pct}
+            for age, pct in zip(coverage_age_groups, vaccine_coverages)
         ]
     )
+
     edited_df_pop = st.data_editor(
         df_pop,
         column_config={

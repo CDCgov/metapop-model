@@ -11,10 +11,12 @@ baseline_parameters:
   infectious_duration: 9.0
   pop_sizes: [15000]    # population sizes
   I0: [5]     # initially infected
-  calculator_on: false
   initial_vaccine_coverage: [0.80]
-  vaccine_coverages: [0.90, 0.92, 0.95,  0.95]  # vaccine defaults for baseline immunity coverage
-  population_percentages: [0.056, 0.165, 0.779] #population defaults for baseline immunity coverage
+  calculator_on: false
+  calculator_pop_labels: ["<5", "5-17", "18+"]
+  calculator_coverage_labels: ["2 years", "5 years (kindergarten)", "13 years", "18+"]
+  calculator_coverage_values: [0.90, 0.92, 0.95,  0.95]  # vaccine defaults for baseline immunity coverage
+  calculator_pop_sizes: [0.056, 0.165, 0.779] #population defaults for baseline immunity coverage
   vaccine_efficacy_2_dose: 0.97
   vaccine_efficacy_1_dose: 0.93
   vaccine_uptake: false

@@ -653,7 +653,7 @@ def app(
         edited_parms2["initial_vaccine_coverage"][0] != baseline_immun
     ):
         warning_message += (
-            "The baseline immunity calculator is toggled on, "
+            "The baseline immunity calculator is enabled, "
             "but the baseline immunity has not yet been set from the calculator. "
             'Either toggle the calculator off, or click the "Set baseline immunity" button in the calculator expander.'
         )
