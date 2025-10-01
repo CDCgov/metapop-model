@@ -47,6 +47,7 @@ __all__ = [
     "get_session_state_idkeys",
     "get_parameter_key_for_session_key",
     "reset",
+    "update_coverage",
     "get_baseline_immunity",
     "set_baseline",
     "make_calculator_tables",
@@ -324,9 +325,9 @@ def get_show_parameter_mapping(parms=None):
         population_percentages_0="Percent of population in first age group",
         population_percentages_1="Percent of population in second age group",
         population_percentages_2="Percent of population in third age group",
-        vaccine_coverages_0="Vaccine coverage in first age group",
-        vaccine_coverages_1="Vaccine coverage in second age group",
-        vaccine_coverages_2="Vaccine coverage in third age group",
+        vaccine_coverages_0="Vaccine coverage by first age point",
+        vaccine_coverages_1="Vaccine coverage by second age point",
+        vaccine_coverages_2="Vaccine coverage by third age point",
     )
 
     if parms is not None and isinstance(parms, dict):
@@ -934,9 +935,9 @@ def get_helpers(parms=None):
             "Baseline immunity in small population 2",
         ],
         vaccine_coverages=[
-            "Vaccine coverage in first age group",
-            "Vaccine coverage in second age group",
-            "Vaccine coverage in third age group",
+            "Vaccine coverage by first age point",
+            "Vaccine coverage by second age point",
+            "Vaccine coverage by third age point",
         ],
         population_percentages=[
             "Percent of population in first age group",
@@ -1256,27 +1257,48 @@ def get_baseline_immunity(population, coverage):
     Calculate the baseline immunity given the values in the calculator
 
     Args:
-        population (list): The percent of the population in each goup.
+        population (list): The percent of the population in each group.
         coverage (list): The percent of individuals in each group with prior immunity.
 
     Returns:
         immunity_value (float): The percent of the population with immunity.
     """
+    # Check that population percentages sum to 100
+    total_population = sum(population)
+    if abs(total_population - 100) > 0.001:  # Allow small floating point errors
+        raise ValueError(
+            f"Population percentages must sum to 100, but sum to {total_population:.2f}"
+        )
 
-    immunity_value = (
-        # 0-1years - no vaccination for infants under 1
-        population[0] * 0 * 1 / 5
-        +
-        # 1-2years
-        population[0] * coverage[0] / (2 * 5)
-        +
-        # 2-5years
-        +population[0] * (coverage[1] + coverage[0]) * 3 / (2 * 5)
-        # 5-18years
-        + population[1] * (coverage[2] + coverage[1]) / 2
-        # over 18 years
-        + population[2] * (coverage[3])
-    ) / (100 * 100)
+    # convert to proportions
+    population = [p / 100 for p in population]
+    coverage = [c / 100 for c in coverage]
+
+    coverage_cutoffs = [2, 5, 18]
+
+    immunity_value = 0
+
+    # Handle the 0-2 year group within the first population group
+    # 1-2 years get partial coverage
+    one_year_coverage = (
+        (1 / coverage_cutoffs[1]) * population[0] * (coverage[0] + 0) / 2
+    )
+    immunity_value += one_year_coverage
+
+    # first cutoff to second cutoff: partial coverage (2-5 years)
+    age_range_years = coverage_cutoffs[1] - coverage_cutoffs[0]  # 5-2 = 3 years
+    immunity_value += (
+        (age_range_years / (coverage_cutoffs[1] - 0))
+        * population[0]
+        * (coverage[1] + coverage[0])
+        / 2
+    )
+
+    # second cutoff to third cutoff: (5-18 years)
+    immunity_value += population[1] * (coverage[2] + coverage[1]) / 2
+
+    # over third cutoff: (18+ years)
+    immunity_value += population[2] * coverage[3]
 
     return round(immunity_value, 2)
 
@@ -1297,6 +1319,41 @@ def set_baseline(immunity_value):
 
             # set the session state value to the default value
             st.session_state[session_key] = value
+
+
+def update_coverage(edited_df_coverage, default_values):
+    """
+    Update coverage DataFrame by filling missing values with default values.
+
+    Args:
+        edited_df_coverage (pd.DataFrame): DataFrame with 'coverage' column that may contain missing values
+        default_values (list): List of default coverage values to use for missing entries
+
+    Returns:
+        pd.DataFrame: Updated DataFrame with missing values filled from defaults
+    """
+    # Make a copy to avoid modifying the original DataFrame
+    updated_df = edited_df_coverage.copy()
+
+    # Check that we have enough default values
+    if len(default_values) < len(updated_df):
+        raise ValueError(
+            f"Not enough default values ({len(default_values)}) for DataFrame rows ({len(updated_df)})"
+        )
+
+    # Fill missing values with defaults (converted to percentage)
+    for i, row_idx in enumerate(updated_df.index):
+        if (
+            pd.isna(updated_df.loc[row_idx, "coverage"])
+            or updated_df.loc[row_idx, "coverage"] == ""
+        ):
+            # Convert from proportion to percentage if needed
+            default_value = (
+                default_values[i] * 100 if default_values[i] <= 1 else default_values[i]
+            )
+            updated_df.loc[row_idx, "coverage"] = default_value
+
+    return updated_df
 
 
 def make_calculator_tables(parms):
@@ -1351,15 +1408,31 @@ def make_calculator_tables(parms):
         disabled=["population"],
         hide_index=True,
     )
+    coverage_update = update_coverage(
+        edited_df_coverage, default_values=parms["calculator_coverage_values"]
+    )
+
+    # Check if any values were missing/None in the original input
+    has_missing_coverage = any(
+        pd.isna(edited_df_coverage.loc[i, "coverage"])
+        or edited_df_coverage.loc[i, "coverage"] == ""
+        for i in edited_df_coverage.index
+    )
 
     baseline_immun = get_baseline_immunity(
-        edited_df_pop["percentage"], edited_df_coverage["coverage"]
+        edited_df_pop["percentage"], coverage_update["coverage"]
     )
     immunity_text = int(baseline_immun * 100)
 
+    # Create appropriate message based on whether values were missing
+    if has_missing_coverage:
+        message = f"Assuming coverage points with no data available are national estimates, the estimate for baseline immunity is {immunity_text}%"
+    else:
+        message = f"Based on these values, the estimate for baseline immunity is {immunity_text}%"
+
     st.text(
-        f"Based on these values, the estimate for baseline immunity is {immunity_text}%",
-        help="To see more details on this calculation, please see the Behind the Model, linked in Detailed Methods..",
+        message,
+        help="To see more details on this calculation, please see the Behind the Model, linked in Detailed Methods.",
     )
 
     return edited_df_pop, edited_df_coverage, baseline_immun
