@@ -163,7 +163,7 @@ def app(
     # Info about the this app (version, date, commit)
     info = get_metapop_info()
 
-    # Load default parameters from YAML config
+    # Load default model parameters from YAML config
     parms = read_parameters(config_file)
 
     # Ensures that the cache gets invalidated when code changes
@@ -183,7 +183,7 @@ def app(
     hosp_rng = np.random.default_rng(
         [parms["seed"], seed_from_string("hospitalizations")]
     )
-
+    # Define scenario names
     scenario_names = ["No interventions", "Interventions"]
     show_parameter_mapping = get_show_parameter_mapping(parms)
     advanced_parameter_mapping = get_advanced_parameter_mapping()
@@ -572,6 +572,7 @@ def app(
             on_click=reset,
             args=(
                 parms,
+                # default_session_state,
                 widget_types,
             ),
         )

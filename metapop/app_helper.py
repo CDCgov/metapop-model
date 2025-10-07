@@ -47,6 +47,7 @@ __all__ = [
     "get_parameter_key_for_session_key",
     "reset",
     "update_coverage",
+    "initialize_baseline_immunity_tables",
     "edit_baseline_immunity",
     "calc_immunity",
     "button_to_calculate_immunity",
@@ -1127,7 +1128,8 @@ def get_parameter_key_for_session_key(session_key):
     # find all session keys that are model parameters, assuming that we stitch
     # them together with a model parameter and numbers to indicate the index if
     # the parameter value is a list
-    if len(split_key) > 1:
+    # first check if the last element of the split key is a number
+    if len(split_key) > 1 and split_key[-1].isdigit():
         # remove the value at the end of the key - this is used for naming
         # purposes to make each key unique
         split_key = split_key[:-1]
@@ -1137,6 +1139,8 @@ def get_parameter_key_for_session_key(session_key):
         if split_key[-1].isdigit():
             index = int(split_key[-1])
             split_key = split_key[:-1]
+        key = "_".join(split_key)
+    else:
         key = "_".join(split_key)
 
     return key, index
@@ -1225,7 +1229,7 @@ def reset(defaults, widget_types):
     """
     for session_key in st.session_state.keys():
         key, index = get_parameter_key_for_session_key(session_key)
-
+        print("widget type", widget_types.get(key))
         if key == "":
             continue
         if index == "":
