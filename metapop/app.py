@@ -48,7 +48,9 @@ from .app_helper import (
     reset,
     get_baseline_immunity,
     set_baseline,
-    make_calculator_tables,
+    edit_baseline_immunity,
+    calc_immunity,
+    button_to_calculate_immunity,
     add_daily_incidence,
     get_interval_results,
     get_median_trajectory_from_episize,
@@ -312,17 +314,21 @@ def app(
         ):
             st.text(
                 "Use this calculator to estimate baseline immunity. "
-                "To populate the values from this calculator in the baseline immunity, "
-                "press the populate button below."
+                "Adjust the population and coverage values below, then click the button to calculate and set the baseline immunity."
             )
 
-            col_pop = st.columns(1)[0]
-            col_cov = st.columns(1)[0]
+            # Create the data editors and store results in session state
+            edit_baseline_immunity(parms)
 
-            col_pop, col_cov, baseline_immun = make_calculator_tables(parms)
+            # Add calculate and set button
+            immunity_result = button_to_calculate_immunity()
 
-            # Add a section to set the baseline immunity using the value from the calculator
-            col_baseline = st.columns(1)[0]
+            # Get the calculated immunity value for reference
+            baseline_immun = calc_immunity()
+            if baseline_immun is None:
+                baseline_immun = edited_parms["initial_vaccine_coverage"][
+                    0
+                ]  # fallback to current value
 
         # Intervention scenario and parameters
         st.header(
@@ -572,15 +578,25 @@ def app(
             ),
         )
 
-    # set baseline parameter if button clicked
-    with col_baseline:
-        baseline_button = st.button(
-            "Set baseline immunity",
-            on_click=set_baseline,
-            args=(baseline_immun,),
-            disabled=not edited_parms["calculator_on"],
-            help="Click to run simulation using this baseline immunity. If this button is disabled, enable it by clicking the toggle above",
-        )
+    # set the baseline immunity if the calculator was used and the user clicked the button
+    # Override baseline immunity with calculated value if calculator is enabled
+    def apply_calculated_immunity(parms):
+        """Apply calculated immunity if calculator is enabled and immunity has been calculated."""
+        if (
+            parms.get("calculator_on", False)
+            and "calculated_baseline_immunity" in st.session_state
+        ):
+            calculated_immunity = st.session_state["calculated_baseline_immunity"]
+            # Override all baseline immunity values with the calculated value
+            if isinstance(parms["initial_vaccine_coverage"], list):
+                for i in range(len(parms["initial_vaccine_coverage"])):
+                    parms["initial_vaccine_coverage"][i] = calculated_immunity
+            else:
+                parms["initial_vaccine_coverage"] = calculated_immunity
+        return parms
+
+    edited_parms1 = apply_calculated_immunity(edited_parms1)
+    edited_parms2 = apply_calculated_immunity(edited_parms2)
 
     # set model parameters based on app inputs - this will update internal parameters that are combinations of user inputs
     # these dictionaries will be used to run the model
@@ -649,13 +665,16 @@ def app(
         )
 
     # Warn if the immunity calculator is on and baseline immunity hasn't been updated
-    if (edited_parms2["calculator_on"]) and (
-        edited_parms2["initial_vaccine_coverage"][0] != baseline_immun
+    calculated_immunity = calc_immunity()
+    if (
+        (edited_parms2["calculator_on"])
+        and calculated_immunity is not None
+        and (edited_parms2["initial_vaccine_coverage"][0] != calculated_immunity)
     ):
         warning_message += (
             "The baseline immunity calculator is enabled, "
             "but the baseline immunity has not yet been set from the calculator. "
-            'Either toggle the calculator off, or click the "Set baseline immunity" button in the calculator expander.'
+            'Either toggle the calculator off, or click the "Calculate and Set Baseline Immunity" button in the calculator expander.'
         )
 
     # Build vaccine schedule and warn if no doses will be administered

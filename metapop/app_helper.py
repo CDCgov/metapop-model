@@ -48,9 +48,11 @@ __all__ = [
     "get_parameter_key_for_session_key",
     "reset",
     "update_coverage",
+    "edit_baseline_immunity",
+    "calc_immunity",
+    "button_to_calculate_immunity",
     "get_baseline_immunity",
     "set_baseline",
-    "make_calculator_tables",
     "get_parms_from_table",
     "update_parms_from_table",
     "correct_parameter_types",
@@ -1252,6 +1254,118 @@ def reset(defaults, widget_types):
     st.session_state["reset"] = True
 
 
+def initialize_pop_table(parms):
+    """
+    Initialize the population table DataFrame from parameters.
+
+    Args:
+        parms (dict): Parameters dictionary containing population data
+
+    Returns:
+        pd.DataFrame: DataFrame with population distribution data
+    """
+    immunity_age_groups = parms["calculator_pop_labels"]
+    population_percentages = parms["calculator_pop_sizes"]
+
+    df_pop = pd.DataFrame(
+        [
+            {"population": age, "percentage": 100 * pct}
+            for age, pct in zip(immunity_age_groups, population_percentages)
+        ]
+    )
+
+    return df_pop
+
+
+def initialize_vacc_table(parms):
+    """
+    Initialize the vaccination coverage table DataFrame from parameters.
+
+    Args:
+        parms (dict): Parameters dictionary containing vaccine coverage data
+
+    Returns:
+        pd.DataFrame: DataFrame with vaccination coverage data
+    """
+    coverage_age_groups = parms["calculator_coverage_labels"]
+    vaccine_coverages = parms["calculator_coverage_values"]
+
+    df_coverage = pd.DataFrame(
+        [
+            {"threshold": age, "coverage": 100 * pct}
+            for age, pct in zip(coverage_age_groups, vaccine_coverages)
+        ]
+    )
+
+    return df_coverage
+
+
+@st.fragment
+def edit_baseline_immunity(parms):
+    """
+    Create data editors for population and coverage tables and store results in session state.
+    Updates session_state variables: pop_table and cov_table
+
+    Args:
+        parms (dict): Parameters dictionary
+
+    Returns:
+        None
+    """
+    # Initialize the base tables if not already in session state
+    if "pop_table_base" not in st.session_state:
+        st.session_state["pop_table_base"] = initialize_pop_table(parms)
+    if "cov_table_base" not in st.session_state:
+        st.session_state["cov_table_base"] = initialize_vacc_table(parms)
+
+    # Create data editors and store results in session state
+    st.session_state["pop_table"] = st.data_editor(
+        st.session_state["pop_table_base"],
+        column_config={
+            "population": "Population Age",
+            "percentage": st.column_config.NumberColumn(
+                "Percent of population (%)",
+                help="What percent of the population is in this age group?",
+                min_value=0,
+                max_value=100,
+                step=0.1,
+                format="%.1f",
+            ),
+        },
+        disabled=["population"],
+        hide_index=True,
+        key="pop_table_editor",
+    )
+
+    st.session_state["cov_table"] = st.data_editor(
+        st.session_state["cov_table_base"],
+        column_config={
+            "threshold": "Age Threshold",
+            "coverage": st.column_config.NumberColumn(
+                "Immunity Coverage",
+                help="What percent of the population is immune by this age?",
+                min_value=0,
+                max_value=100,
+                step=0.1,
+                format="%.1f",
+            ),
+        },
+        disabled=["threshold"],
+        hide_index=True,
+        key="cov_table_editor",
+    )
+
+    if "pop_table" in st.session_state:
+        pop_table = st.session_state["pop_table"]
+        total_percentage = pop_table["percentage"].sum()
+
+    if abs(total_percentage - 100) > 0.1:  # Allow small rounding errors
+        st.warning(
+            f"⚠️ Population percentages sum to {total_percentage:.1f}%. "
+            "Please adjust the values so they sum to 100%."
+        )
+
+
 def get_baseline_immunity(population, coverage):
     """
     Calculate the baseline immunity given the values in the calculator
@@ -1263,12 +1377,6 @@ def get_baseline_immunity(population, coverage):
     Returns:
         immunity_value (float): The percent of the population with immunity.
     """
-    # Check that population percentages sum to 100
-    total_population = sum(population)
-    if abs(total_population - 100) > 0.001:  # Allow small floating point errors
-        raise ValueError(
-            f"Population percentages must sum to 100, but sum to {total_population:.2f}"
-        )
 
     # convert to proportions
     population = [p / 100 for p in population]
@@ -1305,20 +1413,10 @@ def get_baseline_immunity(population, coverage):
 
 def set_baseline(immunity_value):
     """
-    Set the session state baseline immunity value to the value calculated by the immunity calculator.
-
-    Args:
-        immunity_value (int): The baseline immunity estimated by the calculator
-
-    Returns: None
+    Set the baseline immunity parameter in session state.
     """
-    for session_key in st.session_state.keys():
-        key, index = get_parameter_key_for_session_key(session_key)
-        if key == "initial_vaccine_coverage":
-            value = immunity_value
-
-            # set the session state value to the default value
-            st.session_state[session_key] = value
+    # Store the calculated value for use in simulation
+    st.session_state["calculated_baseline_immunity"] = immunity_value
 
 
 def update_coverage(edited_df_coverage, default_values):
@@ -1356,86 +1454,78 @@ def update_coverage(edited_df_coverage, default_values):
     return updated_df
 
 
-def make_calculator_tables(parms):
-    immunity_age_groups = parms["calculator_pop_labels"]
-    coverage_age_groups = parms["calculator_coverage_labels"]
-    population_percentages = parms["calculator_pop_sizes"]
-    vaccine_coverages = parms["calculator_coverage_values"]
+def calc_immunity():
+    """
+    Calculate baseline immunity from session state tables.
 
-    df_pop = pd.DataFrame(
-        [
-            {"population": age, "percentage": 100 * pct}
-            for age, pct in zip(immunity_age_groups, population_percentages)
-        ]
-    )
+    Returns:
+        float or None: Baseline immunity value, or None if tables not in session state
+    """
+    if "pop_table" not in st.session_state or "cov_table" not in st.session_state:
+        return None
 
-    df_coverage = pd.DataFrame(
-        [
-            {"threshold": age, "coverage": 100 * pct}
-            for age, pct in zip(coverage_age_groups, vaccine_coverages)
-        ]
+    pop_table = st.session_state["pop_table"]
+    cov_table = st.session_state["cov_table"]
+
+    # Handle missing coverage values using the existing update_coverage function
+    cov_table_updated = update_coverage(
+        cov_table, default_values=[0.70, 0.85, 0.90, 0.95]
     )
 
-    edited_df_pop = st.data_editor(
-        df_pop,
-        column_config={
-            "population": "Population Age",
-            "percentage": st.column_config.NumberColumn(
-                "Percent of population (%)",
-                help="What percent of the population is in this age group?",
-                min_value=0,
-                max_value=100,
-                step=0.1,
-                format="%.1f",
-            ),
-        },
-        disabled=["population"],
-        hide_index=True,
-    )
-    edited_df_coverage = st.data_editor(
-        df_coverage,
-        column_config={
-            "threshold": "Age Threshold",
-            "coverage": st.column_config.NumberColumn(
-                "Immunity Coverage",
-                help="What percent of the population is immune by this age?",
-                min_value=0,
-                max_value=100,
-                step=0.1,
-                format="%.1f",
-            ),
-        },
-        disabled=["population"],
-        hide_index=True,
-    )
-    coverage_update = update_coverage(
-        edited_df_coverage, default_values=parms["calculator_coverage_values"]
-    )
+    try:
+        baseline_immunity = get_baseline_immunity(
+            pop_table["percentage"].tolist(), cov_table_updated["coverage"].tolist()
+        )
+        return baseline_immunity
+    except (ValueError, TypeError) as e:
+        st.error(f"Error calculating baseline immunity: {str(e)}")
+        return None
 
-    # Check if any values were missing/None in the original input
-    has_missing_coverage = any(
-        pd.isna(edited_df_coverage.loc[i, "coverage"])
-        or edited_df_coverage.loc[i, "coverage"] == ""
-        for i in edited_df_coverage.index
-    )
 
-    baseline_immun = get_baseline_immunity(
-        edited_df_pop["percentage"], coverage_update["coverage"]
-    )
-    immunity_text = int(baseline_immun * 100)
+def button_to_calculate_immunity():
+    """
+    Create a button to calculate and set baseline immunity.
 
-    # Create appropriate message based on whether values were missing
-    if has_missing_coverage:
-        message = f"Assuming coverage points with no data available are national estimates, the estimate for baseline immunity is {immunity_text}%"
+    Returns:
+        float or str: Baseline immunity value if button pressed, otherwise "Button not pressed yet"
+    """
+    if st.button("Calculate and Set Baseline Immunity", key="calc_set_immunity_button"):
+        immunity = calc_immunity()
+        if (
+            immunity is not None and 0 <= immunity <= 1
+        ):  # Check if immunity is between 0 and 1 (0% and 100%)
+            # Check if any values were missing in the original coverage table
+            if "cov_table" in st.session_state:
+                cov_table = st.session_state["cov_table"]
+                has_missing_coverage = any(
+                    pd.isna(cov_table.loc[i, "coverage"])
+                    or cov_table.loc[i, "coverage"] == ""
+                    for i in cov_table.index
+                )
+
+                immunity_text = int(immunity * 100)
+
+                if has_missing_coverage:
+                    message = f"Assuming coverage points with no data available are national estimates, the estimate for baseline immunity is {immunity_text}%"
+                else:
+                    message = f"Based on these values, the estimate for baseline immunity is {immunity_text}%"
+
+                st.success(message)
+
+                # Store the calculated immunity in session state AND set it as the baseline
+                st.session_state["calculated_baseline_immunity"] = immunity
+
+                # Call set_baseline to actually update the parameter
+                set_baseline(immunity)
+
+            return immunity
+        elif immunity is not None:
+            return None
+        else:
+            st.error("Unable to calculate baseline immunity. Please check your inputs.")
+            return None
     else:
-        message = f"Based on these values, the estimate for baseline immunity is {immunity_text}%"
-
-    st.text(
-        message,
-        help="To see more details on this calculation, please see the Behind the Model, linked in Detailed Methods.",
-    )
-
-    return edited_df_pop, edited_df_coverage, baseline_immun
+        return "Button not pressed yet"
 
 
 ### Methods to handle extraction of user inputs and updating parameter dictionaries to send for simulation ##
