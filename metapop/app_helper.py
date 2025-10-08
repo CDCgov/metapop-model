@@ -1504,7 +1504,7 @@ def button_to_calculate_immunity():
                     for i in cov_table.index
                 )
 
-                immunity_text = int(immunity * 100)
+                immunity_text = round(immunity * 100)
 
                 if has_missing_coverage:
                     message = f"Assuming coverage points with no data available are national estimates, the estimate for baseline immunity is {immunity_text}%"
