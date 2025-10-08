@@ -51,6 +51,7 @@ __all__ = [
     "edit_baseline_immunity",
     "calc_immunity",
     "button_to_calculate_immunity",
+    "apply_calculated_immunity",
     "get_baseline_immunity",
     "set_baseline",
     "get_parms_from_table",
@@ -1487,7 +1488,7 @@ def button_to_calculate_immunity():
     Create a button to calculate and set baseline immunity.
 
     Returns:
-        float or str: Baseline immunity value if button pressed, otherwise "Button not pressed yet"
+        None
     """
     if st.button("Calculate and Set Baseline Immunity", key="calc_set_immunity_button"):
         immunity = calc_immunity()
@@ -1512,20 +1513,26 @@ def button_to_calculate_immunity():
 
                 st.success(message)
 
-                # Store the calculated immunity in session state AND set it as the baseline
-                st.session_state["calculated_baseline_immunity"] = immunity
-
                 # Call set_baseline to actually update the parameter
                 set_baseline(immunity)
-
-            return immunity
-        elif immunity is not None:
-            return None
         else:
             st.error("Unable to calculate baseline immunity. Please check your inputs.")
-            return None
-    else:
-        return "Button not pressed yet"
+
+
+def apply_calculated_immunity(parms):
+    """Apply calculated immunity if calculator is enabled and immunity has been calculated."""
+    if (
+        parms.get("calculator_on", False)
+        and "calculated_baseline_immunity" in st.session_state
+    ):
+        calculated_immunity = st.session_state["calculated_baseline_immunity"]
+        # Override all baseline immunity values with the calculated value
+        if isinstance(parms["initial_vaccine_coverage"], list):
+            for i in range(len(parms["initial_vaccine_coverage"])):
+                parms["initial_vaccine_coverage"][i] = calculated_immunity
+        else:
+            parms["initial_vaccine_coverage"] = calculated_immunity
+    return parms
 
 
 ### Methods to handle extraction of user inputs and updating parameter dictionaries to send for simulation ##

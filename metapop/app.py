@@ -48,6 +48,7 @@ from .app_helper import (
     reset,
     get_baseline_immunity,
     set_baseline,
+    apply_calculated_immunity,
     edit_baseline_immunity,
     calc_immunity,
     button_to_calculate_immunity,
@@ -580,21 +581,6 @@ def app(
 
     # set the baseline immunity if the calculator was used and the user clicked the button
     # Override baseline immunity with calculated value if calculator is enabled
-    def apply_calculated_immunity(parms):
-        """Apply calculated immunity if calculator is enabled and immunity has been calculated."""
-        if (
-            parms.get("calculator_on", False)
-            and "calculated_baseline_immunity" in st.session_state
-        ):
-            calculated_immunity = st.session_state["calculated_baseline_immunity"]
-            # Override all baseline immunity values with the calculated value
-            if isinstance(parms["initial_vaccine_coverage"], list):
-                for i in range(len(parms["initial_vaccine_coverage"])):
-                    parms["initial_vaccine_coverage"][i] = calculated_immunity
-            else:
-                parms["initial_vaccine_coverage"] = calculated_immunity
-        return parms
-
     edited_parms1 = apply_calculated_immunity(edited_parms1)
     edited_parms2 = apply_calculated_immunity(edited_parms2)
 
