@@ -1264,7 +1264,7 @@ def reset(defaults, widget_types):
 
         # special case for data editor key - we will generate a new random key for
         # each editor to force a reset rather than resetting the table itself
-        elif key == "data_editor_key":
+        elif key in ["data_editor_key", "pop_editor_key", "coverage_editor_key"]:
             value = generate_random_key()
 
         # special cases for data editors related to baseline immunity calculator
@@ -1274,8 +1274,8 @@ def reset(defaults, widget_types):
         elif key == "cov_table_base":
             value = initialize_vacc_table(defaults)
 
-        elif key == "fake_table_base":
-            value = initialize_fake_table(defaults)
+        # elif key == "fake_table_base":
+        #     value = initialize_fake_table(defaults)
 
         # continue if the key is one of the data editor keys
         elif key in [
@@ -1283,7 +1283,7 @@ def reset(defaults, widget_types):
             "cov_table_editor",
             "pop_table",
             "cov_table",
-            "fake_table",
+            # "fake_table",
             "calc_set_immunity_button",
             "reset",
         ]:
@@ -1372,8 +1372,8 @@ def initialize_vacc_table(parms):
 def table_changed():
     st.session_state.table_changed = True
 
-    if "fake_table_base" not in st.session_state:
-        st.session_state["fake_table_base"] = initialize_fake_table(parms)
+    # if "fake_table_base" not in st.session_state:
+    #     st.session_state["fake_table_base"] = initialize_fake_table(parms)
 
 
 @st.fragment
@@ -1407,6 +1407,7 @@ def edit_baseline_immunity(parms):
         on_change=table_changed,
         disabled=["population"],
         hide_index=True,
+        key=st.session_state.pop_editor_key,
     )
 
     try:
@@ -1439,6 +1440,7 @@ def edit_baseline_immunity(parms):
         disabled=["threshold"],
         on_change=table_changed,
         hide_index=True,
+        key=st.session_state.coverage_editor_key,
     )
 
     calc_immunity()

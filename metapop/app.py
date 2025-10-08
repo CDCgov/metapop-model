@@ -186,6 +186,11 @@ def app(
    # add default value for calculated baseline immunity same as initial vaccine coverage
     parms["calculated_baseline_immunity"] = parms["initial_vaccine_coverage"][0]
 
+    if "pop_editor_key" not in st.session_state:
+        st.session_state["pop_editor_key"] = generate_random_key()
+    if "coverage_editor_key" not in st.session_state:
+        st.session_state["coverage_editor_key"] = generate_random_key()
+
     # Set up random number generators for plotting and hospitalizations
     plot_rng = np.random.default_rng([parms["seed"], seed_from_string("plot")])
     hosp_rng = np.random.default_rng(
