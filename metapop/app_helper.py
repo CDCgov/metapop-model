@@ -1288,10 +1288,6 @@ def reset(defaults, widget_types):
         elif key != "" and isinstance(index, int) and key in defaults:
             value = defaults[key][index]
 
-        # if index == "":
-        #     value = defaults[key]
-        # elif isinstance(index, int):
-        #     value = defaults[key][index]
         else:
             raise ValueError(f"Invalid index type: {type(index)} for key: {key}")
 
