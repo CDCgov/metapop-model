@@ -597,7 +597,7 @@ def app(
 
     print("\nEdited parms scenario 1")
     for key, value in edited_parms1.items():
-        if any(x in key for x in ["calc", "cov", "initial", "reset", "fake"]):
+        if any(x in key for x in ["calc", "cov", "initial", "reset"]):
             print(f"Scenario 1 parm: {key} = {value}")
 
     # set model parameters based on app inputs - this will update internal parameters that are combinations of user inputs
