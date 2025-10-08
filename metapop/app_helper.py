@@ -1244,26 +1244,13 @@ def reset(defaults, widget_types):
         key, index = get_parameter_key_for_session_key(session_key)
         print(session_key, key, index, "widget type", widget_types.get(key, None))
 
-        # special cases for data editors related to baseline immunity calculator
-        # if key == "pop_table_base":
-        #     value = initialize_pop_table(defaults)
-
-        # if key == "cov_table_base":
-        #     value = initialize_vacc_table(defaults)
-
-        # if key in ["pop_table_editor", "cov_table_editor", "pop_table", "cov_table"]:
-        #     continue
-
-        # # reset the data editor key
-        # if key == "data_editor_key":
-        #     value = generate_random_key()
-
         # skip if key is empty
         if key == "":
             continue
 
-        # special case for data editor key - we will generate a new random key for
-        # each editor to force a reset rather than resetting the table itself
+        # special case for data editor keys related to the baseline immunity calculator
+        # we will generate a new random key for each editor to force a reset rather
+        # than resetting the table itself
         elif key in ["data_editor_key", "pop_editor_key", "coverage_editor_key"]:
             value = generate_random_key()
 
@@ -1281,6 +1268,9 @@ def reset(defaults, widget_types):
         elif key in [
             "pop_table_editor",
             "cov_table_editor",
+            "pop_table_base",
+            "cov_table_base",
+            # "fake_table_base",
             "pop_table",
             "cov_table",
             # "fake_table",
