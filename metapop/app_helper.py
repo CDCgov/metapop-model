@@ -4,6 +4,7 @@ import copy
 import datetime
 import io
 import os
+import uuid
 from pathlib import Path
 
 import altair as alt
@@ -45,6 +46,7 @@ __all__ = [
     "get_base_session_state_idkeys",
     "get_session_state_idkeys",
     "get_parameter_key_for_session_key",
+    "generate_random_key",
     "reset",
     "update_coverage",
     "initialize_baseline_immunity_tables",
@@ -735,6 +737,7 @@ def get_widget_types(widget_types=None):
         I0="number_input",
         initial_vaccine_coverage="number_input",
         vaccine_coverages="number_input",
+        calc_set_immunity_button="button",
         population_percentages="number_input",
         vaccine_uptake="toggle",
         vaccine_uptake_start_day="slider",
@@ -1217,6 +1220,16 @@ def update_intervention_parameters_from_widget(parms):
     return parms
 
 
+def generate_random_key():
+    """
+    Generate a random key for the session state.
+
+    Returns:
+        str: A random key string.
+    """
+    return str(uuid.uuid4()) + "_random_key"
+
+
 def reset(defaults, widget_types):
     """
     Reset the session state widget values to their default values.
@@ -1229,18 +1242,74 @@ def reset(defaults, widget_types):
     """
     for session_key in st.session_state.keys():
         key, index = get_parameter_key_for_session_key(session_key)
-        print("widget type", widget_types.get(key))
+        print(session_key, key, index, "widget type", widget_types.get(key, None))
+
+        # special cases for data editors related to baseline immunity calculator
+        # if key == "pop_table_base":
+        #     value = initialize_pop_table(defaults)
+
+        # if key == "cov_table_base":
+        #     value = initialize_vacc_table(defaults)
+
+        # if key in ["pop_table_editor", "cov_table_editor", "pop_table", "cov_table"]:
+        #     continue
+
+        # # reset the data editor key
+        # if key == "data_editor_key":
+        #     value = generate_random_key()
+
+        # skip if key is empty
         if key == "":
             continue
-        if index == "":
+
+        # special case for data editor key - we will generate a new random key for
+        # each editor to force a reset rather than resetting the table itself
+        elif key == "data_editor_key":
+            value = generate_random_key()
+
+        # special cases for data editors related to baseline immunity calculator
+        elif key == "pop_table_base":
+            value = initialize_pop_table(defaults)
+
+        elif key == "cov_table_base":
+            value = initialize_vacc_table(defaults)
+
+        elif key == "fake_table_base":
+            value = initialize_fake_table(defaults)
+
+        # continue if the key is one of the data editor keys
+        elif key in [
+            "pop_table_editor",
+            "cov_table_editor",
+            "pop_table",
+            "cov_table",
+            "fake_table",
+            "calc_set_immunity_button",
+            "reset",
+        ]:
+            continue
+
+        elif "random_key" in session_key:
+            continue
+
+        elif key == "calc_set_immunity_button":
+            continue
+
+        elif key != "" and index == "":
             value = defaults[key]
-        elif isinstance(index, int):
+
+        elif key != "" and isinstance(index, int) and key in defaults:
             value = defaults[key][index]
+
+        # if index == "":
+        #     value = defaults[key]
+        # elif isinstance(index, int):
+        #     value = defaults[key][index]
         else:
             raise ValueError(f"Invalid index type: {type(index)} for key: {key}")
 
         # by default, turn toggles off
-        if widget_types[key] == "toggle":
+        if widget_types.get(key, None) == "toggle":
             value = False
 
         if key == "calculator_on":
@@ -1302,6 +1371,9 @@ def initialize_vacc_table(parms):
 
 def table_changed():
     st.session_state.table_changed = True
+
+    if "fake_table_base" not in st.session_state:
+        st.session_state["fake_table_base"] = initialize_fake_table(parms)
 
 
 @st.fragment
