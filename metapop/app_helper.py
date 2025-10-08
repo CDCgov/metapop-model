@@ -1269,10 +1269,8 @@ def reset(defaults, widget_types):
             "cov_table_editor",
             "pop_table_base",
             "cov_table_base",
-            # "fake_table_base",
             "pop_table",
             "cov_table",
-            # "fake_table",
             "calc_set_immunity_button",
             "reset",
         ]:
@@ -1360,9 +1358,6 @@ def initialize_vacc_table(parms):
 
 def table_changed():
     st.session_state.table_changed = True
-
-    # if "fake_table_base" not in st.session_state:
-    #     st.session_state["fake_table_base"] = initialize_fake_table(parms)
 
 
 @st.fragment
