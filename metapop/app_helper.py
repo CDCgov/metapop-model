@@ -1242,7 +1242,6 @@ def reset(defaults, widget_types):
     """
     for session_key in st.session_state.keys():
         key, index = get_parameter_key_for_session_key(session_key)
-        print(session_key, key, index, "widget type", widget_types.get(key, None))
 
         # skip if key is empty
         if key == "":

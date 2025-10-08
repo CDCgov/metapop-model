@@ -191,6 +191,9 @@ def app(
     if "coverage_editor_key" not in st.session_state:
         st.session_state["coverage_editor_key"] = generate_random_key()
 
+    # add default value for calculated baseline immunity same as initial vaccine coverage
+    parms["calculated_baseline_immunity"] = parms["initial_vaccine_coverage"][0]
+
     # Set up random number generators for plotting and hospitalizations
     plot_rng = np.random.default_rng([parms["seed"], seed_from_string("plot")])
     hosp_rng = np.random.default_rng(
@@ -594,11 +597,6 @@ def app(
     # Override baseline immunity with calculated value if calculator is enabled
     edited_parms1 = apply_calculated_immunity(edited_parms1)
     edited_parms2 = apply_calculated_immunity(edited_parms2)
-
-    print("\nEdited parms scenario 1")
-    for key, value in edited_parms1.items():
-        if any(x in key for x in ["calc", "cov", "initial", "reset"]):
-            print(f"Scenario 1 parm: {key} = {value}")
 
     # set model parameters based on app inputs - this will update internal parameters that are combinations of user inputs
     # these dictionaries will be used to run the model
