@@ -1217,7 +1217,7 @@ def app(
         st.text(
             f"{intervention_text} decreases total measles infections by {relative_difference}% "
             f"in a population of size {edited_parms2['pop_sizes'][0]} "
-            f"with baseline immunity of {edited_parms2['initial_vaccine_coverage'][0] * 100:.0}%."
+            f"with baseline immunity of {edited_parms2['initial_vaccine_coverage'][0] * 100:.0f}%."
         )
 
         # Always false until scipy is included in the project.
