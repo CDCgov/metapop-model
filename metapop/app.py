@@ -46,11 +46,8 @@ from .app_helper import (
     get_session_state_idkeys,
     update_intervention_parameters_from_widget,
     reset,
-    get_baseline_immunity,
-    set_baseline,
     apply_calculated_immunity,
     edit_baseline_immunity,
-    calc_immunity,
     button_to_calculate_immunity,
     add_daily_incidence,
     get_interval_results,
@@ -320,16 +317,6 @@ def app(
 
             # Create the data editors and store results in session state
             edit_baseline_immunity(parms)
-
-            # Add calculate and set button
-            immunity_result = button_to_calculate_immunity()
-
-            # Get the calculated immunity value for reference
-            baseline_immun = calc_immunity()
-            if baseline_immun is None:
-                baseline_immun = edited_parms["initial_vaccine_coverage"][
-                    0
-                ]  # fallback to current value
 
         # Intervention scenario and parameters
         st.header(
@@ -651,16 +638,14 @@ def app(
         )
 
     # Warn if the immunity calculator is on and baseline immunity hasn't been updated
-    calculated_immunity = calc_immunity()
     if (
         (edited_parms2["calculator_on"])
-        and calculated_immunity is not None
-        and (edited_parms2["initial_vaccine_coverage"][0] != calculated_immunity)
+        and not st.session_state.calc_set_immunity_button_clicked
     ):
         warning_message += (
             "The baseline immunity calculator is enabled, "
-            "but the baseline immunity has not yet been set from the calculator. "
-            'Either toggle the calculator off, or click the "Calculate and Set Baseline Immunity" button in the calculator expander.'
+            f"and the baseline immunity has been set to {st.session_state.immunity * 100:.0f}% with the calculator defaults. "
+            'Either toggle the calculator off or change values and click the "Calculate and Set Baseline Immunity" button in the sidebar panel.'
         )
 
     # Build vaccine schedule and warn if no doses will be administered

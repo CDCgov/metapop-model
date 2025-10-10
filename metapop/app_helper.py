@@ -52,8 +52,6 @@ __all__ = [
     "calc_immunity",
     "button_to_calculate_immunity",
     "apply_calculated_immunity",
-    "get_baseline_immunity",
-    "set_baseline",
     "get_parms_from_table",
     "update_parms_from_table",
     "correct_parameter_types",
@@ -526,7 +524,10 @@ def rescale_prop_vax(edited_parms):
         vaccine uptake doses.
     """
     pop_sizes = np.array(edited_parms["pop_sizes"])
-    initial_vaccine_coverage = np.array(edited_parms["initial_vaccine_coverage"])
+    if edited_parms.get("calculator_on", False):
+        initial_vaccine_coverage = st.session_state.immunity
+    else:
+        initial_vaccine_coverage = np.array(edited_parms["initial_vaccine_coverage"])
     prop_vaccine_uptake_doses = edited_parms["total_vaccine_uptake_doses"] / 100.0
     edited_parms["total_vaccine_uptake_doses"] = int(
         (pop_sizes - pop_sizes * initial_vaccine_coverage - edited_parms["I0"])
@@ -1174,8 +1175,6 @@ def coerce_calculator(element_keys):
     """
     if element_keys["calculator_on"] not in st.session_state:
         st.session_state[element_keys["calculator_on"]] = False
-    # else:
-    #    st.session_state[element_keys["initial_vaccine_coverage"]].disabled = True
 
 
 def update_intervention_parameters_from_widget(parms):
@@ -1249,9 +1248,6 @@ def reset(defaults, widget_types):
 
         # set the session state value to the default value
         st.session_state[session_key] = value
-    # reset the calculator tables
-    # make_calculator_tables(defaults)
-    # reset the session state for the app
     st.session_state["reset"] = True
 
 
@@ -1301,6 +1297,10 @@ def initialize_vacc_table(parms):
     return df_coverage
 
 
+def table_changed():
+    st.session_state.table_changed = True
+
+
 @st.fragment
 def edit_baseline_immunity(parms):
     """
@@ -1313,15 +1313,11 @@ def edit_baseline_immunity(parms):
     Returns:
         None
     """
-    # Initialize the base tables if not already in session state
-    if "pop_table_base" not in st.session_state:
-        st.session_state["pop_table_base"] = initialize_pop_table(parms)
-    if "cov_table_base" not in st.session_state:
-        st.session_state["cov_table_base"] = initialize_vacc_table(parms)
+    if "table_changed" not in st.session_state:
+        st.session_state.table_changed = False
 
-    # Create data editors and store results in session state
-    st.session_state["pop_table"] = st.data_editor(
-        st.session_state["pop_table_base"],
+    st.session_state.pop_table = st.data_editor(
+        initialize_pop_table(parms),
         column_config={
             "population": "Population Age",
             "percentage": st.column_config.NumberColumn(
@@ -1333,13 +1329,27 @@ def edit_baseline_immunity(parms):
                 format="%.1f",
             ),
         },
+        on_change=table_changed,
         disabled=["population"],
         hide_index=True,
-        key="pop_table_editor",
     )
 
-    st.session_state["cov_table"] = st.data_editor(
-        st.session_state["cov_table_base"],
+    try:
+        total_percentage = st.session_state.pop_table["percentage"].sum()
+    except KeyError:
+        total_percentage = 100
+
+    if np.round(abs(total_percentage - 100), 1) >= 0.1:  # Allow small rounding errors
+        st.session_state.invalid_population_percentage = True
+        st.warning(
+            f"⚠️ Population percentages sum to {total_percentage:.1f}%. "
+            "Please adjust the values so they sum to 100%."
+        )
+    else:
+        st.session_state.invalid_population_percentage = False
+
+    st.session_state.cov_table = st.data_editor(
+        initialize_vacc_table(parms),
         column_config={
             "threshold": "Age Threshold",
             "coverage": st.column_config.NumberColumn(
@@ -1352,19 +1362,13 @@ def edit_baseline_immunity(parms):
             ),
         },
         disabled=["threshold"],
+        on_change=table_changed,
         hide_index=True,
-        key="cov_table_editor",
     )
 
-    if "pop_table" in st.session_state:
-        pop_table = st.session_state["pop_table"]
-        total_percentage = pop_table["percentage"].sum()
+    calc_immunity()
 
-    if abs(total_percentage - 100) > 0.1:  # Allow small rounding errors
-        st.warning(
-            f"⚠️ Population percentages sum to {total_percentage:.1f}%. "
-            "Please adjust the values so they sum to 100%."
-        )
+    button_to_calculate_immunity()
 
 
 def get_baseline_immunity(population, coverage):
@@ -1412,14 +1416,6 @@ def get_baseline_immunity(population, coverage):
     return round(immunity_value, 2)
 
 
-def set_baseline(immunity_value):
-    """
-    Set the baseline immunity parameter in session state.
-    """
-    # Store the calculated value for use in simulation
-    st.session_state["calculated_baseline_immunity"] = immunity_value
-
-
 def update_coverage(edited_df_coverage, default_values):
     """
     Update coverage DataFrame by filling missing values with default values.
@@ -1434,6 +1430,8 @@ def update_coverage(edited_df_coverage, default_values):
     # Make a copy to avoid modifying the original DataFrame
     updated_df = edited_df_coverage.copy()
 
+    has_missing_coverage = False
+
     # Check that we have enough default values
     if len(default_values) < len(updated_df):
         raise ValueError(
@@ -1447,89 +1445,67 @@ def update_coverage(edited_df_coverage, default_values):
             or updated_df.loc[row_idx, "coverage"] == ""
         ):
             # Convert from proportion to percentage if needed
+            has_missing_coverage = True
             default_value = (
                 default_values[i] * 100 if default_values[i] <= 1 else default_values[i]
             )
             updated_df.loc[row_idx, "coverage"] = default_value
 
-    return updated_df
+    return updated_df, has_missing_coverage
 
 
 def calc_immunity():
-    """
-    Calculate baseline immunity from session state tables.
-
-    Returns:
-        float or None: Baseline immunity value, or None if tables not in session state
-    """
-    if "pop_table" not in st.session_state or "cov_table" not in st.session_state:
-        return None
-
-    pop_table = st.session_state["pop_table"]
-    cov_table = st.session_state["cov_table"]
-
-    # Handle missing coverage values using the existing update_coverage function
-    cov_table_updated = update_coverage(
-        cov_table, default_values=[0.70, 0.85, 0.90, 0.95]
+    st.session_state.cov_table, has_missing_coverage = update_coverage(
+        st.session_state.cov_table, default_values=[0.70, 0.85, 0.90, 0.95]
+    )
+    st.session_state.immunity = get_baseline_immunity(
+        st.session_state.pop_table["percentage"].tolist(),
+        st.session_state.cov_table["coverage"].tolist(),
     )
 
-    try:
-        baseline_immunity = get_baseline_immunity(
-            pop_table["percentage"].tolist(), cov_table_updated["coverage"].tolist()
+    immunity_text = f"{st.session_state.immunity * 100:.0f}"
+
+    if st.session_state.table_changed:
+        st.warning(
+            "Values changed. Please click the button to recalculate baseline immunity."
         )
-        return baseline_immunity
-    except (ValueError, TypeError) as e:
-        st.error(f"Error calculating baseline immunity: {str(e)}")
-        return None
+    else:
+        if has_missing_coverage:
+            message = f"Assuming coverage points with no data available are national estimates, the estimate for baseline immunity is {immunity_text}%"
+        else:
+            message = f"Based on these values, the estimate for baseline immunity is {immunity_text}%"
+        st.success(message)
+
+
+def click_set_immunity_button():
+    st.session_state.calc_set_immunity_button_clicked = True
+    st.session_state.table_changed = False
 
 
 def button_to_calculate_immunity():
     """
     Create a button to calculate and set baseline immunity.
-
-    Returns:
-        None
     """
-    if st.button("Calculate and Set Baseline Immunity", key="calc_set_immunity_button"):
-        immunity = calc_immunity()
-        if (
-            immunity is not None and 0 <= immunity <= 1
-        ):  # Check if immunity is between 0 and 1 (0% and 100%)
-            # Check if any values were missing in the original coverage table
-            if "cov_table" in st.session_state:
-                cov_table = st.session_state["cov_table"]
-                has_missing_coverage = any(
-                    pd.isna(cov_table.loc[i, "coverage"])
-                    or cov_table.loc[i, "coverage"] == ""
-                    for i in cov_table.index
-                )
+    if "calc_set_immunity_button_clicked" not in st.session_state:
+        st.session_state.calc_set_immunity_button_clicked = False
 
-                if has_missing_coverage:
-                    message = f"Assuming coverage points with no data available are national estimates, the estimate for baseline immunity is {immunity*100:.0f}%"
-                else:
-                    message = f"Based on these values, the estimate for baseline immunity is {immunity*100:.0f}%"
-
-                st.success(message)
-
-                # Call set_baseline to actually update the parameter
-                set_baseline(immunity)
-        else:
-            st.error("Unable to calculate baseline immunity. Please check your inputs.")
+    if st.button(
+        "Calculate and Set Baseline Immunity",
+        disabled=st.session_state.invalid_population_percentage,
+        on_click=click_set_immunity_button,
+    ):
+        st.rerun()
 
 
 def apply_calculated_immunity(parms):
     """Apply calculated immunity if calculator is enabled and immunity has been calculated."""
-    if (
-        parms.get("calculator_on", False)
-        and "calculated_baseline_immunity" in st.session_state
-    ):
-        calculated_immunity = st.session_state["calculated_baseline_immunity"]
+    if parms.get("calculator_on", False) and "immunity" in st.session_state:
         # Override all baseline immunity values with the calculated value
         if isinstance(parms["initial_vaccine_coverage"], list):
             for i in range(len(parms["initial_vaccine_coverage"])):
-                parms["initial_vaccine_coverage"][i] = calculated_immunity
+                parms["initial_vaccine_coverage"][i] = st.session_state.immunity
         else:
-            parms["initial_vaccine_coverage"] = calculated_immunity
+            parms["initial_vaccine_coverage"] = st.session_state.immunity
     return parms
 
 
