@@ -682,20 +682,24 @@ def app_editors(
                             disabled=disabled,
                         )
                     elif widget_types[key] == "number_input":
-                        if key == "initial_vaccine_coverage":
-                            if "calculator_on" in edited_parms:
-                                disabled = edited_parms["calculator_on"]
-                        value = st.number_input(
-                            show_parameter_mapping[f"{key}_{index}"],
-                            min_value=min_values[key][index],
-                            max_value=max_values[key][index],
-                            value=parms[key][index],
-                            step=steps[key],
-                            help=helpers[key][index],
-                            format=formats[key],
-                            key=element_keys[key][index],
-                            disabled=disabled,
-                        )
+                        if (
+                            key == "initial_vaccine_coverage"
+                            and "calculator_on" in edited_parms
+                            and edited_parms["calculator_on"]
+                        ):
+                            value = st.empty()
+                        else:
+                            value = st.number_input(
+                                show_parameter_mapping[f"{key}_{index}"],
+                                min_value=min_values[key][index],
+                                max_value=max_values[key][index],
+                                value=parms[key][index],
+                                step=steps[key],
+                                help=helpers[key][index],
+                                format=formats[key],
+                                key=element_keys[key][index],
+                                disabled=disabled,
+                            )
                     elif widget_types[key] == "toggle":
                         value = st.toggle(
                             show_parameter_mapping[f"{key}_{index}"],

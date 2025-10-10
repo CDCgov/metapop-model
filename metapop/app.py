@@ -322,9 +322,7 @@ def app(
             formats,
             session_state_keys0,
         )
-        with st.expander(
-            "Baseline Immunity Calculator", expanded=edited_parms["calculator_on"]
-        ):
+        if edited_parms["calculator_on"]:
             st.text(
                 "Use this calculator to estimate baseline immunity. "
                 "Adjust the population and coverage values below, then click the button to calculate and set the baseline immunity."
