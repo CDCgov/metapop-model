@@ -10,7 +10,8 @@ import altair as alt
 import griddler
 import griddler.griddle
 import numpy as np
-import pandas as pd
+
+# import pandas as pd
 import polars as pl
 import scipy.stats as stats
 import streamlit as st
@@ -1259,12 +1260,12 @@ def initialize_pop_table(parms):
         parms (dict): Parameters dictionary containing population data
 
     Returns:
-        pd.DataFrame: DataFrame with population distribution data
+        pl.DataFrame: DataFrame with population distribution data
     """
     immunity_age_groups = parms["calculator_pop_labels"]
     population_percentages = parms["calculator_pop_sizes"]
 
-    df_pop = pd.DataFrame(
+    df_pop = pl.DataFrame(
         [
             {"population": age, "percentage": 100 * pct}
             for age, pct in zip(immunity_age_groups, population_percentages)
@@ -1282,12 +1283,12 @@ def initialize_vacc_table(parms):
         parms (dict): Parameters dictionary containing vaccine coverage data
 
     Returns:
-        pd.DataFrame: DataFrame with vaccination coverage data
+        pl.DataFrame: DataFrame with vaccination coverage data
     """
     coverage_age_groups = parms["calculator_coverage_labels"]
     vaccine_coverages = parms["calculator_coverage_values"]
 
-    df_coverage = pd.DataFrame(
+    df_coverage = pl.DataFrame(
         [
             {"threshold": age, "coverage": 100 * pct}
             for age, pct in zip(coverage_age_groups, vaccine_coverages)
@@ -1366,7 +1367,7 @@ def edit_baseline_immunity(parms):
         hide_index=True,
     )
 
-    calc_immunity()
+    calc_immunity(parms)
 
     button_to_calculate_immunity()
 
@@ -1421,14 +1422,14 @@ def update_coverage(edited_df_coverage, default_values):
     Update coverage DataFrame by filling missing values with default values.
 
     Args:
-        edited_df_coverage (pd.DataFrame): DataFrame with 'coverage' column that may contain missing values
+        edited_df_coverage (pl.DataFrame): DataFrame with 'coverage' column that may contain missing values
         default_values (list): List of default coverage values to use for missing entries
 
     Returns:
-        pd.DataFrame: Updated DataFrame with missing values filled from defaults
+        pl.DataFrame: Updated DataFrame with missing values filled from defaults
     """
     # Make a copy to avoid modifying the original DataFrame
-    updated_df = edited_df_coverage.copy()
+    updated_df = edited_df_coverage.clone()
 
     has_missing_coverage = False
 
@@ -1438,29 +1439,72 @@ def update_coverage(edited_df_coverage, default_values):
             f"Not enough default values ({len(default_values)}) for DataFrame rows ({len(updated_df)})"
         )
 
-    # Fill missing values with defaults (converted to percentage)
-    for i, row_idx in enumerate(updated_df.index):
-        if (
-            pd.isna(updated_df.loc[row_idx, "coverage"])
-            or updated_df.loc[row_idx, "coverage"] == ""
-        ):
-            # Convert from proportion to percentage if needed
-            has_missing_coverage = True
-            default_value = (
-                default_values[i] * 100 if default_values[i] <= 1 else default_values[i]
-            )
-            updated_df.loc[row_idx, "coverage"] = default_value
+    # check if any coverage values are missing from updated_df before we fill in values with defaults
+    if updated_df["coverage"].is_null().any():
+        has_missing_coverage = True
 
+    # rename the column with default values to avoid confusion
+    default_values = default_values.rename({"coverage": "default_coverage"})
+
+    # create a joined dataframe to merge coverage values
+    joined_df = updated_df.join(default_values, on="threshold", how="left")
+
+    # fill in missing coverage values with default values
+    filled_df = joined_df.with_columns(
+        pl.col("coverage").fill_null(pl.col("default_coverage"))
+    )
+
+    # drop the default coverage column
+    updated_df = filled_df.drop("default_coverage")
+
+    # # Fill missing values with defaults (converted to percentage)
+    # for i, row_idx in enumerate(updated_df.index):
+    #     if (
+    #         pl.isna(updated_df.loc[row_idx, "coverage"])
+    #         or updated_df.loc[row_idx, "coverage"] == ""
+    #     ):
+    #         # Convert from proportion to percentage if needed
+    #         has_missing_coverage = True
+    #         default_value = (
+    #             default_values[i] * 100 if default_values[i] <= 1 else default_values[i]
+    #         )
+    #         updated_df.loc[row_idx, "coverage"] = default_value
+    print(updated_df, has_missing_coverage)
     return updated_df, has_missing_coverage
 
 
-def calc_immunity():
+def calc_immunity(parms):
+    """
+    Calculate and display baseline immunity based on the values in the
+    calculator tables.
+
+    Args:
+        parms (dict): Parameters dictionary containing default calculator values
+
+    Returns:
+        None. Updates session state variable 'immunity' with calculated value,
+        session state variable 'table_changed' to indicate if table was changed,
+        and displays a message with the calculated immunity as well as a warning
+        message indicating if the user needs to press the button to recalculate
+        the immunity value because they have changed table inputs.
+    """
+    # create table with default values from parms dictionary
+    default_values = initialize_vacc_table(parms)
+
+    # change values of "coverage" column to current default values - not likely to remain
+    default_values = default_values.with_columns(
+        pl.Series("coverage", [70, 85, 90, 95])
+    )
+
+    # update coverage table with default values for missing entries
     st.session_state.cov_table, has_missing_coverage = update_coverage(
-        st.session_state.cov_table, default_values=[0.70, 0.85, 0.90, 0.95]
+        st.session_state.cov_table,
+        #   default_values=[0.70, 0.85, 0.90, 0.95]
+        default_values=default_values,
     )
     st.session_state.immunity = get_baseline_immunity(
-        st.session_state.pop_table["percentage"].tolist(),
-        st.session_state.cov_table["coverage"].tolist(),
+        st.session_state.pop_table["percentage"],
+        st.session_state.cov_table["coverage"],
     )
 
     immunity_text = f"{st.session_state.immunity * 100:.0f}"
