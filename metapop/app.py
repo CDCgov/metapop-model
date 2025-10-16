@@ -46,6 +46,8 @@ from .app_helper import (
     update_intervention_parameters_from_widget,
     reset,
     apply_calculated_immunity,
+    initialize_pop_table,
+    initialize_vacc_table,
     edit_baseline_immunity,
     button_to_calculate_immunity,
     add_daily_incidence,
@@ -166,6 +168,20 @@ def app(
 
     # Ensures that the cache gets invalidated when code changes
     parms["cache_key"] = info["commit"]
+
+    # Create default tables for the age distribution and age-based vaccination
+    # coverage, storing them in session state for use in the baseline immunity
+    # calculator feature
+    if "default_pop_table" not in st.session_state:
+        st.session_state.default_pop_table = initialize_pop_table(parms)
+        print("adding default pop table to session state")
+    else:
+        print("default pop table already in session state")
+    if "default_vacc_table" not in st.session_state:
+        st.session_state.default_vacc_table = initialize_vacc_table(parms)
+        print("adding default vacc table to session state")
+    else:
+        print("default vacc table already in session state")
 
     # Set up random number generators for plotting and hospitalizations
     plot_rng = np.random.default_rng([parms["seed"], seed_from_string("plot")])
