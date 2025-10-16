@@ -10,8 +10,6 @@ import altair as alt
 import griddler
 import griddler.griddle
 import numpy as np
-
-# import pandas as pd
 import polars as pl
 import scipy.stats as stats
 import streamlit as st

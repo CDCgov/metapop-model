@@ -17,7 +17,6 @@ Key Features:
 import os
 import copy
 import importlib
-import pandas as pd
 import streamlit as st
 import numpy as np
 import polars as pl
@@ -923,7 +922,7 @@ def app(
     # Add vaccine campaign period as a shaded box if applicable
     if edited_parms2["total_vaccine_uptake_doses"] > 0:
         # Draw two vertical dashed lines for the start and end of the vaccine campaign
-        vax_df = pd.DataFrame(
+        vax_df = pl.DataFrame(
             {
                 "x_start": [vax_start],
                 "x_end": [vax_end],
@@ -961,7 +960,7 @@ def app(
         # different opacity than the actual mark, so we create a dummy DataFrame
         # with the same color as the vaccine campaign window but with no data
         # to be used in the legend
-        dummy_vax_df = pd.DataFrame(
+        dummy_vax_df = pl.DataFrame(
             {
                 "x_start": [np.nan],
                 "x_end": [np.nan],
@@ -992,7 +991,7 @@ def app(
         )
 
         # Vertical lines for campaign start/end
-        vax_lines_df = pd.DataFrame(
+        vax_lines_df = pl.DataFrame(
             {
                 "x": [vax_start, vax_end],
                 "Intervention": ["Vaccine campaign start", "Vaccine campaign end"],
@@ -1015,7 +1014,7 @@ def app(
     else:
         # If no vaccine campaign, set vax to an empty chart
         vax = (
-            alt.Chart(pd.DataFrame({"x": []}))
+            alt.Chart(pl.DataFrame({"x": []}))
             .mark_line()
             .encode(
                 x=alt.X("x:Q", title=time_label),
@@ -1024,7 +1023,7 @@ def app(
         )
 
         dummy_vax_window = (
-            alt.Chart(pd.DataFrame({"x": []}))
+            alt.Chart(pl.DataFrame({"x": []}))
             .mark_line()
             .encode(
                 x=alt.X("x:Q", title=time_label),
@@ -1036,7 +1035,7 @@ def app(
     if interventions == "Off":
         annotation = (
             alt.Chart(
-                pd.DataFrame(
+                pl.DataFrame(
                     {"text": ["Use at least one intervention to compare scenarios"]}
                 )
             )
@@ -1046,7 +1045,7 @@ def app(
     else:
         # Add annotation for the vaccine campaign period
         annotation = (
-            alt.Chart(pd.DataFrame({"text": [""]}))
+            alt.Chart(pl.DataFrame({"text": [""]}))
             .mark_text(align="center", baseline="top", color="grey", fontSize=18)
             .encode(text="text:N", y=alt.value(10))
         )
