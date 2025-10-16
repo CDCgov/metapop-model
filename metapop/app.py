@@ -177,11 +177,11 @@ def app(
         print("adding default pop table to session state")
     else:
         print("default pop table already in session state")
-    if "default_vacc_table" not in st.session_state:
-        st.session_state.default_vacc_table = initialize_vacc_table(parms)
-        print("adding default vacc table to session state")
+    if "default_cov_table" not in st.session_state:
+        st.session_state.default_cov_table = initialize_vacc_table(parms)
+        print("adding default cov table to session state")
     else:
-        print("default vacc table already in session state")
+        print("default cov table already in session state")
 
     # Set up random number generators for plotting and hospitalizations
     plot_rng = np.random.default_rng([parms["seed"], seed_from_string("plot")])

@@ -1315,8 +1315,14 @@ def edit_baseline_immunity(parms):
     if "table_changed" not in st.session_state:
         st.session_state.table_changed = False
 
+    if "default_pop_table" not in st.session_state:
+        st.session_state.default_pop_table = initialize_pop_table(parms)
+    if "default_cov_table" not in st.session_state:
+        st.session_state.default_cov_table = initialize_vacc_table(parms)
+
     st.session_state.pop_table = st.data_editor(
-        initialize_pop_table(parms),
+        # initialize_pop_table(parms),
+        st.session_state.default_pop_table,
         column_config={
             "population": "Population Age",
             "percentage": st.column_config.NumberColumn(
@@ -1348,7 +1354,8 @@ def edit_baseline_immunity(parms):
         st.session_state.invalid_population_percentage = False
 
     st.session_state.cov_table = st.data_editor(
-        initialize_vacc_table(parms),
+        # initialize_vacc_table(parms),
+        st.session_state.default_cov_table,
         column_config={
             "threshold": "Age Threshold",
             "coverage": st.column_config.NumberColumn(
