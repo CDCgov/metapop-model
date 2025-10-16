@@ -1,6 +1,8 @@
 # This file contains helper functions for the metapop app.
 import base64
 import copy
+import datetime
+import io
 import os
 from pathlib import Path
 
@@ -62,6 +64,8 @@ __all__ = [
     "is_light_color",
     "get_github_logo_path",
     "render_chart_title",
+    "combine_incidence_results",
+    "csv_download_button",
 ]
 
 CACHE_TTL = 60 * 60 * 24 * 7  # 1 week in seconds
@@ -1593,3 +1597,24 @@ def render_chart_title(title, subtitle=None):
         else ""
     )
     return f"""<h4 style="font-size: inherit; padding:0; line-height: 1.1;margin-bottom: 0.2em;">{title}</h4>{subtitle_html}"""
+
+
+def combine_incidence_results(alt_results1, alt_results2, combined_ave_results):
+    return pl.concat(
+        [
+            alt_results1.with_columns(pl.col("replicate").cast(pl.String)),
+            alt_results2.with_columns(pl.col("replicate").cast(pl.String)),
+            combined_ave_results.with_columns(pl.lit("median").alias("replicate")),
+        ]
+    )
+
+
+def csv_download_button(polars_df, link_text, filename_stem):
+    csv_buffer = io.StringIO()
+    polars_df.write_csv(csv_buffer, include_header=True)
+    base64_encoded = base64.b64encode(csv_buffer.getvalue().encode("utf-8")).decode(
+        "utf-8"
+    )
+    time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    data_uri = f'<div style="text-align:right;" class="st-emotion-cache-6l3wav es51y5e1"><a download="{filename_stem}-{time}.csv" href="data:text/csv;base64,{base64_encoded}">{link_text}</a></div>'
+    st.markdown(data_uri, unsafe_allow_html=True)

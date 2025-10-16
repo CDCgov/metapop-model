@@ -23,10 +23,7 @@ import numpy as np
 import polars as pl
 import altair as alt
 from st_flexible_callout_elements import flexible_callout
-import io
 import sys
-import base64
-import datetime
 import toml
 
 # import what's needed from other metapop modules
@@ -59,6 +56,8 @@ from .app_helper import (
     is_light_color,
     get_github_logo_path,
     render_chart_title,
+    combine_incidence_results,
+    csv_download_button,
 )
 from .helper import (
     Ind,
@@ -1028,6 +1027,12 @@ def app(
 
     chart_placeholder.altair_chart(layer, use_container_width=True)
 
+    csv_download_button(
+        combine_incidence_results(alt_results1, alt_results2, combined_ave_results),
+        "Download weekly incidence data as CSV",
+        "measles-sim-trajectories",
+    )
+
     # --- Chart Description ---
     st.markdown(
         (
@@ -1184,14 +1189,7 @@ def app(
         # https://github.com/whitphx/stlite?tab=readme-ov-file#limitations
         # about `st.dataframe()`.)
         st.markdown(outbreak_summary.to_pandas().to_markdown(index=False))
-        csv_buffer = io.StringIO()
-        outbreak_summary.to_pandas().to_csv(csv_buffer, index=False)
-        base64_encoded = base64.b64encode(csv_buffer.getvalue().encode("utf-8")).decode(
-            "utf-8"
-        )
-        time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-        data_uri = f'<p style="font-size:10px;text-align:right;"><a download="measles-sim-{time}.csv" href="data:text/csv;base64,{base64_encoded}">Download as CSV</a></p>'
-        st.markdown(data_uri, unsafe_allow_html=True)
+        csv_download_button(outbreak_summary, "Download data (CSV)", "measles-sim")
     else:
         st.dataframe(outbreak_summary)
 
