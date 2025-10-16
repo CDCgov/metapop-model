@@ -1372,7 +1372,7 @@ def edit_baseline_immunity(parms):
         hide_index=True,
     )
 
-    calc_immunity(parms)
+    calc_immunity()
 
     button_to_calculate_immunity()
 
@@ -1470,7 +1470,7 @@ def update_coverage(edited_df_coverage, default_values):
     return updated_df, has_missing_coverage
 
 
-def calc_immunity(parms):
+def calc_immunity():
     """
     Calculate and display baseline immunity based on the values in the
     calculator tables.
