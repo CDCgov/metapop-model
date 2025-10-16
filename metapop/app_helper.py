@@ -1479,9 +1479,14 @@ def calc_immunity(parms):
         the immunity value because they have changed table inputs.
     """
     # create table with default values from parms dictionary
-    default_values = initialize_vacc_table(parms)
+    # default_values = initialize_vacc_table(parms)
+    default_values = st.session_state.cov_table.clone()
 
-    # change values of "coverage" column to current default values - not likely to remain
+    # change values of "coverage" column to current default values
+    # not suggesting this stays in the code base long-term, but for now this
+    # prevents a change from the previous default values we have for the
+    # calculator. We will revisit this shortly and decide what the defaults
+    # will be and store them in the config file for the app
     default_values = default_values.with_columns(
         pl.Series("coverage", [70, 85, 90, 95])
     )
@@ -1489,8 +1494,7 @@ def calc_immunity(parms):
     # update coverage table with default values for missing entries
     st.session_state.cov_table, has_missing_coverage = update_coverage(
         st.session_state.cov_table,
-        #   default_values=[0.70, 0.85, 0.90, 0.95]
-        default_values=default_values,
+        default_values,
     )
     st.session_state.immunity = get_baseline_immunity(
         st.session_state.pop_table["percentage"],
