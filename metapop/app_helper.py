@@ -1423,7 +1423,7 @@ def update_coverage(edited_df_coverage, default_values):
 
     Args:
         edited_df_coverage (pl.DataFrame): DataFrame with 'coverage' column that may contain missing values
-        default_values (list): List of default coverage values to use for missing entries
+        default_values (pl.DataFrame): DataFrame with default 'coverage' values to use for missing entries. Must not contain null values.
 
     Returns:
         pl.DataFrame: Updated DataFrame with missing values filled from defaults
@@ -1439,17 +1439,22 @@ def update_coverage(edited_df_coverage, default_values):
             f"Not enough default values ({len(default_values)}) for DataFrame rows ({len(updated_df)})"
         )
 
+    if default_values["coverage"].is_null().any():
+        raise ValueError(
+            "Default values contain null entries, cannot fill missing coverage."
+        )
+
     # check if any coverage values are missing from updated_df before we fill in values with defaults
     if updated_df["coverage"].is_null().any():
         has_missing_coverage = True
 
-    # rename the column with default values to avoid confusion
+    # rename the column with default values to avoid conflict during join
     default_values = default_values.rename({"coverage": "default_coverage"})
 
     # create a joined dataframe to merge coverage values
     joined_df = updated_df.join(default_values, on="threshold", how="left")
 
-    # fill in missing coverage values with default values
+    # fill in missing coverage values with default values (already converted to percentages)
     filled_df = joined_df.with_columns(
         pl.col("coverage").fill_null(pl.col("default_coverage"))
     )
@@ -1457,19 +1462,6 @@ def update_coverage(edited_df_coverage, default_values):
     # drop the default coverage column
     updated_df = filled_df.drop("default_coverage")
 
-    # # Fill missing values with defaults (converted to percentage)
-    # for i, row_idx in enumerate(updated_df.index):
-    #     if (
-    #         pl.isna(updated_df.loc[row_idx, "coverage"])
-    #         or updated_df.loc[row_idx, "coverage"] == ""
-    #     ):
-    #         # Convert from proportion to percentage if needed
-    #         has_missing_coverage = True
-    #         default_value = (
-    #             default_values[i] * 100 if default_values[i] <= 1 else default_values[i]
-    #         )
-    #         updated_df.loc[row_idx, "coverage"] = default_value
-    print(updated_df, has_missing_coverage)
     return updated_df, has_missing_coverage
 
 
