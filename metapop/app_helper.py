@@ -49,7 +49,7 @@ __all__ = [
     "generate_random_key",
     "reset",
     "update_coverage",
-    "initialize_baseline_immunity_tables",
+    # "initialize_baseline_immunity_tables",
     "edit_baseline_immunity",
     "calc_immunity",
     "button_to_calculate_immunity",
@@ -1260,6 +1260,16 @@ def reset(defaults, widget_types):
         elif key == "cov_table_base":
             value = initialize_vacc_table(defaults)
 
+        elif key in [
+            "table_changed",
+            "immunity",
+            "invalid_population_percentage",
+            "calc_set_immunity_button_clicked",
+        ]:
+            # value = False
+            del st.session_state[session_key]
+            continue
+
         # elif key == "fake_table_base":
         #     value = initialize_fake_table(defaults)
 
@@ -1267,6 +1277,8 @@ def reset(defaults, widget_types):
         elif key in [
             "pop_table_editor",
             "cov_table_editor",
+            "default_pop_table",
+            "default_cov_table",
             "pop_table_base",
             "cov_table_base",
             "pop_table",
