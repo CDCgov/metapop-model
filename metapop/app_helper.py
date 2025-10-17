@@ -1315,11 +1315,6 @@ def edit_baseline_immunity(parms):
     if "table_changed" not in st.session_state:
         st.session_state.table_changed = False
 
-    if "default_pop_table" not in st.session_state:
-        st.session_state.default_pop_table = initialize_pop_table(parms)
-    if "default_cov_table" not in st.session_state:
-        st.session_state.default_cov_table = initialize_vacc_table(parms)
-
     st.session_state.pop_table = st.data_editor(
         st.session_state.default_pop_table,
         column_config={
