@@ -50,7 +50,6 @@ from .app_helper import (
     initialize_pop_table,
     initialize_vacc_table,
     edit_baseline_immunity,
-    # button_to_calculate_immunity,
     add_daily_incidence,
     get_interval_results,
     get_median_trajectory_from_episize,
@@ -179,20 +178,10 @@ def app(
     if "default_cov_table" not in st.session_state:
         st.session_state.default_cov_table = initialize_vacc_table(parms)
 
-    # if "data_editor_key" not in st.session_state:
-    #     st.session_state["data_editor_key"] = generate_random_key()
-
-    #    # not likely needed
-    #    # add default value for calculated baseline immunity same as initial vaccine coverage
-    #     parms["calculated_baseline_immunity"] = parms["initial_vaccine_coverage"][0]
-
     if "pop_editor_key" not in st.session_state:
         st.session_state["pop_editor_key"] = generate_random_key()
     if "coverage_editor_key" not in st.session_state:
         st.session_state["coverage_editor_key"] = generate_random_key()
-
-    # # add default value for calculated baseline immunity same as initial vaccine coverage
-    # parms["calculated_baseline_immunity"] = parms["initial_vaccine_coverage"][0]
 
     # Set up random number generators for plotting and hospitalizations
     plot_rng = np.random.default_rng([parms["seed"], seed_from_string("plot")])
@@ -588,7 +577,6 @@ def app(
             on_click=reset,
             args=(
                 parms,
-                # default_session_state,
                 widget_types,
             ),
         )

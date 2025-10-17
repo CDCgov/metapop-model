@@ -49,7 +49,6 @@ __all__ = [
     "generate_random_key",
     "reset",
     "update_coverage",
-    # "initialize_baseline_immunity_tables",
     "edit_baseline_immunity",
     "calc_immunity",
     "button_to_calculate_immunity",
@@ -670,7 +669,6 @@ def app_editors(
                 edited_parms[key] = value
             if key in list_keys:
                 for index in range(len(parms[key])):
-                    # if key in slider_keys:
                     if widget_types[key] == "slider":
                         value = st.slider(
                             show_parameter_mapping[f"{key}_{index}"],
@@ -683,7 +681,6 @@ def app_editors(
                             key=element_keys[key][index],
                             disabled=disabled,
                         )
-                    # else:
                     elif widget_types[key] == "number_input":
                         if key == "initial_vaccine_coverage":
                             if "calculator_on" in edited_parms:
@@ -1251,7 +1248,6 @@ def reset(defaults, widget_types):
         # we will generate a new random key for each editor to force a reset rather
         # than resetting the table itself
         elif key in [
-            # "data_editor_key",
             "pop_editor_key",
             "coverage_editor_key",
         ]:
@@ -1264,27 +1260,20 @@ def reset(defaults, widget_types):
         elif key == "cov_table_base":
             value = initialize_vacc_table(defaults)
 
+        # delete certain keys from session state to force streamlit to recreate them when reset is called
         elif key in [
             "table_changed",
             "immunity",
             "invalid_population_percentage",
             "calc_set_immunity_button_clicked",
         ]:
-            # value = False
             del st.session_state[session_key]
             continue
 
-        # elif key == "fake_table_base":
-        #     value = initialize_fake_table(defaults)
-
         # continue if the key is one of the data editor keys
         elif key in [
-            # "pop_table_editor",
-            # "cov_table_editor",
             "default_pop_table",
             "default_cov_table",
-            # "pop_table_base",
-            # "cov_table_base",
             "pop_table",
             "cov_table",
             "calc_set_immunity_button",
@@ -1294,9 +1283,6 @@ def reset(defaults, widget_types):
 
         elif "random_key" in session_key:
             continue
-
-        # elif key == "calc_set_immunity_button":
-        #     continue
 
         elif key != "" and index == "":
             value = defaults[key]
