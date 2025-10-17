@@ -1321,7 +1321,6 @@ def edit_baseline_immunity(parms):
         st.session_state.default_cov_table = initialize_vacc_table(parms)
 
     st.session_state.pop_table = st.data_editor(
-        # initialize_pop_table(parms),
         st.session_state.default_pop_table,
         column_config={
             "population": "Population Age",
@@ -1354,7 +1353,6 @@ def edit_baseline_immunity(parms):
         st.session_state.invalid_population_percentage = False
 
     st.session_state.cov_table = st.data_editor(
-        # initialize_vacc_table(parms),
         st.session_state.default_cov_table,
         column_config={
             "threshold": "Age Threshold",
@@ -1486,7 +1484,6 @@ def calc_immunity():
         the immunity value because they have changed table inputs.
     """
     # create table with default values from parms dictionary
-    # default_values = initialize_vacc_table(parms)
     default_values = st.session_state.cov_table.clone()
 
     # change values of "coverage" column to current default values
