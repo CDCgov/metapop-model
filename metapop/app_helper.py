@@ -1250,7 +1250,11 @@ def reset(defaults, widget_types):
         # special case for data editor keys related to the baseline immunity calculator
         # we will generate a new random key for each editor to force a reset rather
         # than resetting the table itself
-        elif key in ["data_editor_key", "pop_editor_key", "coverage_editor_key"]:
+        elif key in [
+            # "data_editor_key",
+            "pop_editor_key",
+            "coverage_editor_key",
+        ]:
             value = generate_random_key()
 
         # special cases for data editors related to baseline immunity calculator
@@ -1275,12 +1279,12 @@ def reset(defaults, widget_types):
 
         # continue if the key is one of the data editor keys
         elif key in [
-            "pop_table_editor",
-            "cov_table_editor",
+            # "pop_table_editor",
+            # "cov_table_editor",
             "default_pop_table",
             "default_cov_table",
-            "pop_table_base",
-            "cov_table_base",
+            # "pop_table_base",
+            # "cov_table_base",
             "pop_table",
             "cov_table",
             "calc_set_immunity_button",
@@ -1291,8 +1295,8 @@ def reset(defaults, widget_types):
         elif "random_key" in session_key:
             continue
 
-        elif key == "calc_set_immunity_button":
-            continue
+        # elif key == "calc_set_immunity_button":
+        #     continue
 
         elif key != "" and index == "":
             value = defaults[key]
@@ -1315,6 +1319,7 @@ def reset(defaults, widget_types):
 
         # set the session state value to the default value
         st.session_state[session_key] = value
+
     st.session_state["reset"] = True
 
 
@@ -1365,6 +1370,9 @@ def initialize_vacc_table(parms):
 
 
 def table_changed():
+    """
+    Callback function to set table_changed flag in session state when a table is edited.
+    """
     st.session_state.table_changed = True
 
 
@@ -1372,7 +1380,7 @@ def table_changed():
 def edit_baseline_immunity(parms):
     """
     Create data editors for population and coverage tables and store results in session state.
-    Updates session_state variables: pop_table and cov_table
+    Updates session_state variables: pop_table and cov_table. Creates its own fragment in streamlit.
 
     Args:
         parms (dict): Parameters dictionary
@@ -1585,6 +1593,10 @@ def calc_immunity():
 
 
 def click_set_immunity_button():
+    """
+    Callback function for the calculate and set immunity button. Sets flag in
+    session state.
+    """
     st.session_state.calc_set_immunity_button_clicked = True
     st.session_state.table_changed = False
 
@@ -1605,7 +1617,9 @@ def button_to_calculate_immunity():
 
 
 def apply_calculated_immunity(parms):
-    """Apply calculated immunity if calculator is enabled and immunity has been calculated."""
+    """
+    Apply calculated immunity if calculator is enabled and immunity has been calculated.
+    """
     if parms.get("calculator_on", False) and "immunity" in st.session_state:
         # Override all baseline immunity values with the calculated value
         if isinstance(parms["initial_vaccine_coverage"], list):
