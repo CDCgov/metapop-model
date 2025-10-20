@@ -1438,6 +1438,101 @@ def edit_baseline_immunity(parms):
     button_to_calculate_immunity()
 
 
+def get_coverage_distribution_mapping(user_pop_table, user_cov_table):
+    print("cutoffs: ", st.session_state.cov_table["threshold"].to_list())
+    num_cutoffs, cutoff_map = get_coverage_cutoffs(user_cov_table)
+    if 0 not in num_cutoffs:
+        num_cutoffs = [0] + num_cutoffs
+    print(f"num_cutoffs: {num_cutoffs}")
+    if 100 not in num_cutoffs:
+        num_cutoffs = num_cutoffs + [100]
+    print(f"num_cutoffs after adding 100: {num_cutoffs}")
+    df = pl.DataFrame(
+        {
+            "threshold": cutoff_map.keys(),
+            "min_age": [cutoff_map[i] for i in cutoff_map.keys()],
+        }
+    )
+    print("coverage map:", df)
+    return df, cutoff_map
+
+
+def get_coverage_cutoffs(user_cov_table):
+    cutoffs = user_cov_table["threshold"].to_list()
+    num_cutoffs = []
+    cutoff_map = dict()
+    for i in cutoffs:
+        r = convert_coverage_cutoff(i)
+        if isinstance(r, int):
+            num_cutoffs.append(r)
+        cutoff_map[i] = r
+    print(f"num_cutoffs: {num_cutoffs}")
+    return num_cutoffs, cutoff_map
+
+
+def convert_coverage_cutoff(text_value):
+    r = (
+        text_value.replace(" ", "")
+        .replace("<", "")
+        .replace("+", "")
+        .replace("kindergarten", "")
+        .replace("(", "")
+        .replace(")", "")
+        .split("years")
+    )
+    r = [i for i in r if i != ""]
+    if len(r) == 1:
+        r = int(r[0])
+    elif len(r) == 2:
+        print("not covered yet")
+    print(f"r: {r}")
+    return r
+
+
+def get_population_distribution_mapping(user_pop_table, user_cov_table):
+    age_bins = get_pop_age_bins(user_pop_table)
+    df = pl.DataFrame(
+        {
+            "age_bin": age_bins.keys(),
+            "population": age_bins.values(),
+        }
+    )
+    return df
+
+
+def get_pop_age_bins(user_pop_table):
+    obins = user_pop_table["population"].to_list()
+    bins = dict()
+    for i in obins:
+        print(i)
+        min_age, max_age = convert_text_age_bin_to_tuple(i)
+        print(f"min_age: {min_age}, max_age: {max_age}")
+        bins[i] = (min_age, max_age)
+    return bins
+
+
+def convert_text_age_bin_to_tuple(age_bin_text):
+    if "<" in age_bin_text:
+        r = age_bin_text.split("<")
+        if len(r) == 1:
+            min_age = 0
+        else:
+            if r[0] == "":
+                min_age = 0
+            else:
+                min_age = int(r[0])
+        max_age = int(r[1])
+    elif "+" in age_bin_text:
+        r = age_bin_text.split("+")
+        min_age = int(r[0])
+        max_age = 100
+    elif "-" in age_bin_text:
+        r = age_bin_text.split("-")
+        min_age = int(r[0])
+        max_age = int(r[1])
+    return (min_age, max_age)
+
+
 def get_baseline_immunity(population, coverage):
     """
     Calculate the baseline immunity given the values in the calculator
@@ -1566,6 +1661,16 @@ def calc_immunity():
     st.session_state.immunity = get_baseline_immunity(
         st.session_state.pop_table["percentage"],
         st.session_state.cov_table["coverage"],
+    )
+
+    st.write("trying to redo immunity calculation")
+    pop_age_df = get_population_distribution_mapping(
+        st.session_state.pop_table, st.session_state.cov_table
+    )
+    print(pop_age_df)
+
+    get_coverage_distribution_mapping(
+        st.session_state.pop_table, st.session_state.cov_table
     )
 
     immunity_text = f"{st.session_state.immunity * 100:.0f}"
