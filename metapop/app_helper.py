@@ -73,6 +73,8 @@ __all__ = [
     "render_chart_title",
     "combine_incidence_results",
     "csv_download_button",
+    "initialize_pop_table",
+    "initialize_vacc_table",
 ]
 
 CACHE_TTL = 60 * 60 * 24 * 7  # 1 week in seconds

@@ -260,18 +260,18 @@ def app(
         session_state_keys2 = get_session_state_idkeys(2)  # scenario 2
 
         # Customize helper texts for clarity
-        helpers["I0"][0] = (
+        helpers["I0"][0] = (  # type: ignore
             "The model currently allows for a maximum of 10 initial introductions in the population. "
             "This value represents recent importations of people who are infectious and able to transmit "
             "the virus to others at the beginning of the outbreak; all are assumed to be introduced and infectious at the same time. "
             "It is not meant to represent the total number of infections reported in a population to date. "
         )
-        helpers["pop_sizes"][0] = (
+        helpers["pop_sizes"][0] = (  # type: ignore
             "The model currently has a minimum of 1,000 people and a maximum of 100,000 people and assumes a well-mixed (homogeneous) population, "
             "meaning that all people are equally likely to come into contact. As population sizes get larger, this assumption "
             "becomes less valid, and the model might be less appropriate."
         )
-        helpers["initial_vaccine_coverage"][0] = (
+        helpers["initial_vaccine_coverage"][0] = (  # type: ignore
             "The percent of the population with prior immunity to measles, including through either MMR vaccination or through past infection. For help estimating population immunity see Population Immunity Expander directly below."
         )
 
@@ -534,7 +534,7 @@ def app(
 
         markdown_content = ""
         markdown_content += f'<a href="{url}" target="_blank">'
-        markdown_content += f'{img_to_html(image_path, "GitHub Logo")}'
+        markdown_content += f"{img_to_html(image_path, 'GitHub Logo')}"
         markdown_content += "Source code"
         markdown_content += "</a>"
 
@@ -869,7 +869,7 @@ def app(
             render_chart_title(
                 title="Simulated measles epidemic curve with and without public health interventions",
                 subtitle=f"""
-                Population size: {edited_parms2['pop_sizes'][0]} people, {edited_parms2['I0'][0]} initial introductions, baseline immunity: {edited_parms2["initial_vaccine_coverage"][0]*100: .0f}%<br />
+                Population size: {edited_parms2["pop_sizes"][0]} people, {edited_parms2["I0"][0]} initial introductions, baseline immunity: {edited_parms2["initial_vaccine_coverage"][0] * 100: .0f}%<br />
                 Vaccine campaign: {mean_doses_administered} doses administered<br />
                 Isolation adherence: {isolation_adherence_pct}%<br />
                 Quarantine adherence: {pre_rash_isolation_adherence_pct}%<br />
@@ -1133,7 +1133,7 @@ def app(
             callout_text += f"<li> Adherence to isolation among people who are symptomatic and infectious: {isolation_adherence_pct}%"
             if isolation_adherence_pct > 0:
                 callout_text += (
-                    f" from day {edited_parms2['symptomatic_isolation_start_day']+1} "
+                    f" from day {edited_parms2['symptomatic_isolation_start_day'] + 1} "
                     f"through day {symptomatic_isolation_end_day}</li>"
                 )
             else:
@@ -1141,7 +1141,7 @@ def app(
             callout_text += f"<li> Adherence to quarantine among people who are pre-symptomatic and infectious: {pre_rash_isolation_adherence_pct}%"
             if pre_rash_isolation_adherence_pct > 0:
                 callout_text += (
-                    f" from day {edited_parms2['pre_rash_isolation_start_day']+1} "
+                    f" from day {edited_parms2['pre_rash_isolation_start_day'] + 1} "
                     f"through day {pre_rash_isolation_end_day}</li>"
                 )
             else:

@@ -19,6 +19,8 @@ from .analyzer import (
 from .app import app  # depends on app_helper
 from .app_helper import (
     get_scenario_results,
+    initialize_pop_table,
+    initialize_vacc_table,
     read_parameters,
 )  # depends on sim
 from .helper import (
@@ -81,4 +83,6 @@ __all__ = [
     "add_week_column",
     "get_relative_difference",
     "create_intervention_summary_table",
+    "initialize_pop_table",
+    "initialize_vacc_table",
 ]
