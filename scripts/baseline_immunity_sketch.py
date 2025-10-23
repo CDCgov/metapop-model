@@ -5,6 +5,21 @@ import polars as pl
 import metapop as mp
 
 
+def get_threshold_values(user_cov_table):
+    # apply to coverage table and return it
+    user_cov_table = user_cov_table.with_columns(
+        pl.col("threshold")
+        .map_elements(convert_cutoff_text, return_dtype=pl.Int64)
+        .alias("threshold_age")
+    )
+    return user_cov_table
+
+
+def get_coverage_cutoffs(user_cov_table):
+    cutoff_values = [0, 1] + user_cov_table["threshold_age"].to_list() + [100]
+    return cutoff_values
+
+
 def convert_cutoff_text(text_value):
     r = (
         text_value.replace(" ", "")
@@ -35,31 +50,6 @@ def convert_pop_text(text_value):
     return min_age, max_age
 
 
-def get_threshold_values(user_cov_table):
-    # apply to table and return it
-    user_cov_table = user_cov_table.with_columns(
-        pl.col("threshold")
-        .map_elements(convert_cutoff_text, return_dtype=pl.Int64)
-        .alias("threshold_age")
-    )
-    return user_cov_table
-
-
-def add_pop_ranges_to_pop_table(user_pop_table):
-    # apply to table and return it
-    user_pop_table = user_pop_table.with_columns(
-        pl.col("population")
-        .map_elements(convert_pop_text, return_dtype=pl.List(pl.Int64))
-        .alias("pop_range")
-    )
-    return user_pop_table
-
-
-def get_coverage_cutoffs(user_cov_table):
-    cutoff_values = [0, 1] + user_cov_table["threshold_age"].to_list() + [100]
-    return cutoff_values
-
-
 def get_coverage_ranges(cutoff_values):
     coverage_range = [
         (cutoff_values[i], cutoff_values[i + 1]) for i in range(len(cutoff_values) - 1)
@@ -76,6 +66,30 @@ def get_threshold_label_from_coverage_range(coverage_range, vacc_table):
     return closest_row["threshold"]
 
 
+# rename df to immunity_df
+def add_threshold_text_to_df(df, vacc_table):
+    # apply to dataframe and return it
+    df = df.with_columns(
+        (
+            pl.col("coverage_range").map_elements(
+                lambda x: get_threshold_label_from_coverage_range(x, vacc_table),
+                return_dtype=pl.String,
+            )
+        ).alias("threshold_text")
+    )
+    return df
+
+
+def add_pop_ranges_to_pop_table(user_pop_table):
+    # apply to table and return it
+    user_pop_table = user_pop_table.with_columns(
+        pl.col("population")
+        .map_elements(convert_pop_text, return_dtype=pl.List(pl.Int64))
+        .alias("pop_range")
+    )
+    return user_pop_table
+
+
 def get_pop_label_from_coverage(coverage_range, pop_table):
     max_age = coverage_range[1]
     closest_row_index = pop_table.select(
@@ -83,6 +97,78 @@ def get_pop_label_from_coverage(coverage_range, pop_table):
     ).item()
     closest_row = pop_table.row(closest_row_index, named=True)
     return closest_row["population"]
+
+
+def add_pop_label_to_df(df, pop_table):
+    # add pop_text column
+    df = df.with_columns(
+        (
+            pl.col("coverage_range").map_elements(
+                lambda x: get_pop_label_from_coverage(x, pop_table),
+                return_dtype=pl.String,
+            )
+        ).alias("pop_text")
+    )
+    return df
+
+
+def add_pop_range_to_df(df):
+    # add pop_range column
+    df = df.with_columns(
+        (
+            pl.col("pop_text").map_elements(
+                convert_pop_text, return_dtype=pl.List(pl.Int64)
+            )
+        ).alias("pop_range")
+    )
+    return df
+
+
+def add_threshold_coverage_to_df(df, vacc_table):
+    # add threshold_coverage column
+    df = df.with_columns(
+        (
+            pl.col("threshold_text").map_elements(
+                lambda x: vacc_table.filter(pl.col("threshold") == x)["coverage"][0],
+                return_dtype=pl.Float64,
+            )
+        ).alias("threshold_coverage")
+    )
+    return df
+
+
+def add_coverage_range_min_max_to_df(df):
+    df = df.with_columns(
+        pl.col("coverage_range").list.get(0).alias("coverage_range_min_age"),
+    )
+    df = df.with_columns(
+        pl.col("coverage_range").list.get(1).alias("coverage_range_max_age"),
+    )
+    return df
+
+
+def add_pop_fraction_in_coverage_range_to_df(df):
+    # calculate coverage_range_length
+    expected_df = df.with_columns(
+        (pl.col("coverage_range_max_age") - pl.col("coverage_range_min_age")).alias(
+            "coverage_range_length"
+        ),
+    )
+
+    # calculate pop_range_length
+    expected_df = expected_df.with_columns(
+        (pl.col("pop_range").list.get(1) - pl.col("pop_range").list.get(0)).alias(
+            "pop_range_length"
+        ),
+    )
+
+    # calculate fraction of population covered by coverage range
+    expected_df = expected_df.with_columns(
+        (pl.col("coverage_range_length") / pl.col("pop_range_length")).alias(
+            "fraction_population_covered"
+        ),
+    )
+    return expected_df
 
 
 config_path = os.path.join(
@@ -117,14 +203,15 @@ print(vacc_table)
 coverage_range = get_coverage_ranges(cutoff_values)
 print("Coverage ranges:", coverage_range)
 
-threshold_text = []
-for i in coverage_range:
-    val = get_threshold_label_from_coverage_range(i, vacc_table)
-    # threshold_text.append(closest_row["threshold"])
-    threshold_text.append(val)
+# threshold_text = []
+# for i in coverage_range:
+#     val = get_threshold_label_from_coverage_range(i, vacc_table)
+#     # threshold_text.append(closest_row["threshold"])
+#     threshold_text.append(val)
 
-print("Threshold text:", threshold_text)
+# print("Threshold text:", threshold_text)
 
+# start building dataframe
 df = pl.DataFrame(
     {
         "coverage_range": coverage_range,
@@ -132,54 +219,65 @@ df = pl.DataFrame(
 )
 
 # add threshold_text column
-df = df.with_columns(
-    (
-        pl.col("coverage_range").map_elements(
-            lambda x: get_threshold_label_from_coverage_range(x, vacc_table),
-            return_dtype=pl.String,
-        )
-    ).alias("threshold_text")
-)
+# df = df.with_columns(
+#     (
+#         pl.col("coverage_range").map_elements(
+#             lambda x: get_threshold_label_from_coverage_range(x, vacc_table),
+#             return_dtype=pl.String,
+#         )
+#     ).alias("threshold_text")
+# )
+df = add_threshold_text_to_df(df, vacc_table)
+
+
 # add pop_text column
-df = df.with_columns(
-    (
-        pl.col("coverage_range").map_elements(
-            lambda x: get_pop_label_from_coverage(x, pop_table),
-            return_dtype=pl.String,
-        )
-    ).alias("pop_text")
-)
+# df = df.with_columns(
+#     (
+#         pl.col("coverage_range").map_elements(
+#             lambda x: get_pop_label_from_coverage(x, pop_table),
+#             return_dtype=pl.String,
+#         )
+#     ).alias("pop_text")
+# )
+df = add_pop_label_to_df(df, pop_table)
+
 
 # add pop_range column
-df = df.with_columns(
-    (
-        pl.col("pop_text").map_elements(
-            convert_pop_text, return_dtype=pl.List(pl.Int64)
-        )
-    ).alias("pop_range")
-)
+# df = df.with_columns(
+#     (
+#         pl.col("pop_text").map_elements(
+#             convert_pop_text, return_dtype=pl.List(pl.Int64)
+#         )
+#     ).alias("pop_range")
+# )
+df = add_pop_range_to_df(df)
+
 
 # add threshold_coverage column
-df = df.with_columns(
-    (
-        pl.col("threshold_text").map_elements(
-            lambda x: vacc_table.filter(pl.col("threshold") == x)["coverage"][0],
-            return_dtype=pl.Float64,
-        )
-    ).alias("threshold_coverage")
-)
-
+# df = df.with_columns(
+#     (
+#         pl.col("threshold_text").map_elements(
+#             lambda x: vacc_table.filter(pl.col("threshold") == x)["coverage"][0],
+#             return_dtype=pl.Float64,
+#         )
+#     ).alias("threshold_coverage")
+# )
+df = add_threshold_coverage_to_df(df, vacc_table)
 
 print("Real dataframe with threshold text:")
 print(df)
 
 
-df = df.with_columns(
-    pl.col("coverage_range").list.get(0).alias("coverage_range_min_age"),
-)
-df = df.with_columns(
-    pl.col("coverage_range").list.get(1).alias("coverage_range_max_age"),
-)
+# df = df.with_columns(
+#     pl.col("coverage_range").list.get(0).alias("coverage_range_min_age"),
+# )
+# df = df.with_columns(
+#     pl.col("coverage_range").list.get(1).alias("coverage_range_max_age"),
+# )
+df = add_coverage_range_min_max_to_df(df)
+
+expected_df = df.clone()
+
 
 # threshold_text = [
 #     "2 years",
@@ -222,62 +320,53 @@ df = df.with_columns(
 # )
 # print(expected_df)
 
-# print(
-#     expected_df.select(
-#         pl.col("*").exclude(
-#             "coverage_range",
-#             "pop_range",
-#             "pop_range_length",
-#             "coverage_range_length",
-#         )
-#     )
+
+# expected_df = df.with_columns(
+#     pl.col("coverage_range").list.get(0).alias("coverage_range_min_age"),
+# )
+# expected_df = expected_df.with_columns(
+#     pl.col("coverage_range").list.get(1).alias("coverage_range_max_age"),
 # )
 
 
-expected_df = df.with_columns(
-    pl.col("coverage_range").list.get(0).alias("coverage_range_min_age"),
-)
-expected_df = expected_df.with_columns(
-    pl.col("coverage_range").list.get(1).alias("coverage_range_max_age"),
-)
-
-
 # calculate coverage_range_length
-expected_df = expected_df.with_columns(
-    (pl.col("coverage_range_max_age") - pl.col("coverage_range_min_age")).alias(
-        "coverage_range_length"
-    ),
-)
+# expected_df = expected_df.with_columns(
+#     (pl.col("coverage_range_max_age") - pl.col("coverage_range_min_age")).alias(
+#         "coverage_range_length"
+#     ),
+# )
 
-# calculate pop_range_length
-expected_df = expected_df.with_columns(
-    (pl.col("pop_range").list.get(1) - pl.col("pop_range").list.get(0)).alias(
-        "pop_range_length"
-    ),
-)
+# # calculate pop_range_length
+# expected_df = expected_df.with_columns(
+#     (pl.col("pop_range").list.get(1) - pl.col("pop_range").list.get(0)).alias(
+#         "pop_range_length"
+#     ),
+# )
 
-# calculate fraction of population covered by coverage range
-expected_df = expected_df.with_columns(
-    (pl.col("coverage_range_length") / pl.col("pop_range_length")).alias(
-        "fraction_population_covered"
-    ),
-)
+# # calculate fraction of population covered by coverage range
+# expected_df = expected_df.with_columns(
+#     (pl.col("coverage_range_length") / pl.col("pop_range_length")).alias(
+#         "fraction_population_covered"
+#     ),
+# )
+expected_df = add_pop_fraction_in_coverage_range_to_df(expected_df)
 
-# reorder columns
-expected_df = expected_df.select(
-    [
-        "coverage_range",
-        "threshold_text",
-        "pop_range",
-        "pop_text",
-        "pop_range_length",
-        "fraction_population_covered",
-        "coverage_range_min_age",
-        "coverage_range_max_age",
-        "coverage_range_length",
-        "threshold_coverage",
-    ]
-)
+
+# # reorder columns
+# expected_df = expected_df.select(
+#     [
+#         "coverage_range",
+#         "threshold_text",
+#         "pop_range",
+#         "pop_text",
+#         "pop_range_length",
+#         "fraction_population_covered",
+#         "coverage_range_min_age",
+#         "coverage_range_max_age",
+#         "coverage_range_length",
+#         "threshold_coverage",
+#     ]
+# )
 
 joined_df = expected_df.clone()
 joined_df = joined_df.join(
