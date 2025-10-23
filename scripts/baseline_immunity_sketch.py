@@ -19,6 +19,22 @@ def convert_cutoff_text(text_value):
     return r
 
 
+def convert_pop_text(text_value):
+    r = text_value.replace(" ", "").replace("<", "").replace("+", "")
+    r = r.split("-")
+    r = [int(i) for i in r]
+    if "<" in text_value:
+        min_age = 0
+        max_age = r[0]
+    elif "+" in text_value:
+        min_age = r[0]
+        max_age = 100
+    else:
+        min_age = r[0]
+        max_age = r[1] + 1
+    return min_age, max_age
+
+
 def get_threshold_values(user_cov_table):
     # apply to table and return it
     user_cov_table = user_cov_table.with_columns(
@@ -29,9 +45,44 @@ def get_threshold_values(user_cov_table):
     return user_cov_table
 
 
+def add_pop_ranges_to_pop_table(user_pop_table):
+    # apply to table and return it
+    user_pop_table = user_pop_table.with_columns(
+        pl.col("population")
+        .map_elements(convert_pop_text, return_dtype=pl.List(pl.Int64))
+        .alias("pop_range")
+    )
+    return user_pop_table
+
+
 def get_coverage_cutoffs(user_cov_table):
     cutoff_values = [0, 1] + user_cov_table["threshold_age"].to_list() + [100]
     return cutoff_values
+
+
+def get_coverage_ranges(cutoff_values):
+    coverage_range = [
+        (cutoff_values[i], cutoff_values[i + 1]) for i in range(len(cutoff_values) - 1)
+    ]
+    return coverage_range
+
+
+def get_threshold_label_from_coverage_range(coverage_range, vacc_table):
+    max_age = coverage_range[1]
+    closest_row_index = vacc_table.select(
+        (pl.col("threshold_age") - max_age).abs().arg_min()
+    ).item()
+    closest_row = vacc_table.row(closest_row_index, named=True)
+    return closest_row["threshold"]
+
+
+def get_pop_label_from_coverage(coverage_range, pop_table):
+    max_age = coverage_range[1]
+    closest_row_index = pop_table.select(
+        (pl.col("pop_range").list.get(1) - max_age).abs().arg_min()
+    ).item()
+    closest_row = pop_table.row(closest_row_index, named=True)
+    return closest_row["population"]
 
 
 config_path = os.path.join(
@@ -52,6 +103,10 @@ vacc_table = vacc_table.with_columns(pl.Series("coverage", [100, 100, 0, 0]))
 print(pop_table)
 print(vacc_table)
 
+# get population range mappings
+pop_table = add_pop_ranges_to_pop_table(pop_table)
+print(pop_table)
+
 # get_coverage_distribution_mapping(pop_table, vacc_table)
 vacc_table = get_threshold_values(vacc_table)
 cutoff_values = get_coverage_cutoffs(vacc_table)
@@ -59,32 +114,72 @@ print("Cutoff values:", cutoff_values)
 print("Vacc table with numeric thresholds:")
 print(vacc_table)
 
-# coverage_range = []
-# for i in range(len(cutoff_values) - 1):
-#     coverage_range.append((cutoff_values[i], cutoff_values[i + 1]))
-
-
-coverage_range = [
-    (cutoff_values[i], cutoff_values[i + 1]) for i in range(len(cutoff_values) - 1)
-]
+coverage_range = get_coverage_ranges(cutoff_values)
 print("Coverage ranges:", coverage_range)
 
 threshold_text = []
 for i in coverage_range:
-    # print(i)
-    # find the matching text in vacc_table - the closest one to the max age
-    max_age = i[1]
-
-    closest_row_index = vacc_table.select(
-        (pl.col("threshold_age") - max_age).abs().arg_min()
-    ).item()
-    # print("Closest row index:", closest_row_index)
-    closest_row = vacc_table.row(closest_row_index, named=True)
-    # print("Closest row:", closest_row)
-    # print("Using threshold text:", closest_row["threshold"])
-    threshold_text.append(closest_row["threshold"])
+    val = get_threshold_label_from_coverage_range(i, vacc_table)
+    # threshold_text.append(closest_row["threshold"])
+    threshold_text.append(val)
 
 print("Threshold text:", threshold_text)
+
+df = pl.DataFrame(
+    {
+        "coverage_range": coverage_range,
+    }
+)
+
+# add threshold_text column
+df = df.with_columns(
+    (
+        pl.col("coverage_range").map_elements(
+            lambda x: get_threshold_label_from_coverage_range(x, vacc_table),
+            return_dtype=pl.String,
+        )
+    ).alias("threshold_text")
+)
+# add pop_text column
+df = df.with_columns(
+    (
+        pl.col("coverage_range").map_elements(
+            lambda x: get_pop_label_from_coverage(x, pop_table),
+            return_dtype=pl.String,
+        )
+    ).alias("pop_text")
+)
+
+# add pop_range column
+df = df.with_columns(
+    (
+        pl.col("pop_text").map_elements(
+            convert_pop_text, return_dtype=pl.List(pl.Int64)
+        )
+    ).alias("pop_range")
+)
+
+# add threshold_coverage column
+df = df.with_columns(
+    (
+        pl.col("threshold_text").map_elements(
+            lambda x: vacc_table.filter(pl.col("threshold") == x)["coverage"][0],
+            return_dtype=pl.Float64,
+        )
+    ).alias("threshold_coverage")
+)
+
+
+print("Real dataframe with threshold text:")
+print(df)
+
+
+df = df.with_columns(
+    pl.col("coverage_range").list.get(0).alias("coverage_range_min_age"),
+)
+df = df.with_columns(
+    pl.col("coverage_range").list.get(1).alias("coverage_range_max_age"),
+)
 
 # threshold_text = [
 #     "2 years",
@@ -95,51 +190,51 @@ print("Threshold text:", threshold_text)
 #     "18+",
 # ]
 
-pop_ranges = [
-    (0, 5),
-    (0, 5),
-    (0, 5),
-    (5, 18),
-    (5, 18),
-    (18, 100),
-]
+# pop_ranges = [
+#     (0, 5),
+#     (0, 5),
+#     (0, 5),
+#     (5, 18),
+#     (5, 18),
+#     (18, 100),
+# ]
 
-pop_text = [
-    "<5",
-    "<5",
-    "<5",
-    "5-17",
-    "5-17",
-    "18+",
-]
+# pop_text = [
+#     "<5",
+#     "<5",
+#     "<5",
+#     "5-17",
+#     "5-17",
+#     "18+",
+# ]
 
-threshold_coverages = vacc_table["coverage"].to_list()
-threshold_coverages = [0.0, 0.0] + threshold_coverages
+# threshold_coverages = vacc_table["coverage"].to_list()
+# threshold_coverages = [0.0, 0.0] + threshold_coverages
 
-expected_df = pl.DataFrame(
-    {
-        "coverage_range": coverage_range,
-        "threshold_text": threshold_text,
-        "pop_range": pop_ranges,
-        "pop_text": pop_text,
-        "threshold_coverage": threshold_coverages,
-    }
-)
-print(expected_df)
+# expected_df = pl.DataFrame(
+#     {
+#         "coverage_range": coverage_range,
+#         "threshold_text": threshold_text,
+#         "pop_range": pop_ranges,
+#         "pop_text": pop_text,
+#         "threshold_coverage": threshold_coverages,
+#     }
+# )
+# print(expected_df)
 
-print(
-    expected_df.select(
-        pl.col("*").exclude(
-            "coverage_range",
-            "pop_range",
-            "pop_range_length",
-            "coverage_range_length",
-        )
-    )
-)
+# print(
+#     expected_df.select(
+#         pl.col("*").exclude(
+#             "coverage_range",
+#             "pop_range",
+#             "pop_range_length",
+#             "coverage_range_length",
+#         )
+#     )
+# )
 
 
-expected_df = expected_df.with_columns(
+expected_df = df.with_columns(
     pl.col("coverage_range").list.get(0).alias("coverage_range_min_age"),
 )
 expected_df = expected_df.with_columns(
