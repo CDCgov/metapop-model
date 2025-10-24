@@ -1437,42 +1437,12 @@ def edit_baseline_immunity(parms):
 
     calc_immunity()
 
+    calc_immunity_2(st.session_state.pop_table, st.session_state.cov_table)
+
     button_to_calculate_immunity()
 
 
-def get_coverage_distribution_mapping(user_pop_table, user_cov_table):
-    print("cutoffs: ", st.session_state.cov_table["threshold"].to_list())
-    num_cutoffs, cutoff_map = get_coverage_cutoffs(user_cov_table)
-    if 0 not in num_cutoffs:
-        num_cutoffs = [0] + num_cutoffs
-    print(f"num_cutoffs: {num_cutoffs}")
-    if 100 not in num_cutoffs:
-        num_cutoffs = num_cutoffs + [100]
-    print(f"num_cutoffs after adding 100: {num_cutoffs}")
-    df = pl.DataFrame(
-        {
-            "threshold": cutoff_map.keys(),
-            "min_age": [cutoff_map[i] for i in cutoff_map.keys()],
-        }
-    )
-    print("coverage map:", df)
-    return df, cutoff_map
-
-
-def get_coverage_cutoffs(user_cov_table):
-    cutoffs = user_cov_table["threshold"].to_list()
-    num_cutoffs = []
-    cutoff_map = dict()
-    for i in cutoffs:
-        r = convert_coverage_cutoff(i)
-        if isinstance(r, int):
-            num_cutoffs.append(r)
-        cutoff_map[i] = r
-    print(f"num_cutoffs: {num_cutoffs}")
-    return num_cutoffs, cutoff_map
-
-
-def convert_coverage_cutoff(text_value):
+def convert_cutoff_text(text_value):
     r = (
         text_value.replace(" ", "")
         .replace("<", "")
@@ -1480,59 +1450,435 @@ def convert_coverage_cutoff(text_value):
         .replace("kindergarten", "")
         .replace("(", "")
         .replace(")", "")
-        .split("years")
+        .replace("years", "")
     )
-    r = [i for i in r if i != ""]
-    if len(r) == 1:
-        r = int(r[0])
-    elif len(r) == 2:
-        print("not covered yet")
-    print(f"r: {r}")
+    r = int(r)
     return r
 
 
-def get_population_distribution_mapping(user_pop_table, user_cov_table):
-    age_bins = get_pop_age_bins(user_pop_table)
-    df = pl.DataFrame(
-        {
-            "age_bin": age_bins.keys(),
-            "population": age_bins.values(),
-        }
+def add_threshold_values_to_vacc_table(user_cov_table):
+    # apply to coverage table and return it
+    user_cov_table = user_cov_table.with_columns(
+        pl.col("threshold")
+        .map_elements(convert_cutoff_text, return_dtype=pl.Int64)
+        .alias("threshold_age")
+    )
+    return user_cov_table
+
+
+def get_coverage_cutoffs(user_cov_table):
+    cutoff_values = [0, 1] + user_cov_table["threshold_age"].to_list() + [100]
+    return cutoff_values
+
+
+def get_coverage_ranges(cutoff_values):
+    coverage_range = [
+        (cutoff_values[i], cutoff_values[i + 1]) for i in range(len(cutoff_values) - 1)
+    ]
+    return coverage_range
+
+
+def get_threshold_label_from_coverage_range(coverage_range, vacc_table):
+    max_age = coverage_range[1]
+    closest_row_index = vacc_table.select(
+        (pl.col("threshold_age") - max_age).abs().arg_min()
+    ).item()
+    closest_row = vacc_table.row(closest_row_index, named=True)
+    return closest_row["threshold"]
+
+
+# rename df to immunity_df
+def add_threshold_text_to_df(df, vacc_table):
+    # apply to dataframe and return it
+    df = df.with_columns(
+        (
+            pl.col("coverage_range").map_elements(
+                lambda x: get_threshold_label_from_coverage_range(x, vacc_table),
+                return_dtype=pl.String,
+            )
+        ).alias("threshold_text")
     )
     return df
 
 
-def get_pop_age_bins(user_pop_table):
-    obins = user_pop_table["population"].to_list()
-    bins = dict()
-    for i in obins:
-        print(i)
-        min_age, max_age = convert_text_age_bin_to_tuple(i)
-        print(f"min_age: {min_age}, max_age: {max_age}")
-        bins[i] = (min_age, max_age)
-    return bins
-
-
-def convert_text_age_bin_to_tuple(age_bin_text):
-    if "<" in age_bin_text:
-        r = age_bin_text.split("<")
-        if len(r) == 1:
-            min_age = 0
-        else:
-            if r[0] == "":
-                min_age = 0
-            else:
-                min_age = int(r[0])
-        max_age = int(r[1])
-    elif "+" in age_bin_text:
-        r = age_bin_text.split("+")
-        min_age = int(r[0])
+def convert_pop_text(text_value):
+    r = text_value.replace(" ", "").replace("<", "").replace("+", "")
+    r = r.split("-")
+    r = [int(i) for i in r]
+    if "<" in text_value:
+        min_age = 0
+        max_age = r[0]
+    elif "+" in text_value:
+        min_age = r[0]
         max_age = 100
-    elif "-" in age_bin_text:
-        r = age_bin_text.split("-")
-        min_age = int(r[0])
-        max_age = int(r[1])
-    return (min_age, max_age)
+    else:
+        min_age = r[0]
+        max_age = r[1] + 1
+    return min_age, max_age
+
+
+def add_pop_ranges_to_pop_table(user_pop_table):
+    # apply to table and return it
+    user_pop_table = user_pop_table.with_columns(
+        pl.col("population")
+        .map_elements(convert_pop_text, return_dtype=pl.List(pl.Int64))
+        .alias("pop_range")
+    )
+    return user_pop_table
+
+
+def get_pop_label_from_coverage(coverage_range, pop_table):
+    max_age = coverage_range[1]
+    closest_row_index = pop_table.select(
+        (pl.col("pop_range").list.get(1) - max_age).abs().arg_min()
+    ).item()
+    closest_row = pop_table.row(closest_row_index, named=True)
+    return closest_row["population"]
+
+
+def add_pop_label_to_df(df, pop_table):
+    # add pop_text column
+    df = df.with_columns(
+        (
+            pl.col("coverage_range").map_elements(
+                lambda x: get_pop_label_from_coverage(x, pop_table),
+                return_dtype=pl.String,
+            )
+        ).alias("pop_text")
+    )
+    return df
+
+
+def add_pop_range_to_df(df):
+    # add pop_range column
+    df = df.with_columns(
+        (
+            pl.col("pop_text").map_elements(
+                convert_pop_text, return_dtype=pl.List(pl.Int64)
+            )
+        ).alias("pop_range")
+    )
+    return df
+
+
+def add_pop_percentage_to_df(df, pop_table):
+    # join on pop_table to get population values
+    df = df.with_columns(
+        (
+            pl.col("pop_text").map_elements(
+                lambda x: pop_table.filter(pl.col("population") == x)["percentage"][0],
+                return_dtype=pl.Float64,
+            )
+        ).alias("pop_percentage")
+    )
+    return df
+
+
+def add_threshold_coverage_to_df(df, vacc_table):
+    # add threshold_coverage column
+    # this is the coverage values corresponding to the threshold_text
+    # and the coverage for the lower bound of the coverage range
+    df = df.with_columns(
+        (
+            pl.col("threshold_text").map_elements(
+                lambda x: vacc_table.filter(pl.col("threshold") == x)["coverage"][0],
+                return_dtype=pl.Float64,
+            )
+        ).alias("threshold_coverage")
+    )
+    return df
+
+
+def add_coverage_range_min_max_to_df(df):
+    df = df.with_columns(
+        pl.col("coverage_range").list.get(0).alias("coverage_range_min_age"),
+    )
+    df = df.with_columns(
+        pl.col("coverage_range").list.get(1).alias("coverage_range_max_age"),
+    )
+    return df
+
+
+def add_pop_fraction_in_coverage_range_to_df(df):
+    # calculate coverage_range_length
+    expected_df = df.with_columns(
+        (pl.col("coverage_range_max_age") - pl.col("coverage_range_min_age")).alias(
+            "coverage_range_length"
+        ),
+    )
+
+    # calculate pop_range_length
+    expected_df = expected_df.with_columns(
+        (pl.col("pop_range").list.get(1) - pl.col("pop_range").list.get(0)).alias(
+            "pop_range_length"
+        ),
+    )
+
+    # calculate fraction of population covered by coverage range
+    expected_df = expected_df.with_columns(
+        (pl.col("coverage_range_length") / pl.col("pop_range_length")).alias(
+            "fraction_population_in_coverage_range"
+        ),
+    )
+    return expected_df
+
+
+def build_initial_baseline_immunity_dataframe_from_user_inputs(
+    pop_table,
+    vacc_table,
+):
+    print(vacc_table)
+    cutoff_values = get_coverage_cutoffs(vacc_table)
+
+    coverage_range = get_coverage_ranges(cutoff_values)
+
+    # start building dataframe
+    df = pl.DataFrame(
+        {
+            "coverage_range": coverage_range,
+        }
+    )
+
+    # add matching threshold_text column
+    df = add_threshold_text_to_df(df, vacc_table)
+
+    # add matching pop_text column
+    df = add_pop_label_to_df(df, pop_table)
+
+    # add matching pop_range column
+    df = add_pop_range_to_df(df)
+
+    # add matching population percentage column
+    df = add_pop_percentage_to_df(df, pop_table)
+
+    # add matching threshold_coverage column
+    df = add_threshold_coverage_to_df(df, vacc_table)
+
+    # add coverage_range_min_age and coverage_range_max_age columns
+    df = add_coverage_range_min_max_to_df(df)
+
+    # add fraction_population_covered column
+    df = add_pop_fraction_in_coverage_range_to_df(df)
+
+    # remove unneeded columns
+    df = df.drop(
+        ["coverage_range_length", "pop_range_length", "coverage_range", "pop_range"]
+    )
+    return df
+
+
+def create_dataframe_for_baseline_immunity_calculation(df):
+    """"""
+    # make a copy of df
+    joined_df = df.clone()
+    # join on itself to get the threshold_coverage for the upper bound of the coverage age range
+    joined_df = joined_df.join(
+        df[["coverage_range_min_age", "threshold_coverage"]],
+        left_on="coverage_range_max_age",
+        right_on="coverage_range_min_age",
+        how="full",
+        suffix="_right",
+    )
+
+    # remove row with null coverage_range
+    joined_df = joined_df.filter(
+        pl.col("coverage_range_min_age").is_not_null()
+        & pl.col("coverage_range_max_age").is_not_null()
+    )
+
+    # fill in threshold_coverage_right with threshold_coverage where null
+    # this is for the last row where there is no threshold_coverage in the
+    # original dataframe for the upper bound
+    joined_df = joined_df.with_columns(
+        pl.when(pl.col("threshold_coverage_right").is_null())
+        .then(pl.col("threshold_coverage"))
+        .otherwise(pl.col("threshold_coverage_right"))
+        .alias("threshold_coverage_right_filled"),
+    )
+
+    # rename columns for clarity
+    joined_df = joined_df.rename(
+        {
+            "threshold_coverage_right_filled": "threshold_coverage_upper",
+        }
+    )
+
+    # reset threshold_coverage for the coverage range starting at 0 to be 0
+    joined_df = joined_df.with_columns(
+        pl.when(
+            (pl.col("coverage_range_min_age") == 0)
+            | (pl.col("coverage_range_min_age") == 1)
+        )
+        .then(0)
+        .otherwise(pl.col("threshold_coverage"))
+        .alias("threshold_coverage"),
+    )
+    # reset threshold_coverage_upper for the coverage range ending at 1 to be 0
+    joined_df = joined_df.with_columns(
+        pl.when(pl.col("coverage_range_max_age") == 1)
+        .then(0)
+        .otherwise(pl.col("threshold_coverage_upper"))
+        .alias("threshold_coverage_upper"),
+    )
+
+    # add mid range coverage value for trapezoid rule
+    joined_df = joined_df.with_columns(
+        ((pl.col("threshold_coverage") + pl.col("threshold_coverage_upper")) / 2).alias(
+            "threshold_coverage_mid"
+        ),
+    )
+
+    # drop unneeded columns
+    joined_df = joined_df.drop(
+        ["coverage_range_min_age_right", "threshold_coverage_right"]
+    )
+
+    # reorder columns
+    joined_df = joined_df.select(
+        [
+            "coverage_range_min_age",
+            "coverage_range_max_age",
+            "threshold_text",
+            "pop_text",
+            "fraction_population_in_coverage_range",
+            "pop_percentage",
+            "threshold_coverage",
+            "threshold_coverage_upper",
+            "threshold_coverage_mid",
+        ]
+    )
+
+    # return the joined dataframe that can be used for calulating the baseline immunity from age based inputs
+    return joined_df
+
+
+def calculate_baseline_immunity_from_dataframe(df):
+    df = df.with_columns(
+        (
+            pl.col("threshold_coverage_mid")
+            * pl.col("pop_percentage")
+            / 100
+            * pl.col("fraction_population_in_coverage_range")
+        ).alias("weighted_coverage")
+    )
+    print("joined df for immunity calculation:")
+    print(df)
+    immunity = np.round(df.select(pl.col("weighted_coverage")).sum().item())
+    print(f"calculated immunity: {immunity}")
+    return immunity
+
+
+def calc_immunity_2(pop_table, cov_table):
+    # get range mappings
+    cov_table = add_threshold_values_to_vacc_table(cov_table)
+
+    pop_table = add_pop_ranges_to_pop_table(pop_table)
+
+    immunity_df = build_initial_baseline_immunity_dataframe_from_user_inputs(
+        pop_table,
+        cov_table,
+    )
+
+    joined_df = create_dataframe_for_baseline_immunity_calculation(immunity_df)
+
+    immunity = calculate_baseline_immunity_from_dataframe(joined_df)
+
+    return immunity
+
+
+# def get_coverage_distribution_mapping(user_pop_table, user_cov_table):
+#     print("cutoffs: ", st.session_state.cov_table["threshold"].to_list())
+#     num_cutoffs, cutoff_map = get_coverage_cutoffs(user_cov_table)
+#     if 0 not in num_cutoffs:
+#         num_cutoffs = [0] + num_cutoffs
+#     print(f"num_cutoffs: {num_cutoffs}")
+#     if 100 not in num_cutoffs:
+#         num_cutoffs = num_cutoffs + [100]
+#     print(f"num_cutoffs after adding 100: {num_cutoffs}")
+#     df = pl.DataFrame(
+#         {
+#             "threshold": cutoff_map.keys(),
+#             "min_age": [cutoff_map[i] for i in cutoff_map.keys()],
+#         }
+#     )
+#     print("coverage map:", df)
+#     return df, cutoff_map
+
+
+# def get_coverage_cutoffs(user_cov_table):
+#     cutoffs = user_cov_table["threshold"].to_list()
+#     num_cutoffs = []
+#     cutoff_map = dict()
+#     for i in cutoffs:
+#         r = convert_coverage_cutoff(i)
+#         if isinstance(r, int):
+#             num_cutoffs.append(r)
+#         cutoff_map[i] = r
+#     print(f"num_cutoffs: {num_cutoffs}")
+#     return num_cutoffs, cutoff_map
+
+
+# def convert_coverage_cutoff(text_value):
+#     r = (
+#         text_value.replace(" ", "")
+#         .replace("<", "")
+#         .replace("+", "")
+#         .replace("kindergarten", "")
+#         .replace("(", "")
+#         .replace(")", "")
+#         .split("years")
+#     )
+#     r = [i for i in r if i != ""]
+#     if len(r) == 1:
+#         r = int(r[0])
+#     elif len(r) == 2:
+#         print("not covered yet")
+#     print(f"r: {r}")
+#     return r
+
+
+# def get_population_distribution_mapping(user_pop_table, user_cov_table):
+#     age_bins = get_pop_age_bins(user_pop_table)
+#     df = pl.DataFrame(
+#         {
+#             "age_bin": age_bins.keys(),
+#             "population": age_bins.values(),
+#         }
+#     )
+#     return df
+
+
+# def get_pop_age_bins(user_pop_table):
+#     obins = user_pop_table["population"].to_list()
+#     bins = dict()
+#     for i in obins:
+#         print(i)
+#         min_age, max_age = convert_text_age_bin_to_tuple(i)
+#         print(f"min_age: {min_age}, max_age: {max_age}")
+#         bins[i] = (min_age, max_age)
+#     return bins
+
+
+# def convert_text_age_bin_to_tuple(age_bin_text):
+#     if "<" in age_bin_text:
+#         r = age_bin_text.split("<")
+#         if len(r) == 1:
+#             min_age = 0
+#         else:
+#             if r[0] == "":
+#                 min_age = 0
+#             else:
+#                 min_age = int(r[0])
+#         max_age = int(r[1])
+#     elif "+" in age_bin_text:
+#         r = age_bin_text.split("+")
+#         min_age = int(r[0])
+#         max_age = 100
+#     elif "-" in age_bin_text:
+#         r = age_bin_text.split("-")
+#         min_age = int(r[0])
+#         max_age = int(r[1])
+#     return (min_age, max_age)
 
 
 def get_baseline_immunity(population, coverage):
@@ -1665,15 +2011,15 @@ def calc_immunity():
         st.session_state.cov_table["coverage"],
     )
 
-    st.write("trying to redo immunity calculation")
-    pop_age_df = get_population_distribution_mapping(
-        st.session_state.pop_table, st.session_state.cov_table
-    )
-    print(pop_age_df)
+    # st.write("trying to redo immunity calculation")
+    # pop_age_df = get_population_distribution_mapping(
+    #     st.session_state.pop_table, st.session_state.cov_table
+    # )
+    # print(pop_age_df)
 
-    get_coverage_distribution_mapping(
-        st.session_state.pop_table, st.session_state.cov_table
-    )
+    # get_coverage_distribution_mapping(
+    #     st.session_state.pop_table, st.session_state.cov_table
+    # )
 
     immunity_text = f"{st.session_state.immunity * 100:.0f}"
 

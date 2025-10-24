@@ -1,5 +1,6 @@
 import os
 
+import numpy as np
 import polars as pl
 
 import metapop as mp
@@ -187,16 +188,10 @@ def add_pop_fraction_in_coverage_range_to_df(df):
 
 
 def build_initial_baseline_immunity_dataframe_from_user_inputs(
-    # coverage_range,
-    vacc_table,
     pop_table,
+    vacc_table,
 ):
-    # get_coverage_distribution_mapping(pop_table, vacc_table)
-    # vacc_table = get_threshold_values(vacc_table)
     cutoff_values = get_coverage_cutoffs(vacc_table)
-    # print("Cutoff values:", cutoff_values)
-    # print("Vacc table with numeric thresholds:")
-    # print(vacc_table)
 
     coverage_range = get_coverage_ranges(cutoff_values)
 
@@ -244,7 +239,7 @@ def create_dataframe_for_baseline_immunity_calculation(df):
 
     # join on itself to get the threshold_coverage for the upper bound of the coverage age range
     joined_df = joined_df.join(
-        expected_df[["coverage_range_min_age", "threshold_coverage"]],
+        df[["coverage_range_min_age", "threshold_coverage"]],
         left_on="coverage_range_max_age",
         right_on="coverage_range_min_age",
         how="full",
@@ -309,7 +304,9 @@ def calculate_baseline_immunity_from_dataframe(df):
         ).alias("weighted_coverage")
     )
 
-    immunity = df.select(pl.col("weighted_coverage")).sum()["weighted_coverage"][0]
+    immunity = np.round(
+        df.select(pl.col("weighted_coverage")).sum()["weighted_coverage"][0], 0
+    )
     return immunity
 
 
