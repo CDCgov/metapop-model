@@ -1442,7 +1442,7 @@ def edit_baseline_immunity(parms):
 
     calc_immunity()
 
-    calc_immunity_2(st.session_state.pop_table, st.session_state.cov_table)
+    get_baseline_immunity_2(st.session_state.pop_table, st.session_state.cov_table)
 
     button_to_calculate_immunity()
 
@@ -1583,22 +1583,16 @@ def add_threshold_coverage_to_df(df, vacc_table):
     # add threshold_coverage column
     # this is the coverage values corresponding to the threshold_text
     # and the coverage for the lower bound of the coverage range
-    print("df before adding threshold coverage:")
-    print(df)
-    df = df.with_columns(
-        (
-            pl.col("coverage_range_min_age").map_elements(
-                lambda x: vacc_table.filter(pl.col("threshold_age") == x)[
-                    "coverage"
-                ].to_list()[0]
-                if len(vacc_table.filter(pl.col("threshold_age") == x)) > 0
-                else 0.0,
-                return_dtype=pl.Float64,
-            )
-        ).alias("threshold_coverage")
+    df = (
+        df.join(
+            vacc_table.select(["threshold_age", "coverage"]),
+            left_on="coverage_range_min_age",
+            right_on="threshold_age",
+            how="left",
+        )
+        .with_columns(pl.col("coverage").fill_null(0.0).alias("threshold_coverage"))
+        .drop("coverage")
     )
-    print("df after adding threshold coverage:")
-    print(df)
     return df
 
 
@@ -1640,7 +1634,6 @@ def build_initial_baseline_immunity_dataframe_from_user_inputs(
     pop_table,
     vacc_table,
 ):
-    print(vacc_table)
     cutoff_values = get_coverage_cutoffs(vacc_table)
 
     coverage_range = get_coverage_ranges(cutoff_values)
@@ -1691,18 +1684,6 @@ def create_dataframe_for_baseline_immunity_calculation(df):
         right_on="coverage_range_min_age",
         how="full",
         suffix="_right",
-    )
-    print("joined df inside:")
-    print(
-        joined_df.select(
-            [
-                "threshold_text",
-                "coverage_range_min_age",
-                "coverage_range_max_age",
-                "threshold_coverage",
-                "threshold_coverage_right",
-            ]
-        )
     )
 
     # remove row with null coverage_range
@@ -1786,14 +1767,12 @@ def calculate_baseline_immunity_from_dataframe(df):
             * pl.col("fraction_population_in_coverage_range")
         ).alias("weighted_coverage")
     )
-    print("joined df for immunity calculation:")
-    # print(df)
-    immunity = np.round(df.select(pl.col("weighted_coverage")).sum().item())
-    print(f"calculated immunity: {immunity}")
+
+    immunity = np.round(df.select(pl.col("weighted_coverage")).sum().item() / 100, 2)
     return immunity
 
 
-def calc_immunity_2(pop_table, cov_table):
+def get_baseline_immunity_2(pop_table, cov_table):
     # get range mappings
     cov_table = add_threshold_values_to_vacc_table(cov_table)
 
@@ -1809,101 +1788,6 @@ def calc_immunity_2(pop_table, cov_table):
     immunity = calculate_baseline_immunity_from_dataframe(joined_df)
 
     return immunity
-
-
-# def get_coverage_distribution_mapping(user_pop_table, user_cov_table):
-#     print("cutoffs: ", st.session_state.cov_table["threshold"].to_list())
-#     num_cutoffs, cutoff_map = get_coverage_cutoffs(user_cov_table)
-#     if 0 not in num_cutoffs:
-#         num_cutoffs = [0] + num_cutoffs
-#     print(f"num_cutoffs: {num_cutoffs}")
-#     if 100 not in num_cutoffs:
-#         num_cutoffs = num_cutoffs + [100]
-#     print(f"num_cutoffs after adding 100: {num_cutoffs}")
-#     df = pl.DataFrame(
-#         {
-#             "threshold": cutoff_map.keys(),
-#             "min_age": [cutoff_map[i] for i in cutoff_map.keys()],
-#         }
-#     )
-#     print("coverage map:", df)
-#     return df, cutoff_map
-
-
-# def get_coverage_cutoffs(user_cov_table):
-#     cutoffs = user_cov_table["threshold"].to_list()
-#     num_cutoffs = []
-#     cutoff_map = dict()
-#     for i in cutoffs:
-#         r = convert_coverage_cutoff(i)
-#         if isinstance(r, int):
-#             num_cutoffs.append(r)
-#         cutoff_map[i] = r
-#     print(f"num_cutoffs: {num_cutoffs}")
-#     return num_cutoffs, cutoff_map
-
-
-# def convert_coverage_cutoff(text_value):
-#     r = (
-#         text_value.replace(" ", "")
-#         .replace("<", "")
-#         .replace("+", "")
-#         .replace("kindergarten", "")
-#         .replace("(", "")
-#         .replace(")", "")
-#         .split("years")
-#     )
-#     r = [i for i in r if i != ""]
-#     if len(r) == 1:
-#         r = int(r[0])
-#     elif len(r) == 2:
-#         print("not covered yet")
-#     print(f"r: {r}")
-#     return r
-
-
-# def get_population_distribution_mapping(user_pop_table, user_cov_table):
-#     age_bins = get_pop_age_bins(user_pop_table)
-#     df = pl.DataFrame(
-#         {
-#             "age_bin": age_bins.keys(),
-#             "population": age_bins.values(),
-#         }
-#     )
-#     return df
-
-
-# def get_pop_age_bins(user_pop_table):
-#     obins = user_pop_table["population"].to_list()
-#     bins = dict()
-#     for i in obins:
-#         print(i)
-#         min_age, max_age = convert_text_age_bin_to_tuple(i)
-#         print(f"min_age: {min_age}, max_age: {max_age}")
-#         bins[i] = (min_age, max_age)
-#     return bins
-
-
-# def convert_text_age_bin_to_tuple(age_bin_text):
-#     if "<" in age_bin_text:
-#         r = age_bin_text.split("<")
-#         if len(r) == 1:
-#             min_age = 0
-#         else:
-#             if r[0] == "":
-#                 min_age = 0
-#             else:
-#                 min_age = int(r[0])
-#         max_age = int(r[1])
-#     elif "+" in age_bin_text:
-#         r = age_bin_text.split("+")
-#         min_age = int(r[0])
-#         max_age = 100
-#     elif "-" in age_bin_text:
-#         r = age_bin_text.split("-")
-#         min_age = int(r[0])
-#         max_age = int(r[1])
-#     return (min_age, max_age)
 
 
 def get_baseline_immunity(population, coverage):
@@ -2031,20 +1915,13 @@ def calc_immunity():
         st.session_state.cov_table,
         default_values,
     )
-    st.session_state.immunity = get_baseline_immunity(
-        st.session_state.pop_table["percentage"],
-        st.session_state.cov_table["coverage"],
+    # st.session_state.immunity = get_baseline_immunity(
+    #     st.session_state.pop_table["percentage"],
+    #     st.session_state.cov_table["coverage"],
+    # )
+    st.session_state.immunity = get_baseline_immunity_2(
+        st.session_state.pop_table, st.session_state.cov_table
     )
-
-    # st.write("trying to redo immunity calculation")
-    # pop_age_df = get_population_distribution_mapping(
-    #     st.session_state.pop_table, st.session_state.cov_table
-    # )
-    # print(pop_age_df)
-
-    # get_coverage_distribution_mapping(
-    #     st.session_state.pop_table, st.session_state.cov_table
-    # )
 
     immunity_text = f"{st.session_state.immunity * 100:.0f}"
 
