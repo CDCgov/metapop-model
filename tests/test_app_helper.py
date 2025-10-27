@@ -1211,6 +1211,9 @@ def test_get_baseline_immunity_all_immune_under_5_other_arbitrary():
     pop_table = initialize_pop_table(parms)
     vacc_table = initialize_vacc_table(parms)
 
+    pop_table = add_pop_ranges_to_pop_table(pop_table)
+    vacc_table = add_threshold_values_to_vacc_table(vacc_table)
+
     # Set population to be 100% in the 0-5 years age group - first age group
     pop_table = pop_table.with_columns(
         pl.when(pl.col("population") == "<5")
@@ -1229,9 +1232,6 @@ def test_get_baseline_immunity_all_immune_under_5_other_arbitrary():
         .otherwise(pl.col("coverage"))
         .alias("coverage")
     )
-
-    pop_table = add_pop_ranges_to_pop_table(pop_table)
-    vacc_table = add_threshold_values_to_vacc_table(vacc_table)
 
     immunity_df = build_initial_baseline_immunity_dataframe_from_user_inputs(
         pop_table, vacc_table
