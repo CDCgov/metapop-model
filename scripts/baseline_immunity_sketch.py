@@ -16,7 +16,9 @@ vacc_table = mp.initialize_vacc_table(parms)
 
 pop_table = pop_table.with_columns(pl.Series("percentage", [100.0, 0.0, 0.0]))
 
-vacc_table = vacc_table.with_columns(pl.Series("coverage", [100.0, 100.0, 0.0, 100.0]))
+vacc_table = vacc_table.with_columns(
+    pl.Series("coverage", [100.0, 100.0, 100.0, 100.0])
+)
 
 # get range mappings
 pop_table = mp.add_pop_ranges_to_pop_table(pop_table)
@@ -65,4 +67,4 @@ print(
 
 
 immunity = mp.calculate_baseline_immunity_from_dataframe(joined_df)
-print("Final baseline immunity value:", immunity)
+print(f"Final baseline immunity value: {immunity * 100:.0f}%")

@@ -475,3 +475,252 @@ def test_indistinguishable_scenarios():
     assert (
         abs(diffs["Total"].mean()) < 0.1
     ), f"Expected the mean difference to be close to 0, but got {diffs['Total'].mean()}"
+
+
+def test_relative_difference():
+    # Create a sample DataFrame
+    scenarios = ["A", "B"]
+    a_base_vals = np.arange(100, 191, 10)
+    b_compare_vals = np.arange(105, 196, 10)
+
+    data = pl.DataFrame(
+        {
+            "Scenario": ["A"] * 10 + ["B"] * 10,
+            "Total": a_base_vals.tolist() + b_compare_vals.tolist(),
+        }
+    )
+
+    rel_diffs = []
+    for base in a_base_vals:
+        for compare in b_compare_vals:
+            diff = 100 * (base - compare) / np.mean(a_base_vals)
+            rel_diffs.append(diff)
+
+    expected_reldiff = np.mean(rel_diffs)
+    expected_reldiff_low = np.quantile(rel_diffs, 0.025)
+    expected_reldiff_high = np.quantile(rel_diffs, 0.975)
+    expected_reldiff = [expected_reldiff_low, expected_reldiff, expected_reldiff_high]
+
+    # Test relative_difference for Total column
+    total_reldiff = relative_difference(data, col_name="Total", group_values=scenarios)
+    assert (
+        len(total_reldiff) == 3
+    ), f"Expected total_reldiff to have 3 elements, but got {len(total_reldiff)}"
+    print(total_reldiff)
+    for i in range(3):
+        assert (
+            total_reldiff[i] == expected_reldiff[i]
+        ), f"Expected {i}th element of relative difference to be {expected_reldiff[i]}, but got {total_reldiff[i]}"
+
+
+def test_relative_difference_against_self():
+    # Create a sample DataFrame
+    scenarios = ["A", "B"]
+    a_base_vals = np.arange(100, 191, 10)
+
+    data = pl.DataFrame(
+        {
+            "Scenario": ["A"] * 10 + ["B"] * 10,
+            "Total": a_base_vals.tolist() * 2,
+        }
+    )
+
+    # Test relative_difference for Total column
+    total_reldiff = relative_difference(data, col_name="Total", group_values=scenarios)
+    # lwr should be approximately equal to upr and mean should be approximately zero
+    assert total_reldiff[1] == pytest.approx(0.0, rel=1e-6)
+    assert -total_reldiff[0] == pytest.approx(total_reldiff[2], rel=1e-6)
+
+
+def test_relative_difference_assertion():
+    with pytest.raises(AssertionError):
+        relative_difference(
+            pl.DataFrame({"Scenario": ["A", "B", "C"], "Total": [1, 2, 3]}),
+            col_name="Total",
+            group_values=["A", "B", "C"],
+        )
+
+
+def test_relative_difference_identifier():
+    # Create a sample DataFrame
+    scenarios = ["A", "B"]
+    a_base_vals = [100] * 10
+    b_compare_vals = [105] * 10
+
+    data = pl.DataFrame(
+        {
+            "Scenario": ["A"] * 10 + ["B"] * 10,
+            "Total": a_base_vals + b_compare_vals,
+            "replicate": list(range(10)) * 2,
+        }
+    )
+    expected_reldiff = [-5, -5, -5]
+
+    # Test relative_difference for Total column
+    total_reldiff = relative_difference(
+        data, col_name="Total", group_values=scenarios, identifier="replicate"
+    )
+    assert (
+        len(total_reldiff) == 3
+    ), f"Expected total_reldiff to have 3 elements, but got {len(total_reldiff)}"
+
+    for i in range(3):
+        assert (
+            total_reldiff[i] == expected_reldiff[i]
+        ), f"Expected {i}th element of relative difference to be {expected_reldiff[i]}, but got {total_reldiff[i]}"
+
+
+def test_relative_difference_identifier_unequal_length():
+    """Should trim the values that don't have identifier matches in A for B compare scenarios"""
+    # Create a sample DataFrame
+    scenarios = ["A", "B"]
+    a_base_vals = [100] * 10
+    # Additional five values that should alter calculation of reldiff unless properly removed by the helper
+    b_compare_vals = [105] * 10 + [10] * 5
+
+    data = pl.DataFrame(
+        {
+            "Scenario": ["A"] * 10 + ["B"] * 15,
+            "Total": a_base_vals + b_compare_vals,
+            "replicate": np.arange(0, 10).tolist() + np.arange(0, 15).tolist(),
+        }
+    )
+    expected_reldiff = [-5, -5, -5]
+
+    # Test relative_difference for Total column
+    total_reldiff = relative_difference(
+        data, col_name="Total", group_values=scenarios, identifier="replicate"
+    )
+    assert (
+        len(total_reldiff) == 3
+    ), f"Expected total_reldiff to have 3 elements, but got {len(total_reldiff)}"
+
+    for i in range(3):
+        assert (
+            total_reldiff[i] == expected_reldiff[i]
+        ), f"Expected {i}th element of relative difference to be {expected_reldiff[i]}, but got {total_reldiff[i]}"
+
+
+def test_relative_difference_identifier_no_matches():
+    with pytest.raises(
+        ValueError,
+        match="No matching comparisons based on column replicate. Check input data frame or try running with all pairwise comparisons instead.",
+    ):
+        # Create a sample DataFrame
+        scenarios = ["A", "B"]
+        a_base_vals = [100] * 10
+        b_compare_vals = [105] * 10
+
+        data = pl.DataFrame(
+            {
+                "Scenario": ["A"] * 10 + ["B"] * 10,
+                "Total": a_base_vals + b_compare_vals,
+                "replicate": np.arange(0, 10).tolist() + np.arange(10, 20).tolist(),
+            }
+        )
+
+        # Test relative_difference for Total column
+        relative_difference(
+            data, col_name="Total", group_values=scenarios, identifier="replicate"
+        )
+
+
+def test_get_baseline_immunity_all_pop_under_5():
+    """
+    Test the baseline immunity calculation when all population is under 5 years old. In this case, the baseline immunity should account for zero immunity for 0 to 1 years old since infants under 12 months old are typically not eligible for vaccination.
+
+    Assuming 100% MMR vaccination coverage for those at 2 years old and 5 years old (prior to an outbreak), the expected baseline immunity should be 0% for 0-1 years, increase from 0% to 100% for infants aged 1-2 years, and then be 100% for 2-5 years, resulting in an overall baseline immunity of 70% (since 2-5 years covers 3 out of the 5 years in the age range and we assume that vaccination gradually happens for infants between ages 1 and 2 years, i.e. 50% on average).
+    """
+    config_path = os.path.join(testdir, "test_app_config.yaml")
+
+    parms = read_parameters(config_path)
+
+    pop_table = initialize_pop_table(parms)
+    vacc_table = initialize_vacc_table(parms)
+
+    # Set population to be 100% in the 0-5 years age group - first age group
+    pop_table = pop_table.with_columns(
+        pl.when(pl.col("population") == "<5")
+        .then(100.0)
+        .otherwise(0.0)
+        .alias("percentage")
+    )
+
+    # Set vaccination coverage to be 100% for 2 years and 5 years (kindergarten) age groups
+    vacc_table = vacc_table.with_columns(
+        pl.when(
+            (pl.col("threshold") == "2 years")
+            | (pl.col("threshold") == "5 years (kindergarten)")
+        )
+        .then(100.0)
+        .otherwise(0.0)
+        .alias("coverage")
+    )
+
+    pop_table = add_pop_ranges_to_pop_table(pop_table)
+    vacc_table = add_threshold_values_to_vacc_table(vacc_table)
+
+    immunity_df = build_initial_baseline_immunity_dataframe_from_user_inputs(
+        pop_table, vacc_table
+    )
+    joined_immunity_df = create_dataframe_for_baseline_immunity_calculation(immunity_df)
+    immunity = calculate_baseline_immunity_from_dataframe(joined_immunity_df)
+
+    expected_immunity = 0.7  # 70% baseline immunity
+    assert (
+        expected_immunity == pytest.approx(immunity)
+    ), f"Calculated immunity: {immunity} does not match expected value: {expected_immunity}."
+
+
+def test_get_baseline_immunity_all_immune_under_5_other_arbitrary():
+    """
+    Test the baseline immunity calculation when all population is under 5 years old. In this case, the baseline immunity should account for zero immunity for 0 to 1 years old since infants under 12 months old are typically not eligible for vaccination.
+
+    Assuming 100% MMR vaccination coverage for those at 2 years old and 5 years old (prior to an outbreak), the expected baseline immunity should be 0% for 0-1 years, increase from 0% to 100% for infants aged 1-2 years, and then be 100% for 2-5 years, resulting in an overall baseline immunity of 70% (since 2-5 years covers 3 out of the 5 years in the age range and we assume that vaccination gradually happens for infants between ages 1 and 2 years, i.e. 50% on average).
+    """
+    config_path = os.path.join(testdir, "test_app_config.yaml")
+
+    parms = read_parameters(config_path)
+
+    pop_table = initialize_pop_table(parms)
+    vacc_table = initialize_vacc_table(parms)
+
+    # Set population to be 100% in the 0-5 years age group - first age group
+    pop_table = pop_table.with_columns(
+        pl.when(pl.col("population") == "<5")
+        .then(100.0)
+        .otherwise(0.0)
+        .alias("percentage")
+    )
+
+    # Set vaccination coverage to be 100% for 2 years and 5 years (kindergarten) age groups, don't reset other values
+    vacc_table = vacc_table.with_columns(
+        pl.when(
+            (pl.col("threshold") == "2 years")
+            | (pl.col("threshold") == "5 years (kindergarten)")
+        )
+        .then(100.0)
+        .otherwise(pl.col("coverage"))
+        .alias("coverage")
+    )
+
+    pop_table = add_pop_ranges_to_pop_table(pop_table)
+    vacc_table = add_threshold_values_to_vacc_table(vacc_table)
+
+    immunity_df = build_initial_baseline_immunity_dataframe_from_user_inputs(
+        pop_table, vacc_table
+    )
+    joined_immunity_df = create_dataframe_for_baseline_immunity_calculation(immunity_df)
+    immunity = calculate_baseline_immunity_from_dataframe(joined_immunity_df)
+
+    print("joined_immunity_df:\n", joined_immunity_df)
+    expected_immunity = 0.7  # 70% baseline immunity
+    assert (
+        expected_immunity == pytest.approx(immunity)
+    ), f"Calculated immunity: {immunity} does not match expected value: {expected_immunity}."
+    print(f"Calculated immunity: {immunity}")
+
+
+if __name__ == "__main__":
+    test_get_baseline_immunity_all_pop_under_5()
+    test_get_baseline_immunity_all_immune_under_5_other_arbitrary()
