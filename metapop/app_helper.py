@@ -85,6 +85,11 @@ __all__ = [
     "get_coverage_ranges",
     "get_threshold_label_from_coverage_range",
     "add_threshold_text_to_df",
+    "convert_pop_text",
+    "add_pop_ranges_to_pop_table",
+    "get_pop_label_from_coverage",
+    "add_pop_label_to_df",
+    "add_pop_range_to_df",
 ]
 
 CACHE_TTL = 60 * 60 * 24 * 7  # 1 week in seconds
@@ -1576,7 +1581,12 @@ def convert_pop_text(text_value):
         tuple: Tuple of min and max age values.
     """
 
-    r = text_value.replace(" ", "").replace("<", "").replace("+", "")
+    r = (
+        text_value.replace(" ", "")
+        .replace("<", "")
+        .replace("+", "")
+        .replace("years", "")
+    )
     r = r.split("-")
     r = [int(i) for i in r]
     if "<" in text_value:

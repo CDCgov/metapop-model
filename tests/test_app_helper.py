@@ -1328,9 +1328,9 @@ def test_get_threshold_label_from_coverage_range():
 
 
 def test_add_threshold_text_to_df():
-    config_path = os.path.join(testdir, "test_app_config.yaml")
-    parms = read_parameters(config_path)
-    vacc_table = initialize_vacc_table(parms)
+    vacc_table = pl.DataFrame(
+        {"threshold": ["2 years", "4 years (kindergarten)", "12 years", "18+"]}
+    )
     vacc_table = add_threshold_values_to_vacc_table(vacc_table)
 
     cutoff_values = get_coverage_cutoffs(vacc_table)
@@ -1343,7 +1343,124 @@ def test_add_threshold_text_to_df():
     )
 
     df_with_labels = add_threshold_text_to_df(df, vacc_table)
-    print("DataFrame with threshold labels:\n", df_with_labels)
+    expected_labels = [
+        "2 years",  # for (0, 1)
+        "2 years",  # for (1, 2)
+        "4 years (kindergarten)",
+        "12 years",
+        "18+",  # for (12, 18)
+        "18+",  # for (18, 100)
+    ]
+    assert (
+        df_with_labels["threshold_text"].to_list() == expected_labels
+    ), f"Expected labels {expected_labels}, but got {df_with_labels['threshold_text'].to_list()}"
+
+
+def test_convert_pop_text():
+    assert convert_pop_text("<3") == (0, 3)
+    assert convert_pop_text("6-11") == (6, 12)
+    assert convert_pop_text("18+") == (18, 100)
+    assert convert_pop_text("0-1") == (0, 2)
+    assert convert_pop_text("<50 years") == (0, 50)
+
+
+def test_add_pop_ranges_to_pop_table():
+    pop_table = pl.DataFrame(
+        {
+            "population": ["<4", "4-16", "17+"],
+        }
+    )
+    pop_table = add_pop_ranges_to_pop_table(pop_table)
+    expected_ranges = [
+        [0, 4],
+        [4, 17],
+        [17, 100],
+    ]
+    assert (
+        pop_table["pop_range"].to_list() == expected_ranges
+    ), f"Expected population ranges {expected_ranges}, but got {pop_table['pop_range'].to_list()}"
+
+
+def test_get_pop_label_from_coverage():
+    pop_table = pl.DataFrame(
+        {
+            "population": ["<4", "4-16", "17+"],
+        }
+    )
+    pop_table = add_pop_ranges_to_pop_table(pop_table)
+
+    coverage = (0, 3)
+    label = get_pop_label_from_coverage(coverage, pop_table)
+    expected_label = "<4"
+
+    assert (
+        label == expected_label
+    ), f"Expected label '{expected_label}', but got '{label}'"
+
+
+def test_add_pop_label_to_df():
+    pop_table = pl.DataFrame(
+        {
+            "population": ["<4", "4-16", "17+"],
+        }
+    )
+    pop_table = add_pop_ranges_to_pop_table(pop_table)
+
+    coverage_ranges = [
+        (0, 3),
+        (3, 4),
+        (4, 16),
+        (17, 100),
+    ]
+    df = pl.DataFrame(
+        {
+            "coverage_range": coverage_ranges,
+        }
+    )
+
+    df_with_labels = add_pop_label_to_df(df, pop_table)
+    expected_labels = [
+        "<4",  # for (0, 3)
+        "<4",  # for (3, 4)
+        "4-16",  # for (4, 16)
+        "17+",  # for (17, 100)
+    ]
+    assert (
+        df_with_labels["pop_text"].to_list() == expected_labels
+    ), f"Expected labels {expected_labels}, but got {df_with_labels['pop_text'].to_list()}"
+
+
+def test_add_pop_range_to_df():
+    pop_table = pl.DataFrame(
+        {
+            "population": ["<4", "4-16", "17+"],
+        }
+    )
+    pop_table = add_pop_ranges_to_pop_table(pop_table)
+
+    coverage_ranges = [
+        (0, 3),
+        (3, 4),
+        (4, 16),
+        (17, 100),
+    ]
+    df = pl.DataFrame(
+        {
+            "coverage_range": coverage_ranges,
+        }
+    )
+    df = add_pop_label_to_df(df, pop_table)
+    df_with_ranges = add_pop_range_to_df(df)
+
+    expected_ranges = [
+        [0, 4],  # for (0, 3)
+        [0, 4],  # for (3, 4)
+        [4, 17],  # for (4, 16)
+        [17, 100],  # for (17, 100)
+    ]
+    assert (
+        df_with_ranges["pop_range"].to_list() == expected_ranges
+    ), f"Expected ranges {expected_ranges}, but got {df_with_ranges['pop_range'].to_list()}"
 
 
 if __name__ == "__main__":
@@ -1357,10 +1474,16 @@ if __name__ == "__main__":
 
     # test_get_baseline_immunity_all_immune_under_5_other_arbitrary()
 
-    test_convert_cutoff_text()
-    test_add_threshold_values_to_vacc_table()
-    test_get_coverage_cutoffs()
-    test_coverage_ranges()
+    # test_convert_cutoff_text()
+    # test_add_threshold_values_to_vacc_table()
+    # test_get_coverage_cutoffs()
+    # test_coverage_ranges()
 
-    test_get_threshold_label_from_coverage_range()
-    test_add_threshold_text_to_df()
+    # test_get_threshold_label_from_coverage_range()
+    # test_add_threshold_text_to_df()
+
+    test_convert_pop_text()
+    test_add_pop_ranges_to_pop_table()
+    test_get_pop_label_from_coverage()
+    test_add_pop_label_to_df()
+    test_add_pop_range_to_df()
