@@ -625,6 +625,7 @@ def test_relative_difference_identifier_no_matches():
         )
 
 
+# Tests for baseline immunity calculation and related functions
 def test_get_baseline_immunity_full_coverage_at_2():
     """
     This test looks at different scenarios where coverage is 100% for all age groups at 2 years old, 0% otherwise, and varies the population distribution.
@@ -1246,13 +1247,68 @@ def test_get_baseline_immunity_all_immune_under_5_other_arbitrary():
     ), f"Calculated immunity: {immunity} does not match expected value: {expected_immunity}."
 
 
+def test_convert_cutoff_text():
+    assert convert_cutoff_text("7 years") == 7
+    assert convert_cutoff_text("4 years (kindergarten)") == 4
+    assert convert_cutoff_text("18+") == 18
+    assert convert_cutoff_text("<50 years") == 50
+
+
+def test_add_threshold_values_to_vacc_table():
+    config_path = os.path.join(testdir, "test_app_config.yaml")
+    parms = read_parameters(config_path)
+
+    vacc_table = initialize_vacc_table(parms)
+    print("Initial vacc_table:\n", vacc_table)
+    vacc_table = add_threshold_values_to_vacc_table(vacc_table)
+    print("Vaccination table with threshold values:\n", vacc_table)
+
+    assert (
+        "threshold_age" in vacc_table.columns
+    ), "threshold_value column not found in vacc_table"
+
+    assert vacc_table["threshold_age"].to_list() == [
+        2,
+        5,
+        13,
+        18,
+    ], "Incorrect threshold_age values"  # these are the default values based
+
+
+def test_get_coverage_cutoffs():
+    config_path = os.path.join(testdir, "test_app_config.yaml")
+    parms = read_parameters(config_path)
+
+    vacc_table = initialize_vacc_table(parms)
+    vacc_table = add_threshold_values_to_vacc_table(vacc_table)
+
+    cutoffs = get_coverage_cutoffs(vacc_table)
+    expected_cutoffs = [0, 1, 2, 5, 13, 18, 100]
+    assert (
+        cutoffs == expected_cutoffs
+    ), f"Expected cutoffs {expected_cutoffs}, but got {cutoffs}"
+    print("Coverage cutoffs:", cutoffs)
+
+    vacc_table = vacc_table.filter(pl.col("threshold") != "5 years (kindergarten)")
+    cutoffs = get_coverage_cutoffs(vacc_table)
+    expected_cutoffs = [0, 1, 2, 13, 18, 100]
+    assert (
+        cutoffs == expected_cutoffs
+    ), f"Expected cutoffs {expected_cutoffs}, but got {cutoffs}"
+    print("Coverage cutoffs after removing 5 years threshold:", cutoffs)
+
+
 if __name__ == "__main__":
-    test_get_baseline_immunity_full_coverage_at_2()
-    test_get_baseline_immunity_full_coverage_under_5()
-    test_get_baseline_immunity_full_coverage_at_5()
-    test_get_baseline_immunity_full_coverage_at_18()
+    # test_get_baseline_immunity_full_coverage_at_2()
+    # test_get_baseline_immunity_full_coverage_under_5()
+    # test_get_baseline_immunity_full_coverage_at_5()
+    # test_get_baseline_immunity_full_coverage_at_18()
 
-    test_get_baseline_immunity_no_coverage()
-    test_get_baseline_immunity_all_full_coverage()
+    # test_get_baseline_immunity_no_coverage()
+    # test_get_baseline_immunity_all_full_coverage()
 
-    test_get_baseline_immunity_all_immune_under_5_other_arbitrary()
+    # test_get_baseline_immunity_all_immune_under_5_other_arbitrary()
+
+    test_convert_cutoff_text()
+    test_add_threshold_values_to_vacc_table()
+    test_get_coverage_cutoffs()
