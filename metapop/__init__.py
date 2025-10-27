@@ -18,6 +18,11 @@ from .analyzer import (
 )
 from .app import app  # depends on app_helper
 from .app_helper import (
+    add_pop_ranges_to_pop_table,
+    add_threshold_values_to_vacc_table,
+    build_initial_baseline_immunity_dataframe_from_user_inputs,
+    calculate_baseline_immunity_from_dataframe,
+    create_dataframe_for_baseline_immunity_calculation,
     get_scenario_results,
     initialize_pop_table,
     initialize_vacc_table,
@@ -85,4 +90,9 @@ __all__ = [
     "create_intervention_summary_table",
     "initialize_pop_table",
     "initialize_vacc_table",
+    "add_pop_ranges_to_pop_table",
+    "add_threshold_values_to_vacc_table",
+    "build_initial_baseline_immunity_dataframe_from_user_inputs",
+    "create_dataframe_for_baseline_immunity_calculation",
+    "calculate_baseline_immunity_from_dataframe",
 ]

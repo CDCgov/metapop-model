@@ -75,6 +75,11 @@ __all__ = [
     "csv_download_button",
     "initialize_pop_table",
     "initialize_vacc_table",
+    "add_pop_ranges_to_pop_table",
+    "add_threshold_values_to_vacc_table",
+    "build_initial_baseline_immunity_dataframe_from_user_inputs",
+    "create_dataframe_for_baseline_immunity_calculation",
+    "calculate_baseline_immunity_from_dataframe",
 ]
 
 CACHE_TTL = 60 * 60 * 24 * 7  # 1 week in seconds
@@ -1578,14 +1583,22 @@ def add_threshold_coverage_to_df(df, vacc_table):
     # add threshold_coverage column
     # this is the coverage values corresponding to the threshold_text
     # and the coverage for the lower bound of the coverage range
+    print("df before adding threshold coverage:")
+    print(df)
     df = df.with_columns(
         (
-            pl.col("threshold_text").map_elements(
-                lambda x: vacc_table.filter(pl.col("threshold") == x)["coverage"][0],
+            pl.col("coverage_range_min_age").map_elements(
+                lambda x: vacc_table.filter(pl.col("threshold_age") == x)[
+                    "coverage"
+                ].to_list()[0]
+                if len(vacc_table.filter(pl.col("threshold_age") == x)) > 0
+                else 0.0,
                 return_dtype=pl.Float64,
             )
         ).alias("threshold_coverage")
     )
+    print("df after adding threshold coverage:")
+    print(df)
     return df
 
 
@@ -1651,11 +1664,11 @@ def build_initial_baseline_immunity_dataframe_from_user_inputs(
     # add matching population percentage column
     df = add_pop_percentage_to_df(df, pop_table)
 
-    # add matching threshold_coverage column
-    df = add_threshold_coverage_to_df(df, vacc_table)
-
     # add coverage_range_min_age and coverage_range_max_age columns
     df = add_coverage_range_min_max_to_df(df)
+
+    # add matching threshold_coverage column
+    df = add_threshold_coverage_to_df(df, vacc_table)
 
     # add fraction_population_covered column
     df = add_pop_fraction_in_coverage_range_to_df(df)
@@ -1678,6 +1691,18 @@ def create_dataframe_for_baseline_immunity_calculation(df):
         right_on="coverage_range_min_age",
         how="full",
         suffix="_right",
+    )
+    print("joined df inside:")
+    print(
+        joined_df.select(
+            [
+                "threshold_text",
+                "coverage_range_min_age",
+                "coverage_range_max_age",
+                "threshold_coverage",
+                "threshold_coverage_right",
+            ]
+        )
     )
 
     # remove row with null coverage_range
@@ -1762,7 +1787,7 @@ def calculate_baseline_immunity_from_dataframe(df):
         ).alias("weighted_coverage")
     )
     print("joined df for immunity calculation:")
-    print(df)
+    # print(df)
     immunity = np.round(df.select(pl.col("weighted_coverage")).sum().item())
     print(f"calculated immunity: {immunity}")
     return immunity
