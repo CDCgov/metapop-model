@@ -625,9 +625,9 @@ def test_relative_difference_identifier_no_matches():
         )
 
 
-def test_get_baseline_immunity_full_coverage_under_2():
+def test_get_baseline_immunity_full_coverage_at_2():
     """
-    This test looks at different scenarios where coverage is 100% for all age groups under 2 years old, 0% otherwise, and varies the population distribution.
+    This test looks at different scenarios where coverage is 100% for all age groups at 2 years old, 0% otherwise, and varies the population distribution.
 
     In this case, the baseline immunity should account for zero immunity for 0 to 1 years old since infants under 12 months old are typically not eligible for vaccination. The method assumes vaccination increases linearly from 0% at 12 months to the coverage level at the age threshold 2 years old.
 
@@ -636,7 +636,100 @@ def test_get_baseline_immunity_full_coverage_under_2():
     If all of the population is between 5 and 17 years old with the same vaccination coverage assumptions, the expected baseline immunity should be 0% since no vaccination coverage is assumed for those 5 years and older prior to an outbreak.
 
     If all of the population is 18 years old and older with the same vaccination coverage assumptions, the expected baseline immunity should be 0% since no vaccination coverage is assumed for those 18 years and older prior to an outbreak.
+
+    If the population is evenly distributed across all age ages, assuming ages 0 through 99 years old, i.e. 1% for each year, the expected baseline immunity should be 2% since ages 1-5 years old has 50% vaccination coverage on average.
     """
+    config_path = os.path.join(testdir, "test_app_config.yaml")
+    parms = read_parameters(config_path)
+
+    pop_table = initialize_pop_table(parms)
+    vacc_table = initialize_vacc_table(parms)
+
+    pop_table = add_pop_ranges_to_pop_table(pop_table)
+    vacc_table = add_threshold_values_to_vacc_table(vacc_table)
+
+    # set vaccination coverage to be 100% at 2 years old, 0% otherwise
+    vacc_table = vacc_table.with_columns(
+        pl.when((pl.col("threshold") == "2 years"))
+        .then(100.0)
+        .otherwise(0.0)
+        .alias("coverage")
+    )
+
+    # first scenario: population to be 100% in the 0-5 years age group
+    pop_table = pop_table.with_columns(
+        pl.when(pl.col("population") == "<5")
+        .then(100.0)
+        .otherwise(0.0)
+        .alias("percentage")
+    )
+    immunity_df = build_initial_baseline_immunity_dataframe_from_user_inputs(
+        pop_table, vacc_table
+    )
+    joined_immunity_df = create_dataframe_for_baseline_immunity_calculation(immunity_df)
+    immunity = calculate_baseline_immunity_from_dataframe(joined_immunity_df)
+    expected_immunity = 0.4
+    assert expected_immunity == pytest.approx(
+        immunity
+    ), f"Expected baseline immunity to be {expected_immunity}, but got {immunity}"
+
+    # second scenario: population to be 100% in the 5-17 years age group
+    pop_table = pop_table.with_columns(
+        pl.when(pl.col("population") == "5-17")
+        .then(100.0)
+        .otherwise(0.0)
+        .alias("percentage")
+    )
+
+    immunity_df = build_initial_baseline_immunity_dataframe_from_user_inputs(
+        pop_table, vacc_table
+    )
+    joined_immunity_df = create_dataframe_for_baseline_immunity_calculation(immunity_df)
+    immunity = calculate_baseline_immunity_from_dataframe(joined_immunity_df)
+    expected_immunity = 0.0
+    assert expected_immunity == pytest.approx(
+        immunity
+    ), f"Expected baseline immunity to be {expected_immunity}, but got {immunity}"
+
+    # third scenario: population to be 100% in the 18+ years age group
+    pop_table = pop_table.with_columns(
+        pl.when(pl.col("population") == "18+")
+        .then(100.0)
+        .otherwise(0.0)
+        .alias("percentage")
+    )
+
+    immunity_df = build_initial_baseline_immunity_dataframe_from_user_inputs(
+        pop_table, vacc_table
+    )
+    joined_immunity_df = create_dataframe_for_baseline_immunity_calculation(immunity_df)
+    immunity = calculate_baseline_immunity_from_dataframe(joined_immunity_df)
+    expected_immunity = 0.0
+    assert expected_immunity == pytest.approx(
+        immunity
+    ), f"Expected baseline immunity to be {expected_immunity}, but got {immunity}"
+
+    # fourth scenario: population to be 1% for each age between 0 and 99 years old
+    pop_table = pop_table.with_columns(
+        pl.when(pl.col("population") == "<5")
+        .then(5.0)
+        .when(pl.col("population") == "5-17")
+        .then(13.0)
+        .when(pl.col("population") == "18+")
+        .then(82.0)
+        .otherwise(None)
+        .alias("percentage")
+    )
+
+    immunity_df = build_initial_baseline_immunity_dataframe_from_user_inputs(
+        pop_table, vacc_table
+    )
+    joined_immunity_df = create_dataframe_for_baseline_immunity_calculation(immunity_df)
+    immunity = calculate_baseline_immunity_from_dataframe(joined_immunity_df)
+    expected_immunity = 0.02
+    assert expected_immunity == pytest.approx(
+        immunity
+    ), f"Expected baseline immunity to be {expected_immunity}, but got {immunity}"
 
 
 def test_get_baseline_immunity_full_coverage_under_5():
@@ -650,7 +743,29 @@ def test_get_baseline_immunity_full_coverage_under_5():
     If all of the population is between 5 and 17 years old with the same vaccination coverage assumptions, the expected baseline immunity should be 31% (30.7% rounded up), i.e. 50% for those between 5 and 12 years old and 0% for those between 13 and 17 years old.
 
     If all of the population is 18 years old and older with the same vaccination coverage assumptions, the expected baseline immunity should be 0% since no vaccination coverage is assumed for those 18 years and older prior to an outbreak.
+
+    If the population is evenly distributed across all age ages, assuming ages 0 through 99 years old, i.e. 1% for year, the expected baseline immunity should be 8% (7.5% rounded) since ages 1-2 years old has 50% vaccination coverage on average, 2 to 5 years old has 100%, and 5 to 12 years old has 50% vaccination on average.
     """
+
+    config_path = os.path.join(testdir, "test_app_config.yaml")
+    parms = read_parameters(config_path)
+
+    pop_table = initialize_pop_table(parms)
+    vacc_table = initialize_vacc_table(parms)
+
+    pop_table = add_pop_ranges_to_pop_table(pop_table)
+    vacc_table = add_threshold_values_to_vacc_table(vacc_table)
+
+    # set vaccination coverage to be 100% at 2 years old, 0% otherwise
+    vacc_table = vacc_table.with_columns(
+        pl.when(
+            (pl.col("threshold") == "2 years")
+            | (pl.col("threshold") == "5 years (kindergarten)")
+        )
+        .then(100.0)
+        .otherwise(0.0)
+        .alias("coverage")
+    )
 
 
 def test_get_baseline_immunity_full_coverage_at_5():
@@ -664,6 +779,8 @@ def test_get_baseline_immunity_full_coverage_at_5():
     If all of the population is between 5 and 17 years old with the same vaccination coverage assumptions, the expected baseline immunity should be 50% for those between 5 and 12 years old and 0% for those between 13 and 17 years old, resulting in an overall baseline immunity of 31% (30.7% rounded up).
 
     If all of the population is 18 years old and older with the same vaccination coverage assumptions, the expected baseline immunity should be 0% since no vaccination coverage is assumed for those 18 years and older prior to an outbreak.
+
+    If the population is evenly distributed across all age ages, assuming ages 0 through 99 years old, i.e. 1% for year, the expected baseline immunity should be 6% (5.5% rounded) since ages 0-2 years old has 0% vaccination coverage on average, 2 to 5 years old has 50%, and 5 to 12 years old has 50% vaccination on average.
     """
 
 
@@ -676,6 +793,8 @@ def test_get_baseline_immunity_full_coverage_at_18():
     If all of the population is between 5 and 17 years old with the same vaccination coverage assumptions, the expected baseline immunity should be 19% (19.2% rounded) since no vaccination coverage is assumed for those under 13 years old prior to an outbreak, and vaccination linearly increases from 0% to 100% for those 13 to 17 years old.
 
     If all of the population is 18 years old and older with the same vaccination coverage assumptions, the expected baseline immunity should be 100% since 100% vaccination coverage is assumed for those 18 years and older prior to an outbreak.
+
+    If the population is evenly distributed across all age ages, assuming ages 0 through 99 years old, i.e. 1% for year, the expected baseline immunity should be 85% (84.5% rounded) since ages 1-2 years old has 50% vaccination coverage on average, 2 to 5 years old has 100%, and 5 to 12 years old has 50% vaccination on average.
     """
 
 
@@ -694,6 +813,8 @@ def test_get_baseline_immunity_all_full_coverage():
     If all of the population is between 5 and 17 years old with the same vaccination coverage assumptions, the expected baseline immunity should be 100% since 100% vaccination coverage is assumed for those 5 years and older prior to an outbreak.
 
     If all of the population is 18 years old and older with the same vaccination coverage assumptions, the expected baseline immunity should be 100% since 100% vaccination coverage is assumed for those 18 years and older prior to an outbreak.
+
+    If the population is evenly distributed across all age ages, assuming ages 0 through 99 years old, i.e. 1% for year, the expected baseline immunity should be 99% (98.5% rounded) since ages 1-2 years old has 50% vaccination coverage on average, and all other ages have 100% coverage.
     """
 
 
@@ -704,7 +825,6 @@ def test_get_baseline_immunity_all_pop_under_5():
     Assuming 100% MMR vaccination coverage for those at 2 years old and 5 years old (prior to an outbreak), the expected baseline immunity should be 0% for 0-1 years, increase from 0% to 100% for infants aged 1-2 years, and then be 100% for 2-5 years, resulting in an overall baseline immunity of 70% (since 2-5 years covers 3 out of the 5 years in the age range and we assume that vaccination gradually happens for infants between ages 1 and 2 years, i.e. 50% on average).
     """
     config_path = os.path.join(testdir, "test_app_config.yaml")
-
     parms = read_parameters(config_path)
 
     pop_table = initialize_pop_table(parms)
@@ -785,14 +905,16 @@ def test_get_baseline_immunity_all_immune_under_5_other_arbitrary():
     joined_immunity_df = create_dataframe_for_baseline_immunity_calculation(immunity_df)
     immunity = calculate_baseline_immunity_from_dataframe(joined_immunity_df)
 
-    print("joined_immunity_df:\n", joined_immunity_df)
+    # print("joined_immunity_df:\n", joined_immunity_df)
     expected_immunity = 0.7  # 70% baseline immunity
     assert (
         expected_immunity == pytest.approx(immunity)
     ), f"Calculated immunity: {immunity} does not match expected value: {expected_immunity}."
-    print(f"Calculated immunity: {immunity}")
 
 
 if __name__ == "__main__":
+    test_get_baseline_immunity_full_coverage_at_2()
+    test_get_baseline_immunity_full_coverage_under_5()
+
     test_get_baseline_immunity_all_pop_under_5()
     test_get_baseline_immunity_all_immune_under_5_other_arbitrary()
