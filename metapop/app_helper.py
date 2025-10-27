@@ -1442,12 +1442,18 @@ def edit_baseline_immunity(parms):
 
     calc_immunity()
 
-    # get_baseline_immunity_2(st.session_state.pop_table, st.session_state.cov_table)
-
     button_to_calculate_immunity()
 
 
 def convert_cutoff_text(text_value):
+    """
+    Convert cutoff text to integer age value
+
+    Args:
+        text_value (str): Cutoff text value.
+    Returns:
+        int: Converted integer age value.
+    """
     r = (
         text_value.replace(" ", "")
         .replace("<", "")
@@ -1462,6 +1468,15 @@ def convert_cutoff_text(text_value):
 
 
 def add_threshold_values_to_vacc_table(user_cov_table):
+    """
+    Add threshold age values to vaccination coverage table.
+
+    Args:
+        user_cov_table (pl.DataFrame): User-defined vaccination coverage table.
+
+    Returns:
+        pl.DataFrame: Updated vaccination coverage table with threshold age values.
+    """
     # apply to coverage table and return it
     user_cov_table = user_cov_table.with_columns(
         pl.col("threshold")
@@ -1472,11 +1487,30 @@ def add_threshold_values_to_vacc_table(user_cov_table):
 
 
 def get_coverage_cutoffs(user_cov_table):
+    """
+    Get coverage cutoff values from user-defined vaccination coverage table.
+
+    Args:
+        user_cov_table (pl.DataFrame): User-defined vaccination coverage table.
+
+    Returns:
+        list: List of coverage cutoff values.
+    """
     cutoff_values = [0, 1] + user_cov_table["threshold_age"].to_list() + [100]
     return cutoff_values
 
 
 def get_coverage_ranges(cutoff_values):
+    """
+    Get coverage ranges from cutoff values.
+
+    Args:
+        cutoff_values (list): List of coverage cutoff values.
+
+    Returns:
+        list: List of coverage ranges as tuples.
+    """
+
     coverage_range = [
         (cutoff_values[i], cutoff_values[i + 1]) for i in range(len(cutoff_values) - 1)
     ]
@@ -1484,6 +1518,17 @@ def get_coverage_ranges(cutoff_values):
 
 
 def get_threshold_label_from_coverage_range(coverage_range, vacc_table):
+    """
+    Get threshold label from coverage range.
+
+    Args:
+        coverage_range (tuple): Coverage range as a tuple (min_age, max_age).
+        vacc_table (pl.DataFrame): Vaccination coverage table
+
+    Returns:
+        str: Threshold label corresponding to the coverage range.
+    """
+
     max_age = coverage_range[1]
     closest_row_index = vacc_table.select(
         (pl.col("threshold_age") - max_age).abs().arg_min()
@@ -1492,8 +1537,17 @@ def get_threshold_label_from_coverage_range(coverage_range, vacc_table):
     return closest_row["threshold"]
 
 
-# rename df to immunity_df
 def add_threshold_text_to_df(df, vacc_table):
+    """
+    Add threshold text column to DataFrame.
+
+    Args:
+        df (pl.DataFrame): DataFrame to add threshold text to.
+        vacc_table (pl.DataFrame): Vaccination coverage table.
+
+    Returns:
+        pl.DataFrame: Updated DataFrame with threshold text column.
+    """
     # apply to dataframe and return it
     df = df.with_columns(
         (
@@ -1507,6 +1561,16 @@ def add_threshold_text_to_df(df, vacc_table):
 
 
 def convert_pop_text(text_value):
+    """
+    Convert population text to min and max age values.
+
+    Args:
+        text_value (str): Population text value.
+
+    Returns:
+        tuple: Tuple of min and max age values.
+    """
+
     r = text_value.replace(" ", "").replace("<", "").replace("+", "")
     r = r.split("-")
     r = [int(i) for i in r]
@@ -1523,6 +1587,15 @@ def convert_pop_text(text_value):
 
 
 def add_pop_ranges_to_pop_table(user_pop_table):
+    """
+    Add population ranges to population table.
+
+    Args:
+        user_pop_table (pl.DataFrame): User-defined population table.
+
+    Returns:
+        pl.DataFrame: Updated population table with population ranges.
+    """
     # apply to table and return it
     user_pop_table = user_pop_table.with_columns(
         pl.col("population")
@@ -1533,6 +1606,16 @@ def add_pop_ranges_to_pop_table(user_pop_table):
 
 
 def get_pop_label_from_coverage(coverage_range, pop_table):
+    """
+    Get population label from coverage range.
+
+    Args:
+        coverage_range (tuple): Coverage range as a tuple (min_age, max_age).
+        pop_table (pl.DataFrame): Population table.
+
+    Returns:
+        str: Population label corresponding to the coverage range.
+    """
     max_age = coverage_range[1]
     closest_row_index = pop_table.select(
         (pl.col("pop_range").list.get(1) - max_age).abs().arg_min()
@@ -1542,6 +1625,16 @@ def get_pop_label_from_coverage(coverage_range, pop_table):
 
 
 def add_pop_label_to_df(df, pop_table):
+    """
+    Add population label column to DataFrame.
+
+    Args:
+        df (pl.DataFrame): DataFrame to add population label to.
+        pop_table (pl.DataFrame): Population table.
+
+    Returns:
+        pl.DataFrame: Updated DataFrame with population label column.
+    """
     # add pop_text column
     df = df.with_columns(
         (
@@ -1555,6 +1648,15 @@ def add_pop_label_to_df(df, pop_table):
 
 
 def add_pop_range_to_df(df):
+    """
+    Add population range column to DataFrame.
+
+    Args:
+        df (pl.DataFrame): DataFrame to add population range to.
+
+    Returns:
+        pl.DataFrame: Updated DataFrame with population range column.
+    """
     # add pop_range column
     df = df.with_columns(
         (
@@ -1567,6 +1669,16 @@ def add_pop_range_to_df(df):
 
 
 def add_pop_percentage_to_df(df, pop_table):
+    """
+    Add population percentage column to DataFrame.
+
+    Args:
+        df (pl.DataFrame): DataFrame to add population percentage to.
+        pop_table (pl.DataFrame): Population table.
+
+    Returns:
+        pl.DataFrame: Updated DataFrame with population percentage column.
+    """
     # join on pop_table to get population values
     df = df.with_columns(
         (
@@ -1580,6 +1692,16 @@ def add_pop_percentage_to_df(df, pop_table):
 
 
 def add_threshold_coverage_to_df(df, vacc_table):
+    """
+    Add threshold coverage column to DataFrame.
+
+    Args:
+        df (pl.DataFrame): DataFrame to add threshold coverage to.
+        vacc_table (pl.DataFrame): Vaccination coverage table.
+
+    Returns:
+        pl.DataFrame: Updated DataFrame with threshold coverage column.
+    """
     # add threshold_coverage column
     # this is the coverage values corresponding to the threshold_text
     # and the coverage for the lower bound of the coverage range
@@ -1597,6 +1719,15 @@ def add_threshold_coverage_to_df(df, vacc_table):
 
 
 def add_coverage_range_min_max_to_df(df):
+    """
+    Add coverage range min and max age columns to DataFrame.
+
+    Args:
+        df (pl.DataFrame): DataFrame to add coverage range min and max age to.
+
+    Returns:
+        pl.DataFrame: Updated DataFrame with coverage range min and max age columns.
+    """
     df = df.with_columns(
         pl.col("coverage_range").list.get(0).alias("coverage_range_min_age"),
     )
@@ -1607,6 +1738,15 @@ def add_coverage_range_min_max_to_df(df):
 
 
 def add_pop_fraction_in_coverage_range_to_df(df):
+    """
+    Add fraction of population in coverage range column to DataFrame.
+
+    Args:
+        df (pl.DataFrame): DataFrame to add fraction of population in coverage range to.
+
+    Returns:
+        pl.DataFrame: Updated DataFrame with fraction of population in coverage range column.
+    """
     # calculate coverage_range_length
     expected_df = df.with_columns(
         (pl.col("coverage_range_max_age") - pl.col("coverage_range_min_age")).alias(
@@ -1634,6 +1774,18 @@ def build_initial_baseline_immunity_dataframe_from_user_inputs(
     pop_table,
     vacc_table,
 ):
+    """
+    Build initial baseline immunity DataFrame from user inputs. This DataFrame
+    will be used to calculate baseline immunity.
+
+    Args:
+        pop_table (pl.DataFrame): Population table.
+        vacc_table (pl.DataFrame): Vaccination coverage table.
+
+    Returns:
+        pl.DataFrame: Initial baseline immunity DataFrame.
+    """
+
     cutoff_values = get_coverage_cutoffs(vacc_table)
 
     coverage_range = get_coverage_ranges(cutoff_values)
@@ -1674,7 +1826,15 @@ def build_initial_baseline_immunity_dataframe_from_user_inputs(
 
 
 def create_dataframe_for_baseline_immunity_calculation(df):
-    """"""
+    """
+    Create DataFrame for baseline immunity calculation.
+
+    Args:
+        df (pl.DataFrame): Initial baseline immunity DataFrame.
+
+    Returns:
+        pl.DataFrame: DataFrame for baseline immunity calculation.
+    """
     # make a copy of df
     joined_df = df.clone()
     # join on itself to get the threshold_coverage for the upper bound of the coverage age range
@@ -1759,6 +1919,16 @@ def create_dataframe_for_baseline_immunity_calculation(df):
 
 
 def calculate_baseline_immunity_from_dataframe(df):
+    """
+    Calculate baseline immunity from DataFrame.
+
+    Args:
+        df (pl.DataFrame): DataFrame for baseline immunity calculation.
+
+    Returns:
+        float: Baseline immunity value.
+    """
+
     df = df.with_columns(
         (
             pl.col("threshold_coverage_mid")
@@ -1772,7 +1942,18 @@ def calculate_baseline_immunity_from_dataframe(df):
     return immunity
 
 
-def get_baseline_immunity_2(pop_table, cov_table):
+def get_baseline_immunity(pop_table, cov_table):
+    """
+    Calculate the baseline immunity given the values in the calculator tables.
+
+    Args:
+        pop_table (pl.DataFrame): Population table.
+        cov_table (pl.DataFrame): Vaccination coverage table.
+
+    Returns:
+        float: The percent of the population with immunity.
+    """
+
     # get range mappings
     cov_table = add_threshold_values_to_vacc_table(cov_table)
 
@@ -1916,7 +2097,7 @@ def calc_immunity():
         default_values,
     )
 
-    st.session_state.immunity = get_baseline_immunity_2(
+    st.session_state.immunity = get_baseline_immunity(
         st.session_state.pop_table, st.session_state.cov_table
     )
 
