@@ -82,6 +82,9 @@ __all__ = [
     "build_initial_baseline_immunity_dataframe_from_user_inputs",
     "create_dataframe_for_baseline_immunity_calculation",
     "calculate_baseline_immunity_from_dataframe",
+    "get_coverage_ranges",
+    "get_threshold_label_from_coverage_range",
+    "add_threshold_text_to_df",
 ]
 
 CACHE_TTL = 60 * 60 * 24 * 7  # 1 week in seconds

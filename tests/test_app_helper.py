@@ -1298,6 +1298,54 @@ def test_get_coverage_cutoffs():
     print("Coverage cutoffs after removing 5 years threshold:", cutoffs)
 
 
+def test_coverage_ranges():
+    cutoffs = [0, 25, 100]
+    coverage_ranges = get_coverage_ranges(cutoffs)
+
+    expected_ranges = [
+        (0, 25),
+        (25, 100),
+    ]
+    assert (
+        coverage_ranges == expected_ranges
+    ), f"Expected coverage ranges {expected_ranges}, but got {coverage_ranges}"
+
+
+def test_get_threshold_label_from_coverage_range():
+    config_path = os.path.join(testdir, "test_app_config.yaml")
+    parms = read_parameters(config_path)
+    vacc_table = initialize_vacc_table(parms)
+    vacc_table = add_threshold_values_to_vacc_table(vacc_table)
+
+    coverage_range = (0, 1)
+    label = get_threshold_label_from_coverage_range(coverage_range, vacc_table)
+    expected_label = "2 years"
+
+    print("Threshold label for coverage range", coverage_range, "is", label)
+    assert (
+        label == expected_label
+    ), f"Expected label '{expected_label}', but got '{label}'"
+
+
+def test_add_threshold_text_to_df():
+    config_path = os.path.join(testdir, "test_app_config.yaml")
+    parms = read_parameters(config_path)
+    vacc_table = initialize_vacc_table(parms)
+    vacc_table = add_threshold_values_to_vacc_table(vacc_table)
+
+    cutoff_values = get_coverage_cutoffs(vacc_table)
+    coverage_ranges = get_coverage_ranges(cutoff_values)
+
+    df = pl.DataFrame(
+        {
+            "coverage_range": coverage_ranges,
+        }
+    )
+
+    df_with_labels = add_threshold_text_to_df(df, vacc_table)
+    print("DataFrame with threshold labels:\n", df_with_labels)
+
+
 if __name__ == "__main__":
     # test_get_baseline_immunity_full_coverage_at_2()
     # test_get_baseline_immunity_full_coverage_under_5()
@@ -1312,3 +1360,7 @@ if __name__ == "__main__":
     test_convert_cutoff_text()
     test_add_threshold_values_to_vacc_table()
     test_get_coverage_cutoffs()
+    test_coverage_ranges()
+
+    test_get_threshold_label_from_coverage_range()
+    test_add_threshold_text_to_df()
