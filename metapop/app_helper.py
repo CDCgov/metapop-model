@@ -1442,7 +1442,7 @@ def edit_baseline_immunity(parms):
 
     calc_immunity()
 
-    get_baseline_immunity_2(st.session_state.pop_table, st.session_state.cov_table)
+    # get_baseline_immunity_2(st.session_state.pop_table, st.session_state.cov_table)
 
     button_to_calculate_immunity()
 
@@ -1790,49 +1790,49 @@ def get_baseline_immunity_2(pop_table, cov_table):
     return immunity
 
 
-def get_baseline_immunity(population, coverage):
-    """
-    Calculate the baseline immunity given the values in the calculator
+# def get_baseline_immunity(population, coverage):
+#     """
+#     Calculate the baseline immunity given the values in the calculator
 
-    Args:
-        population (list): The percent of the population in each group.
-        coverage (list): The percent of individuals in each group with prior immunity.
+#     Args:
+#         population (list): The percent of the population in each group.
+#         coverage (list): The percent of individuals in each group with prior immunity.
 
-    Returns:
-        immunity_value (float): The percent of the population with immunity.
-    """
+#     Returns:
+#         immunity_value (float): The percent of the population with immunity.
+#     """
 
-    # convert to proportions
-    population = [p / 100 for p in population]
-    coverage = [c / 100 for c in coverage]
+#     # convert to proportions
+#     population = [p / 100 for p in population]
+#     coverage = [c / 100 for c in coverage]
 
-    coverage_cutoffs = [2, 5, 18]
+#     coverage_cutoffs = [2, 5, 18]
 
-    immunity_value = 0
+#     immunity_value = 0
 
-    # Handle the 0-2 year group within the first population group
-    # 1-2 years get partial coverage
-    one_year_coverage = (
-        (1 / coverage_cutoffs[1]) * population[0] * (coverage[0] + 0) / 2
-    )
-    immunity_value += one_year_coverage
+#     # Handle the 0-2 year group within the first population group
+#     # 1-2 years get partial coverage
+#     one_year_coverage = (
+#         (1 / coverage_cutoffs[1]) * population[0] * (coverage[0] + 0) / 2
+#     )
+#     immunity_value += one_year_coverage
 
-    # first cutoff to second cutoff: partial coverage (2-5 years)
-    age_range_years = coverage_cutoffs[1] - coverage_cutoffs[0]  # 5-2 = 3 years
-    immunity_value += (
-        (age_range_years / (coverage_cutoffs[1] - 0))
-        * population[0]
-        * (coverage[1] + coverage[0])
-        / 2
-    )
+#     # first cutoff to second cutoff: partial coverage (2-5 years)
+#     age_range_years = coverage_cutoffs[1] - coverage_cutoffs[0]  # 5-2 = 3 years
+#     immunity_value += (
+#         (age_range_years / (coverage_cutoffs[1] - 0))
+#         * population[0]
+#         * (coverage[1] + coverage[0])
+#         / 2
+#     )
 
-    # second cutoff to third cutoff: (5-18 years)
-    immunity_value += population[1] * (coverage[2] + coverage[1]) / 2
+#     # second cutoff to third cutoff: (5-18 years)
+#     immunity_value += population[1] * (coverage[2] + coverage[1]) / 2
 
-    # over third cutoff: (18+ years)
-    immunity_value += population[2] * coverage[3]
+#     # over third cutoff: (18+ years)
+#     immunity_value += population[2] * coverage[3]
 
-    return round(immunity_value, 2)
+#     return round(immunity_value, 2)
 
 
 def update_coverage(edited_df_coverage, default_values):
@@ -1915,10 +1915,7 @@ def calc_immunity():
         st.session_state.cov_table,
         default_values,
     )
-    # st.session_state.immunity = get_baseline_immunity(
-    #     st.session_state.pop_table["percentage"],
-    #     st.session_state.cov_table["coverage"],
-    # )
+
     st.session_state.immunity = get_baseline_immunity_2(
         st.session_state.pop_table, st.session_state.cov_table
     )
