@@ -1240,7 +1240,6 @@ def test_get_baseline_immunity_all_immune_under_5_other_arbitrary():
     joined_immunity_df = create_dataframe_for_baseline_immunity_calculation(immunity_df)
     immunity = calculate_baseline_immunity_from_dataframe(joined_immunity_df)
 
-    # print("joined_immunity_df:\n", joined_immunity_df)
     expected_immunity = 0.7  # 70% baseline immunity
     assert (
         expected_immunity == pytest.approx(immunity)
@@ -1259,9 +1258,7 @@ def test_add_threshold_values_to_vacc_table():
     parms = read_parameters(config_path)
 
     vacc_table = initialize_vacc_table(parms)
-    print("Initial vacc_table:\n", vacc_table)
     vacc_table = add_threshold_values_to_vacc_table(vacc_table)
-    print("Vaccination table with threshold values:\n", vacc_table)
 
     assert (
         "threshold_age" in vacc_table.columns
@@ -1287,7 +1284,6 @@ def test_get_coverage_cutoffs():
     assert (
         cutoffs == expected_cutoffs
     ), f"Expected cutoffs {expected_cutoffs}, but got {cutoffs}"
-    print("Coverage cutoffs:", cutoffs)
 
     vacc_table = vacc_table.filter(pl.col("threshold") != "5 years (kindergarten)")
     cutoffs = get_coverage_cutoffs(vacc_table)
@@ -1295,7 +1291,6 @@ def test_get_coverage_cutoffs():
     assert (
         cutoffs == expected_cutoffs
     ), f"Expected cutoffs {expected_cutoffs}, but got {cutoffs}"
-    print("Coverage cutoffs after removing 5 years threshold:", cutoffs)
 
 
 def test_coverage_ranges():
@@ -1321,7 +1316,6 @@ def test_get_threshold_label_from_coverage_range():
     label = get_threshold_label_from_coverage_range(coverage_range, vacc_table)
     expected_label = "2 years"
 
-    print("Threshold label for coverage range", coverage_range, "is", label)
     assert (
         label == expected_label
     ), f"Expected label '{expected_label}', but got '{label}'"
@@ -1463,27 +1457,139 @@ def test_add_pop_range_to_df():
     ), f"Expected ranges {expected_ranges}, but got {df_with_ranges['pop_range'].to_list()}"
 
 
-if __name__ == "__main__":
-    # test_get_baseline_immunity_full_coverage_at_2()
-    # test_get_baseline_immunity_full_coverage_under_5()
-    # test_get_baseline_immunity_full_coverage_at_5()
-    # test_get_baseline_immunity_full_coverage_at_18()
+def test_add_pop_percentage_to_df():
+    pop_table = pl.DataFrame(
+        {
+            "population": ["<4", "4-16", "17+"],
+            "percentage": [20.0, 50.0, 30.0],
+        }
+    )
+    pop_table = add_pop_ranges_to_pop_table(pop_table)
 
-    # test_get_baseline_immunity_no_coverage()
-    # test_get_baseline_immunity_all_full_coverage()
+    coverage_ranges = [
+        (0, 3),
+        (3, 4),
+        (4, 16),
+        (17, 100),
+    ]
+    df = pl.DataFrame(
+        {
+            "coverage_range": coverage_ranges,
+        }
+    )
+    df = add_pop_label_to_df(df, pop_table)
+    df_with_ranges = add_pop_range_to_df(df)
+    df_with_percentage = add_pop_percentage_to_df(df_with_ranges, pop_table)
 
-    # test_get_baseline_immunity_all_immune_under_5_other_arbitrary()
+    expected_percentages = [
+        20.0,  # for (0, 3)
+        20.0,  # for (3, 4)
+        50.0,  # for (4, 16)
+        30.0,  # for (17, 100)
+    ]
+    assert (
+        df_with_percentage["pop_percentage"].to_list() == expected_percentages
+    ), f"Expected percentages {expected_percentages}, but got {df_with_percentage['pop_percentage'].to_list()}"
 
-    # test_convert_cutoff_text()
-    # test_add_threshold_values_to_vacc_table()
-    # test_get_coverage_cutoffs()
-    # test_coverage_ranges()
 
-    # test_get_threshold_label_from_coverage_range()
-    # test_add_threshold_text_to_df()
+def test_add_coverage_range_min_max_to_df():
+    coverage_ranges = [
+        (0, 3),
+        (3, 4),
+        (4, 16),
+        (17, 100),
+    ]
 
-    test_convert_pop_text()
-    test_add_pop_ranges_to_pop_table()
-    test_get_pop_label_from_coverage()
-    test_add_pop_label_to_df()
-    test_add_pop_range_to_df()
+    df = pl.DataFrame(
+        {
+            "coverage_range": coverage_ranges,
+        }
+    )
+
+    df_with_min_max = add_coverage_range_min_max_to_df(df)
+
+    expected_min = [0, 3, 4, 17]
+    expected_max = [3, 4, 16, 100]
+    assert (
+        df_with_min_max["coverage_range_min_age"].to_list() == expected_min
+    ), f"Expected coverage_min {expected_min}, but got {df_with_min_max['coverage_range_min_age'].to_list()}"
+    assert (
+        df_with_min_max["coverage_range_max_age"].to_list() == expected_max
+    ), f"Expected coverage_max {expected_max}, but got {df_with_min_max['coverage_range_max_age'].to_list()}"
+
+
+def test_add_threshold_coverage_to_df():
+    vacc_table = pl.DataFrame(
+        {
+            "threshold": ["2 years", "5 years (kindergarten)", "13 years", "18+"],
+            "coverage": [0.0, 100.0, 0.0, 0.0],
+        }
+    )
+    vacc_table = add_threshold_values_to_vacc_table(vacc_table)
+    cutoff_values = get_coverage_cutoffs(vacc_table)
+    coverage_ranges = get_coverage_ranges(cutoff_values)
+
+    df = pl.DataFrame(
+        {
+            "coverage_range": coverage_ranges,
+        }
+    )
+
+    df_with_labels = add_threshold_text_to_df(df, vacc_table)
+    df_with_min_max = add_coverage_range_min_max_to_df(df_with_labels)
+    # this adds the threshold_coverage column based on the min age in the coverage range
+    df_with_coverage = add_threshold_coverage_to_df(df_with_min_max, vacc_table)
+
+    expected_coverage = [
+        0.0,  # for (0, 1)
+        0.0,  # for (1, 2)
+        0.0,  # for (2, 5)
+        100.0,  # for (5, 13)
+        0.0,  # for (13, 18)
+        0.0,  # for (18, 100)
+    ]
+    assert (
+        df_with_coverage["threshold_coverage"].to_list() == expected_coverage
+    ), f"Expected coverage {expected_coverage}, but got {df_with_coverage['threshold_coverage'].to_list()}"
+
+
+def test_add_pop_fraction_in_coverage_range_to_df():
+    pop_table = pl.DataFrame(
+        {
+            "population": ["<5", "5-17", "18+"],
+            "percentage": [20.0, 20.0, 60.0],
+        }
+    )
+    pop_table = add_pop_ranges_to_pop_table(pop_table)
+
+    coverage_ranges = [
+        (0, 2),
+        (2, 3),
+        (3, 5),
+        (5, 12),
+        (12, 18),
+        (18, 100),
+    ]
+    df = pl.DataFrame(
+        {
+            "coverage_range": coverage_ranges,
+        }
+    )
+    df = add_pop_label_to_df(df, pop_table)
+    df_with_ranges = add_pop_range_to_df(df)
+    df_with_min_max = add_coverage_range_min_max_to_df(df_with_ranges)
+    df_with_fraction = add_pop_fraction_in_coverage_range_to_df(df_with_min_max)
+
+    expected_fractions = [
+        0.4,  # for (0, 2) - all under 5
+        0.2,  # for (2, 3) - all under 5
+        0.4,  # for (3, 5) - all under 5
+        0.54,  # for (5, 12) - all between 5-17
+        0.46,  # for (12, 18) - all between 5-17
+        1.0,  # for (18, 100) - all 18+
+    ]
+    assert np.allclose(
+        df_with_fraction["fraction_population_in_coverage_range"].to_list(),
+        expected_fractions,
+        atol=1e-2,
+    ), f"Expected fractions {expected_fractions}, but got {df_with_fraction['fraction_population_in_coverage_range'].to_list()}"

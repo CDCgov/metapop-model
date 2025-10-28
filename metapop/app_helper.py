@@ -90,6 +90,10 @@ __all__ = [
     "get_pop_label_from_coverage",
     "add_pop_label_to_df",
     "add_pop_range_to_df",
+    "add_pop_percentage_to_df",
+    "add_coverage_range_min_max_to_df",
+    "add_threshold_coverage_to_df",
+    "add_pop_fraction_in_coverage_range_to_df",
 ]
 
 CACHE_TTL = 60 * 60 * 24 * 7  # 1 week in seconds
@@ -1706,6 +1710,25 @@ def add_pop_percentage_to_df(df, pop_table):
     return df
 
 
+def add_coverage_range_min_max_to_df(df):
+    """
+    Add coverage range min and max age columns to DataFrame.
+
+    Args:
+        df (pl.DataFrame): DataFrame to add coverage range min and max age to.
+
+    Returns:
+        pl.DataFrame: Updated DataFrame with coverage range min and max age columns.
+    """
+    df = df.with_columns(
+        pl.col("coverage_range").list.get(0).alias("coverage_range_min_age"),
+    )
+    df = df.with_columns(
+        pl.col("coverage_range").list.get(1).alias("coverage_range_max_age"),
+    )
+    return df
+
+
 def add_threshold_coverage_to_df(df, vacc_table):
     """
     Add threshold coverage column to DataFrame.
@@ -1729,25 +1752,6 @@ def add_threshold_coverage_to_df(df, vacc_table):
         )
         .with_columns(pl.col("coverage").fill_null(0.0).alias("threshold_coverage"))
         .drop("coverage")
-    )
-    return df
-
-
-def add_coverage_range_min_max_to_df(df):
-    """
-    Add coverage range min and max age columns to DataFrame.
-
-    Args:
-        df (pl.DataFrame): DataFrame to add coverage range min and max age to.
-
-    Returns:
-        pl.DataFrame: Updated DataFrame with coverage range min and max age columns.
-    """
-    df = df.with_columns(
-        pl.col("coverage_range").list.get(0).alias("coverage_range_min_age"),
-    )
-    df = df.with_columns(
-        pl.col("coverage_range").list.get(1).alias("coverage_range_max_age"),
     )
     return df
 
