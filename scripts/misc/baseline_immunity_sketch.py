@@ -5,9 +5,13 @@ import polars as pl
 import metapop as mp
 
 config_path = os.path.join(
-    os.path.dirname(__file__), "..", "metapop", "app_assets", "one_pop_config.yaml"
+    os.path.dirname(__file__),
+    "..",
+    "..",
+    "metapop",
+    "app_assets",
+    "one_pop_config.yaml",
 )
-
 
 parms = mp.read_parameters(config_path)
 
@@ -68,3 +72,6 @@ print(
 
 immunity = mp.calculate_baseline_immunity_from_dataframe(joined_df)
 print(f"Final baseline immunity value: {immunity * 100:.0f}%")
+
+
+mp.calculate_baseline_immunity_from_dataframe_2(joined_df)

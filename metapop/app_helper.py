@@ -93,7 +93,9 @@ __all__ = [
     "add_pop_percentage_to_df",
     "add_coverage_range_min_max_to_df",
     "add_threshold_coverage_to_df",
+    "add_pop_range_min_max_to_df",
     "add_pop_fraction_in_coverage_range_to_df",
+    "calculate_baseline_immunity_from_dataframe_2",
 ]
 
 CACHE_TTL = 60 * 60 * 24 * 7  # 1 week in seconds
@@ -1511,6 +1513,8 @@ def get_coverage_cutoffs(user_cov_table):
         list: List of coverage cutoff values.
     """
     cutoff_values = [0, 1] + user_cov_table["threshold_age"].to_list() + [100]
+    # cutoff_values = [0] + user_cov_table["threshold_age"].to_list() + [100]
+
     return cutoff_values
 
 
@@ -1756,6 +1760,25 @@ def add_threshold_coverage_to_df(df, vacc_table):
     return df
 
 
+def add_pop_range_min_max_to_df(df):
+    """
+    Add population range min and max age columns to DataFrame.
+
+    Args:
+        df (pl.DataFrame): DataFrame to add population range min and max age to.
+
+    Returns:
+        pl.DataFrame: Updated DataFrame with population range min and max age columns.
+    """
+    df = df.with_columns(
+        pl.col("pop_range").list.get(0).alias("pop_range_min_age"),
+    )
+    df = df.with_columns(
+        pl.col("pop_range").list.get(1).alias("pop_range_max_age"),
+    )
+    return df
+
+
 def add_pop_fraction_in_coverage_range_to_df(df):
     """
     Add fraction of population in coverage range column to DataFrame.
@@ -1834,12 +1857,20 @@ def build_initial_baseline_immunity_dataframe_from_user_inputs(
     # add matching threshold_coverage column
     df = add_threshold_coverage_to_df(df, vacc_table)
 
+    # add pop_range_min_age and pop_range_max_age columns
+    df = add_pop_range_min_max_to_df(df)
+
     # add fraction_population_covered column
     df = add_pop_fraction_in_coverage_range_to_df(df)
 
     # remove unneeded columns
     df = df.drop(
-        ["coverage_range_length", "pop_range_length", "coverage_range", "pop_range"]
+        [
+            # "coverage_range_length",
+            #  "pop_range_length",
+            #  "coverage_range",
+            #  "pop_range"
+        ]
     )
     return df
 
@@ -1924,6 +1955,9 @@ def create_dataframe_for_baseline_immunity_calculation(df):
             "coverage_range_min_age",
             "coverage_range_max_age",
             "threshold_text",
+            "pop_range_min_age",
+            "pop_range_max_age",
+            # "pop_range",
             "pop_text",
             "fraction_population_in_coverage_range",
             "pop_percentage",
@@ -1958,6 +1992,89 @@ def calculate_baseline_immunity_from_dataframe(df):
     )
 
     immunity = np.round(df.select(pl.col("weighted_coverage")).sum().item() / 100, 2)
+    return immunity
+
+
+def calculate_baseline_immunity_from_dataframe_2(df):
+    immunity = 0.0
+    immunities = []
+
+    for i in range(100):
+        # find the pop range for i
+        pop_row = df.filter(
+            (pl.col("pop_range_min_age") <= i)
+            & (pl.col("pop_range_max_age") >= i)
+            & (pl.col("coverage_range_min_age") <= i)
+            & (pl.col("coverage_range_max_age") > i)
+        )
+        if pop_row.height == 0:
+            continue
+        elif pop_row.height > 1:
+            raise ValueError(f"Multiple rows found for population range min age {i}")
+        else:
+            # print(i, len(pop_row))
+            pop_range_length = (
+                pop_row["pop_range_max_age"][0] - pop_row["pop_range_min_age"][0]
+            )
+            pop_percentage = pop_row["pop_percentage"][0]
+            # print(i, "pop range length", pop_range_length, "pop percentage", pop_percentage)
+
+        # check if i is in coverage_range_min_age column
+        row = df.filter((pl.col("coverage_range_min_age") == i))
+        if row.height == 0:
+            # find the rows where i is greater than the coverage_range_min_age
+
+            lower_rows = df.filter((i - pl.col("coverage_range_min_age")) > 0)
+            closest_lower_index = lower_rows.select(
+                (i - pl.col("coverage_range_min_age")).arg_min()
+            ).item()
+            closest_lower = lower_rows.row(closest_lower_index, named=True)
+            lower_coverage = closest_lower["threshold_coverage"]
+
+            upper_rows = df.filter((pl.col("coverage_range_max_age") - i) > 0)
+            closest_upper_index = upper_rows.select(
+                (pl.col("coverage_range_max_age") - i).arg_min()
+            ).item()
+            closest_upper = upper_rows.row(closest_upper_index, named=True)
+            upper_coverage = closest_upper["threshold_coverage_upper"]
+
+            threshold_coverage = (lower_coverage + upper_coverage) / 2
+
+            print(
+                i,
+                "lower coverage",
+                lower_coverage,
+                "upper coverage",
+                upper_coverage,
+                "coverage",
+                threshold_coverage,
+            )
+
+            # print()
+
+        elif row.height > 1:
+            raise ValueError(f"Multiple rows found for coverage range min age {i}")
+        else:
+            if i == 1:
+                threshold_coverage = row["threshold_coverage_mid"][0]
+            else:
+                threshold_coverage = row["threshold_coverage"][0]
+            # print(
+            #     i,
+            #     "coverage age",
+            #     row["coverage_range_min_age"][0],
+            #     "coverage",
+            #     threshold_coverage,
+            # )
+
+        immunity += threshold_coverage / 100 * pop_percentage / 100 / pop_range_length
+        immunities.append(threshold_coverage)
+
+    print(f"immunity: {immunity}")
+    print(f"immunities: {immunities}")
+    print(f"Total Immunity before rounding: {immunity * 100}%")
+    immunity = np.round(immunity, 2)
+    print(f"Final Immunity: {immunity * 100:.0f}%")
     return immunity
 
 
