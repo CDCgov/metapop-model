@@ -2040,15 +2040,15 @@ def calculate_baseline_immunity_from_dataframe_2(df):
 
             threshold_coverage = (lower_coverage + upper_coverage) / 2
 
-            print(
-                i,
-                "lower coverage",
-                lower_coverage,
-                "upper coverage",
-                upper_coverage,
-                "coverage",
-                threshold_coverage,
-            )
+            # print(
+            #     i,
+            #     "lower coverage",
+            #     lower_coverage,
+            #     "upper coverage",
+            #     upper_coverage,
+            #     "coverage",
+            #     threshold_coverage,
+            # )
 
             # print()
 
@@ -2071,7 +2071,7 @@ def calculate_baseline_immunity_from_dataframe_2(df):
         immunities.append(threshold_coverage)
 
     print(f"immunity: {immunity}")
-    print(f"immunities: {immunities}")
+    # print(f"immunities: {immunities}")
     print(f"Total Immunity before rounding: {immunity * 100}%")
     immunity = np.round(immunity, 2)
     print(f"Final Immunity: {immunity * 100:.0f}%")
