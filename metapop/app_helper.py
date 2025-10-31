@@ -2080,7 +2080,10 @@ def get_baseline_immunity(pop_table, cov_table):
 
     joined_df = create_dataframe_for_baseline_immunity_calculation(immunity_df)
 
-    immunity = calculate_baseline_immunity_from_dataframe(joined_df)
+    # old method
+    # immunity = calculate_baseline_immunity_from_dataframe(joined_df)
+    # new method
+    immunity = calculate_baseline_immunity_from_dataframe_2(joined_df)
 
     return immunity
 

@@ -18,6 +18,7 @@ parms = mp.read_parameters(config_path)
 pop_table = mp.initialize_pop_table(parms)
 vacc_table = mp.initialize_vacc_table(parms)
 
+# scenario: all population under 5 years old age group, full coverage for all eligible age groups
 pop_table = pop_table.with_columns(pl.Series("percentage", [100.0, 0.0, 0.0]))
 
 vacc_table = vacc_table.with_columns(
@@ -28,19 +29,17 @@ vacc_table = vacc_table.with_columns(
 pop_table = mp.add_pop_ranges_to_pop_table(pop_table)
 vacc_table = mp.add_threshold_values_to_vacc_table(vacc_table)
 
-print(pop_table)
-print(vacc_table)
-
-
-expected_df = mp.build_initial_baseline_immunity_dataframe_from_user_inputs(
+immunity_df = mp.build_initial_baseline_immunity_dataframe_from_user_inputs(
     pop_table,
     vacc_table,
 )
 
-
-print("Expected df:")
 print(
-    expected_df.select(
+    "Scenario: all population under 5 years old age group, full coverage for all eligible age groups"
+)
+print("immunity df:")
+print(
+    immunity_df.select(
         [
             "coverage_range_min_age",
             "coverage_range_max_age",
@@ -51,7 +50,7 @@ print(
 )
 
 
-joined_df = mp.create_dataframe_for_baseline_immunity_calculation(expected_df)
+joined_df = mp.create_dataframe_for_baseline_immunity_calculation(immunity_df)
 
 print("joined df for baseline immunity calculation:")
 print(
@@ -74,4 +73,30 @@ immunity = mp.calculate_baseline_immunity_from_dataframe(joined_df)
 print(f"Final baseline immunity value: {immunity * 100:.0f}%")
 
 
-mp.calculate_baseline_immunity_from_dataframe_2(joined_df)
+immunity_2 = mp.calculate_baseline_immunity_from_dataframe_2(joined_df)
+print(f"Final baseline immunity value 2: {immunity_2 * 100:.0f}%\n")
+
+
+# a few examples where the two calculations differ
+# scenario 1: only full coverage at 2 years old, all population under 5 years old
+
+pop_table = pop_table.with_columns(pl.Series("percentage", [100.0, 0.0, 0.0]))
+vacc_table = vacc_table.with_columns(
+    pl.when(pl.col("threshold") == "2 years")
+    .then(100.0)
+    .otherwise(0.0)
+    .alias("coverage")
+)
+
+expected_df = mp.build_initial_baseline_immunity_dataframe_from_user_inputs(
+    pop_table,
+    vacc_table,
+)
+
+joined_df = mp.create_dataframe_for_baseline_immunity_calculation(expected_df)
+immunity = mp.calculate_baseline_immunity_from_dataframe(joined_df)
+immunity_2 = mp.calculate_baseline_immunity_from_dataframe_2(joined_df)
+
+print(
+    f"All population under 5, only coverage (100%) at 2 years old -> Immunity 1: {immunity*100:.2f}%, Immunity 2: {immunity_2*100:.2f}%"
+)
