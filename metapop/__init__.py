@@ -22,7 +22,8 @@ from .app_helper import (
     add_threshold_values_to_vacc_table,
     build_initial_baseline_immunity_dataframe_from_user_inputs,
     calculate_baseline_immunity_from_dataframe,
-    calculate_baseline_immunity_from_dataframe_2,
+    calculate_baseline_immunity_from_dataframe_average,
+    calculate_baseline_immunity_from_dataframe_linear,
     create_dataframe_for_baseline_immunity_calculation,
     get_scenario_results,
     initialize_pop_table,
@@ -96,5 +97,6 @@ __all__ = [
     "build_initial_baseline_immunity_dataframe_from_user_inputs",
     "create_dataframe_for_baseline_immunity_calculation",
     "calculate_baseline_immunity_from_dataframe",
-    "calculate_baseline_immunity_from_dataframe_2",
+    "calculate_baseline_immunity_from_dataframe_average",
+    "calculate_baseline_immunity_from_dataframe_linear",
 ]

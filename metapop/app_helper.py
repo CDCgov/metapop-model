@@ -95,7 +95,8 @@ __all__ = [
     "add_threshold_coverage_to_df",
     "add_pop_range_min_max_to_df",
     "add_pop_fraction_in_coverage_range_to_df",
-    "calculate_baseline_immunity_from_dataframe_2",
+    "calculate_baseline_immunity_from_dataframe_average",
+    "calculate_baseline_immunity_from_dataframe_linear",
 ]
 
 CACHE_TTL = 60 * 60 * 24 * 7  # 1 week in seconds
@@ -1992,10 +1993,12 @@ def calculate_baseline_immunity_from_dataframe(df):
     )
 
     immunity = np.round(df.select(pl.col("weighted_coverage")).sum().item() / 100, 2)
-    return immunity
+    immunities = []
+
+    return immunity, immunities
 
 
-def calculate_baseline_immunity_from_dataframe_2(df):
+def calculate_baseline_immunity_from_dataframe_average(df):
     immunity = 0.0
     immunities = []
 
@@ -2007,6 +2010,7 @@ def calculate_baseline_immunity_from_dataframe_2(df):
             & (pl.col("coverage_range_min_age") <= i)
             & (pl.col("coverage_range_max_age") > i)
         )
+        # age not covered in any pop range
         if pop_row.height == 0:
             continue
         elif pop_row.height > 1:
@@ -2019,7 +2023,7 @@ def calculate_baseline_immunity_from_dataframe_2(df):
 
         # find coverage
         # check if i is in coverage_range_min_age column
-        row = df.filter((pl.col("coverage_range_min_age") == i))
+        row = df.filter(pl.col("coverage_range_min_age") == i)
 
         # if not, find the closest lower and upper rows and interpolate
         if row.height == 0:
@@ -2044,6 +2048,7 @@ def calculate_baseline_immunity_from_dataframe_2(df):
         elif row.height > 1:
             raise ValueError(f"Multiple rows found for coverage range min age {i}")
         else:
+            # for 1 years old use mid value between 0 and 2 years old
             if i == 1:
                 threshold_coverage = row["threshold_coverage_mid"][0]
             else:
@@ -2053,7 +2058,85 @@ def calculate_baseline_immunity_from_dataframe_2(df):
         immunities.append(threshold_coverage)
 
     immunity = np.round(immunity, 2)
-    return immunity
+    return immunity, immunities
+
+
+def linear_interpolate(x, x1, x2, y1, y2):
+    slope = (y2 - y1) / (x2 - x1)
+    y_intercept = y1 - slope * x1
+    return slope * x + y_intercept
+
+
+def calculate_baseline_immunity_from_dataframe_linear(df):
+    immunity = 0.0
+    immunities = []
+
+    for i in range(100):
+        # find the pop range for i
+        pop_row = df.filter(
+            (pl.col("pop_range_min_age") <= i)
+            & (pl.col("pop_range_max_age") >= i)
+            & (pl.col("coverage_range_min_age") <= i)
+            & (pl.col("coverage_range_max_age") > i)
+        )
+        # age not covered in any pop range
+        if pop_row.height == 0:
+            continue
+        elif pop_row.height > 1:
+            raise ValueError(f"Multiple rows found for population range min age {i}")
+        else:
+            pop_range_length = (
+                pop_row["pop_range_max_age"][0] - pop_row["pop_range_min_age"][0]
+            )
+            pop_percentage = pop_row["pop_percentage"][0]
+
+        # find coverage
+        # check if i is in coverage_range_min_age column
+        row = df.filter(pl.col("coverage_range_min_age") == i)
+
+        # if not, find the closest lower and upper rows and interpolate
+        if row.height == 0:
+            lower_rows = df.filter((i - pl.col("coverage_range_min_age")) > 0)
+            closest_lower_index = lower_rows.select(
+                (i - pl.col("coverage_range_min_age")).arg_min()
+            ).item()
+            lower_coverage = lower_rows.row(closest_lower_index, named=True)[
+                "threshold_coverage"
+            ]
+            closest_lower_age = lower_rows.row(closest_lower_index, named=True)[
+                "coverage_range_min_age"
+            ]
+
+            upper_rows = df.filter((pl.col("coverage_range_max_age") - i) > 0)
+            closest_upper_index = upper_rows.select(
+                (pl.col("coverage_range_max_age") - i).arg_min()
+            ).item()
+            upper_coverage = upper_rows.row(closest_upper_index, named=True)[
+                "threshold_coverage_upper"
+            ]
+            closest_upper_age = upper_rows.row(closest_upper_index, named=True)[
+                "coverage_range_max_age"
+            ]
+
+            threshold_coverage = linear_interpolate(
+                i, closest_lower_age, closest_upper_age, lower_coverage, upper_coverage
+            )
+
+        elif row.height > 1:
+            raise ValueError(f"Multiple rows found for coverage range min age {i}")
+        else:
+            # for 1 years old use mid value between 0 and 2 years old
+            if i == 1:
+                threshold_coverage = row["threshold_coverage_mid"][0]
+            else:
+                threshold_coverage = row["threshold_coverage"][0]
+
+        immunity += threshold_coverage / 100 * pop_percentage / 100 / pop_range_length
+        immunities.append(threshold_coverage)
+
+    immunity = np.round(immunity, 2)
+
+    return immunity, immunities
 
 
 def get_baseline_immunity(pop_table, cov_table):
@@ -2081,9 +2164,9 @@ def get_baseline_immunity(pop_table, cov_table):
     joined_df = create_dataframe_for_baseline_immunity_calculation(immunity_df)
 
     # old method
-    # immunity = calculate_baseline_immunity_from_dataframe(joined_df)
+    # immunity, immunities = calculate_baseline_immunity_from_dataframe(joined_df)
     # new method
-    immunity = calculate_baseline_immunity_from_dataframe_2(joined_df)
+    immunity, immunities = calculate_baseline_immunity_from_dataframe_average(joined_df)
 
     return immunity
 
