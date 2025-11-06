@@ -668,13 +668,20 @@ def test_get_baseline_immunity_full_coverage_at_2():
         pop_table, vacc_table
     )
     joined_immunity_df = create_dataframe_for_baseline_immunity_calculation(immunity_df)
-    immunity = calculate_baseline_immunity_from_dataframe(joined_immunity_df)
-    immunity_2 = calculate_baseline_immunity_from_dataframe_2(joined_immunity_df)
+    immunity, immunities = calculate_baseline_immunity_from_dataframe(
+        joined_immunity_df
+    )
+    immunity_average, immunities_average = (
+        calculate_baseline_immunity_from_dataframe_average(joined_immunity_df)
+    )
     expected_immunity = 0.4
     assert expected_immunity == pytest.approx(
         immunity
     ), f"Expected baseline immunity to be {expected_immunity}, but got {immunity}"
-    print(f"Immunity: {immunity} Immunity 2: {immunity_2}\n")
+    expected_immunity_average = 0.5
+    assert (
+        expected_immunity_average == pytest.approx(immunity_average)
+    ), f"Expected baseline immunity average to be {expected_immunity_average}, but got {immunity_average}"
 
     # second scenario: population to be 100% in the 5-17 years age group
     pop_table = pop_table.with_columns(
@@ -688,14 +695,21 @@ def test_get_baseline_immunity_full_coverage_at_2():
         pop_table, vacc_table
     )
     joined_immunity_df = create_dataframe_for_baseline_immunity_calculation(immunity_df)
-    immunity = calculate_baseline_immunity_from_dataframe(joined_immunity_df)
-    immunity_2 = calculate_baseline_immunity_from_dataframe_2(joined_immunity_df)
+    immunity, immunities = calculate_baseline_immunity_from_dataframe(
+        joined_immunity_df
+    )
+    immunity_average, immunities_average = (
+        calculate_baseline_immunity_from_dataframe_average(joined_immunity_df)
+    )
 
     expected_immunity = 0.0
     assert expected_immunity == pytest.approx(
         immunity
     ), f"Expected baseline immunity to be {expected_immunity}, but got {immunity}"
-    print(f"Immunity: {immunity} Immunity 2: {immunity_2}\n")
+    expected_immunity_average = 0.0
+    assert (
+        expected_immunity_average == pytest.approx(immunity_average)
+    ), f"Expected baseline immunity average to be {expected_immunity_average}, but got {immunity_average}"
 
     # third scenario: population to be 100% in the 18+ years age group
     pop_table = pop_table.with_columns(
@@ -709,13 +723,20 @@ def test_get_baseline_immunity_full_coverage_at_2():
         pop_table, vacc_table
     )
     joined_immunity_df = create_dataframe_for_baseline_immunity_calculation(immunity_df)
-    immunity = calculate_baseline_immunity_from_dataframe(joined_immunity_df)
-    immunity_2 = calculate_baseline_immunity_from_dataframe_2(joined_immunity_df)
+    immunity, immunities = calculate_baseline_immunity_from_dataframe(
+        joined_immunity_df
+    )
+    immunity_average, immunities_average = (
+        calculate_baseline_immunity_from_dataframe_average(joined_immunity_df)
+    )
     expected_immunity = 0.0
     assert expected_immunity == pytest.approx(
         immunity
     ), f"Expected baseline immunity to be {expected_immunity}, but got {immunity}"
-    print(f"Immunity: {immunity} Immunity 2: {immunity_2}\n")
+    expected_immunity_average = 0.0
+    assert (
+        expected_immunity_average == pytest.approx(immunity_average)
+    ), f"Expected baseline immunity average to be {expected_immunity_average}, but got {immunity_average}"
 
     # fourth scenario: population to be 1% for each age between 0 and 99 years old
     pop_table = pop_table.with_columns(
@@ -733,13 +754,20 @@ def test_get_baseline_immunity_full_coverage_at_2():
         pop_table, vacc_table
     )
     joined_immunity_df = create_dataframe_for_baseline_immunity_calculation(immunity_df)
-    immunity = calculate_baseline_immunity_from_dataframe(joined_immunity_df)
-    immunity_2 = calculate_baseline_immunity_from_dataframe_2(joined_immunity_df)
+    immunity, immunities = calculate_baseline_immunity_from_dataframe(
+        joined_immunity_df
+    )
+    immunity_average, immunities_average = (
+        calculate_baseline_immunity_from_dataframe_average(joined_immunity_df)
+    )
     expected_immunity = 0.02
     assert expected_immunity == pytest.approx(
         immunity
     ), f"Expected baseline immunity to be {expected_immunity}, but got {immunity}"
-    print(f"Immunity: {immunity} Immunity 2: {immunity_2}\n\n")
+    expected_immunity_average = 0.02
+    assert (
+        expected_immunity_average == pytest.approx(immunity_average)
+    ), f"Expected baseline immunity average to be {expected_immunity_average}, but got {immunity_average}"
 
 
 def test_get_baseline_immunity_full_coverage_under_5():
@@ -788,14 +816,21 @@ def test_get_baseline_immunity_full_coverage_under_5():
         pop_table, vacc_table
     )
     joined_immunity_df = create_dataframe_for_baseline_immunity_calculation(immunity_df)
-    immunity = calculate_baseline_immunity_from_dataframe(joined_immunity_df)
-    immunity_2 = calculate_baseline_immunity_from_dataframe_2(joined_immunity_df)
+    immunity, immunities = calculate_baseline_immunity_from_dataframe(
+        joined_immunity_df
+    )
+    immunity_average, immunities_average = (
+        calculate_baseline_immunity_from_dataframe_average(joined_immunity_df)
+    )
 
     expected_immunity = 0.7
     assert expected_immunity == pytest.approx(
         immunity
     ), f"Expected baseline immunity to be {expected_immunity}, but got {immunity}"
-    print(f"immunity: {immunity} Immunity 2: {immunity_2}\n")
+    expected_immunity_average = 0.7
+    assert (
+        expected_immunity_average == pytest.approx(immunity_average)
+    ), f"Expected baseline immunity average to be {expected_immunity_average}, but got {immunity_average}"
 
     # second scenario: population to be 100% in the 5-17 years age group
     pop_table = pop_table.with_columns(
@@ -809,14 +844,21 @@ def test_get_baseline_immunity_full_coverage_under_5():
         pop_table, vacc_table
     )
     joined_immunity_df = create_dataframe_for_baseline_immunity_calculation(immunity_df)
-    immunity = calculate_baseline_immunity_from_dataframe(joined_immunity_df)
-    immunity_2 = calculate_baseline_immunity_from_dataframe_2(joined_immunity_df)
+    immunity, immunities = calculate_baseline_immunity_from_dataframe(
+        joined_immunity_df
+    )
+    immunity_average, immunities_average = (
+        calculate_baseline_immunity_from_dataframe_average(joined_immunity_df)
+    )
 
     expected_immunity = 0.31
     assert (
         expected_immunity == pytest.approx(immunity)
     ), f"Expected baseline immunity to be {expected_immunity * 100:.0f}%, but got {immunity * 100:.0f}%"
-    print(f"Immunity: {immunity} Immunity 2: {immunity_2}\n")
+    expected_immunity_average = 0.35
+    assert (
+        expected_immunity_average == pytest.approx(immunity_average)
+    ), f"Expected baseline immunity average to be {expected_immunity_average * 100:.0f}%, but got {immunity_average * 100:.0f}%"
 
     # third scenario: population to be 100% in the 18+ years age group
     pop_table = pop_table.with_columns(
@@ -830,14 +872,21 @@ def test_get_baseline_immunity_full_coverage_under_5():
         pop_table, vacc_table
     )
     joined_immunity_df = create_dataframe_for_baseline_immunity_calculation(immunity_df)
-    immunity = calculate_baseline_immunity_from_dataframe(joined_immunity_df)
-    immunity_2 = calculate_baseline_immunity_from_dataframe_2(joined_immunity_df)
+    immunity, immunities = calculate_baseline_immunity_from_dataframe(
+        joined_immunity_df
+    )
+    immunity_average, immunities_average = (
+        calculate_baseline_immunity_from_dataframe_average(joined_immunity_df)
+    )
 
     expected_immunity = 0.0
     assert (
         expected_immunity == pytest.approx(immunity)
     ), f"Expected baseline immunity to be {expected_immunity * 100:.0f}%, but got {immunity * 100:.0f}%"
-    print(f"Immunity: {immunity} Immunity 2: {immunity_2}\n")
+    expected_immunity_average = 0.0
+    assert (
+        expected_immunity_average == pytest.approx(immunity_average)
+    ), f"Expected baseline immunity average to be {expected_immunity_average * 100:.0f}%, but got {immunity_average * 100:.0f}%"
 
     # fourth scenario: population to be 1% for each age between 0 and 99 years old
     pop_table = pop_table.with_columns(
@@ -855,14 +904,22 @@ def test_get_baseline_immunity_full_coverage_under_5():
         pop_table, vacc_table
     )
     joined_immunity_df = create_dataframe_for_baseline_immunity_calculation(immunity_df)
-    immunity = calculate_baseline_immunity_from_dataframe(joined_immunity_df)
-    immunity_2 = calculate_baseline_immunity_from_dataframe_2(joined_immunity_df)
+    immunity, immunities = calculate_baseline_immunity_from_dataframe(
+        joined_immunity_df
+    )
+    immunity_average, immunities_average = (
+        calculate_baseline_immunity_from_dataframe_average(joined_immunity_df)
+    )
 
     expected_immunity = 0.08
     assert (
         expected_immunity == pytest.approx(immunity)
     ), f"Expected baseline immunity to be {expected_immunity * 100:.0f}%, but got {immunity * 100:.0f}%"
-    print(f"Immunity: {immunity} Immunity 2: {immunity_2}\n\n")
+    expected_immunity_average = 0.08
+    assert (
+        expected_immunity_average == pytest.approx(immunity_average)
+    ), f"Expected baseline immunity average to be {expected_immunity_average * 100:.0f}%, but got {immunity_average * 100:.0f}%"
+    print(f"Immunity: {immunity} Immunity 2: {immunity_average}\n\n")
 
 
 def test_get_baseline_immunity_full_coverage_at_5():
@@ -907,14 +964,22 @@ def test_get_baseline_immunity_full_coverage_at_5():
         pop_table, vacc_table
     )
     joined_immunity_df = create_dataframe_for_baseline_immunity_calculation(immunity_df)
-    immunity = calculate_baseline_immunity_from_dataframe(joined_immunity_df)
-    immunity_2 = calculate_baseline_immunity_from_dataframe_2(joined_immunity_df)
+    immunity, immunities = calculate_baseline_immunity_from_dataframe(
+        joined_immunity_df
+    )
+    immunity_average, immunities_average = (
+        calculate_baseline_immunity_from_dataframe_average(joined_immunity_df)
+    )
 
     expected_immunity = 0.3
     assert expected_immunity == pytest.approx(
         immunity
     ), f"Expected baseline immunity to be {expected_immunity}, but got {immunity}"
-    print(f"immunity: {immunity} immunity 2: {immunity_2}\n")
+    expected_immunity_average = 0.2
+    assert (
+        expected_immunity_average == pytest.approx(immunity_average)
+    ), f"Expected baseline immunity average to be {expected_immunity_average}, but got {immunity_average}"
+    print(f"immunity: {immunity} immunity 2: {immunity_average}\n")
 
     # second scenario: population to be 100% in the 5-17 years age group
     pop_table = pop_table.with_columns(
@@ -928,14 +993,22 @@ def test_get_baseline_immunity_full_coverage_at_5():
         pop_table, vacc_table
     )
     joined_immunity_df = create_dataframe_for_baseline_immunity_calculation(immunity_df)
-    immunity = calculate_baseline_immunity_from_dataframe(joined_immunity_df)
-    immunity_2 = calculate_baseline_immunity_from_dataframe_2(joined_immunity_df)
+    immunity, immunities = calculate_baseline_immunity_from_dataframe(
+        joined_immunity_df
+    )
+    immunity_average, immunities_average = (
+        calculate_baseline_immunity_from_dataframe_average(joined_immunity_df)
+    )
 
     expected_immunity = 0.31
     assert (
         expected_immunity == pytest.approx(immunity)
     ), f"Expected baseline immunity to be {expected_immunity * 100:.0f}%, but got {immunity * 100:.0f}%"
-    print(f"immunity: {immunity} immunity 2: {immunity_2}\n")
+    expected_immunity_average = 0.35
+    assert (
+        expected_immunity_average == pytest.approx(immunity_average)
+    ), f"Expected baseline immunity average to be {expected_immunity_average * 100:.0f}%, but got {immunity_average * 100:.0f}%"
+    print(f"immunity: {immunity} immunity 2: {immunity_average}\n")
 
     # third scenario: population to be 100% in the 18+ years age group
     pop_table = pop_table.with_columns(
@@ -949,14 +1022,22 @@ def test_get_baseline_immunity_full_coverage_at_5():
         pop_table, vacc_table
     )
     joined_immunity_df = create_dataframe_for_baseline_immunity_calculation(immunity_df)
-    immunity = calculate_baseline_immunity_from_dataframe(joined_immunity_df)
-    immunity_2 = calculate_baseline_immunity_from_dataframe_2(joined_immunity_df)
+    immunity, immunities = calculate_baseline_immunity_from_dataframe(
+        joined_immunity_df
+    )
+    immunity_average, immunities_average = (
+        calculate_baseline_immunity_from_dataframe_average(joined_immunity_df)
+    )
 
     expected_immunity = 0.0
     assert (
         expected_immunity == pytest.approx(immunity)
     ), f"Expected baseline immunity to be {expected_immunity * 100:.0f}%, but got {immunity * 100:.0f}%"
-    print(f"immunity: {immunity} immunity 2: {immunity_2}\n")
+    expected_immunity_average = 0.0
+    assert (
+        expected_immunity_average == pytest.approx(immunity_average)
+    ), f"Expected baseline immunity average to be {expected_immunity_average * 100:.0f}%, but got {immunity_average * 100:.0f}%"
+    print(f"immunity: {immunity} immunity 2: {immunity_average}\n")
 
     # fourth scenario: population to be 1% for each age between 0 and 99 years old
     pop_table = pop_table.with_columns(
@@ -974,14 +1055,22 @@ def test_get_baseline_immunity_full_coverage_at_5():
         pop_table, vacc_table
     )
     joined_immunity_df = create_dataframe_for_baseline_immunity_calculation(immunity_df)
-    immunity = calculate_baseline_immunity_from_dataframe(joined_immunity_df)
-    immunity_2 = calculate_baseline_immunity_from_dataframe_2(joined_immunity_df)
+    immunity, immunities = calculate_baseline_immunity_from_dataframe(
+        joined_immunity_df
+    )
+    immunity_average, immunities_average = (
+        calculate_baseline_immunity_from_dataframe_average(joined_immunity_df)
+    )
 
     expected_immunity = 0.06
     assert (
         expected_immunity == pytest.approx(immunity)
     ), f"Expected baseline immunity to be {expected_immunity * 100:.0f}%, but got {immunity * 100:.0f}%"
-    print(f"immunity: {immunity} immunity 2: {immunity_2}\n\n")
+    expected_immunity_average = 0.05
+    assert (
+        expected_immunity_average == pytest.approx(immunity_average)
+    ), f"Expected baseline immunity average to be {expected_immunity_average * 100:.0f}%, but got {immunity_average * 100:.0f}%"
+    print(f"immunity: {immunity} immunity 2: {immunity_average}\n\n")
 
 
 def test_get_baseline_immunity_full_coverage_at_18():
@@ -1024,14 +1113,22 @@ def test_get_baseline_immunity_full_coverage_at_18():
         pop_table, vacc_table
     )
     joined_immunity_df = create_dataframe_for_baseline_immunity_calculation(immunity_df)
-    immunity = calculate_baseline_immunity_from_dataframe(joined_immunity_df)
-    immunity_2 = calculate_baseline_immunity_from_dataframe_2(joined_immunity_df)
+    immunity, immunities = calculate_baseline_immunity_from_dataframe(
+        joined_immunity_df
+    )
+    immunity_average, immunities_average = (
+        calculate_baseline_immunity_from_dataframe_average(joined_immunity_df)
+    )
 
     expected_immunity = 0.0
     assert expected_immunity == pytest.approx(
         immunity
     ), f"Expected baseline immunity to be {expected_immunity}, but got {immunity}"
-    print(f"immunity: {immunity} immunity 2: {immunity_2}\n")
+    expected_immunity_average = 0.0
+    assert (
+        expected_immunity_average == pytest.approx(immunity_average)
+    ), f"Expected baseline immunity average to be {expected_immunity_average}, but got {immunity_average}"
+    print(f"immunity: {immunity} immunity 2: {immunity_average}\n")
 
     # second scenario: population to be 100% in the 5-17 years age group
     pop_table = pop_table.with_columns(
@@ -1045,14 +1142,22 @@ def test_get_baseline_immunity_full_coverage_at_18():
         pop_table, vacc_table
     )
     joined_immunity_df = create_dataframe_for_baseline_immunity_calculation(immunity_df)
-    immunity = calculate_baseline_immunity_from_dataframe(joined_immunity_df)
-    immunity_2 = calculate_baseline_immunity_from_dataframe_2(joined_immunity_df)
+    immunity, immunities = calculate_baseline_immunity_from_dataframe(
+        joined_immunity_df
+    )
+    immunity_average, immunities_average = (
+        calculate_baseline_immunity_from_dataframe_average(joined_immunity_df)
+    )
 
     expected_immunity = 0.19
     assert (
         expected_immunity == pytest.approx(immunity)
     ), f"Expected baseline immunity to be {expected_immunity * 100:.0f}%, but got {immunity * 100:.0f}%"
-    print(f"immunity: {immunity} immunity 2: {immunity_2}\n")
+    expected_immunity_average = 0.15
+    assert (
+        expected_immunity_average == pytest.approx(immunity_average)
+    ), f"Expected baseline immunity average to be {expected_immunity_average * 100:.0f}%, but got {immunity_average * 100:.0f}%"
+    print(f"immunity: {immunity} immunity 2: {immunity_average}\n")
 
     # third scenario: population to be 100% in the 18+ years age group
     pop_table = pop_table.with_columns(
@@ -1066,14 +1171,22 @@ def test_get_baseline_immunity_full_coverage_at_18():
         pop_table, vacc_table
     )
     joined_immunity_df = create_dataframe_for_baseline_immunity_calculation(immunity_df)
-    immunity = calculate_baseline_immunity_from_dataframe(joined_immunity_df)
-    immunity_2 = calculate_baseline_immunity_from_dataframe_2(joined_immunity_df)
+    immunity, immunities = calculate_baseline_immunity_from_dataframe(
+        joined_immunity_df
+    )
+    immunity_average, immunities_average = (
+        calculate_baseline_immunity_from_dataframe_average(joined_immunity_df)
+    )
 
     expected_immunity = 1.0
     assert (
         expected_immunity == pytest.approx(immunity)
     ), f"Expected baseline immunity to be {expected_immunity * 100:.0f}%, but got {immunity * 100:.0f}%"
-    print(f"Immunity: {immunity} Immunity 2: {immunity_2}\n")
+    expected_immunity_average = 1.0
+    assert (
+        expected_immunity_average == pytest.approx(immunity_average)
+    ), f"Expected baseline immunity average to be {expected_immunity_average * 100:.0f}%, but got {immunity_average * 100:.0f}%"
+    print(f"Immunity: {immunity} Immunity 2: {immunity_average}\n")
 
     # fourth scenario: population to be 1% for each age between 0 and 99 years old
     pop_table = pop_table.with_columns(
@@ -1091,14 +1204,22 @@ def test_get_baseline_immunity_full_coverage_at_18():
         pop_table, vacc_table
     )
     joined_immunity_df = create_dataframe_for_baseline_immunity_calculation(immunity_df)
-    immunity = calculate_baseline_immunity_from_dataframe(joined_immunity_df)
-    immunity_2 = calculate_baseline_immunity_from_dataframe_2(joined_immunity_df)
+    immunity, immunities = calculate_baseline_immunity_from_dataframe(
+        joined_immunity_df
+    )
+    immunity_average, immunities_average = (
+        calculate_baseline_immunity_from_dataframe_average(joined_immunity_df)
+    )
 
     expected_immunity = 0.85  # this is coming out rounded as 0.84 not 0.85 - check calculation and rounding with numpy
     assert (
         expected_immunity == pytest.approx(immunity, abs=2e-2)
     ), f"Expected baseline immunity to be {expected_immunity * 100:.0f}%, but got {immunity * 100:.0f}%"
-    print(f"immunity: {immunity} immunity 2: {immunity_2}\n\n")
+    expected_immunity_average = 0.85
+    assert (
+        expected_immunity_average == pytest.approx(immunity_average, abs=2e-2)
+    ), f"Expected baseline immunity average to be {expected_immunity_average * 100:.0f}%, but got {immunity_average * 100:.0f}%"
+    print(f"immunity: {immunity} immunity 2: {immunity_average}\n\n")
 
 
 def test_get_baseline_immunity_no_coverage():
@@ -1135,14 +1256,22 @@ def test_get_baseline_immunity_no_coverage():
         pop_table, vacc_table
     )
     joined_immunity_df = create_dataframe_for_baseline_immunity_calculation(immunity_df)
-    immunity = calculate_baseline_immunity_from_dataframe(joined_immunity_df)
-    immunity_2 = calculate_baseline_immunity_from_dataframe_2(joined_immunity_df)
+    immunity, immunities = calculate_baseline_immunity_from_dataframe(
+        joined_immunity_df
+    )
+    immunity_average, immunities_average = (
+        calculate_baseline_immunity_from_dataframe_average(joined_immunity_df)
+    )
 
     expected_immunity = 0.0
     assert (
-        expected_immunity == pytest.approx(immunity, abs=2e-2)
+        expected_immunity == pytest.approx(immunity)
     ), f"Expected baseline immunity to be {expected_immunity * 100:.0f}%, but got {immunity * 100:.0f}%"
-    print(f"Immunity: {immunity} Immunity 2: {immunity_2}\n\n")
+    expected_immunity_average = 0.0
+    assert (
+        expected_immunity_average == pytest.approx(immunity_average)
+    ), f"Expected baseline immunity average to be {expected_immunity_average * 100:.0f}%, but got {immunity_average * 100:.0f}%"
+    print(f"Immunity: {immunity} Immunity 2: {immunity_average}\n\n")
 
 
 def test_get_baseline_immunity_all_full_coverage():
@@ -1182,14 +1311,22 @@ def test_get_baseline_immunity_all_full_coverage():
         pop_table, vacc_table
     )
     joined_immunity_df = create_dataframe_for_baseline_immunity_calculation(immunity_df)
-    immunity = calculate_baseline_immunity_from_dataframe(joined_immunity_df)
-    immunity_2 = calculate_baseline_immunity_from_dataframe_2(joined_immunity_df)
+    immunity, immunities = calculate_baseline_immunity_from_dataframe(
+        joined_immunity_df
+    )
+    immunity_average, immunities_average = (
+        calculate_baseline_immunity_from_dataframe_average(joined_immunity_df)
+    )
 
     expected_immunity = 0.7
     assert expected_immunity == pytest.approx(
         immunity
     ), f"Expected baseline immunity to be {expected_immunity}, but got {immunity}"
-    print(f"Immunity: {immunity} Immunity 2: {immunity_2}\n")
+    expected_immunity_average = 0.7
+    assert (
+        expected_immunity_average == pytest.approx(immunity_average)
+    ), f"Expected baseline immunity average to be {expected_immunity_average}, but got {immunity_average}"
+    print(f"Immunity: {immunity} Immunity 2: {immunity_average}\n")
 
     # second scenario: population to be 100% in the 5-17 years age group
     pop_table = pop_table.with_columns(
@@ -1203,14 +1340,22 @@ def test_get_baseline_immunity_all_full_coverage():
         pop_table, vacc_table
     )
     joined_immunity_df = create_dataframe_for_baseline_immunity_calculation(immunity_df)
-    immunity = calculate_baseline_immunity_from_dataframe(joined_immunity_df)
-    immunity_2 = calculate_baseline_immunity_from_dataframe_2(joined_immunity_df)
+    immunity, immunities = calculate_baseline_immunity_from_dataframe(
+        joined_immunity_df
+    )
+    immunity_average, immunities_average = (
+        calculate_baseline_immunity_from_dataframe_average(joined_immunity_df)
+    )
 
     expected_immunity = 1.0
     assert (
         expected_immunity == pytest.approx(immunity)
     ), f"Expected baseline immunity to be {expected_immunity * 100:.0f}%, but got {immunity * 100:.0f}%"
-    print(f"Immunity: {immunity} Immunity 2: {immunity_2}\n")
+    expected_immunity_average = 1.0
+    assert (
+        expected_immunity_average == pytest.approx(immunity_average)
+    ), f"Expected baseline immunity average to be {expected_immunity_average * 100:.0f}%, but got {immunity_average * 100:.0f}%"
+    print(f"Immunity: {immunity} Immunity 2: {immunity_average}\n")
 
     # third scenario: population to be 100% in the 18+ years age group
     pop_table = pop_table.with_columns(
@@ -1224,14 +1369,22 @@ def test_get_baseline_immunity_all_full_coverage():
         pop_table, vacc_table
     )
     joined_immunity_df = create_dataframe_for_baseline_immunity_calculation(immunity_df)
-    immunity = calculate_baseline_immunity_from_dataframe(joined_immunity_df)
-    immunity_2 = calculate_baseline_immunity_from_dataframe_2(joined_immunity_df)
+    immunity, immunities = calculate_baseline_immunity_from_dataframe(
+        joined_immunity_df
+    )
+    immunity_average, immunities_average = (
+        calculate_baseline_immunity_from_dataframe_average(joined_immunity_df)
+    )
 
     expected_immunity = 1.0
     assert (
         expected_immunity == pytest.approx(immunity)
     ), f"Expected baseline immunity to be {expected_immunity * 100:.0f}%, but got {immunity * 100:.0f}%"
-    print(f"Immunity: {immunity} Immunity 2: {immunity_2}\n")
+    expected_immunity_average = 1.0
+    assert (
+        expected_immunity_average == pytest.approx(immunity_average)
+    ), f"Expected baseline immunity average to be {expected_immunity_average * 100:.0f}%, but got {immunity_average * 100:.0f}%"
+    print(f"Immunity: {immunity} Immunity 2: {immunity_average}\n")
 
     # fourth scenario: population to be 1% for each age between 0 and 99 years old
     pop_table = pop_table.with_columns(
@@ -1249,14 +1402,22 @@ def test_get_baseline_immunity_all_full_coverage():
         pop_table, vacc_table
     )
     joined_immunity_df = create_dataframe_for_baseline_immunity_calculation(immunity_df)
-    immunity = calculate_baseline_immunity_from_dataframe(joined_immunity_df)
-    immunity_2 = calculate_baseline_immunity_from_dataframe_2(joined_immunity_df)
+    immunity, immunities = calculate_baseline_immunity_from_dataframe(
+        joined_immunity_df
+    )
+    immunity_average, immunities_average = (
+        calculate_baseline_immunity_from_dataframe_average(joined_immunity_df)
+    )
 
     expected_immunity = 0.98  # this is coming out rounded as 0.98 not 0.99 - check calculation and rounding with numpy
     assert (
         expected_immunity == pytest.approx(immunity)
     ), f"Expected baseline immunity to be {expected_immunity * 100:.0f}%, but got {immunity * 100:.0f}%"
-    print(f"Immunity: {immunity} Immunity 2: {immunity_2}\n\n")
+    expected_immunity_average = 0.99
+    assert (
+        expected_immunity_average == pytest.approx(immunity_average)
+    ), f"Expected baseline immunity average to be {expected_immunity_average * 100:.0f}%, but got {immunity_average * 100:.0f}%"
+    print(f"Immunity: {immunity} Immunity 2: {immunity_average}\n\n")
 
 
 def test_get_baseline_immunity_all_immune_under_5_other_arbitrary():
@@ -1298,14 +1459,22 @@ def test_get_baseline_immunity_all_immune_under_5_other_arbitrary():
         pop_table, vacc_table
     )
     joined_immunity_df = create_dataframe_for_baseline_immunity_calculation(immunity_df)
-    immunity = calculate_baseline_immunity_from_dataframe(joined_immunity_df)
-    immunity_2 = calculate_baseline_immunity_from_dataframe_2(joined_immunity_df)
+    immunity, immunities = calculate_baseline_immunity_from_dataframe(
+        joined_immunity_df
+    )
+    immunity_average, immunities_average = (
+        calculate_baseline_immunity_from_dataframe_average(joined_immunity_df)
+    )
 
     expected_immunity = 0.7  # 70% baseline immunity
     assert (
         expected_immunity == pytest.approx(immunity)
     ), f"Calculated immunity: {immunity} does not match expected value: {expected_immunity}."
-    print(f"Immunity: {immunity} Immunity 2: {immunity_2}\n")
+    expected_immunity_average = 0.7
+    assert (
+        expected_immunity_average == pytest.approx(immunity_average)
+    ), f"Calculated immunity average: {immunity_average} does not match expected value: {expected_immunity_average}."
+    print(f"Immunity: {immunity} Immunity 2: {immunity_average}\n")
 
 
 def test_convert_cutoff_text():
