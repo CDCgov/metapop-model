@@ -693,6 +693,10 @@ def test_get_baseline_immunity_full_coverage_at_2():
     immunity_average, immunities_average = (
         calculate_baseline_immunity_from_dataframe_average(joined_immunity_df)
     )
+    immunity_linear, immunities_linear = (
+        calculate_baseline_immunity_from_dataframe_linear(joined_immunity_df)
+    )
+
     expected_immunity = 0.4
     assert expected_immunity == pytest.approx(
         immunity
@@ -701,6 +705,9 @@ def test_get_baseline_immunity_full_coverage_at_2():
     assert (
         expected_immunity_average == pytest.approx(immunity_average)
     ), f"Expected baseline immunity average to be {expected_immunity_average}, but got {immunity_average}"
+    assert (
+        expected_immunity_average == pytest.approx(immunity_linear)
+    ), f"Expected baseline immunity linear to be {expected_immunity_average}, but got {immunity_linear}"
 
     # second scenario: population to be 100% in the 5-17 years age group
     pop_table = pop_table.with_columns(
@@ -709,7 +716,6 @@ def test_get_baseline_immunity_full_coverage_at_2():
         .otherwise(0.0)
         .alias("percentage")
     )
-
     immunity_df = build_initial_baseline_immunity_dataframe_from_user_inputs(
         pop_table, vacc_table
     )
@@ -720,6 +726,9 @@ def test_get_baseline_immunity_full_coverage_at_2():
     immunity_average, immunities_average = (
         calculate_baseline_immunity_from_dataframe_average(joined_immunity_df)
     )
+    immunity_linear, immunities_linear = (
+        calculate_baseline_immunity_from_dataframe_linear(joined_immunity_df)
+    )
 
     expected_immunity = 0.0
     assert expected_immunity == pytest.approx(
@@ -729,6 +738,9 @@ def test_get_baseline_immunity_full_coverage_at_2():
     assert (
         expected_immunity_average == pytest.approx(immunity_average)
     ), f"Expected baseline immunity average to be {expected_immunity_average}, but got {immunity_average}"
+    assert (
+        expected_immunity_average == pytest.approx(immunity_linear)
+    ), f"Expected baseline immunity linear to be {expected_immunity_average}, but got {immunity_linear}"
 
     # third scenario: population to be 100% in the 18+ years age group
     pop_table = pop_table.with_columns(
@@ -748,6 +760,10 @@ def test_get_baseline_immunity_full_coverage_at_2():
     immunity_average, immunities_average = (
         calculate_baseline_immunity_from_dataframe_average(joined_immunity_df)
     )
+    immunity_linear, immunities_linear = (
+        calculate_baseline_immunity_from_dataframe_linear(joined_immunity_df)
+    )
+
     expected_immunity = 0.0
     assert expected_immunity == pytest.approx(
         immunity
@@ -756,6 +772,9 @@ def test_get_baseline_immunity_full_coverage_at_2():
     assert (
         expected_immunity_average == pytest.approx(immunity_average)
     ), f"Expected baseline immunity average to be {expected_immunity_average}, but got {immunity_average}"
+    assert (
+        expected_immunity_average == pytest.approx(immunity_linear)
+    ), f"Expected baseline immunity linear to be {expected_immunity_average}, but got {immunity_linear}"
 
     # fourth scenario: population to be 1% for each age between 0 and 99 years old
     pop_table = pop_table.with_columns(
@@ -779,6 +798,10 @@ def test_get_baseline_immunity_full_coverage_at_2():
     immunity_average, immunities_average = (
         calculate_baseline_immunity_from_dataframe_average(joined_immunity_df)
     )
+    immunity_linear, immunities_linear = (
+        calculate_baseline_immunity_from_dataframe_linear(joined_immunity_df)
+    )
+
     expected_immunity = 0.02
     assert expected_immunity == pytest.approx(
         immunity
@@ -787,21 +810,46 @@ def test_get_baseline_immunity_full_coverage_at_2():
     assert (
         expected_immunity_average == pytest.approx(immunity_average)
     ), f"Expected baseline immunity average to be {expected_immunity_average}, but got {immunity_average}"
+    assert (
+        expected_immunity_average == pytest.approx(immunity_linear)
+    ), f"Expected baseline immunity linear to be {expected_immunity_average}, but got {immunity_linear}"
 
 
 def test_get_baseline_immunity_full_coverage_under_5():
     """
-    This test looks at different scenarios where coverage is 100% for all age groups under 5 years old, 0% otherwise, and varies the population distribution.
+    This test looks at different scenarios where coverage is 100% for all age
+    groups under 5 years old, 0% otherwise, and varies the population
+    distribution.
 
-    In this case, the baseline immunity should account for zero immunity for 0 to 1 years old since infants under 12 months old are typically not eligible for vaccination. The method assumes vaccination increases linearly from 0% at 12 months to the coverage level at the age threshold 2 years old.
+    In this case, the baseline immunity should account for zero immunity for 0
+    to 1 years old since infants under 12 months old are typically not eligible
+    for vaccination. The method assumes vaccination increases linearly from 0%
+    at 12 months to the coverage level at the age threshold 2 years old.
 
-    For example, if all of the population is under 5 years old and vaccination coverage is 100% for those at 2 years old and 5 years old (prior to an outbreak), the expected baseline immunity should be 0% for 0-1 years, increase from 0% to 100% for infants aged 1-2 years, and then be 100% for 2-5 years, resulting in an overall baseline immunity of 70% (since 2-5 years covers 3 out of the 5 years in the age range and we assume that vaccination gradually happens for infants between ages 1 and 2 years, i.e. 50% on average).
+    For example, if all of the population is under 5 years old and vaccination
+    coverage is 100% for those at 2 years old and 5 years old (prior to an
+    outbreak), the expected baseline immunity should be 0% for 0-1 years,
+    increase from 0% to 100% for infants aged 1-2 years, and then be 100% for
+    2-5 years, resulting in an overall baseline immunity of 70% (since 2-5
+    years covers 3 out of the 5 years in the age range and we assume that
+    vaccination gradually happens for infants between ages 1 and 2 years, i.e.
+    50% on average).
 
-    If all of the population is between 5 and 17 years old with the same vaccination coverage assumptions, the expected baseline immunity should be 31% (30.7% rounded up), i.e. 50% for those between 5 and 12 years old and 0% for those between 13 and 17 years old.
+    If all of the population is between 5 and 17 years old with the same
+    vaccination coverage assumptions, the expected baseline immunity should
+    be 31% (30.7% rounded up), i.e. 50% for those between 5 and 12 years old
+    and 0% for those between 13 and 17 years old.
 
-    If all of the population is 18 years old and older with the same vaccination coverage assumptions, the expected baseline immunity should be 0% since no vaccination coverage is assumed for those 18 years and older prior to an outbreak.
+    If all of the population is 18 years old and older with the same
+    vaccination coverage assumptions, the expected baseline immunity should be
+    0% since no vaccination coverage is assumed for those 18 years and older
+    prior to an outbreak.
 
-    If the population is evenly distributed across all age ages, assuming ages 0 through 99 years old, i.e. 1% for year, the expected baseline immunity should be 8% (7.5% rounded) since ages 1-2 years old has 50% vaccination coverage on average, 2 to 5 years old has 100%, and 5 to 12 years old has 50% vaccination on average.
+    If the population is evenly distributed across all age ages, assuming ages
+    0 through 99 years old, i.e. 1% for year, the expected baseline immunity
+    should be 8% (7.5% rounded) since ages 1-2 years old has 50% vaccination
+    coverage on average, 2 to 5 years old has 100%, and 5 to 12 years old has
+    50% vaccination on average.
     """
 
     config_path = os.path.join(testdir, "test_app_config.yaml")
@@ -841,6 +889,9 @@ def test_get_baseline_immunity_full_coverage_under_5():
     immunity_average, immunities_average = (
         calculate_baseline_immunity_from_dataframe_average(joined_immunity_df)
     )
+    immunity_linear, immunities_linear = (
+        calculate_baseline_immunity_from_dataframe_linear(joined_immunity_df)
+    )
 
     expected_immunity = 0.7
     assert expected_immunity == pytest.approx(
@@ -850,6 +901,9 @@ def test_get_baseline_immunity_full_coverage_under_5():
     assert (
         expected_immunity_average == pytest.approx(immunity_average)
     ), f"Expected baseline immunity average to be {expected_immunity_average}, but got {immunity_average}"
+    assert (
+        expected_immunity_average == pytest.approx(immunity_linear)
+    ), f"Expected baseline immunity linear to be {expected_immunity_average}, but got {immunity_linear}"
 
     # second scenario: population to be 100% in the 5-17 years age group
     pop_table = pop_table.with_columns(
@@ -869,6 +923,9 @@ def test_get_baseline_immunity_full_coverage_under_5():
     immunity_average, immunities_average = (
         calculate_baseline_immunity_from_dataframe_average(joined_immunity_df)
     )
+    immunity_linear, immunities_linear = (
+        calculate_baseline_immunity_from_dataframe_linear(joined_immunity_df)
+    )
 
     expected_immunity = 0.31
     assert (
@@ -878,6 +935,9 @@ def test_get_baseline_immunity_full_coverage_under_5():
     assert (
         expected_immunity_average == pytest.approx(immunity_average)
     ), f"Expected baseline immunity average to be {expected_immunity_average * 100:.0f}%, but got {immunity_average * 100:.0f}%"
+    assert (
+        expected_immunity_average == pytest.approx(immunity_linear)
+    ), f"Expected baseline immunity linear to be {expected_immunity_average * 100:.0f}%, but got {immunity_linear * 100:.0f}%"
 
     # third scenario: population to be 100% in the 18+ years age group
     pop_table = pop_table.with_columns(
@@ -897,6 +957,9 @@ def test_get_baseline_immunity_full_coverage_under_5():
     immunity_average, immunities_average = (
         calculate_baseline_immunity_from_dataframe_average(joined_immunity_df)
     )
+    immunity_linear, immunities_linear = (
+        calculate_baseline_immunity_from_dataframe_linear(joined_immunity_df)
+    )
 
     expected_immunity = 0.0
     assert (
@@ -906,6 +969,9 @@ def test_get_baseline_immunity_full_coverage_under_5():
     assert (
         expected_immunity_average == pytest.approx(immunity_average)
     ), f"Expected baseline immunity average to be {expected_immunity_average * 100:.0f}%, but got {immunity_average * 100:.0f}%"
+    assert (
+        expected_immunity_average == pytest.approx(immunity_linear)
+    ), f"Expected baseline immunity linear to be {expected_immunity_average * 100:.0f}%, but got {immunity_linear * 100:.0f}%"
 
     # fourth scenario: population to be 1% for each age between 0 and 99 years old
     pop_table = pop_table.with_columns(
@@ -929,6 +995,9 @@ def test_get_baseline_immunity_full_coverage_under_5():
     immunity_average, immunities_average = (
         calculate_baseline_immunity_from_dataframe_average(joined_immunity_df)
     )
+    immunity_linear, immunities_linear = (
+        calculate_baseline_immunity_from_dataframe_linear(joined_immunity_df)
+    )
 
     expected_immunity = 0.08
     assert (
@@ -939,21 +1008,44 @@ def test_get_baseline_immunity_full_coverage_under_5():
         expected_immunity_average == pytest.approx(immunity_average)
     ), f"Expected baseline immunity average to be {expected_immunity_average * 100:.0f}%, but got {immunity_average * 100:.0f}%"
     print(f"Immunity: {immunity} Immunity 2: {immunity_average}\n\n")
+    assert (
+        expected_immunity_average == pytest.approx(immunity_linear)
+    ), f"Expected baseline immunity linear to be {expected_immunity_average * 100:.0f}%, but got {immunity_linear * 100:.0f}%"
 
 
 def test_get_baseline_immunity_full_coverage_at_5():
     """
-    This test looks at different scenarios where coverage is 100% for all age groups at 5 years old, 0% otherwise, and varies the population distribution.
+    This test looks at different scenarios where coverage is 100% for all age
+    groups at 5 years old, 0% otherwise, and varies the population distribution.
 
-    In this case, the baseline immunity should account for zero immunity for 0 to 1 years old since infants under 12 months old are typically not eligible for vaccination. The method assumes vaccination increases linearly from 0% at 12 months to the coverage level at the age threshold 2 years old.
+    In this case, the baseline immunity should account for zero immunity for 0
+    to 1 years old since infants under 12 months old are typically not eligible
+    for vaccination. The method assumes vaccination increases linearly from 0%
+    at 12 months to the coverage level at the age threshold 2 years old.
 
-    For example, if all of the population is under 5 years old and vaccination coverage is 100% for those at 5 years old (prior to an outbreak), the expected baseline immunity should be 0% for 0-2 years, and then increase from 0% to 100% for 2-5 years, resulting in an overall baseline immunity of 30% (since 2-5 years covers 3 out of the 5 years in the age range and we assume that vaccination gradually happens for infants between ages 2 and 5 years old, i.e. 50% on average).
+    For example, if all of the population is under 5 years old and vaccination
+    coverage is 100% for those at 5 years old (prior to an outbreak), the
+    expected baseline immunity should be 0% for 0-2 years, and then increase
+    from 0% to 100% for 2-5 years, resulting in an overall baseline immunity of
+    30% (since 2-5 years covers 3 out of the 5 years in the age range and we
+    assume that vaccination gradually happens for infants between ages 2 and 5
+    years old, i.e. 50% on average).
 
-    If all of the population is between 5 and 17 years old with the same vaccination coverage assumptions, the expected baseline immunity should be 50% for those between 5 and 12 years old and 0% for those between 13 and 17 years old, resulting in an overall baseline immunity of 31% (30.7% rounded up).
+    If all of the population is between 5 and 17 years old with the same
+    vaccination coverage assumptions, the expected baseline immunity should be
+    50% for those between 5 and 12 years old and 0% for those between 13 and 17
+    years old, resulting in an overall baseline immunity of 31% (30.7% rounded up).
 
-    If all of the population is 18 years old and older with the same vaccination coverage assumptions, the expected baseline immunity should be 0% since no vaccination coverage is assumed for those 18 years and older prior to an outbreak.
+    If all of the population is 18 years old and older with the same vaccination
+    coverage assumptions, the expected baseline immunity should be 0% since no
+    vaccination coverage is assumed for those 18 years and older prior to an
+    outbreak.
 
-    If the population is evenly distributed across all age ages, assuming ages 0 through 99 years old, i.e. 1% for year, the expected baseline immunity should be 6% (5.5% rounded) since ages 0-2 years old has 0% vaccination coverage on average, 2 to 5 years old has 50%, and 5 to 12 years old has 50% vaccination on average.
+    If the population is evenly distributed across all age ages, assuming ages
+    0 through 99 years old, i.e. 1% for year, the expected baseline immunity
+    should be 6% (5.5% rounded) since ages 0-2 years old has 0% vaccination
+    coverage on average, 2 to 5 years old has 50%, and 5 to 12 years old has
+    50% vaccination on average.
     """
     config_path = os.path.join(testdir, "test_app_config.yaml")
     parms = read_parameters(config_path)
@@ -989,6 +1081,9 @@ def test_get_baseline_immunity_full_coverage_at_5():
     immunity_average, immunities_average = (
         calculate_baseline_immunity_from_dataframe_average(joined_immunity_df)
     )
+    immunity_linear, immunities_linear = (
+        calculate_baseline_immunity_from_dataframe_linear(joined_immunity_df)
+    )
 
     expected_immunity = 0.3
     assert expected_immunity == pytest.approx(
@@ -999,6 +1094,9 @@ def test_get_baseline_immunity_full_coverage_at_5():
         expected_immunity_average == pytest.approx(immunity_average)
     ), f"Expected baseline immunity average to be {expected_immunity_average}, but got {immunity_average}"
     print(f"immunity: {immunity} immunity 2: {immunity_average}\n")
+    assert (
+        expected_immunity_average == pytest.approx(immunity_linear)
+    ), f"Expected baseline immunity linear to be {expected_immunity_average}, but got {immunity_linear}"
 
     # second scenario: population to be 100% in the 5-17 years age group
     pop_table = pop_table.with_columns(
@@ -1018,6 +1116,9 @@ def test_get_baseline_immunity_full_coverage_at_5():
     immunity_average, immunities_average = (
         calculate_baseline_immunity_from_dataframe_average(joined_immunity_df)
     )
+    immunity_linear, immunities_linear = (
+        calculate_baseline_immunity_from_dataframe_linear(joined_immunity_df)
+    )
 
     expected_immunity = 0.31
     assert (
@@ -1028,6 +1129,9 @@ def test_get_baseline_immunity_full_coverage_at_5():
         expected_immunity_average == pytest.approx(immunity_average)
     ), f"Expected baseline immunity average to be {expected_immunity_average * 100:.0f}%, but got {immunity_average * 100:.0f}%"
     print(f"immunity: {immunity} immunity 2: {immunity_average}\n")
+    assert (
+        expected_immunity_average == pytest.approx(immunity_linear)
+    ), f"Expected baseline immunity linear to be {expected_immunity_average * 100:.0f}%, but got {immunity_linear * 100:.0f}%"
 
     # third scenario: population to be 100% in the 18+ years age group
     pop_table = pop_table.with_columns(
@@ -1047,6 +1151,9 @@ def test_get_baseline_immunity_full_coverage_at_5():
     immunity_average, immunities_average = (
         calculate_baseline_immunity_from_dataframe_average(joined_immunity_df)
     )
+    immunity_linear, immunities_linear = (
+        calculate_baseline_immunity_from_dataframe_linear(joined_immunity_df)
+    )
 
     expected_immunity = 0.0
     assert (
@@ -1057,6 +1164,9 @@ def test_get_baseline_immunity_full_coverage_at_5():
         expected_immunity_average == pytest.approx(immunity_average)
     ), f"Expected baseline immunity average to be {expected_immunity_average * 100:.0f}%, but got {immunity_average * 100:.0f}%"
     print(f"immunity: {immunity} immunity 2: {immunity_average}\n")
+    assert (
+        expected_immunity_average == pytest.approx(immunity_linear)
+    ), f"Expected baseline immunity linear to be {expected_immunity_average * 100:.0f}%, but got {immunity_linear * 100:.0f}%"
 
     # fourth scenario: population to be 1% for each age between 0 and 99 years old
     pop_table = pop_table.with_columns(
@@ -1080,6 +1190,9 @@ def test_get_baseline_immunity_full_coverage_at_5():
     immunity_average, immunities_average = (
         calculate_baseline_immunity_from_dataframe_average(joined_immunity_df)
     )
+    immunity_linear, immunities_linear = (
+        calculate_baseline_immunity_from_dataframe_linear(joined_immunity_df)
+    )
 
     expected_immunity = 0.06
     assert (
@@ -1090,19 +1203,38 @@ def test_get_baseline_immunity_full_coverage_at_5():
         expected_immunity_average == pytest.approx(immunity_average)
     ), f"Expected baseline immunity average to be {expected_immunity_average * 100:.0f}%, but got {immunity_average * 100:.0f}%"
     print(f"immunity: {immunity} immunity 2: {immunity_average}\n\n")
+    assert (
+        expected_immunity_average == pytest.approx(immunity_linear)
+    ), f"Expected baseline immunity linear to be {expected_immunity_average * 100:.0f}%, but got {immunity_linear * 100:.0f}%"
 
 
 def test_get_baseline_immunity_full_coverage_at_18():
     """
-    This test looks at different scenarios where coverage is 0% for all age groups under 18 years old, 100% otherwise, and varies the population distribution.
+    This test looks at different scenarios where coverage is 0% for all age
+    groups under 18 years old, 100% otherwise, and varies the population
+    distribution.
 
-    If all of the population is under 5 years old with the same vaccination coverage assumptions, the expected baseline immunity should be 0% since no vaccination coverage is assumed for those under 18 years old prior to an outbreak.
+    If all of the population is under 5 years old with the same vaccination
+    coverage assumptions, the expected baseline immunity should be 0% since no
+    vaccination coverage is assumed for those under 18 years old prior to an
+    outbreak.
 
-    If all of the population is between 5 and 17 years old with the same vaccination coverage assumptions, the expected baseline immunity should be 19% (19.2% rounded) since no vaccination coverage is assumed for those under 13 years old prior to an outbreak, and vaccination linearly increases from 0% to 100% for those 13 to 17 years old.
+    If all of the population is between 5 and 17 years old with the same
+    vaccination coverage assumptions, the expected baseline immunity should be
+    19% (19.2% rounded) since no vaccination coverage is assumed for those
+    under 13 years old prior to an outbreak, and vaccination linearly increases
+    from 0% to 100% for those 13 to 17 years old.
 
-    If all of the population is 18 years old and older with the same vaccination coverage assumptions, the expected baseline immunity should be 100% since 100% vaccination coverage is assumed for those 18 years and older prior to an outbreak.
+    If all of the population is 18 years old and older with the same
+    vaccination coverage assumptions, the expected baseline immunity should be
+    100% since 100% vaccination coverage is assumed for those 18 years and
+    older prior to an outbreak.
 
-    If the population is evenly distributed across all age ages, assuming ages 0 through 99 years old, i.e. 1% for year, the expected baseline immunity should be 84% (84.5% rounded) since ages 1-2 years old has 50% vaccination coverage on average, 2 to 5 years old has 100%, and 5 to 12 years old has 50% vaccination on average.
+    If the population is evenly distributed across all age ages, assuming ages
+    0 through 99 years old, i.e. 1% for year, the expected baseline immunity
+    should be 84% (84.5% rounded) since ages 1-2 years old has 50% vaccination
+    coverage on average, 2 to 5 years old has 100%, and 5 to 12 years old has
+    50% vaccination on average.
     """
     config_path = os.path.join(testdir, "test_app_config.yaml")
     parms = read_parameters(config_path)
@@ -1138,6 +1270,9 @@ def test_get_baseline_immunity_full_coverage_at_18():
     immunity_average, immunities_average = (
         calculate_baseline_immunity_from_dataframe_average(joined_immunity_df)
     )
+    immunity_linear, immunities_linear = (
+        calculate_baseline_immunity_from_dataframe_linear(joined_immunity_df)
+    )
 
     expected_immunity = 0.0
     assert expected_immunity == pytest.approx(
@@ -1148,6 +1283,9 @@ def test_get_baseline_immunity_full_coverage_at_18():
         expected_immunity_average == pytest.approx(immunity_average)
     ), f"Expected baseline immunity average to be {expected_immunity_average}, but got {immunity_average}"
     print(f"immunity: {immunity} immunity 2: {immunity_average}\n")
+    assert (
+        expected_immunity_average == pytest.approx(immunity_linear)
+    ), f"Expected baseline immunity linear to be {expected_immunity_average}, but got {immunity_linear}"
 
     # second scenario: population to be 100% in the 5-17 years age group
     pop_table = pop_table.with_columns(
@@ -1167,6 +1305,9 @@ def test_get_baseline_immunity_full_coverage_at_18():
     immunity_average, immunities_average = (
         calculate_baseline_immunity_from_dataframe_average(joined_immunity_df)
     )
+    immunity_linear, immunities_linear = (
+        calculate_baseline_immunity_from_dataframe_linear(joined_immunity_df)
+    )
 
     expected_immunity = 0.19
     assert (
@@ -1177,6 +1318,9 @@ def test_get_baseline_immunity_full_coverage_at_18():
         expected_immunity_average == pytest.approx(immunity_average)
     ), f"Expected baseline immunity average to be {expected_immunity_average * 100:.0f}%, but got {immunity_average * 100:.0f}%"
     print(f"immunity: {immunity} immunity 2: {immunity_average}\n")
+    assert (
+        expected_immunity_average == pytest.approx(immunity_linear)
+    ), f"Expected baseline immunity linear to be {expected_immunity_average * 100:.0f}%, but got {immunity_linear * 100:.0f}%"
 
     # third scenario: population to be 100% in the 18+ years age group
     pop_table = pop_table.with_columns(
@@ -1196,6 +1340,9 @@ def test_get_baseline_immunity_full_coverage_at_18():
     immunity_average, immunities_average = (
         calculate_baseline_immunity_from_dataframe_average(joined_immunity_df)
     )
+    immunity_linear, immunities_linear = (
+        calculate_baseline_immunity_from_dataframe_linear(joined_immunity_df)
+    )
 
     expected_immunity = 1.0
     assert (
@@ -1206,6 +1353,9 @@ def test_get_baseline_immunity_full_coverage_at_18():
         expected_immunity_average == pytest.approx(immunity_average)
     ), f"Expected baseline immunity average to be {expected_immunity_average * 100:.0f}%, but got {immunity_average * 100:.0f}%"
     print(f"Immunity: {immunity} Immunity 2: {immunity_average}\n")
+    assert (
+        expected_immunity_average == pytest.approx(immunity_linear)
+    ), f"Expected baseline immunity linear to be {expected_immunity_average * 100:.0f}%, but got {immunity_linear * 100:.0f}%"
 
     # fourth scenario: population to be 1% for each age between 0 and 99 years old
     pop_table = pop_table.with_columns(
@@ -1229,6 +1379,9 @@ def test_get_baseline_immunity_full_coverage_at_18():
     immunity_average, immunities_average = (
         calculate_baseline_immunity_from_dataframe_average(joined_immunity_df)
     )
+    immunity_linear, immunities_linear = (
+        calculate_baseline_immunity_from_dataframe_linear(joined_immunity_df)
+    )
 
     expected_immunity = 0.85  # this is coming out rounded as 0.84 not 0.85 - check calculation and rounding with numpy
     assert (
@@ -1238,12 +1391,17 @@ def test_get_baseline_immunity_full_coverage_at_18():
     assert (
         expected_immunity_average == pytest.approx(immunity_average, abs=2e-2)
     ), f"Expected baseline immunity average to be {expected_immunity_average * 100:.0f}%, but got {immunity_average * 100:.0f}%"
-    print(f"immunity: {immunity} immunity 2: {immunity_average}\n\n")
+    assert (
+        expected_immunity_average == pytest.approx(immunity_linear, abs=2e-2)
+    ), f"Expected baseline immunity linear to be {expected_immunity_average * 100:.0f}%, but got {immunity_linear * 100:.0f}%"
 
 
 def test_get_baseline_immunity_no_coverage():
     """
-    This test looks at different scenarios where coverage is 0% for all age groups and varies the population distribution. In all cases, the expected baseline immunity should be 0% since no vaccination coverage is assumed for any age group prior to an outbreak.
+    This test looks at different scenarios where coverage is 0% for all age
+    groups and varies the population distribution. In all cases, the expected
+    baseline immunity should be 0% since no vaccination coverage is assumed for
+    any age group prior to an outbreak.
     """
     config_path = os.path.join(testdir, "test_app_config.yaml")
     parms = read_parameters(config_path)
@@ -1281,6 +1439,9 @@ def test_get_baseline_immunity_no_coverage():
     immunity_average, immunities_average = (
         calculate_baseline_immunity_from_dataframe_average(joined_immunity_df)
     )
+    immunity_linear, immunities_linear = (
+        calculate_baseline_immunity_from_dataframe_linear(joined_immunity_df)
+    )
 
     expected_immunity = 0.0
     assert (
@@ -1290,20 +1451,35 @@ def test_get_baseline_immunity_no_coverage():
     assert (
         expected_immunity_average == pytest.approx(immunity_average)
     ), f"Expected baseline immunity average to be {expected_immunity_average * 100:.0f}%, but got {immunity_average * 100:.0f}%"
-    print(f"Immunity: {immunity} Immunity 2: {immunity_average}\n\n")
+    assert (
+        expected_immunity_average == pytest.approx(immunity_linear)
+    ), f"Expected baseline immunity linear to be {expected_immunity_average * 100:.0f}%, but got {immunity_linear * 100:.0f}%"
 
 
 def test_get_baseline_immunity_all_full_coverage():
     """
-    This test looks at different scenarios where coverage is 100% for all age groups eligible and varies the population distribution.
+    This test looks at different scenarios where coverage is 100% for all age
+    groups eligible and varies the population distribution.
 
-    If all of the population is under 5 years old with the same vaccination coverage assumptions, the expected baseline immunity should be 70% since 100% vaccination coverage is assumed for those 2 years and older prior to an outbreak, and 50% on average for enfants between 1 and 2 years old.
+    If all of the population is under 5 years old with the same vaccination
+    coverage assumptions, the expected baseline immunity should be 70% since
+    100% vaccination coverage is assumed for those 2 years and older prior to
+    an outbreak, and 50% on average for enfants between 1 and 2 years old.
 
-    If all of the population is between 5 and 17 years old with the same vaccination coverage assumptions, the expected baseline immunity should be 100% since 100% vaccination coverage is assumed for those 5 years and older prior to an outbreak.
+    If all of the population is between 5 and 17 years old with the same
+    vaccination coverage assumptions, the expected baseline immunity should be
+    100% since 100% vaccination coverage is assumed for those 5 years and older
+    prior to an outbreak.
 
-    If all of the population is 18 years old and older with the same vaccination coverage assumptions, the expected baseline immunity should be 100% since 100% vaccination coverage is assumed for those 18 years and older prior to an outbreak.
+    If all of the population is 18 years old and older with the same
+    vaccination coverage assumptions, the expected baseline immunity should be
+    100% since 100% vaccination coverage is assumed for those 18 years and
+    older prior to an outbreak.
 
-    If the population is evenly distributed across all age ages, assuming ages 0 through 99 years old, i.e. 1% for year, the expected baseline immunity should be 99% (98.5% rounded) since ages 1-2 years old has 50% vaccination coverage on average, and all other ages have 100% coverage.
+    If the population is evenly distributed across all age ages, assuming ages
+    0 through 99 years old, i.e. 1% for year, the expected baseline immunity
+    should be 99% (98.5% rounded) since ages 1-2 years old has 50% vaccination
+    coverage on average, and all other ages have 100% coverage.
     """
     config_path = os.path.join(testdir, "test_app_config.yaml")
     parms = read_parameters(config_path)
@@ -1336,6 +1512,9 @@ def test_get_baseline_immunity_all_full_coverage():
     immunity_average, immunities_average = (
         calculate_baseline_immunity_from_dataframe_average(joined_immunity_df)
     )
+    immunity_linear, immunities_linear = (
+        calculate_baseline_immunity_from_dataframe_linear(joined_immunity_df)
+    )
 
     expected_immunity = 0.7
     assert expected_immunity == pytest.approx(
@@ -1345,7 +1524,9 @@ def test_get_baseline_immunity_all_full_coverage():
     assert (
         expected_immunity_average == pytest.approx(immunity_average)
     ), f"Expected baseline immunity average to be {expected_immunity_average}, but got {immunity_average}"
-    print(f"Immunity: {immunity} Immunity 2: {immunity_average}\n")
+    assert (
+        expected_immunity_average == pytest.approx(immunity_linear)
+    ), f"Expected baseline immunity linear to be {expected_immunity_average}, but got {immunity_linear}"
 
     # second scenario: population to be 100% in the 5-17 years age group
     pop_table = pop_table.with_columns(
@@ -1365,6 +1546,9 @@ def test_get_baseline_immunity_all_full_coverage():
     immunity_average, immunities_average = (
         calculate_baseline_immunity_from_dataframe_average(joined_immunity_df)
     )
+    immunity_linear, immunities_linear = (
+        calculate_baseline_immunity_from_dataframe_linear(joined_immunity_df)
+    )
 
     expected_immunity = 1.0
     assert (
@@ -1374,7 +1558,9 @@ def test_get_baseline_immunity_all_full_coverage():
     assert (
         expected_immunity_average == pytest.approx(immunity_average)
     ), f"Expected baseline immunity average to be {expected_immunity_average * 100:.0f}%, but got {immunity_average * 100:.0f}%"
-    print(f"Immunity: {immunity} Immunity 2: {immunity_average}\n")
+    assert (
+        expected_immunity_average == pytest.approx(immunity_linear)
+    ), f"Expected baseline immunity linear to be {expected_immunity_average * 100:.0f}%, but got {immunity_linear * 100:.0f}%"
 
     # third scenario: population to be 100% in the 18+ years age group
     pop_table = pop_table.with_columns(
@@ -1394,6 +1580,9 @@ def test_get_baseline_immunity_all_full_coverage():
     immunity_average, immunities_average = (
         calculate_baseline_immunity_from_dataframe_average(joined_immunity_df)
     )
+    immunity_linear, immunities_linear = (
+        calculate_baseline_immunity_from_dataframe_linear(joined_immunity_df)
+    )
 
     expected_immunity = 1.0
     assert (
@@ -1403,7 +1592,9 @@ def test_get_baseline_immunity_all_full_coverage():
     assert (
         expected_immunity_average == pytest.approx(immunity_average)
     ), f"Expected baseline immunity average to be {expected_immunity_average * 100:.0f}%, but got {immunity_average * 100:.0f}%"
-    print(f"Immunity: {immunity} Immunity 2: {immunity_average}\n")
+    assert (
+        expected_immunity_average == pytest.approx(immunity_linear)
+    ), f"Expected baseline immunity linear to be {expected_immunity_average * 100:.0f}%, but got {immunity_linear * 100:.0f}%"
 
     # fourth scenario: population to be 1% for each age between 0 and 99 years old
     pop_table = pop_table.with_columns(
@@ -1427,6 +1618,9 @@ def test_get_baseline_immunity_all_full_coverage():
     immunity_average, immunities_average = (
         calculate_baseline_immunity_from_dataframe_average(joined_immunity_df)
     )
+    immunity_linear, immunities_linear = (
+        calculate_baseline_immunity_from_dataframe_linear(joined_immunity_df)
+    )
 
     expected_immunity = 0.98  # this is coming out rounded as 0.98 not 0.99 - check calculation and rounding with numpy
     assert (
@@ -1436,14 +1630,25 @@ def test_get_baseline_immunity_all_full_coverage():
     assert (
         expected_immunity_average == pytest.approx(immunity_average)
     ), f"Expected baseline immunity average to be {expected_immunity_average * 100:.0f}%, but got {immunity_average * 100:.0f}%"
-    print(f"Immunity: {immunity} Immunity 2: {immunity_average}\n\n")
+    assert (
+        expected_immunity_average == pytest.approx(immunity_linear)
+    ), f"Expected baseline immunity linear to be {expected_immunity_average * 100:.0f}%, but got {immunity_linear * 100:.0f}%"
 
 
 def test_get_baseline_immunity_all_immune_under_5_other_arbitrary():
     """
-    Test the baseline immunity calculation when all population is under 5 years old. In this case, the baseline immunity should account for zero immunity for 0 to 1 years old since infants under 12 months old are typically not eligible for vaccination.
+    Test the baseline immunity calculation when all population is under 5 years
+    old. In this case, the baseline immunity should account for zero immunity
+    for 0 to 1 years old since infants under 12 months old are typically not
+    eligible for vaccination.
 
-    Assuming 100% MMR vaccination coverage for those at 2 years old and 5 years old (prior to an outbreak), the expected baseline immunity should be 0% for 0-1 years, increase from 0% to 100% for infants aged 1-2 years, and then be 100% for 2-5 years, resulting in an overall baseline immunity of 70% (since 2-5 years covers 3 out of the 5 years in the age range and we assume that vaccination gradually happens for infants between ages 1 and 2 years, i.e. 50% on average).
+    Assuming 100% MMR vaccination coverage for those at 2 years old and 5 years
+    old (prior to an outbreak), the expected baseline immunity should be 0% for
+    0-1 years, increase from 0% to 100% for infants aged 1-2 years, and then be
+    100% for 2-5 years, resulting in an overall baseline immunity of 70% (since
+    2-5 years covers 3 out of the 5 years in the age range and we assume that
+    vaccination gradually happens for infants between ages 1 and 2 years, i.e.
+    50% on average).
     """
     config_path = os.path.join(testdir, "test_app_config.yaml")
 
@@ -1484,6 +1689,9 @@ def test_get_baseline_immunity_all_immune_under_5_other_arbitrary():
     immunity_average, immunities_average = (
         calculate_baseline_immunity_from_dataframe_average(joined_immunity_df)
     )
+    immunity_linear, immunities_linear = (
+        calculate_baseline_immunity_from_dataframe_linear(joined_immunity_df)
+    )
 
     expected_immunity = 0.7  # 70% baseline immunity
     assert (
@@ -1493,7 +1701,9 @@ def test_get_baseline_immunity_all_immune_under_5_other_arbitrary():
     assert (
         expected_immunity_average == pytest.approx(immunity_average)
     ), f"Calculated immunity average: {immunity_average} does not match expected value: {expected_immunity_average}."
-    print(f"Immunity: {immunity} Immunity 2: {immunity_average}\n")
+    assert (
+        expected_immunity_average == pytest.approx(immunity_linear)
+    ), f"Calculated immunity linear: {immunity_linear} does not match expected value: {expected_immunity_average}."
 
 
 def test_convert_cutoff_text():
