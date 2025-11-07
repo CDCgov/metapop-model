@@ -2083,7 +2083,8 @@ def calculate_baseline_immunity_from_dataframe_linear(df):
     immunities = []
 
     for i in range(100):
-        # find the pop range for i
+        # find the pop age range for i and the percentage of the population in that
+        # age range
         pop_row = df.filter(
             (pl.col("pop_range_min_age") <= i)
             & (pl.col("pop_range_max_age") >= i)
@@ -2105,8 +2106,9 @@ def calculate_baseline_immunity_from_dataframe_linear(df):
         # check if i is in coverage_range_min_age column
         row = df.filter(pl.col("coverage_range_min_age") == i)
 
-        # if not, find the closest lower and upper rows and interpolate
+        # if not, find the closest lower and upper rows by age and interpolate
         if row.height == 0:
+            # first find the closest lower row by age
             lower_rows = df.filter((i - pl.col("coverage_range_min_age")) > 0)
             closest_lower_index = lower_rows.select(
                 (i - pl.col("coverage_range_min_age")).arg_min()
@@ -2117,7 +2119,7 @@ def calculate_baseline_immunity_from_dataframe_linear(df):
             closest_lower_age = lower_rows.row(closest_lower_index, named=True)[
                 "coverage_range_min_age"
             ]
-
+            # then find the closest upper row by age
             upper_rows = df.filter((pl.col("coverage_range_max_age") - i) > 0)
             closest_upper_index = upper_rows.select(
                 (pl.col("coverage_range_max_age") - i).arg_min()
@@ -2133,15 +2135,22 @@ def calculate_baseline_immunity_from_dataframe_linear(df):
                 i, closest_lower_age, closest_upper_age, lower_coverage, upper_coverage
             )
 
+        # if more than one row found, raise error because the dataframe is invalid
         elif row.height > 1:
             raise ValueError(f"Multiple rows found for coverage range min age {i}")
+        # if exactly one row found, use the threshold coverage value
         else:
-            # for 1 years old use mid value between 0 and 2 years old
+            # for 1 years old use mid value between 0 and 2 years old, i.e. the mid point value
             if i == 1:
                 threshold_coverage = row["threshold_coverage_mid"][0]
+            # for all other ages use the threshold coverage value
             else:
                 threshold_coverage = row["threshold_coverage"][0]
 
+        # add to the population level immunity the threshold_coverage/100
+        # by weighting the coverage for age i by the percentage of the
+        # population in age i, i.e. pop_percentage / pop_range_length / 100
+        # (to convert to fraction)
         immunity += threshold_coverage / 100 * pop_percentage / 100 / pop_range_length
         immunities.append(threshold_coverage)
 
