@@ -2092,7 +2092,7 @@ def calculate_baseline_immunity_from_dataframe_linear(df):
         )
         # age not covered in any pop range
         if pop_row.height == 0:
-            continue
+            raise ValueError(f"No population range found for age {i}")
         elif pop_row.height > 1:
             raise ValueError(f"Multiple rows found for population range min age {i}")
         else:
