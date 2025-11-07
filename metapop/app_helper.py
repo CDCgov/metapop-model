@@ -2166,8 +2166,9 @@ def get_baseline_immunity(pop_table, cov_table):
     # old method
     # immunity, immunities = calculate_baseline_immunity_from_dataframe(joined_df)
     # new method
-    immunity, immunities = calculate_baseline_immunity_from_dataframe_average(joined_df)
-
+    # immunity, immunities = calculate_baseline_immunity_from_dataframe_average(joined_df)
+    # linear interpolation method
+    immunity, immunities = calculate_baseline_immunity_from_dataframe_linear(joined_df)
     return immunity
 
 
