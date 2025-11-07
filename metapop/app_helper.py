@@ -1468,6 +1468,7 @@ def convert_cutoff_text(text_value):
 
     Args:
         text_value (str): Cutoff text value.
+
     Returns:
         int: Converted integer age value.
     """
@@ -1506,6 +1507,8 @@ def add_threshold_values_to_vacc_table(user_cov_table):
 def get_coverage_cutoffs(user_cov_table):
     """
     Get coverage cutoff values from user-defined vaccination coverage table.
+    Assumes that ages 0, 1, and 100 are included as cutoffs, along with any
+    thresholds presented to the user.
 
     Args:
         user_cov_table (pl.DataFrame): User-defined vaccination coverage table.
@@ -1514,7 +1517,6 @@ def get_coverage_cutoffs(user_cov_table):
         list: List of coverage cutoff values.
     """
     cutoff_values = [0, 1] + user_cov_table["threshold_age"].to_list() + [100]
-    # cutoff_values = [0] + user_cov_table["threshold_age"].to_list() + [100]
 
     return cutoff_values
 
@@ -1864,21 +1866,18 @@ def build_initial_baseline_immunity_dataframe_from_user_inputs(
     # add fraction_population_covered column
     df = add_pop_fraction_in_coverage_range_to_df(df)
 
-    # remove unneeded columns
-    df = df.drop(
-        [
-            # "coverage_range_length",
-            #  "pop_range_length",
-            #  "coverage_range",
-            #  "pop_range"
-        ]
-    )
     return df
 
 
 def create_dataframe_for_baseline_immunity_calculation(df):
     """
-    Create DataFrame for baseline immunity calculation.
+    Create DataFrame for baseline immunity calculation. This DataFrame includes
+    the (lower bound) threshold coverage, the upper bound threshold coverage
+    and mid-point threshold coverage for each coverage age range. The DataFrame
+    also maps each coverage age range to the corresponding population age range
+    and the fraction of the population in that age range that is covered by the
+    coverage age range for easy calculation of baseline immunity using this
+    information.
 
     Args:
         df (pl.DataFrame): Initial baseline immunity DataFrame.
@@ -1930,6 +1929,7 @@ def create_dataframe_for_baseline_immunity_calculation(df):
         .otherwise(pl.col("threshold_coverage"))
         .alias("threshold_coverage"),
     )
+
     # reset threshold_coverage_upper for the coverage range ending at 1 to be 0
     joined_df = joined_df.with_columns(
         pl.when(pl.col("coverage_range_max_age") == 1)
@@ -1958,7 +1958,6 @@ def create_dataframe_for_baseline_immunity_calculation(df):
             "threshold_text",
             "pop_range_min_age",
             "pop_range_max_age",
-            # "pop_range",
             "pop_text",
             "fraction_population_in_coverage_range",
             "pop_percentage",
@@ -1999,11 +1998,23 @@ def calculate_baseline_immunity_from_dataframe(df):
 
 
 def calculate_baseline_immunity_from_dataframe_average(df):
+    """
+    Calculate baseline immunity from a DataFrame using the average value
+    between user given data for ages not specified, weighting the immunity
+    coverage for each age by the age distribution of the modeled population.
+
+    Args:
+        df (pl.DataFrame): DataFrame for baseline immunity calculation.
+
+    Returns:
+        float, np.ndarray: Baseline immunity value, list of immunities by age.
+    """
     immunity = 0.0
     immunities = []
 
     for i in range(100):
-        # find the pop range for i
+        # find the pop age range for i and the percentage of the population in that
+        # age range
         pop_row = df.filter(
             (pl.col("pop_range_min_age") <= i)
             & (pl.col("pop_range_max_age") >= i)
@@ -2012,7 +2023,7 @@ def calculate_baseline_immunity_from_dataframe_average(df):
         )
         # age not covered in any pop range
         if pop_row.height == 0:
-            continue
+            raise ValueError(f"No population range found for age {i}")
         elif pop_row.height > 1:
             raise ValueError(f"Multiple rows found for population range min age {i}")
         else:
@@ -2027,6 +2038,7 @@ def calculate_baseline_immunity_from_dataframe_average(df):
 
         # if not, find the closest lower and upper rows and interpolate
         if row.height == 0:
+            # first find the closest lower row by age
             lower_rows = df.filter((i - pl.col("coverage_range_min_age")) > 0)
             closest_lower_index = lower_rows.select(
                 (i - pl.col("coverage_range_min_age")).arg_min()
@@ -2034,7 +2046,7 @@ def calculate_baseline_immunity_from_dataframe_average(df):
             lower_coverage = lower_rows.row(closest_lower_index, named=True)[
                 "threshold_coverage"
             ]
-
+            # then find the closest upper row by age
             upper_rows = df.filter((pl.col("coverage_range_max_age") - i) > 0)
             closest_upper_index = upper_rows.select(
                 (pl.col("coverage_range_max_age") - i).arg_min()
@@ -2043,25 +2055,48 @@ def calculate_baseline_immunity_from_dataframe_average(df):
                 "threshold_coverage_upper"
             ]
 
+            # average the two values
             threshold_coverage = (lower_coverage + upper_coverage) / 2
 
+        # if more than one row found, raise error because the dataframe is invalid
         elif row.height > 1:
             raise ValueError(f"Multiple rows found for coverage range min age {i}")
+        # if exactly one row found, use the threshold coverage value
         else:
-            # for 1 years old use mid value between 0 and 2 years old
+            # for 1 years old use mid value between 0 and 2 years old, i.e. the mid point value
             if i == 1:
                 threshold_coverage = row["threshold_coverage_mid"][0]
+            # for all other ages use the threshold coverage value
             else:
                 threshold_coverage = row["threshold_coverage"][0]
 
+        # add to the population level immunity the threshold_coverage/100
+        # by weighting the coverage for age i by the percentage of the
+        # population in age i, i.e. pop_percentage / pop_range_length / 100
+        # (to convert to fraction)
         immunity += threshold_coverage / 100 * pop_percentage / 100 / pop_range_length
         immunities.append(threshold_coverage)
 
     immunity = np.round(immunity, 2)
+
     return immunity, immunities
 
 
 def linear_interpolate(x, x1, x2, y1, y2):
+    """
+    Perform linear interpolation to find y value at x given two points
+    (x1, y1) and (x2, y2).
+
+    Args:
+        x (float): The x value to interpolate.
+        x1 (float): The first x value.
+        x2 (float): The second x value.
+        y1 (float): The first y value.
+        y2 (float): The second y value.
+
+    Returns:
+        float: The linear interpolated y value at x.
+    """
     slope = (y2 - y1) / (x2 - x1)
     y_intercept = y1 - slope * x1
     return slope * x + y_intercept
@@ -2069,7 +2104,7 @@ def linear_interpolate(x, x1, x2, y1, y2):
 
 def calculate_baseline_immunity_from_dataframe_linear(df):
     """
-    Calculate baseline immunity from a DataFrame using linear interpolation and
+    Calculate baseline immunity from a DataFrame using linear interpolation,
     weighting the immunity coverage for each age by the age distribution of the
     modeled population.
 
@@ -2131,6 +2166,7 @@ def calculate_baseline_immunity_from_dataframe_linear(df):
                 "coverage_range_max_age"
             ]
 
+            # linear interpolation
             threshold_coverage = linear_interpolate(
                 i, closest_lower_age, closest_upper_age, lower_coverage, upper_coverage
             )
