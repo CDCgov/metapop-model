@@ -2068,6 +2068,17 @@ def linear_interpolate(x, x1, x2, y1, y2):
 
 
 def calculate_baseline_immunity_from_dataframe_linear(df):
+    """
+    Calculate baseline immunity from a DataFrame using linear interpolation and
+    weighting the immunity coverage for each age by the age distribution of the
+    modeled population.
+
+    Args:
+        df (pl.DataFrame): DataFrame for baseline immunity calculation.
+
+    Returns:
+        float, np.ndarray: Baseline immunity value, list of immunities by age.
+    """
     immunity = 0.0
     immunities = []
 
@@ -2163,58 +2174,9 @@ def get_baseline_immunity(pop_table, cov_table):
 
     joined_df = create_dataframe_for_baseline_immunity_calculation(immunity_df)
 
-    # old method
-    # immunity, immunities = calculate_baseline_immunity_from_dataframe(joined_df)
-    # new method
-    # immunity, immunities = calculate_baseline_immunity_from_dataframe_average(joined_df)
-    # linear interpolation method
+    # linear interpolation method to calculate immunity
     immunity, immunities = calculate_baseline_immunity_from_dataframe_linear(joined_df)
     return immunity
-
-
-# def get_baseline_immunity(population, coverage):
-#     """
-#     Calculate the baseline immunity given the values in the calculator
-
-#     Args:
-#         population (list): The percent of the population in each group.
-#         coverage (list): The percent of individuals in each group with prior immunity.
-
-#     Returns:
-#         immunity_value (float): The percent of the population with immunity.
-#     """
-
-#     # convert to proportions
-#     population = [p / 100 for p in population]
-#     coverage = [c / 100 for c in coverage]
-
-#     coverage_cutoffs = [2, 5, 18]
-
-#     immunity_value = 0
-
-#     # Handle the 0-2 year group within the first population group
-#     # 1-2 years get partial coverage
-#     one_year_coverage = (
-#         (1 / coverage_cutoffs[1]) * population[0] * (coverage[0] + 0) / 2
-#     )
-#     immunity_value += one_year_coverage
-
-#     # first cutoff to second cutoff: partial coverage (2-5 years)
-#     age_range_years = coverage_cutoffs[1] - coverage_cutoffs[0]  # 5-2 = 3 years
-#     immunity_value += (
-#         (age_range_years / (coverage_cutoffs[1] - 0))
-#         * population[0]
-#         * (coverage[1] + coverage[0])
-#         / 2
-#     )
-
-#     # second cutoff to third cutoff: (5-18 years)
-#     immunity_value += population[1] * (coverage[2] + coverage[1]) / 2
-
-#     # over third cutoff: (18+ years)
-#     immunity_value += population[2] * coverage[3]
-
-#     return round(immunity_value, 2)
 
 
 def update_coverage(edited_df_coverage, default_values):
