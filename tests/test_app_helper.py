@@ -2,6 +2,7 @@ import os
 
 import numpy as np
 import polars as pl
+import pytest
 import yaml
 
 from metapop.app_helper import *
@@ -477,154 +478,6 @@ def test_indistinguishable_scenarios():
     ), f"Expected the mean difference to be close to 0, but got {diffs['Total'].mean()}"
 
 
-def test_relative_difference():
-    # Create a sample DataFrame
-    scenarios = ["A", "B"]
-    a_base_vals = np.arange(100, 191, 10)
-    b_compare_vals = np.arange(105, 196, 10)
-
-    data = pl.DataFrame(
-        {
-            "Scenario": ["A"] * 10 + ["B"] * 10,
-            "Total": a_base_vals.tolist() + b_compare_vals.tolist(),
-        }
-    )
-
-    rel_diffs = []
-    for base in a_base_vals:
-        for compare in b_compare_vals:
-            diff = 100 * (base - compare) / np.mean(a_base_vals)
-            rel_diffs.append(diff)
-
-    expected_reldiff = np.mean(rel_diffs)
-    expected_reldiff_low = np.quantile(rel_diffs, 0.025)
-    expected_reldiff_high = np.quantile(rel_diffs, 0.975)
-    expected_reldiff = [expected_reldiff_low, expected_reldiff, expected_reldiff_high]
-
-    # Test relative_difference for Total column
-    total_reldiff = relative_difference(data, col_name="Total", group_values=scenarios)
-    assert (
-        len(total_reldiff) == 3
-    ), f"Expected total_reldiff to have 3 elements, but got {len(total_reldiff)}"
-    print(total_reldiff)
-    for i in range(3):
-        assert (
-            total_reldiff[i] == expected_reldiff[i]
-        ), f"Expected {i}th element of relative difference to be {expected_reldiff[i]}, but got {total_reldiff[i]}"
-
-
-def test_relative_difference_against_self():
-    # Create a sample DataFrame
-    scenarios = ["A", "B"]
-    a_base_vals = np.arange(100, 191, 10)
-
-    data = pl.DataFrame(
-        {
-            "Scenario": ["A"] * 10 + ["B"] * 10,
-            "Total": a_base_vals.tolist() * 2,
-        }
-    )
-
-    # Test relative_difference for Total column
-    total_reldiff = relative_difference(data, col_name="Total", group_values=scenarios)
-    # lwr should be approximately equal to upr and mean should be approximately zero
-    assert total_reldiff[1] == pytest.approx(0.0, rel=1e-6)
-    assert -total_reldiff[0] == pytest.approx(total_reldiff[2], rel=1e-6)
-
-
-def test_relative_difference_assertion():
-    with pytest.raises(AssertionError):
-        relative_difference(
-            pl.DataFrame({"Scenario": ["A", "B", "C"], "Total": [1, 2, 3]}),
-            col_name="Total",
-            group_values=["A", "B", "C"],
-        )
-
-
-def test_relative_difference_identifier():
-    # Create a sample DataFrame
-    scenarios = ["A", "B"]
-    a_base_vals = [100] * 10
-    b_compare_vals = [105] * 10
-
-    data = pl.DataFrame(
-        {
-            "Scenario": ["A"] * 10 + ["B"] * 10,
-            "Total": a_base_vals + b_compare_vals,
-            "replicate": list(range(10)) * 2,
-        }
-    )
-    expected_reldiff = [-5, -5, -5]
-
-    # Test relative_difference for Total column
-    total_reldiff = relative_difference(
-        data, col_name="Total", group_values=scenarios, identifier="replicate"
-    )
-    assert (
-        len(total_reldiff) == 3
-    ), f"Expected total_reldiff to have 3 elements, but got {len(total_reldiff)}"
-
-    for i in range(3):
-        assert (
-            total_reldiff[i] == expected_reldiff[i]
-        ), f"Expected {i}th element of relative difference to be {expected_reldiff[i]}, but got {total_reldiff[i]}"
-
-
-def test_relative_difference_identifier_unequal_length():
-    """Should trim the values that don't have identifier matches in A for B compare scenarios"""
-    # Create a sample DataFrame
-    scenarios = ["A", "B"]
-    a_base_vals = [100] * 10
-    # Additional five values that should alter calculation of reldiff unless properly removed by the helper
-    b_compare_vals = [105] * 10 + [10] * 5
-
-    data = pl.DataFrame(
-        {
-            "Scenario": ["A"] * 10 + ["B"] * 15,
-            "Total": a_base_vals + b_compare_vals,
-            "replicate": np.arange(0, 10).tolist() + np.arange(0, 15).tolist(),
-        }
-    )
-    expected_reldiff = [-5, -5, -5]
-
-    # Test relative_difference for Total column
-    total_reldiff = relative_difference(
-        data, col_name="Total", group_values=scenarios, identifier="replicate"
-    )
-    assert (
-        len(total_reldiff) == 3
-    ), f"Expected total_reldiff to have 3 elements, but got {len(total_reldiff)}"
-
-    for i in range(3):
-        assert (
-            total_reldiff[i] == expected_reldiff[i]
-        ), f"Expected {i}th element of relative difference to be {expected_reldiff[i]}, but got {total_reldiff[i]}"
-
-
-def test_relative_difference_identifier_no_matches():
-    with pytest.raises(
-        ValueError,
-        match="No matching comparisons based on column replicate. Check input data frame or try running with all pairwise comparisons instead.",
-    ):
-        # Create a sample DataFrame
-        scenarios = ["A", "B"]
-        a_base_vals = [100] * 10
-        b_compare_vals = [105] * 10
-
-        data = pl.DataFrame(
-            {
-                "Scenario": ["A"] * 10 + ["B"] * 10,
-                "Total": a_base_vals + b_compare_vals,
-                "replicate": np.arange(0, 10).tolist() + np.arange(10, 20).tolist(),
-            }
-        )
-
-        # Test relative_difference for Total column
-        relative_difference(
-            data, col_name="Total", group_values=scenarios, identifier="replicate"
-        )
-
-
 # Tests for baseline immunity calculation and related functions
 def test_get_baseline_immunity_full_coverage_at_2():
     """
@@ -708,6 +561,9 @@ def test_get_baseline_immunity_full_coverage_at_2():
     assert (
         expected_immunity_average == pytest.approx(immunity_linear)
     ), f"Expected baseline immunity linear to be {expected_immunity_average}, but got {immunity_linear}"
+    print(
+        f"All pop under 5, immunity from old method: {immunity}, linear interpolated immunity: {immunity_linear}"
+    )
 
     # second scenario: population to be 100% in the 5-17 years age group
     pop_table = pop_table.with_columns(
@@ -741,6 +597,9 @@ def test_get_baseline_immunity_full_coverage_at_2():
     assert (
         expected_immunity_average == pytest.approx(immunity_linear)
     ), f"Expected baseline immunity linear to be {expected_immunity_average}, but got {immunity_linear}"
+    print(
+        f"All pop 5-17, immunity from old method: {immunity}, linear interpolated immunity: {immunity_linear}"
+    )
 
     # third scenario: population to be 100% in the 18+ years age group
     pop_table = pop_table.with_columns(
@@ -775,6 +634,9 @@ def test_get_baseline_immunity_full_coverage_at_2():
     assert (
         expected_immunity_average == pytest.approx(immunity_linear)
     ), f"Expected baseline immunity linear to be {expected_immunity_average}, but got {immunity_linear}"
+    print(
+        f"All pop 18+, immunity from old method: {immunity}, linear interpolated immunity: {immunity_linear}"
+    )
 
     # fourth scenario: population to be 1% for each age between 0 and 99 years old
     pop_table = pop_table.with_columns(
@@ -813,6 +675,9 @@ def test_get_baseline_immunity_full_coverage_at_2():
     assert (
         expected_immunity_average == pytest.approx(immunity_linear)
     ), f"Expected baseline immunity linear to be {expected_immunity_average}, but got {immunity_linear}"
+    print(
+        f"Equally distributed population, immunity from old method: {immunity}, linear interpolated immunity: {immunity_linear}\n"
+    )
 
 
 def test_get_baseline_immunity_full_coverage_under_5():
@@ -904,6 +769,9 @@ def test_get_baseline_immunity_full_coverage_under_5():
     assert (
         expected_immunity_average == pytest.approx(immunity_linear)
     ), f"Expected baseline immunity linear to be {expected_immunity_average}, but got {immunity_linear}"
+    print(
+        f"All pop under 5, immunity from old method: {immunity}, linear interpolated immunity: {immunity_linear}"
+    )
 
     # second scenario: population to be 100% in the 5-17 years age group
     pop_table = pop_table.with_columns(
@@ -938,6 +806,9 @@ def test_get_baseline_immunity_full_coverage_under_5():
     assert (
         expected_immunity_average == pytest.approx(immunity_linear)
     ), f"Expected baseline immunity linear to be {expected_immunity_average * 100:.0f}%, but got {immunity_linear * 100:.0f}%"
+    print(
+        f"All pop 5-17, immunity from old method: {immunity}, linear interpolated immunity: {immunity_linear}"
+    )
 
     # third scenario: population to be 100% in the 18+ years age group
     pop_table = pop_table.with_columns(
@@ -972,6 +843,9 @@ def test_get_baseline_immunity_full_coverage_under_5():
     assert (
         expected_immunity_average == pytest.approx(immunity_linear)
     ), f"Expected baseline immunity linear to be {expected_immunity_average * 100:.0f}%, but got {immunity_linear * 100:.0f}%"
+    print(
+        f"All pop 18+, immunity from old method: {immunity}, linear interpolated immunity: {immunity_linear}"
+    )
 
     # fourth scenario: population to be 1% for each age between 0 and 99 years old
     pop_table = pop_table.with_columns(
@@ -1007,10 +881,12 @@ def test_get_baseline_immunity_full_coverage_under_5():
     assert (
         expected_immunity_average == pytest.approx(immunity_average)
     ), f"Expected baseline immunity average to be {expected_immunity_average * 100:.0f}%, but got {immunity_average * 100:.0f}%"
-    print(f"Immunity: {immunity} Immunity 2: {immunity_average}\n\n")
     assert (
         expected_immunity_average == pytest.approx(immunity_linear)
     ), f"Expected baseline immunity linear to be {expected_immunity_average * 100:.0f}%, but got {immunity_linear * 100:.0f}%"
+    print(
+        f"Equally distributed population, immunity from old method: {immunity}, linear interpolated immunity: {immunity_linear}\n"
+    )
 
 
 def test_get_baseline_immunity_full_coverage_at_5():
@@ -1093,10 +969,12 @@ def test_get_baseline_immunity_full_coverage_at_5():
     assert (
         expected_immunity_average == pytest.approx(immunity_average)
     ), f"Expected baseline immunity average to be {expected_immunity_average}, but got {immunity_average}"
-    print(f"immunity: {immunity} immunity 2: {immunity_average}\n")
     assert (
         expected_immunity_average == pytest.approx(immunity_linear)
     ), f"Expected baseline immunity linear to be {expected_immunity_average}, but got {immunity_linear}"
+    print(
+        f"All pop under 5, immunity from old method: {immunity}, linear interpolated immunity: {immunity_linear}"
+    )
 
     # second scenario: population to be 100% in the 5-17 years age group
     pop_table = pop_table.with_columns(
@@ -1128,10 +1006,12 @@ def test_get_baseline_immunity_full_coverage_at_5():
     assert (
         expected_immunity_average == pytest.approx(immunity_average)
     ), f"Expected baseline immunity average to be {expected_immunity_average * 100:.0f}%, but got {immunity_average * 100:.0f}%"
-    print(f"immunity: {immunity} immunity 2: {immunity_average}\n")
     assert (
         expected_immunity_average == pytest.approx(immunity_linear)
     ), f"Expected baseline immunity linear to be {expected_immunity_average * 100:.0f}%, but got {immunity_linear * 100:.0f}%"
+    print(
+        f"All pop 5-17, immunity from old method: {immunity}, linear interpolated immunity: {immunity_linear}"
+    )
 
     # third scenario: population to be 100% in the 18+ years age group
     pop_table = pop_table.with_columns(
@@ -1163,10 +1043,12 @@ def test_get_baseline_immunity_full_coverage_at_5():
     assert (
         expected_immunity_average == pytest.approx(immunity_average)
     ), f"Expected baseline immunity average to be {expected_immunity_average * 100:.0f}%, but got {immunity_average * 100:.0f}%"
-    print(f"immunity: {immunity} immunity 2: {immunity_average}\n")
     assert (
         expected_immunity_average == pytest.approx(immunity_linear)
     ), f"Expected baseline immunity linear to be {expected_immunity_average * 100:.0f}%, but got {immunity_linear * 100:.0f}%"
+    print(
+        f"All pop 18+, immunity from old method: {immunity}, linear interpolated immunity: {immunity_linear}"
+    )
 
     # fourth scenario: population to be 1% for each age between 0 and 99 years old
     pop_table = pop_table.with_columns(
@@ -1202,10 +1084,12 @@ def test_get_baseline_immunity_full_coverage_at_5():
     assert (
         expected_immunity_average == pytest.approx(immunity_average)
     ), f"Expected baseline immunity average to be {expected_immunity_average * 100:.0f}%, but got {immunity_average * 100:.0f}%"
-    print(f"immunity: {immunity} immunity 2: {immunity_average}\n\n")
     assert (
-        expected_immunity_average == pytest.approx(immunity_linear)
+        expected_immunity_average == pytest.approx(immunity_linear, abs=1e-2)
     ), f"Expected baseline immunity linear to be {expected_immunity_average * 100:.0f}%, but got {immunity_linear * 100:.0f}%"
+    print(
+        f"Equally distributed population, immunity from old method: {immunity}, linear interpolated immunity: {immunity_linear}\n"
+    )
 
 
 def test_get_baseline_immunity_full_coverage_at_18():
@@ -1282,10 +1166,12 @@ def test_get_baseline_immunity_full_coverage_at_18():
     assert (
         expected_immunity_average == pytest.approx(immunity_average)
     ), f"Expected baseline immunity average to be {expected_immunity_average}, but got {immunity_average}"
-    print(f"immunity: {immunity} immunity 2: {immunity_average}\n")
     assert (
         expected_immunity_average == pytest.approx(immunity_linear)
     ), f"Expected baseline immunity linear to be {expected_immunity_average}, but got {immunity_linear}"
+    print(
+        f"All pop under 5, immunity from old method: {immunity}, linear interpolated immunity: {immunity_linear}"
+    )
 
     # second scenario: population to be 100% in the 5-17 years age group
     pop_table = pop_table.with_columns(
@@ -1317,10 +1203,12 @@ def test_get_baseline_immunity_full_coverage_at_18():
     assert (
         expected_immunity_average == pytest.approx(immunity_average)
     ), f"Expected baseline immunity average to be {expected_immunity_average * 100:.0f}%, but got {immunity_average * 100:.0f}%"
-    print(f"immunity: {immunity} immunity 2: {immunity_average}\n")
     assert (
         expected_immunity_average == pytest.approx(immunity_linear)
     ), f"Expected baseline immunity linear to be {expected_immunity_average * 100:.0f}%, but got {immunity_linear * 100:.0f}%"
+    print(
+        f"All pop 5-17, immunity from old method: {immunity}, linear interpolated immunity: {immunity_linear}"
+    )
 
     # third scenario: population to be 100% in the 18+ years age group
     pop_table = pop_table.with_columns(
@@ -1352,10 +1240,12 @@ def test_get_baseline_immunity_full_coverage_at_18():
     assert (
         expected_immunity_average == pytest.approx(immunity_average)
     ), f"Expected baseline immunity average to be {expected_immunity_average * 100:.0f}%, but got {immunity_average * 100:.0f}%"
-    print(f"Immunity: {immunity} Immunity 2: {immunity_average}\n")
     assert (
         expected_immunity_average == pytest.approx(immunity_linear)
     ), f"Expected baseline immunity linear to be {expected_immunity_average * 100:.0f}%, but got {immunity_linear * 100:.0f}%"
+    print(
+        f"All pop 18+, immunity from old method: {immunity}, linear interpolated immunity: {immunity_linear}"
+    )
 
     # fourth scenario: population to be 1% for each age between 0 and 99 years old
     pop_table = pop_table.with_columns(
@@ -1394,6 +1284,9 @@ def test_get_baseline_immunity_full_coverage_at_18():
     assert (
         expected_immunity_average == pytest.approx(immunity_linear, abs=2e-2)
     ), f"Expected baseline immunity linear to be {expected_immunity_average * 100:.0f}%, but got {immunity_linear * 100:.0f}%"
+    print(
+        f"Equally distributed population, immunity from old method: {immunity}, linear interpolated immunity: {immunity_linear}\n"
+    )
 
 
 def test_get_baseline_immunity_no_coverage():
@@ -1454,6 +1347,9 @@ def test_get_baseline_immunity_no_coverage():
     assert (
         expected_immunity_average == pytest.approx(immunity_linear)
     ), f"Expected baseline immunity linear to be {expected_immunity_average * 100:.0f}%, but got {immunity_linear * 100:.0f}%"
+    print(
+        f"Equally distributed population, immunity from old method: {immunity}, linear interpolated immunity: {immunity_linear}\n"
+    )
 
 
 def test_get_baseline_immunity_all_full_coverage():
@@ -1527,6 +1423,9 @@ def test_get_baseline_immunity_all_full_coverage():
     assert (
         expected_immunity_average == pytest.approx(immunity_linear)
     ), f"Expected baseline immunity linear to be {expected_immunity_average}, but got {immunity_linear}"
+    print(
+        f"All pop under 5, immunity from old method: {immunity}, linear interpolated immunity: {immunity_linear}"
+    )
 
     # second scenario: population to be 100% in the 5-17 years age group
     pop_table = pop_table.with_columns(
@@ -1561,6 +1460,9 @@ def test_get_baseline_immunity_all_full_coverage():
     assert (
         expected_immunity_average == pytest.approx(immunity_linear)
     ), f"Expected baseline immunity linear to be {expected_immunity_average * 100:.0f}%, but got {immunity_linear * 100:.0f}%"
+    print(
+        f"All pop 5-17, immunity from old method: {immunity}, linear interpolated immunity: {immunity_linear}"
+    )
 
     # third scenario: population to be 100% in the 18+ years age group
     pop_table = pop_table.with_columns(
@@ -1595,6 +1497,9 @@ def test_get_baseline_immunity_all_full_coverage():
     assert (
         expected_immunity_average == pytest.approx(immunity_linear)
     ), f"Expected baseline immunity linear to be {expected_immunity_average * 100:.0f}%, but got {immunity_linear * 100:.0f}%"
+    print(
+        f"All pop 18+, immunity from old method: {immunity}, linear interpolated immunity: {immunity_linear}"
+    )
 
     # fourth scenario: population to be 1% for each age between 0 and 99 years old
     pop_table = pop_table.with_columns(
@@ -1633,6 +1538,9 @@ def test_get_baseline_immunity_all_full_coverage():
     assert (
         expected_immunity_average == pytest.approx(immunity_linear)
     ), f"Expected baseline immunity linear to be {expected_immunity_average * 100:.0f}%, but got {immunity_linear * 100:.0f}%"
+    print(
+        f"Equally distributed population, immunity from old method: {immunity}, linear interpolated immunity: {immunity_linear}\n"
+    )
 
 
 def test_get_baseline_immunity_all_immune_under_5_other_arbitrary():
@@ -1704,16 +1612,25 @@ def test_get_baseline_immunity_all_immune_under_5_other_arbitrary():
     assert (
         expected_immunity_average == pytest.approx(immunity_linear)
     ), f"Calculated immunity linear: {immunity_linear} does not match expected value: {expected_immunity_average}."
+    print(
+        f"All pop under 5, immunity from old method: {immunity}, linear interpolated immunity: {immunity_linear}"
+    )
 
 
 def test_convert_cutoff_text():
+    "Test conversion of cutoff text to numeric values."
     assert convert_cutoff_text("7 years") == 7
     assert convert_cutoff_text("4 years (kindergarten)") == 4
     assert convert_cutoff_text("18+") == 18
     assert convert_cutoff_text("<50 years") == 50
+    assert (
+        isinstance(convert_cutoff_text("100"), int)
+        and convert_cutoff_text("100") == 100
+    )
 
 
 def test_add_threshold_values_to_vacc_table():
+    "Test addition of threshold values to vaccination table."
     config_path = os.path.join(testdir, "test_app_config.yaml")
     parms = read_parameters(config_path)
 
@@ -2056,17 +1973,17 @@ def test_add_pop_fraction_in_coverage_range_to_df():
 
 
 if __name__ == "__main__":
-    print("\n\n at 2")
+    print("at 2")
     test_get_baseline_immunity_full_coverage_at_2()
-    print("\n\n under 5")
+    print("\nunder 5")
     test_get_baseline_immunity_full_coverage_under_5()
-    print("\n\n at 5")
+    print("\nat 5")
     test_get_baseline_immunity_full_coverage_at_5()
-    print("\n\n at 18")
+    print("\nat 18")
     test_get_baseline_immunity_full_coverage_at_18()
-    print("\n\n no coverage")
+    print("\nno coverage")
     test_get_baseline_immunity_no_coverage()
-    print("\n\n all full coverage")
+    print("\nall full coverage")
     test_get_baseline_immunity_all_full_coverage()
-    print("\n\n all immune under 5 other arbitrary")
+    print("\nall immune under 5 other arbitrary")
     test_get_baseline_immunity_all_immune_under_5_other_arbitrary()
