@@ -628,17 +628,36 @@ def test_relative_difference_identifier_no_matches():
 # Tests for baseline immunity calculation and related functions
 def test_get_baseline_immunity_full_coverage_at_2():
     """
-    This test looks at different scenarios where coverage is 100% for all age groups at 2 years old, 0% otherwise, and varies the population distribution.
+    This test looks at different scenarios where coverage is 100% for all age
+    groups at 2 years old, 0% otherwise, and varies the population distribution.
 
-    In this case, the baseline immunity should account for zero immunity for 0 to 1 years old since infants under 12 months old are typically not eligible for vaccination. The method assumes vaccination increases linearly from 0% at 12 months to the coverage level at the age threshold 2 years old.
+    In this case, the baseline immunity should account for zero immunity for 0
+    to 1 years old since infants under 12 months old are typically not eligible
+    for vaccination. The method assumes vaccination increases linearly from 0%
+    at 12 months to the coverage level at the age threshold 2 years old.
 
-    For example, if all of the population is under 5 years old and vaccination coverage is 100% for those at 2 years old and 0% at 5 years old (prior to an outbreak), the expected baseline immunity should be 0% for 0-1 years, increase from 0% to 100% for infants aged 1-2 years, and then linearly decrease from 100% to 0% for 2-5 years, resulting in an overall baseline immunity of 40% (since we assume that vaccination is 50% on average for ages 1-5 years old).
+    For example, if all of the population is under 5 years old and vaccination
+    coverage is 100% for those at 2 years old and 0% at 5 years old (prior to
+    an outbreak), the expected baseline immunity should be 0% for 0-1 years,
+    increase from 0% to 100% for infants aged 1-2 years, and then linearly
+    decrease from 100% to 0% for 2-5 years, resulting in an overall baseline
+    immunity of 40% (since we assume that vaccination is 50% on average for
+    ages 1-5 years old).
 
-    If all of the population is between 5 and 17 years old with the same vaccination coverage assumptions, the expected baseline immunity should be 0% since no vaccination coverage is assumed for those 5 years and older prior to an outbreak.
+    If all of the population is between 5 and 17 years old with the same
+    vaccination coverage assumptions, the expected baseline immunity should be
+    0% since no vaccination coverage is assumed for those 5 years and older
+    prior to an outbreak.
 
-    If all of the population is 18 years old and older with the same vaccination coverage assumptions, the expected baseline immunity should be 0% since no vaccination coverage is assumed for those 18 years and older prior to an outbreak.
+    If all of the population is 18 years old and older with the same
+    vaccination coverage assumptions, the expected baseline immunity should be
+    0% since no vaccination coverage is assumed for those 18 years and older
+    prior to an outbreak.
 
-    If the population is evenly distributed across all age ages, assuming ages 0 through 99 years old, i.e. 1% for each year, the expected baseline immunity should be 2% since ages 1-5 years old has 50% vaccination coverage on average.
+    If the population is evenly distributed across all age ages, assuming ages
+    0 through 99 years old, i.e. 1% for each year, the expected baseline
+    immunity should be 2% since ages 1-5 years old has 50% vaccination coverage
+    on average.
     """
     config_path = os.path.join(testdir, "test_app_config.yaml")
     parms = read_parameters(config_path)
