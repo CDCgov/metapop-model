@@ -272,7 +272,7 @@ def app(
             "becomes less valid, and the model might be less appropriate."
         )
         helpers["initial_vaccine_coverage"][0] = (  # type: ignore
-            "The percent of the population with prior immunity to measles, including through either MMR vaccination or through past infection. For help estimating population immunity see Population Immunity Expander directly below."
+            "The percent of the population with prior immunity to measles, including through either MMR vaccination or through past infection. For help estimating population immunity, enable the Baseline Immunity Calculator."
         )
 
         # Add a section for a Reset button for all parameters
