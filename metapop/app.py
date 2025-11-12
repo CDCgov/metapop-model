@@ -300,11 +300,12 @@ def app(
         )
 
         col0.text(
-            "Type in a population size and baseline immunity, as "
-            "well as the number of initial introductions of measles in the population. "
+            "Type in a population size and the number of initial introductions of measles in the population. "
+            "For the baseline immunity, either type in one number for the overall population or"
+            'select "Enable Baseline Immunity Calculator" to estimate the baseline immunity.'
         )
         subheader = ""
-        # this function will return a dictionary of edited scenario parameters
+        # this function`` will return a dictionary of edited scenario parameters
         # based on user input for parameters shared between all scenarios
         # this way we can avoid modifying the original default parameters in parms
         edited_parms = app_editors(
@@ -325,7 +326,9 @@ def app(
         if edited_parms["calculator_on"]:
             st.text(
                 "Use this calculator to estimate baseline immunity. "
-                "Adjust the population and coverage values below, then click the button to calculate and set the baseline immunity."
+                "Adjust the age distribution and age-based immunity coverage values (from MMR and/or past infection) below, then click the button to calculate and set the baseline immunity. "
+                "\n\nNot all ages for the immunity coverage table need to be filled in; blank values will default to national MMR coverage estimates. "
+                "For all other ages, the calculator interpolates coverage values linearly between specified ages. "
             )
 
             # Create the data editors and store results in session state
