@@ -15,8 +15,8 @@ baseline_parameters:
   calculator_on: false
   calculator_pop_labels: ["<5", "5-17", "18+"]
   calculator_coverage_labels: ["2 years", "5 years (kindergarten)", "13 years", "18+"]
-  calculator_coverage_values: [0.90, 0.92, 0.95,  0.95]  # vaccine defaults for baseline immunity coverage
-  calculator_pop_sizes: [0.056, 0.165, 0.779] #population defaults for baseline immunity coverage
+  calculator_coverage_values: [0.90, 0.91, 0.94,  0.93]  # vaccine defaults for baseline immunity coverage
+  calculator_pop_sizes: [0.057, 0.164, 0.779] #population defaults for baseline immunity coverage
   vaccine_efficacy_2_dose: 0.97
   vaccine_efficacy_1_dose: 0.93
   vaccine_uptake: false

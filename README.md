@@ -8,6 +8,7 @@
 * A model capable of handling flexible numbers of groups (e.g., age classes or connected populations) that is changeable using the config
 * Intervention strategies common for measles: pre-introduction vaccination, active vaccination, and quarantine and isolation of infectious populations
 * Interactive outbreak simulators built in `streamlit` and using the `metapop` package to model transmission dynamics
+* Tool in `streamlit` app to aid localities in estimating the baseline immunity of their population.
 
 ## Getting started
 
@@ -60,6 +61,24 @@ graph LR
   * Active vaccination: Vaccination of susceptible individuals after the introduction of the disease. This is modeled as a proportion of the susceptible population that is vaccinated with 1 dose of MMR vaccine over the vaccination campaign. Users can specify the timing of the vaccination campaign and the proportion of the susceptible population that is vaccinated. Users can also specify the efficacy of 1 dose of MMR vaccine; current data put this estimate at 93% efficacy [(Measles (Rubeola) Factsheet | CDC)](https://www.cdc.gov/measles/vaccines/index.html?CDC_AA_refVal=https%3A%2F%2Fwww.cdc.gov%2Fvaccines%2Fvpd%2Fmmr%2Fpublic%2Findex.html). We assume that people will get vaccinated once in the active vaccination campaign, but the vaccination may not be successful in conferring immunity. By tracking them, we can model these dynamics more accurately and model the administration of vaccines only to people who have not yet received a vaccine. We assume that both susceptible and exposed individuals who are not yet infectious are eligible to get vaccinated during the vaccination campaign. We also assume that exposed individuals are not yet aware of their exposure status and so they are equally likely to seek vaccination. After vaccination, only susceptible individuals may become immune, and we allow for the possibility of vaccine failure (SV). Exposed individuals remain in the exposed state and continue with infection progression as normal. The number of doses administered may be lower than the number of doses scheduled if by the time of the campaign, the daily dose rate scheduled exceeds the number of individuals eligible for vaccination or if the vaccination schedule extends beyond the simulation.
   * Quarantine and isolation: Quarantine is modeled as a proportion of pre-symptomatic infectious individuals that are isolated. Isolation is modeled as a proportion of symptomatic infectious individuals that are isolated. Users can specify the timing of the quarantine and isolation campaigns and the proportion of the population that is quarantined or isolated. Users can also specify the efficacy of quarantine and isolation.
 
+* Baseline Immunity Calculator
+    - Default values for the baseline immunity calculator represent crude national estimates extracted from a variety of data sources containing information on reported vaccination coverage levels and national seroprevalence estimates.
+
+    - Age distribution values are drawn from the [2023: ACS 5 year estimates](https://data.census.gov/table/ACSST5Y2023.S0101?q=age) available from the US Census Bureau.
+      | Age group | Percentage |
+      |-------|-----|
+      | Under 5 | 5.7% |
+      | 5-17 | 16.4% |
+      | 18+ | 77.9% |
+
+  - Age specific immunity coverage values are drawn from a mix of sources, listed below
+    | Age threshold | Coverage | Source |
+    |-------|-----|--------------|
+    | 24 months | 90 | [MMWR (NIS)](https://www.cdc.gov/mmwr/volumes/73/wr/mm7338a3.htm) |
+    | 5 years | 91 | [JAMA](https://jamanetwork.com/journals/jama/fullarticle/2834892) |
+    | 13 years | 94 | [JAMA](https://jamanetwork.com/journals/jama/fullarticle/2834892) |
+    | 18+ | 93 | [OFID (NHANES)](https://pmc.ncbi.nlm.nih.gov/articles/PMC4438887/) |
+Note that at present we model immunity coverage at birth as `0` for no MMR coverage, however, we recognize that newborns receive some level of immunity from their mothers and we are working to update our model to include an estimate to account for this immunity.
 ## Running with a flexible number of compartments
 
 * The `metapop` package can currently support the modeling of infectious disease transmission in 1 or 3 groups. Groups represent populations with different epidemiologically relevant characteristics such as age classes or connected populations. To model a single population or 3 connected populations, you can change the number of groups by modifying the config file (`scripts/config.yaml`).
