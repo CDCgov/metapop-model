@@ -326,7 +326,7 @@ def app(
         if edited_parms["calculator_on"]:
             st.text(
                 "Use this calculator to estimate baseline immunity. "
-                "Adjust the age distribution and age-based immunity coverage values (from MMR and/or past infection) below, then click the button to calculate and set the baseline immunity. "
+                "Adjust the age distribution and age-based immunity coverage values (from up-to-date MMR vaccination and/or past infection) below, then click the button to calculate and set the baseline immunity. "
                 "\n\nNot all ages for the immunity coverage table need to be filled in; blank values will default to national MMR coverage estimates. "
                 "For all other ages, the calculator interpolates coverage values linearly between specified ages. "
             )
