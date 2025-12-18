@@ -70,7 +70,7 @@ if __name__ == "__main__":
         base_name="simulation_runs",
         date=run_date,
         suffix=expt_name,
-        format=".csv",
+        fmt=".csv",
     )
 
     results.write_csv(os.path.join(output_dir, sims_filename))
@@ -97,7 +97,7 @@ if __name__ == "__main__":
         base_name="summary_table",
         date=run_date,
         suffix=expt_name,
-        format=".csv",
+        fmt=".csv",
     )
 
     summary_table.write_csv(os.path.join(output_dir, table_filename))
