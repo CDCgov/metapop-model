@@ -211,7 +211,7 @@ def app(
         # Get widget types, min/max values, steps, helpers, formats, and keys for widgets
         widget_types = get_widget_types()
         min_values = dict(
-            pop_sizes=[1000, 100, 100],
+            pop_sizes=[100, 100, 100],
             I0=[1, 0, 0],
             vaccine_uptake_start_day=0,
             symptomatic_isolation_start_day=0,
