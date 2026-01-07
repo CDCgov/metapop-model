@@ -301,7 +301,7 @@ def app(
 
         col0.text(
             "Type in a population size and the number of initial introductions of measles in the population. "
-            "For the baseline immunity, either type in one number for the overall population or"
+            "For the baseline immunity, either type in one number for the overall population or "
             'select "Enable Baseline Immunity Calculator" to estimate the baseline immunity.'
         )
         subheader = ""
