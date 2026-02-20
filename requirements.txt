@@ -95,7 +95,7 @@ pre_commit==4.5.1
 progressbar2==4.5.0
 prometheus_client==0.23.1
 prompt_toolkit==3.0.52
-protobuf==6.33.2
+protobuf==6.33.5
 psutil==7.2.1
 ptyprocess==0.7.0
 pure_eval==0.2.3
