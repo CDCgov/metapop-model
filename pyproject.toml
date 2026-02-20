@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "metapop"
-version = "1.0.2"
+version = "1.0.3"
 description = ""
 authors = [
     "Paige Miller <yub1@cdc.gov>",
@@ -40,7 +40,7 @@ jupyter = "^1.1.1"
 
 [project]
 name = "metapop"
-version = "1.0.2"
+version = "1.0.3"
 description = ""
 authors = [
     { name = "Paige Miller", email = "yub1@cdc.gov" },
