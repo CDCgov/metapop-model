@@ -1,6 +1,6 @@
 # A stochastic SEIRV metapopulation model in python
 
-⚠️ This is a work in progress
+⚠️ This project is being archived. For our new metapop related repo, checkout: [https://github.com/CDCgov/cfa-measles-simulator](https://github.com/CDCgov/cfa-measles-simulator).
 
 ## Package features
 
