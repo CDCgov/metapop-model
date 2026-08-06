@@ -1,0 +1,224 @@
+{
+  "version": 1,
+  "locale": "en_US.UTF-8",
+  "metadata": {
+    "appmode": "python-streamlit",
+    "entrypoint": "app"
+  },
+  "python": {
+    "version": "3.10.18",
+    "package_manager": {
+      "name": "pip",
+      "version": "25.2",
+      "package_file": "requirements.txt"
+    }
+  },
+  "environment": {
+    "python": {
+      "requires": "~=3.10.0"
+    }
+  },
+  "files": {
+    "requirements.txt": {
+      "checksum": "aa2ddbd347474c545ddda68e733f62e6"
+    },
+    ".github/CODEOWNERS": {
+      "checksum": "ef0f97e3672ed7d35b64510ad2aebbc7"
+    },
+    ".github/ISSUE_TEMPLATE/bug_report.md": {
+      "checksum": "e468801d29e6b66b0d496136e22e8b34"
+    },
+    ".github/ISSUE_TEMPLATE/feature_request.md": {
+      "checksum": "174545e1d9daff8020525fdd1e020411"
+    },
+    ".github/ISSUE_TEMPLATE/scientific-improvement.md": {
+      "checksum": "c636b4266b797edf7c85f46135c56d55"
+    },
+    ".github/actions/pre-commit/action.yaml": {
+      "checksum": "a485a03fcd23ce81db3520f44d63918c"
+    },
+    ".github/workflows/mirror-to-cdcgov.yaml": {
+      "checksum": "7a4e3c239b7619abe18051cb0514e0dc"
+    },
+    ".github/workflows/pre-commit.yaml": {
+      "checksum": "4bceea758261b24dbe7482c613a967e1"
+    },
+    ".github/workflows/run-tests.yaml": {
+      "checksum": "bf9c2f158a5eb752288b43522cc516d5"
+    },
+    ".github/workflows/update_deploy.yaml": {
+      "checksum": "d833e769e32410a860cad83e38590639"
+    },
+    ".gitignore": {
+      "checksum": "a1af78ac673bf31d9aee9ac05697abe7"
+    },
+    ".pre-commit-config.yaml": {
+      "checksum": "598c04ae7f5f58483573d0946b2867c1"
+    },
+    ".python-version": {
+      "checksum": "d9cdb6069726907d7bc5a6bf6b110f2d"
+    },
+    ".secrets.baseline": {
+      "checksum": "025a545e32fdfc1e3ca6d83223875aff"
+    },
+    ".streamlit/config.toml": {
+      "checksum": "9ad5683b5439b9fd311ac4531c0ee607"
+    },
+    "LICENSE": {
+      "checksum": "86d3f3a95c324c9479bd8986968f4327"
+    },
+    "app.py": {
+      "checksum": "c3fff4f8bff3e5278bed17710f22bf80"
+    },
+    "data/fake_outbreak.csv": {
+      "checksum": "2e4e96338e227aa0d9235673df1d766e"
+    },
+    "docs/defining_beta.md": {
+      "checksum": "fde47f66722109c30846496a10d82389"
+    },
+    "metapop/__init__.py": {
+      "checksum": "af6f1b62a5b169ac575d506665b1ced7"
+    },
+    "metapop/advanced_app.py": {
+      "checksum": "892fb5235f381710ce0587ac557434a2"
+    },
+    "metapop/app.py": {
+      "checksum": "24d4aebbeee9c4a19ef33791e1afa0db"
+    },
+    "metapop/app_assets/app_config.yaml": {
+      "checksum": "472c46c4cd6a27dd9aa9394dd4fb2959"
+    },
+    "metapop/app_assets/github-mark-white.png": {
+      "checksum": "1dee40f2668d5c719eafa2c89296f5e7"
+    },
+    "metapop/app_assets/github-mark.png": {
+      "checksum": "43ce87609eb221d09d4832a9c0e709d0"
+    },
+    "metapop/app_assets/onepop_config.yaml": {
+      "checksum": "ba6d91f0b067319021e15410003bfe0d"
+    },
+    "metapop/app_helper.py": {
+      "checksum": "1cdfe8fa3a2265b7f341b956033f1a69"
+    },
+    "metapop/helper.py": {
+      "checksum": "86fdd0e3f7dd203c22cc64076f8eda00"
+    },
+    "metapop/model.py": {
+      "checksum": "1cab18afd0c624514aec3bf2b1a00ccb"
+    },
+    "metapop/sim.py": {
+      "checksum": "435039109241976247162ea676d039ba"
+    },
+    "metapop/version.py": {
+      "checksum": "00c1cccbba0d8a39109f551c060da898"
+    },
+    "poetry.lock": {
+      "checksum": "52d8d83524ab416a586fb0a9df4a0a7c"
+    },
+    "pyproject.toml": {
+      "checksum": "13d134b2debce671589ffe6c69d9b907"
+    },
+    "scripts/analyzer.R": {
+      "checksum": "7acb59958be3f142272aa1b27fe73457"
+    },
+    "scripts/comparison/comparison_config.yaml": {
+      "checksum": "82bdf0019a571551b7bfcc34225bba6f"
+    },
+    "scripts/comparison/comparison_results_post_processing.R": {
+      "checksum": "9e51ae5811ef678f78128ead85e623d4"
+    },
+    "scripts/comparison/comparison_simulate.py": {
+      "checksum": "e3e438fddf2e20bd9417b9065c7125cf"
+    },
+    "scripts/connectivity/config.yaml": {
+      "checksum": "fd561c061a0bb17c3905174822583967"
+    },
+    "scripts/connectivity/make_plots.R": {
+      "checksum": "5b7a8f6cd271abef916b47e6f357f305"
+    },
+    "scripts/connectivity/simulate.py": {
+      "checksum": "5a734562648e6f30a52c458cbd067243"
+    },
+    "scripts/interventions/intervention_config.yaml": {
+      "checksum": "5279ad4a2cbdaffcd65e601de4d59859"
+    },
+    "scripts/interventions/intervention_plots.R": {
+      "checksum": "35f281375f43f8bf3d65a404a214fde6"
+    },
+    "scripts/interventions/intervention_simulate.py": {
+      "checksum": "6242959794d746259c655b21fafec295"
+    },
+    "scripts/misc/example_new_beta_calculation.py": {
+      "checksum": "4b924db0b3aaf492ecac14c03a182aba"
+    },
+    "scripts/misc/make_plots.py": {
+      "checksum": "0def126d590c000439de704d1d53c00c"
+    },
+    "scripts/misc/make_plots.qmd": {
+      "checksum": "d18147bb0b0b7edbeaa22e6ec9353bdd"
+    },
+    "scripts/misc/run_abc.py": {
+      "checksum": "6c2af35105c7cb6dfef8ef5fc4dfc168"
+    },
+    "scripts/onepop/onepop_config.yaml": {
+      "checksum": "895459aa9b9982f58dba4790a9ede3c1"
+    },
+    "scripts/onepop/onepop_plots.R": {
+      "checksum": "116e982b3cd64bb161d8052949acb642"
+    },
+    "scripts/onepop/onepop_simulate.py": {
+      "checksum": "2eaa2d4be50a01f1a6d49a8adb42410a"
+    },
+    "scripts/timing/timing_config.yaml": {
+      "checksum": "70a9186688fba83f236e0a4673e8c886"
+    },
+    "scripts/timing/timing_results_post_processing.R": {
+      "checksum": "364cc9a4a6692be36460dd105cd9818b"
+    },
+    "scripts/timing/timing_simulate.py": {
+      "checksum": "428a75b802f6a6e152a69fa2f0411fa4"
+    },
+    "stlite/griddler-0.2.0-py3-none-any.whl": {
+      "checksum": "fd6dabc3b5ac5ca9ce1e496b2d966344"
+    },
+    "stlite/index.html": {
+      "checksum": "7204664427ccdbc45a1d846f10a0abd6"
+    },
+    "stlite/launch_stlite.py": {
+      "checksum": "366755fc17d08fac9f6774c2b6db2de7"
+    },
+    "stlite/make_measles_sim_html.py": {
+      "checksum": "ed812b3360433ddb94f261050cee4657"
+    },
+    "stlite/metapop-0.4.0-py2.py3-none-any.whl": {
+      "checksum": "f4650b7b32e59398c9d7d849acb548a2"
+    },
+    "stlite/polars-1.24.0-cp39-abi3-emscripten_3_1_58_wasm32.whl": {
+      "checksum": "0a1c989319b5989c80dc16d1afbc2b9c"
+    },
+    "tests/__init__.py": {
+      "checksum": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    "tests/test_app.py": {
+      "checksum": "d817ccd5b6b4b5c95602da0b7967cefd"
+    },
+    "tests/test_app_helper.py": {
+      "checksum": "740f0501a1cfb4306278f7a8d496ac00"
+    },
+    "tests/test_config.yaml": {
+      "checksum": "4daaae58e95abfcb75b66a29370fa458"
+    },
+    "tests/test_helper.py": {
+      "checksum": "2122bbc4ea9a8d9fd7edf676ad1be96f"
+    },
+    "tests/test_model.py": {
+      "checksum": "ed3fdb89cac89e8433f25b14cce3eacb"
+    },
+    "tests/test_simulate.py": {
+      "checksum": "533dd8167b090fdeb8cffbdd518ba1e2"
+    },
+    "tests/test_vaccine_schedules.py": {
+      "checksum": "07fa42046de25c51dc304ae214429165"
+    }
+  }
+}
